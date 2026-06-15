@@ -1,6 +1,6 @@
-package org.dawn.shared.exception.wrapper;
+package com.dawn.shared.exception.wrapper;
 
-import org.dawn.shared.exception.ApiException;
+import com.dawn.shared.exception.ApiException;
 import org.springframework.http.HttpStatus;
 
 import java.io.Serial;

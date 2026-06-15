@@ -1,4 +1,4 @@
-package org.dawn.shared.web;
+package com.dawn.shared.web;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;

@@ -1,4 +1,4 @@
-package org.dawn.shared.exception.payload;
+package com.dawn.shared.exception.payload;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;

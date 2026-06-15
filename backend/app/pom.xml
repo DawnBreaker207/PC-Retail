@@ -14,13 +14,12 @@
     <packaging>jar</packaging>
     <dependencies>
         <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <scope>provided</scope>
+            <groupId>com.dawn.backend</groupId>
+            <artifactId>shared</artifactId>
         </dependency>
         <dependency>
             <groupId>com.dawn.backend</groupId>
-            <artifactId>shared</artifactId>
+            <artifactId>catalog</artifactId>
         </dependency>
     </dependencies>
 
