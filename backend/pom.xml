@@ -79,6 +79,11 @@
                 <artifactId>catalog</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.dawn.backend</groupId>
+                <artifactId>inventory</artifactId>
+                <version>${project.version}</version>
+            </dependency>
 
             <!--  Spring Boot ML & Tools Pack   -->
             <dependency>
@@ -103,6 +108,7 @@
         <module>app</module>
         <module>shared</module>
         <module>catalog</module>
+        <module>inventory</module>
     </modules>
 
     <build>
