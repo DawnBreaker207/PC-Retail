@@ -5,12 +5,12 @@
 
     <parent>
         <groupId>com.dawn.backend</groupId>
-        <artifactId>backend</artifactId>
+        <artifactId>dawn-backend</artifactId>
         <version>0.0.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath> <!-- lookup parent from repository -->
     </parent>
 
-    <artifactId>shared</artifactId>
+    <artifactId>dawn-common</artifactId>
     <packaging>jar</packaging>
 
     <dependencies>

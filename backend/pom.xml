@@ -10,7 +10,7 @@
     </parent>
 
     <groupId>com.dawn.backend</groupId>
-    <artifactId>backend</artifactId>
+    <artifactId>dawn-backend</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>backend</name>
@@ -71,22 +71,22 @@
             <!-- Internal modules -->
             <dependency>
                 <groupId>com.dawn.backend</groupId>
-                <artifactId>shared</artifactId>
+                <artifactId>dawn-common</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.dawn.backend</groupId>
-                <artifactId>catalog</artifactId>
+                <artifactId>dawn-catalog</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.dawn.backend</groupId>
-                <artifactId>inventory</artifactId>
+                <artifactId>dawn-inventory</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.dawn.backend</groupId>
-                <artifactId>user</artifactId>
+                <artifactId>dawn-user</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
@@ -110,11 +110,11 @@
     </dependencyManagement>
 
     <modules>
-        <module>app</module>
-        <module>shared</module>
-        <module>catalog</module>
-        <module>inventory</module>
-        <module>user</module>
+        <module>dawn-app</module>
+        <module>dawn-common</module>
+        <module>dawn-catalog</module>
+        <module>dawn-inventory</module>
+        <module>dawn-user</module>
     </modules>
 
     <build>
