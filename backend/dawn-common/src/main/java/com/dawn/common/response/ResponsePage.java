@@ -16,8 +16,23 @@ public class ResponsePage<T> {
 
     Pagination pagination;
 
+
     public static <T> ResponsePage<T> of(Page<T> page) {
         return new ResponsePage<>(page);
+    }
+
+    public static <T> ResponsePage<T> of(List<T> content, int page, int size, long totalElements) {
+        return new ResponsePage<>(content, page, size, totalElements);
+    }
+
+    public ResponsePage(List<T> content, int page, int size, long totalElements) {
+        this.content = content;
+        this.pagination = new Pagination(
+                page,
+                size,
+                totalElements,
+                size > 0 ? (int) ((totalElements + size - 1) / size) : 0
+        );
     }
 
     public ResponsePage(Page<T> page) {
