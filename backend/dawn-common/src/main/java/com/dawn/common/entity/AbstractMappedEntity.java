@@ -1,4 +1,4 @@
-package com.dawn.shared.entity;
+package com.dawn.common.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.Column;

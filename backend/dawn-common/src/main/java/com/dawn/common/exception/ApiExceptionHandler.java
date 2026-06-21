@@ -1,7 +1,7 @@
-package com.dawn.shared.exception;
+package com.dawn.common.exception;
 
 import lombok.extern.slf4j.Slf4j;
-import com.dawn.shared.exception.payload.ExceptionMessage;
+import com.dawn.common.exception.payload.ExceptionMessage;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;

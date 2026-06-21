@@ -1,4 +1,4 @@
-package com.dawn.shared.response;
+package com.dawn.common.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Value;

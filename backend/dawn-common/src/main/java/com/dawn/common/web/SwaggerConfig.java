@@ -1,4 +1,4 @@
-package com.dawn.shared.web;
+package com.dawn.common.web;
 
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.ExternalDocumentation;

@@ -1,4 +1,4 @@
-package com.dawn.shared;
+package com.dawn.common;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
