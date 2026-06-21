@@ -32,6 +32,7 @@
     <properties>
         <java.version>25</java.version>
         <springdoc.version>2.8.9</springdoc.version>
+        <jwt.version>0.12.6</jwt.version>
     </properties>
     <dependencies>
         <!--  Spring Boot Test Pack -->
