@@ -19,6 +19,10 @@
         </dependency>
         <dependency>
             <groupId>com.dawn.backend</groupId>
+            <artifactId>dawn-user</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.dawn.backend</groupId>
             <artifactId>dawn-catalog</artifactId>
         </dependency>
     </dependencies>
