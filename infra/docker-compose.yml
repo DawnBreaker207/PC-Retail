@@ -1,3 +1,7 @@
+networks:
+  network:
+    driver: bridge
+
 services:
   postgres:
     image: postgres:17
@@ -15,5 +19,23 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - network
+  redis:
+    container_name: redis
+    image: redis:latest
+    ports:
+      - '6379:6379'
+    networks:
+      - network
+    command: ['redis-server', '--notify-keyspace-events', 'Ex']
+  rabbitmq:
+    container_name: rabbitmq
+    image: rabbitmq:management
+    ports:
+      - '5672:5672'
+      - '15672:15672'
+    networks:
+      - network
 volumes:
   postgres:
