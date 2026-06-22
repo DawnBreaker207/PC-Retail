@@ -34,8 +34,15 @@ public class SecurityConfig {
 
 
     private static final String[] PUBLIC_URL = {
-            "/api/v1/auth/**",
-            "/api/v1/user/**"};
+            "/api/v1/auth/register",
+            "/api/v1/auth/login",
+            "/api/v1/auth/logout",
+            "/api/v1/auth/refresh",
+            "/api/v1/auth/forgot-password",
+            "/api/v1/auth/reset-password",
+            "/api/v1/auth/verify-otp",
+            "/api/v1/auth/resend-otp"
+    };
 
     private final AuthEntryPointJwt unauthorizedHandler;
 
@@ -60,8 +67,7 @@ public class SecurityConfig {
                 .csrf(CsrfConfigurer::disable)
                 .exceptionHandling(this::configExceptionHandling)
                 .sessionManagement(this::configSession)
-                .authorizeHttpRequests(this::configAuth)
-                .logout(this::configLogout);
+                .authorizeHttpRequests(this::configAuth);
 
         http.addFilterBefore(authTokenFilter, UsernamePasswordAuthenticationFilter.class);
 
@@ -87,14 +93,5 @@ public class SecurityConfig {
                 .permitAll()
                 .anyRequest()
                 .authenticated();
-    }
-
-    private void configLogout(LogoutConfigurer<HttpSecurity> config) {
-        config.logoutUrl("/api/v1/auth/logout")
-                .addLogoutHandler(logoutHandler)
-                .logoutSuccessHandler(
-                        (req, res, auth) ->
-                                res.setStatus(HttpServletResponse.SC_NO_CONTENT)
-                );
     }
 }
