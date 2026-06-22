@@ -18,6 +18,12 @@
             <groupId>com.dawn.backend</groupId>
             <artifactId>dawn-common</artifactId>
         </dependency>
+        <!--  Spring Boot ML & Tools Pack   -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <scope>provided</scope>
+        </dependency>
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
