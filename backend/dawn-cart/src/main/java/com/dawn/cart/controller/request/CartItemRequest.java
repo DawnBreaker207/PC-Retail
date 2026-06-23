@@ -1,4 +1,4 @@
-package com.dawn.cart.controlller.request;
+package com.dawn.cart.controller.request;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;

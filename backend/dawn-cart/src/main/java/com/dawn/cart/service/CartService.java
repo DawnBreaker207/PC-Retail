@@ -1,67 +1,93 @@
 package com.dawn.cart.service;
 
 import com.dawn.cart.dto.CartItemDto;
+import com.dawn.cart.dto.CartQueryPort;
 import com.dawn.cart.dto.CartSummaryDto;
 import com.dawn.cart.entity.CartItem;
-import com.dawn.cart.repository.CartItemRepository;
+import com.dawn.cart.infra.persistence.JpaCartItemRepository;
+import com.dawn.cart.port.in.AddCartItemUseCase;
+import com.dawn.cart.port.in.GetCartUseCase;
+import com.dawn.cart.port.in.RemoveCartItemUseCase;
+import com.dawn.cart.port.in.UpdateCartItemUseCase;
+import com.dawn.cart.port.out.CartCachePort;
+import com.dawn.catalog.dto.CatalogQueryPort;
+import com.dawn.catalog.dto.SkuPriceInfo;
 import com.dawn.common.exception.wrapper.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.OptimisticLockingFailureException;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class CartService {
-    private static final String CART_KEY = "cart:count";
-    private static final long CART_TTL_HOURS = 24;
+public class CartService implements GetCartUseCase, AddCartItemUseCase, UpdateCartItemUseCase, RemoveCartItemUseCase, CartQueryPort {
 
-    private final CartItemRepository cartItemRepository;
-    private final StringRedisTemplate redisTemplate;
+    private final JpaCartItemRepository cartItemRepository;
+    private final CartCachePort cartCachePort;
+    private final CatalogQueryPort catalogQueryPort;
 
     // READ
+    @Override
     public CartSummaryDto getCart(Long userId) {
-        List<CartItem> items = cartItemRepository.findByUserId(userId);
+        return cartCachePort.getCart(userId).orElseGet(() -> {
+            List<CartItem> items = cartItemRepository.findByUserId(userId);
+            if (items.isEmpty()) {
+                return new CartSummaryDto(List.of(), 0, BigDecimal.ZERO);
+            }
+            List<Long> skuIds = items.stream().map(CartItem::getSkuId).toList();
+            Map<Long, SkuPriceInfo> skuInfoMap = catalogQueryPort.getSkuDetailsMap(skuIds);
 
-        List<CartItemDto> dtos = items.stream()
-                .map(item -> new CartItemDto(
+            List<CartItemDto> dtos = items.stream().map(item -> {
+                SkuPriceInfo skuInfo = skuInfoMap.get(item.getSkuId());
+                BigDecimal unitPrice = (skuInfo != null) ? skuInfo.unitPrice() : BigDecimal.ZERO;
+                String productName = (skuInfo != null) ? skuInfo.productName() : "";
+                String skuName = (skuInfo != null) ? skuInfo.skuName() : "";
+
+                BigDecimal subTotal = unitPrice.multiply(BigDecimal.valueOf(item.getQuantity()));
+
+                return new CartItemDto(
                         item.getSkuId(),
-                        null,
-                        null,
-                        BigDecimal.ZERO,
+                        productName,
+                        skuName, unitPrice,
                         item.getQuantity(),
-                        BigDecimal.ZERO
-                ))
-                .toList();
+                        subTotal);
+            }).toList();
 
-        BigDecimal total = dtos.stream()
-                .map(CartItemDto::subtotal)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+            BigDecimal totalAmount = dtos.stream()
+                    .map(CartItemDto::subtotal)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        return new CartSummaryDto(dtos, dtos.size(), total);
+            CartSummaryDto summary = new CartSummaryDto(dtos, dtos.size(), totalAmount);
+            cartCachePort.putCart(userId, summary);
+            return summary;
+        });
     }
 
     public int getItemCount(Long userId) {
-        String cached = redisTemplate.opsForValue().get(CART_KEY + userId);
-        if (cached != null) return Integer.parseInt(cached);
-
-        int count = cartItemRepository.countByUserId(userId);
-        redisTemplate.opsForValue().set(CART_KEY + userId, String.valueOf(count), CART_TTL_HOURS, TimeUnit.HOURS);
-        return count;
+        return cartCachePort.getItemCount(userId).orElseGet(() -> {
+            int count = cartItemRepository.countByUserId(userId);
+            cartCachePort.putItemCount(userId, count);
+            return count;
+        });
     }
 
+
+    @Override
+    public List<CartItemDto> getItems(Long userId) {
+        return List.of();
+    }
 
     // WRITE
     @Retryable(retryFor = OptimisticLockingFailureException.class, maxAttempts = 3)
     @Transactional
+    @Override
     public CartItemDto addItem(Long userId, Long skuId, int quantity) {
         CartItem item = cartItemRepository.findByUserIdAndSkuId(userId, skuId).map(existing -> {
             existing.setQuantity(existing.getQuantity() + quantity);
@@ -73,10 +99,11 @@ public class CartService {
                 .build());
 
         cartItemRepository.save(item);
-        invalidateCountCache(userId);
+        cartCachePort.evict(userId);
 
         return toDto(item);
     }
+
     @Retryable(retryFor = OptimisticLockingFailureException.class, maxAttempts = 3)
     @Transactional
     public CartItemDto updateItem(Long userId, Long skuId, int quantity) {
@@ -84,22 +111,22 @@ public class CartService {
                 .orElseThrow(() -> new ResourceNotFoundException("Cart item not found"));
         item.setQuantity(quantity);
         cartItemRepository.save(item);
-        invalidateCountCache(userId);
 
+        cartCachePort.evict(userId);
         return toDto(item);
     }
 
     @Transactional
     public void removeItem(Long userId, Long skuId) {
         cartItemRepository.deleteByUserIdAndSkuId(userId, skuId);
-        invalidateCountCache(userId);
+        cartCachePort.evict(userId);
     }
 
     // Call AFTER_COMMIT from CheckoutService
     @Transactional
     public void clearCart(Long userId) {
         cartItemRepository.deleteByUserId(userId);
-        redisTemplate.delete(CART_KEY + userId);
+        cartCachePort.evict(userId);
     }
 
     // Take raw cart items for CheckoutService
@@ -109,10 +136,6 @@ public class CartService {
     }
 
     // Private Helpers
-    private void invalidateCountCache(Long userId) {
-        redisTemplate.delete(CART_KEY + userId);
-    }
-
     private CartItemDto toDto(CartItem item) {
         return new CartItemDto(
                 item.getSkuId(),
@@ -122,4 +145,6 @@ public class CartService {
                 item.getQuantity(),
                 BigDecimal.ZERO);
     }
+
+
 }
