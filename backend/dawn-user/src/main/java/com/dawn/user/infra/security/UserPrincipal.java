@@ -18,7 +18,6 @@ public class UserPrincipal implements UserDetails {
     private final String email;
     private final String passwordHash;
     private final SystemRole systemRole;
-    private final Long branchId;
     private final Collection<? extends GrantedAuthority> authorities;
 
     public UserPrincipal(User user) {
@@ -26,7 +25,6 @@ public class UserPrincipal implements UserDetails {
         this.email = user.getEmail();
         this.passwordHash = user.getPasswordHash();
         this.systemRole = user.getSystemRole();
-        this.branchId = user.getBranchId();
         this.authorities = buildAuthorities(user);
     }
 

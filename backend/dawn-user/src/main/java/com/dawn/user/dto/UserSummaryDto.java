@@ -6,6 +6,5 @@ public record UserSummaryDto(
         Long userId,
         String fullName,
         String email,
-        SystemRole systemRole,
-        Long branchId) {
+        SystemRole systemRole) {
 }

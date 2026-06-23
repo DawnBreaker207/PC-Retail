@@ -16,8 +16,7 @@ public final class UserMapper {
                 user.getId(),
                 user.getFullName(),
                 user.getEmail(),
-                user.getSystemRole(),
-                user.getBranchId());
+                user.getSystemRole());
     }
 
     public static AddressDto toAddressDto(AddressEntry entry) {
