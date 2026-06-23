@@ -94,6 +94,11 @@
                 <artifactId>dawn-user</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.dawn.backend</groupId>
+                <artifactId>dawn-promotion</artifactId>
+                <version>${project.version}</version>
+            </dependency>
 
             <!--  Spring Boot ML & Tools Pack   -->
             <dependency>
@@ -138,6 +143,7 @@
         <module>dawn-catalog</module>
         <module>dawn-inventory</module>
         <module>dawn-user</module>
+        <module>dawn-promotion</module>
     </modules>
 
     <build>
