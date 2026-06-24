@@ -24,6 +24,9 @@ public class VnpayGatewayAdapter implements VnpayGatewayPort {
     @Value("${payment.VNPay.url}")
     private String vnp_PayUrl;
 
+    @Value("${payment.VNPay.queryUrl}")
+    private String vnp_QueryUrl;
+
     @Value("${payment.VNPay.returnUrl}")
     private String vnp_ReturnUrl;
 
@@ -41,9 +44,6 @@ public class VnpayGatewayAdapter implements VnpayGatewayPort {
 
     @Value("${payment.VNPay.orderType}")
     private String vnp_OrderType;
-
-    @Value("${payment.VNPay.queryUrl}")
-    private String vnp_QueryUrl;
 
     private final RestTemplate restTemplate;
 

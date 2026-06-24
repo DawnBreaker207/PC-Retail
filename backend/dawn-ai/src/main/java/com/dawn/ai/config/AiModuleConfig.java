@@ -1,16 +1,16 @@
 package com.dawn.ai.config;
 
 import com.dawn.ai.tools.*;
+import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.embedding.EmbeddingModel;
 import dev.langchain4j.model.openai.OpenAiChatModel;
-import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.openai.OpenAiEmbeddingModel;
 import dev.langchain4j.service.AiServices;
-import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
-@Configurable
+@Configuration
 public class AiModuleConfig {
     @Value("${openrouter.base-url}")
     private String baseUrl;

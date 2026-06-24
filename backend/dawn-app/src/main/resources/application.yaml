@@ -97,3 +97,15 @@ langchain4j:
     enabled: false
   embedding-model:
     enabled: false
+  #Config Payment
+payment:
+  # VNPay
+  VNPay:
+    url: ${VNPAY_URL}
+    queryUrl: ${VNPAY_ORDER_TYPE}
+    tmnCode: ${VNPAY_TMN_CODE}
+    secretKey: ${VNPAY_SECRET_KEY}
+    returnUrl: ${VNPAY_RETURN_URL}
+    version: ${VNPAY_VERSION}
+    command: ${VNPAY_COMMAND}
+    orderType: ${VNPAY_ORDER_TYPE}

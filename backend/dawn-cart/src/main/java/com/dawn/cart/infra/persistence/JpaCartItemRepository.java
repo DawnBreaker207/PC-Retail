@@ -31,5 +31,5 @@ public interface JpaCartItemRepository extends JpaRepository<CartItem, Long>, Ca
     @Override
     int countByUserId(Long userId);
 
-    int updateQuantityWithVersion(Long userId, Long skuId, int quantity, long expectedVersion);
+//    int updateQuantityWithVersion(Long userId, Long skuId, int quantity, long expectedVersion);
 }
