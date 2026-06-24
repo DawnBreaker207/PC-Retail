@@ -4,7 +4,7 @@ networks:
 
 services:
   postgres:
-    image: postgres:17
+    image: pgvector/pgvector:pg17
     container_name: postgres
     environment:
       POSTGRES_DB: demo
