@@ -2,7 +2,6 @@ package com.dawn.payment.port.out;
 
 import com.dawn.payment.entity.Payment;
 import com.dawn.payment.entity.enums.PaymentMethod;
-import com.dawn.payment.entity.enums.PaymentResultStatus;
 
 import java.util.List;
 import java.util.Optional;

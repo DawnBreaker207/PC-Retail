@@ -1,7 +1,6 @@
 package com.dawn.payment.entity;
 
 import com.dawn.common.entity.AbstractMappedEntity;
-import com.dawn.common.entity.BaseEntity;
 import com.dawn.payment.entity.enums.PaymentMethod;
 import com.dawn.payment.entity.enums.PaymentResultStatus;
 import io.swagger.v3.oas.annotations.Hidden;
