@@ -115,6 +115,11 @@
                 <artifactId>dawn-payment</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.dawn.backend</groupId>
+                <artifactId>dawn-ai</artifactId>
+                <version>${project.version}</version>
+            </dependency>
 
             <!--  Spring Boot ML & Tools Pack   -->
             <dependency>
@@ -153,12 +158,12 @@
             <!--  Langchain4j -->
             <dependency>
                 <groupId>dev.langchain4j</groupId>
-                <artifactId>langchain4j-spring-boot-starter</artifactId>
+                <artifactId>langchain4j-spring-boot4-starter</artifactId>
                 <version>${langchain.version}</version>
             </dependency>
             <dependency>
                 <groupId>dev.langchain4j</groupId>
-                <artifactId>langchain4j-open-ai-spring-boot-starter</artifactId>
+                <artifactId>langchain4j-open-ai-spring-boot4-starter</artifactId>
                 <version>${langchain.version}</version>
             </dependency>
         </dependencies>
@@ -174,6 +179,7 @@
         <module>dawn-cart</module>
         <module>dawn-order</module>
         <module>dawn-payment</module>
+        <module>dawn-ai</module>
     </modules>
 
     <build>
