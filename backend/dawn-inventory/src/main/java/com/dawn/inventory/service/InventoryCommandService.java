@@ -2,7 +2,7 @@ package com.dawn.inventory.service;
 
 import com.dawn.common.exception.wrapper.InvalidRequestException;
 import com.dawn.common.exception.wrapper.ResourceNotFoundException;
-import com.dawn.inventory.dto.StockDecrementCommand;
+import com.dawn.inventory.dto.StockDecrementCommandDto;
 import com.dawn.inventory.entity.Inventory;
 import com.dawn.inventory.entity.InventoryTransaction;
 import com.dawn.inventory.entity.enums.ReferenceType;
@@ -33,8 +33,8 @@ public class InventoryCommandService implements ReserveStockUseCase, ReleaseStoc
 
     // RESERVE
     @Override
-    public void reserve(List<StockDecrementCommand> items, Long orderId) {
-        for (StockDecrementCommand item : items) {
+    public void reserve(List<StockDecrementCommandDto> items, Long orderId) {
+        for (StockDecrementCommandDto item : items) {
             Inventory inv = inventoryRepository.findBySkuIdWithLock(item.skuId())
                     .orElseThrow(() -> new ResourceNotFoundException("Inventory not found for SKU: " + item.skuId()));
 
@@ -59,8 +59,8 @@ public class InventoryCommandService implements ReserveStockUseCase, ReleaseStoc
     // RELEASE
     @Override
     @Transactional
-    public void release(List<StockDecrementCommand> items, Long orderId) {
-        for (StockDecrementCommand item : items) {
+    public void release(List<StockDecrementCommandDto> items, Long orderId) {
+        for (StockDecrementCommandDto item : items) {
             Inventory inv = inventoryRepository.findBySkuIdWithLock(item.skuId())
                     .orElseThrow(() -> new ResourceNotFoundException("Inventory not found for SKU: " + item.skuId()));
 
@@ -91,8 +91,8 @@ public class InventoryCommandService implements ReserveStockUseCase, ReleaseStoc
     // DEDUCT
     @Override
     @Transactional
-    public void deduct(List<StockDecrementCommand> items, Long orderId) {
-        for (StockDecrementCommand item : items) {
+    public void deduct(List<StockDecrementCommandDto> items, Long orderId) {
+        for (StockDecrementCommandDto item : items) {
             Inventory inv = inventoryRepository.findBySkuIdWithLock(item.skuId())
                     .orElseThrow(() -> new ResourceNotFoundException("Inventory not found for SKU: " + item.skuId()));
 

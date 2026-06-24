@@ -1,9 +1,9 @@
 package com.dawn.inventory.port.in;
 
-import com.dawn.inventory.dto.StockDecrementCommand;
+import com.dawn.inventory.dto.StockDecrementCommandDto;
 
 import java.util.List;
 
 public interface DeductStockUseCase {
-    void deduct(List<StockDecrementCommand> items, Long orderId);
+    void deduct(List<StockDecrementCommandDto> items, Long orderId);
 }

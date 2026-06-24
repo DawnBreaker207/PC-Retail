@@ -1,5 +1,6 @@
 package com.dawn.promotion.dto;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 public interface PromotionCheckoutPort {
@@ -11,4 +12,6 @@ public interface PromotionCheckoutPort {
     void validateStack(List<Long> cartSkuIds, List<String> voucherCodes);
 
     void recordUsage(Long userId, Long orderId, List<String> voucherCodes);
+
+    VoucherValidationResult validate(String code, BigDecimal orderTotal);
 }

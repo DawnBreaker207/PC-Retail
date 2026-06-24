@@ -1,6 +1,6 @@
 package com.dawn.inventory.infra.redis;
 
-import com.dawn.inventory.dto.StockDecrementCommand;
+import com.dawn.inventory.dto.StockDecrementCommandDto;
 import com.dawn.inventory.port.out.InventoryCachePort;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -44,7 +44,7 @@ public class InventoryCacheAdapter implements InventoryCachePort {
     }
 
     @Override
-    public List<Long> decrementBatch(List<StockDecrementCommand> items) {
+    public List<Long> decrementBatch(List<StockDecrementCommandDto> items) {
         List<String> keys = items.stream()
                 .map(i -> String.valueOf(i.skuId()))
                 .toList();
@@ -63,7 +63,7 @@ public class InventoryCacheAdapter implements InventoryCachePort {
     }
 
     @Override
-    public void incrementBatch(List<StockDecrementCommand> items) {
+    public void incrementBatch(List<StockDecrementCommandDto> items) {
         List<String> keys = items.stream()
                 .map(i -> String.valueOf(i.skuId()))
                 .toList();

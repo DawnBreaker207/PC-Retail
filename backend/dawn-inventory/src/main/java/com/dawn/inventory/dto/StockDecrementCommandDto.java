@@ -1,6 +1,6 @@
 package com.dawn.inventory.dto;
 
-public record StockDecrementCommand(
+public record StockDecrementCommandDto(
         Long skuId,
         int quantity) {
 }
