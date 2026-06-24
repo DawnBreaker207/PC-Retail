@@ -109,6 +109,11 @@
                 <artifactId>dawn-order</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.dawn.backend</groupId>
+                <artifactId>dawn-payment</artifactId>
+                <version>${project.version}</version>
+            </dependency>
 
             <!--  Spring Boot ML & Tools Pack   -->
             <dependency>
@@ -156,6 +161,7 @@
         <module>dawn-promotion</module>
         <module>dawn-cart</module>
         <module>dawn-order</module>
+        <module>dawn-payment</module>
     </modules>
 
     <build>
