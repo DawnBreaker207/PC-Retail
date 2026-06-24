@@ -4,7 +4,6 @@ import com.dawn.ai.dto.AiSearchResult;
 import com.dawn.ai.dto.EmbeddingSearchResult;
 import com.dawn.ai.port.in.SearchProductUseCase;
 import com.dawn.ai.port.out.EmbeddingPort;
-import io.swagger.v3.oas.annotations.servers.Server;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
