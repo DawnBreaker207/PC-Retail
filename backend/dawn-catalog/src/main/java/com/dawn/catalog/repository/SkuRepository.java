@@ -12,7 +12,7 @@ import java.util.Optional;
 
 @Repository
 public interface SkuRepository extends JpaRepository<Sku, Long>, JpaSpecificationExecutor<Sku> {
-    @Query("SELECT s FROM Sku s JOIN FETCH s WHERE s.id IN :skuIds AND s.deletedAt IS NULL")
+    @Query("SELECT s FROM Sku s WHERE s.id IN :skuIds AND s.deletedAt IS NULL")
     List<Sku> findAllActiveByIds(@Param("skuIds") List<Long> skuIds);
 
     Optional<Sku> findByIdAndDeletedAtIsNull(Long id);

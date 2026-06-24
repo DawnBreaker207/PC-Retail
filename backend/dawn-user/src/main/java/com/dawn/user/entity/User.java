@@ -50,4 +50,7 @@ public class User extends AuditableEntity {
     @Column(columnDefinition = "jsonb", nullable = false)
     @Builder.Default
     private List<AddressEntry> addresses = new ArrayList<>();
+
+    @Column(name = "deleted_at")
+    private Instant deletedAt;
 }

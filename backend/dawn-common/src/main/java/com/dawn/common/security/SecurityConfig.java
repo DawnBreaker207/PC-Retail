@@ -56,9 +56,6 @@ public class SecurityConfig {
 
     private final CorsConfig corsConfig;
 
-    @Autowired(required = false)
-    private final LogoutHandler logoutHandler;
-
     private final AuthTokenFilter authTokenFilter;
 
     @Bean
