@@ -1,0 +1,99 @@
+package com.dawn.promotion.service;
+
+import com.dawn.common.exception.wrapper.InvalidRequestException;
+import com.dawn.common.exception.wrapper.ResourceAlreadyExistedException;
+import com.dawn.common.exception.wrapper.ResourceNotFoundException;
+import com.dawn.common.response.ResponsePage;
+import com.dawn.promotion.controller.request.VoucherCreateRequest;
+import com.dawn.promotion.dto.VoucherDto;
+import com.dawn.promotion.entity.Voucher;
+import com.dawn.promotion.port.in.ManageVoucherUseCase;
+import com.dawn.promotion.port.out.PromotionCachePort;
+import com.dawn.promotion.port.out.VoucherRepositoryPort;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+import java.time.Instant;
+
+@Service
+@RequiredArgsConstructor
+public class PromotionService implements ManageVoucherUseCase {
+
+    private final VoucherRepositoryPort voucherRepo;
+    private final PromotionCachePort cachePort;
+
+    @Transactional(readOnly = true)
+    @Override
+    public ResponsePage<VoucherDto> getAll(int page, int size) {
+        PageRequest pageable = PageRequest.of(page, size, Sort.by("id").descending());
+        return ResponsePage.of(voucherRepo.findAllByDeletedAtIsNull(pageable).map(this::toDto));
+    }
+
+
+    @Override
+    @Transactional
+    public VoucherDto create(VoucherCreateRequest req) {
+        String code = req.code().toUpperCase();
+        if (voucherRepo.existsByCodeAndDeletedAtIsNull(req.code())) {
+            throw new ResourceAlreadyExistedException("Voucher code already existed");
+        }
+        if (req.validFrom().isAfter(req.validTo())) {
+            throw new InvalidRequestException("validFrom must be before validTo");
+        }
+
+        Voucher voucher = Voucher.builder()
+                .code(code)
+                .scopeType(req.scopeType())
+                .scopeId(req.scopeId())
+                .discountType(req.discountType())
+                .discountValue(req.discountValue())
+                .maxDiscountAmount(req.maxDiscountAmount())
+                .minOrderValue(req.minOrderValue() != null
+                        ? req.minOrderValue() : BigDecimal.ZERO)
+                .totalQuantity(req.totalQuantity())
+                .remainingQuantity(req.totalQuantity())
+                .validFrom(req.validFrom())
+                .validTo(req.validTo())
+                .build();
+
+        voucherRepo.save(voucher);
+
+        // Sync remaining quantity into Redis
+        cachePort.setVoucherRemaining(code, voucher.getRemainingQuantity());
+
+        return toDto(voucher);
+    }
+
+
+    @Transactional
+    @Override
+    public void delete(Long id) {
+        Voucher voucher = voucherRepo
+                .findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Voucher not found"));
+
+        voucher.setDeletedAt(Instant.now());
+        voucherRepo.save(voucher);
+        cachePort.deleteVoucher(voucher.getCode());
+    }
+
+    private VoucherDto toDto(Voucher v) {
+        return new VoucherDto(
+                v.getId(),
+                v.getCode(),
+                v.getScopeType(),
+                v.getScopeId(),
+                v.getDiscountType(),
+                v.getDiscountValue(),
+                v.getMaxDiscountAmount(),
+                v.getMinOrderValue(),
+                v.getTotalQuantity(),
+                v.getRemainingQuantity(),
+                v.getValidFrom(),
+                v.getValidTo());
+    }
+}
