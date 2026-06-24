@@ -86,3 +86,14 @@ app:
   jwtSecret: ${JWT_SECRET:dGhpc2lzYXZlcnlzZWNyZXRrZXlmb3JkZXZlbG9wbWVudDI1Ng==}
   jwtExpirationsMs: ${JWT_EXPIRATION_MS:900000}
   jwtRefreshExpirationsMs: ${JWT_REFRESH_EXPIRATION_MS:604800000}
+openrouter:
+  base-url: https://openrouter.ai/api/v1
+  api-key: ${OPEN_ROUTER_API}
+  chat-model: openai/gpt-4o-mini
+  embedding-model: openai/text-embedding-ada-002
+
+langchain4j:
+  chat-model:
+    enabled: false
+  embedding-model:
+    enabled: false
