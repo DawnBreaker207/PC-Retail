@@ -25,6 +25,30 @@
             <groupId>com.dawn.backend</groupId>
             <artifactId>dawn-catalog</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.dawn.backend</groupId>
+            <artifactId>dawn-inventory</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.dawn.backend</groupId>
+            <artifactId>dawn-promotion</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.dawn.backend</groupId>
+            <artifactId>dawn-cart</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.dawn.backend</groupId>
+            <artifactId>dawn-order</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.dawn.backend</groupId>
+            <artifactId>dawn-payment</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.dawn.backend</groupId>
+            <artifactId>dawn-ai</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

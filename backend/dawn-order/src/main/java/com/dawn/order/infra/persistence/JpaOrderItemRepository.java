@@ -9,6 +9,15 @@ import java.util.List;
 
 @Repository
 public interface JpaOrderItemRepository extends JpaRepository<OrderItem, Long>, OrderItemRepositoryPort {
+
+    @Override
+    default List<OrderItem> saveAll(List<OrderItem> items) {
+        return this.saveAllAndFlush(items);
+    }
+
+    @Override
+    boolean existsBySkuId(Long skuId);
+
     @Override
     List<OrderItem> findBySubOrderId(Long subOrderId);
 }
