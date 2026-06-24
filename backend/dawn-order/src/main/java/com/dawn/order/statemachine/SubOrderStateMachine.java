@@ -2,32 +2,37 @@ package com.dawn.order.statemachine;
 
 import com.dawn.common.exception.wrapper.InvalidRequestException;
 import com.dawn.order.entity.enums.SubOrderStatus;
+import org.springframework.stereotype.Component;
 
+import java.util.EnumMap;
+import java.util.EnumSet;
 import java.util.Map;
 import java.util.Set;
 
+import static com.dawn.order.entity.enums.SubOrderStatus.*;
+
+@Component
 public class SubOrderStateMachine {
 
-    private static final Map<SubOrderStatus, Set<SubOrderStatus>> TRANSITIONS = Map.of(
-            SubOrderStatus.PENDING_PAYMENT, Set.of(SubOrderStatus.PAID, SubOrderStatus.EXPIRED, SubOrderStatus.CANCELLED),
-            SubOrderStatus.PAID, Set.of(SubOrderStatus.PROCESSING, SubOrderStatus.CANCELLED),
-            SubOrderStatus.PROCESSING, Set.of(SubOrderStatus.SHIPPED, SubOrderStatus.READY_FOR_PICKUP, SubOrderStatus.CANCELLED),
-            SubOrderStatus.SHIPPED, Set.of(SubOrderStatus.DELIVERED),
-            SubOrderStatus.READY_FOR_PICKUP, Set.of(SubOrderStatus.DELIVERED, SubOrderStatus.CANCELLED),
-            SubOrderStatus.DELIVERED, Set.of(SubOrderStatus.RETURN_REQUESTED),
-            SubOrderStatus.RETURN_REQUESTED, Set.of(SubOrderStatus.RETURNED, SubOrderStatus.PAID),
-            SubOrderStatus.RETURNED, Set.of(),
-            SubOrderStatus.EXPIRED, Set.of(),
-            SubOrderStatus.CANCELLED, Set.of());
+    private static final Map<SubOrderStatus, Set<SubOrderStatus>> TRANSITIONS = new EnumMap<>(SubOrderStatus.class);
 
-    public static void validate(SubOrderStatus from, SubOrderStatus to) {
-        Set<SubOrderStatus> allowed = TRANSITIONS.getOrDefault(from, Set.of());
-        if (!allowed.contains(to)) {
-            throw new InvalidRequestException("Invalid transition: " + from + " -> " + to + ". Allowed: " + allowed);
-        }
+    static {
+        TRANSITIONS.put(PENDING_PAYMENT, EnumSet.of(PAID, CANCELLED, EXPIRED));
+        TRANSITIONS.put(PAID, EnumSet.of(PROCESSING, CANCELLED));
+        TRANSITIONS.put(PROCESSING, EnumSet.of(SHIPPED, READY_FOR_PICKUP, CANCELLED));
+        TRANSITIONS.put(SHIPPED, EnumSet.of(DELIVERED));
+        TRANSITIONS.put(DELIVERED, EnumSet.of(RETURN_REQUESTED));
+        TRANSITIONS.put(RETURN_REQUESTED, EnumSet.of(RETURNED, DELIVERED));
+        TRANSITIONS.put(RETURNED, EnumSet.noneOf(SubOrderStatus.class));
+        TRANSITIONS.put(CANCELLED, EnumSet.noneOf(SubOrderStatus.class));
+        TRANSITIONS.put(EXPIRED, EnumSet.noneOf(SubOrderStatus.class));
     }
 
-    public static Set<SubOrderStatus> allowedTransitions(SubOrderStatus from) {
-        return TRANSITIONS.getOrDefault(from, Set.of());
+
+    public void assertValidTransition(SubOrderStatus from, SubOrderStatus to) {
+        Set<SubOrderStatus> allowed = TRANSITIONS.getOrDefault(from, Set.of());
+        if (!allowed.contains(to)) {
+            throw new InvalidRequestException("Invalid transition from " + from + " -> " + to);
+        }
     }
 }

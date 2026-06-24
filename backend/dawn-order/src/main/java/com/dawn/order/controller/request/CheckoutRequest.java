@@ -1,4 +1,4 @@
-package com.dawn.order.dto;
+package com.dawn.order.controller.request;
 
 import com.dawn.order.entity.enums.FulfillmentType;
 import jakarta.validation.constraints.NotBlank;
@@ -9,8 +9,8 @@ import java.util.Map;
 public record CheckoutRequest(
         @NotBlank String idempotencyKey,
         @NotNull FulfillmentType fulfillmentType,
-        String shippingAddressId,
+        Map<String, Object> shippingAddress,
         String voucherCode,
-        boolean invoiceRequested,
-        Map<String, Object> taxInfo) {
+        Map<String, Object> taxInfo
+) {
 }

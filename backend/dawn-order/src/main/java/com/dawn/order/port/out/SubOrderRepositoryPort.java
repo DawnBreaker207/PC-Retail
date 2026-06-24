@@ -1,0 +1,23 @@
+package com.dawn.order.port.out;
+
+import com.dawn.order.entity.SubOrder;
+import com.dawn.order.entity.enums.SubOrderStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
+import java.time.Instant;
+import java.util.List;
+import java.util.Optional;
+
+public interface SubOrderRepositoryPort {
+    SubOrder save(SubOrder subOrder);
+
+    Optional<SubOrder> findById(Long id);
+
+    List<SubOrder> findByOrderId(Long orderId);
+
+    Page<SubOrder> findByStatus(SubOrderStatus status, Pageable pageable);
+
+    List<SubOrder> findByStatusAndCreatedAtBefore(SubOrderStatus status, Instant threshold);
+
+}

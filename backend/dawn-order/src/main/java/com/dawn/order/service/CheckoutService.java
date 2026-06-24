@@ -1,22 +1,19 @@
 package com.dawn.order.service;
 
 import com.dawn.common.exception.wrapper.InvalidRequestException;
-import com.dawn.order.dto.CheckoutRequest;
-import com.dawn.order.dto.OrderDto;
+import com.dawn.order.controller.request.CheckoutRequest;
+import com.dawn.order.dto.*;
 import com.dawn.order.entity.Order;
 import com.dawn.order.entity.OrderItem;
 import com.dawn.order.entity.SubOrder;
-import com.dawn.order.entity.VoucherUsage;
 import com.dawn.order.entity.enums.FulfillmentType;
 import com.dawn.order.entity.enums.PaymentStatus;
 import com.dawn.order.entity.enums.SubOrderStatus;
-import com.dawn.order.repository.OrderItemRepository;
-import com.dawn.order.repository.OrderRepository;
-import com.dawn.order.repository.SubOrderRepository;
-import com.dawn.order.repository.VoucherUsageRepository;
+import com.dawn.order.port.in.CheckoutUseCase;
+import com.dawn.order.port.out.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
@@ -27,76 +24,90 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class CheckoutService {
+public class CheckoutService implements CheckoutUseCase {
     private static final String VOUCHER_KEY = "voucher:remaining";
+    private static final BigDecimal DELIVERY_FEE = BigDecimal.valueOf(30000);
 
-    private final OrderRepository orderRepository;
-    private final SubOrderRepository subOrderRepository;
-    private final OrderItemRepository orderItemRepository;
-    private final VoucherUsageRepository voucherUsageRepository;
-    private final CartService cartService;
-    private final VoucherService voucherService;
-    private final ReserveStockUseCase reserveStockUseCase;
-    private final InventoryCachePort inventoryCachePort;
+    private final OrderRepositoryPort orderRepository;
+    private final SubOrderRepositoryPort subOrderRepository;
+    private final OrderItemRepositoryPort orderItemRepository;
     private final OrderQueryService orderQueryService;
-    private final StringRedisTemplate redisTemplate;
 
+    private final CartClientPort cartClient;
+    private final InventoryClientPort inventoryClient;
+    private final PromotionClientPort promotionClient;
+    private final CatalogClientPort catalogClient;
+
+    @Override
     public OrderDto checkout(CheckoutRequest req, Long userId) {
         // Step 1: Idempotency
-        return orderRepository.findByIdempotencyKey(req.idempotencyKey())
-                .map(existing -> orderQueryService.toOrderDto(existing))
-                .orElseGet(() -> doCheckout(req, userId));
-    }
-
-    private OrderDto doCheckout(CheckoutRequest req, Long userId) {
+        var existing = orderRepository.findByIdempotencyKey(req.idempotencyKey());
+        if (existing.isPresent()) {
+            return orderQueryService.toOrderDto(existing.get());
+        }
         // Step 2: Load + Validate cart
-        List<CartItem> cartItems = cartService.getRawItems(userId);
+        List<CartItemSnapshot> cartItems = cartClient.getItems(userId);
         if (cartItems.isEmpty()) {
             throw new InvalidRequestException("Cart is empty");
         }
 
+        if (req.fulfillmentType() == FulfillmentType.DELIVERY && (req.shippingAddress() == null || req.shippingAddress().isEmpty())) {
+            throw new InvalidRequestException("Shipping address is required for DELIVERY");
+        }
 
-        // Step 3: Validate Voucher
-        Voucher voucher = null;
-        BigDecimal discountAmount = BigDecimal.ZERO;
+        List<Long> skuIds = cartItems.stream().map(CartItemSnapshot::skuId).toList();
 
-        // Calculate temporary subtotal
-        BigDecimal subtotal = cartItems.stream()
-                .map(item -> BigDecimal.ZERO.multiply(BigDecimal.valueOf(item.getQuantity)))
+        Map<Long, BigDecimal> priceMap = catalogClient.getPrices(skuIds);
+        BigDecimal subTotal = cartItems.stream()
+                .map(item -> priceMap
+                        .getOrDefault(item.skuId(), BigDecimal.ZERO)
+                        .multiply(BigDecimal.valueOf(item.quantity())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        if (req.voucherCode() != null) {
-            VoucherValidationResult validation = voucherService.validate(req.voucherCode(), subtotal);
+        List<String> voucherCodes = req.voucherCode() != null ? List.of(req.voucherCode()) : List.of();
+        BigDecimal discountAmount = BigDecimal.ZERO;
 
+        if (!voucherCodes.isEmpty()) {
+            promotionClient.validateStack(skuIds, voucherCodes);
+            VoucherApplyResult validation = promotionClient.validate(req.voucherCode(), subTotal);
             if (!validation.valid()) {
                 throw new InvalidRequestException(validation.errorMessage());
             }
-            throw new InvalidRequestException(validation.errorMessage());
             discountAmount = validation.discountAmount();
         }
 
-
-        // Step 4: Lua gatekeeper
-        List<StockDecrementCommand> stockItems = cartItems.stream()
-                .map(item -> new StockDecrementCommand(item.getSkuId(), item.getQuantity()))
-                .toList();
-
-        List<Long> failedSkuIds = inventoryCachePort.decrementBatch(stockItems);
-        if (!failedSkuIds.isEmpty()) {
-            throw new InvalidRequestException("This product is not enough item: " + failedSkuIds);
+        if (!voucherCodes.isEmpty()) {
+            promotionClient.reservePromotions(voucherCodes, List.of());
         }
 
+        List<StockDecrementCommand> stockItems = cartItems.stream()
+                .map(item -> new StockDecrementCommand(item.skuId(), item.quantity()))
+                .toList();
 
-        // Step 5: DB Transaction
+        List<Long> failedSkuIds = inventoryClient.decrementBatch(stockItems);
+        if (!failedSkuIds.isEmpty()) {
+            if (!voucherCodes.isEmpty()) promotionClient.rollBackPromotions(voucherCodes, List.of());
+            throw new InvalidRequestException("Not enough stock for SKU: " + failedSkuIds);
+        }
+
         try {
-            return executeTransaction(req, userId, cartItems, stockItems, voucher, discountAmount, subtotal);
+            return executeTransaction(req, userId, cartItems, priceMap, stockItems, voucherCodes, discountAmount, subTotal);
+        } catch (DataIntegrityViolationException dup) {
+            log.warn("Duplicate checkout DB constraint, key={}", req.idempotencyKey());
+            inventoryClient.incrementBatch(stockItems);
+            if (!voucherCodes.isEmpty()) promotionClient.rollBackPromotions(voucherCodes, List.of());
+            return orderRepository.findByIdempotencyKey(req.idempotencyKey())
+                    .map(orderQueryService::toOrderDto)
+                    .orElseThrow(() -> dup);
         } catch (Exception e) {
             log.error("Checkout DB transaction failed, compensating Redis", e);
-            inventoryCachePort.incrementBatch(stockItems);
+            inventoryClient.incrementBatch(stockItems);
+            if (!voucherCodes.isEmpty()) promotionClient.rollBackPromotions(voucherCodes, List.of());
             throw e;
         }
     }
@@ -105,18 +116,20 @@ public class CheckoutService {
     protected OrderDto executeTransaction(
             CheckoutRequest req,
             Long userId,
-            List<CartItem> cartItems,
+            List<CartItemSnapshot> cartItems,
+            Map<Long, BigDecimal> priceMap,
             List<StockDecrementCommand> stockItems,
-            Voucher voucher,
+            List<String> voucherCodes,
             BigDecimal discountAmount,
             BigDecimal subtotal) {
-        BigDecimal shippingFee = req.fulfillmentType() == FulfillmentType.DELIVERY ? BigDecimal.valueOf(30000) : BigDecimal.ZERO;
+
+        BigDecimal shippingFee = req.fulfillmentType() == FulfillmentType.DELIVERY ? DELIVERY_FEE : BigDecimal.ZERO;
         BigDecimal finalAmount = subtotal.subtract(discountAmount).add(shippingFee);
 
         // Create Order
         Order order = Order.builder()
                 .userId(userId)
-                .shippingAddress(Map.of())
+                .shippingAddress(req.shippingAddress() != null ? req.shippingAddress() : Map.of())
                 .totalAmount(finalAmount)
                 .taxAmount(BigDecimal.ZERO)
                 .paymentStatus(PaymentStatus.PENDING)
@@ -147,35 +160,26 @@ public class CheckoutService {
         List<OrderItem> orderItems = cartItems.stream()
                 .map(item -> OrderItem.builder()
                         .subOrderId(subOrder.getId())
-                        .skuId(item.getSkuId())
-                        .quantity(item.getQuantity())
-                        .unitPrice(BigDecimal.ZERO)
+                        .skuId(item.skuId())
+                        .quantity(item.quantity())
+                        .unitPrice(priceMap.getOrDefault(item.skuId(), BigDecimal.ZERO))
                         .build())
-                .toList();
-        orderItemRepository.save(orderItems);
+                .collect(Collectors.toList());
+        orderItemRepository.saveAll(orderItems);
 
         // Reserve inventory with pessimistic lock
-        reserveStockUseCase.reserve(stockItems, order.getId());
+        inventoryClient.reserve(stockItems, order.getId());
 
         // Voucher usage
-        if (voucher != null) {
-            // Decrement Redis
-            redisTemplate.opsForValue().decrement(VOUCHER_KEY + voucher.getId());
-
-            // Write VoucherUsage
-            voucherUsageRepository.save(VoucherUsage.builder()
-                    .voucherId(voucher.getId())
-                    .userId(userId)
-                    .orderId(order.getId())
-                    .discountAmount(discountAmount)
-                    .build());
+        if (voucherCodes.isEmpty()) {
+            promotionClient.recordUsage(userId, order.getId(), voucherCodes);
         }
 
         // Step 7: AFTER COMMIT - Clear Cart
         TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
             @Override
             public void afterCommit() {
-                cartService.clearCart(userId);
+                cartClient.clearCart(userId);
             }
         });
 
