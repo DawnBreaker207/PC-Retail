@@ -1,6 +1,6 @@
 package com.dawn.inventory.infra.scheduler;
 
-import com.dawn.inventory.infra.persistence.InventoryRepository;
+import com.dawn.inventory.infra.persistence.JpaInventoryRepository;
 import com.dawn.inventory.port.out.InventoryCachePort;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,7 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Slf4j
 public class InventoryReconciliationJob {
-    private final InventoryRepository inventoryRepository;
+    private final JpaInventoryRepository inventoryRepository;
     private final InventoryCachePort cachePort;
 
     @Scheduled(fixedDelay = 5 * 60 * 1000)
