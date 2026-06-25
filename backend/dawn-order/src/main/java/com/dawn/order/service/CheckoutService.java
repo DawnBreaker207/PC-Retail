@@ -45,6 +45,7 @@ public class CheckoutService implements CheckoutUseCase {
     private final CatalogClientPort catalogClient;
 
     @Override
+    @Transactional
     public OrderDto checkout(CheckoutRequest req, Long userId) {
         // Step 1: Idempotency
         var existing = orderRepository.findByIdempotencyKey(req.idempotencyKey());
@@ -97,7 +98,67 @@ public class CheckoutService implements CheckoutUseCase {
         }
 
         try {
-            return executeTransaction(req, userId, cartItems, priceMap, stockItems, voucherCodes, discountAmount, subTotal);
+            BigDecimal shippingFee = req.fulfillmentType() == FulfillmentType.DELIVERY ? DELIVERY_FEE : BigDecimal.ZERO;
+            BigDecimal finalAmount = subTotal.subtract(discountAmount).add(shippingFee);
+
+            // Create Order
+            Order order = Order.builder()
+                    .userId(userId)
+                    .shippingAddress(req.shippingAddress() != null ? req.shippingAddress() : Map.of())
+                    .totalAmount(finalAmount)
+                    .taxAmount(BigDecimal.ZERO)
+                    .paymentStatus(PaymentStatus.PENDING)
+                    .reservedUntil(Instant.now().plusSeconds(15 * 60))
+                    .idempotencyKey(req.idempotencyKey())
+                    .taxInfo(req.taxInfo())
+                    .build();
+            orderRepository.save(order);
+
+            // Create SubOrder
+            SubOrder subOrder = SubOrder.builder()
+                    .orderId(order.getId())
+                    .fulfillmentType(req.fulfillmentType())
+                    .subtotal(subTotal)
+                    .shippingFee(shippingFee)
+                    .discountAmount(discountAmount)
+                    .finalAmount(finalAmount)
+                    .status(SubOrderStatus.PENDING_PAYMENT)
+                    .statusHistory(new ArrayList<>(List.of(Map.of(
+                            "from", "CREATED",
+                            "to", SubOrderStatus.PENDING_PAYMENT.name(),
+                            "createdAt", Instant.now().toString()
+                    ))))
+                    .build();
+            subOrderRepository.save(subOrder);
+
+            // Create OrderItems
+            List<OrderItem> orderItems = cartItems.stream()
+                    .map(item -> OrderItem.builder()
+                            .subOrderId(subOrder.getId())
+                            .skuId(item.skuId())
+                            .quantity(item.quantity())
+                            .unitPrice(priceMap.getOrDefault(item.skuId(), BigDecimal.ZERO))
+                            .build())
+                    .collect(Collectors.toList());
+            orderItemRepository.saveAll(orderItems);
+
+            // Reserve inventory with pessimistic lock
+            inventoryClient.reserve(stockItems, order.getId());
+
+            // Voucher usage
+            if (!voucherCodes.isEmpty()) {
+                promotionClient.recordUsage(userId, order.getId(), voucherCodes);
+            }
+
+            // Step 7: AFTER COMMIT - Clear Cart
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    cartClient.clearCart(userId);
+                }
+            });
+
+            return orderQueryService.toOrderDto(order);
         } catch (DataIntegrityViolationException dup) {
             log.warn("Duplicate checkout DB constraint, key={}", req.idempotencyKey());
             inventoryClient.incrementBatch(stockItems);
@@ -111,79 +172,5 @@ public class CheckoutService implements CheckoutUseCase {
             if (!voucherCodes.isEmpty()) promotionClient.rollBackPromotions(voucherCodes, List.of());
             throw e;
         }
-    }
-
-    @Transactional
-    protected OrderDto executeTransaction(
-            CheckoutRequest req,
-            Long userId,
-            List<CartItemSnapshot> cartItems,
-            Map<Long, BigDecimal> priceMap,
-            List<StockDecrementCommand> stockItems,
-            List<String> voucherCodes,
-            BigDecimal discountAmount,
-            BigDecimal subtotal) {
-
-        BigDecimal shippingFee = req.fulfillmentType() == FulfillmentType.DELIVERY ? DELIVERY_FEE : BigDecimal.ZERO;
-        BigDecimal finalAmount = subtotal.subtract(discountAmount).add(shippingFee);
-
-        // Create Order
-        Order order = Order.builder()
-                .userId(userId)
-                .shippingAddress(req.shippingAddress() != null ? req.shippingAddress() : Map.of())
-                .totalAmount(finalAmount)
-                .taxAmount(BigDecimal.ZERO)
-                .paymentStatus(PaymentStatus.PENDING)
-                .reservedUntil(Instant.now().plusSeconds(15 * 60))
-                .idempotencyKey(req.idempotencyKey())
-                .taxInfo(req.taxInfo())
-                .build();
-        orderRepository.save(order);
-
-        // Create SubOrder
-        SubOrder subOrder = SubOrder.builder()
-                .orderId(order.getId())
-                .fulfillmentType(req.fulfillmentType())
-                .subtotal(subtotal)
-                .shippingFee(shippingFee)
-                .discountAmount(discountAmount)
-                .finalAmount(finalAmount)
-                .status(SubOrderStatus.PENDING_PAYMENT)
-                .statusHistory(new ArrayList<>(List.of(Map.of(
-                        "from", "CREATED",
-                        "to", SubOrderStatus.PENDING_PAYMENT.name(),
-                        "createdAt", Instant.now().toString()
-                ))))
-                .build();
-        subOrderRepository.save(subOrder);
-
-        // Create OrderItems
-        List<OrderItem> orderItems = cartItems.stream()
-                .map(item -> OrderItem.builder()
-                        .subOrderId(subOrder.getId())
-                        .skuId(item.skuId())
-                        .quantity(item.quantity())
-                        .unitPrice(priceMap.getOrDefault(item.skuId(), BigDecimal.ZERO))
-                        .build())
-                .collect(Collectors.toList());
-        orderItemRepository.saveAll(orderItems);
-
-        // Reserve inventory with pessimistic lock
-        inventoryClient.reserve(stockItems, order.getId());
-
-        // Voucher usage
-        if (voucherCodes.isEmpty()) {
-            promotionClient.recordUsage(userId, order.getId(), voucherCodes);
-        }
-
-        // Step 7: AFTER COMMIT - Clear Cart
-        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-            @Override
-            public void afterCommit() {
-                cartClient.clearCart(userId);
-            }
-        });
-
-        return orderQueryService.toOrderDto(order);
     }
 }
