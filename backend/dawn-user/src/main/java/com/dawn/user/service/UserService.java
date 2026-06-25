@@ -1,6 +1,7 @@
 package com.dawn.user.service;
 
 import com.dawn.common.exception.wrapper.ResourceNotFoundException;
+import com.dawn.common.message.Message;
 import com.dawn.user.controller.request.AddressRequest;
 import com.dawn.user.controller.request.UpdateProfileRequest;
 import com.dawn.user.controller.response.UserResponse;
@@ -89,7 +90,7 @@ public class UserService implements UserProfileUseCase {
                     entry.setId(addressId);
                     return entry;
                 })
-                .orElseThrow(() -> new ResourceNotFoundException("Address not found"));
+                .orElseThrow(() -> new ResourceNotFoundException(Message.User.ADDRESS_NOT_FOUND));
 
         if (updated.isDefault()) {
             addresses.forEach(address -> address.setDefault(false));
@@ -110,7 +111,7 @@ public class UserService implements UserProfileUseCase {
                 .collect(java.util.stream.Collectors.toCollection(ArrayList::new));
 
         if (addresses.size() == user.getAddresses().size()) {
-            throw new ResourceNotFoundException("Address not found");
+            throw new ResourceNotFoundException(Message.User.ADDRESS_NOT_FOUND);
         }
 
         if (addresses.stream().noneMatch(AddressEntry::isDefault) && !addresses.isEmpty()) {
@@ -123,7 +124,7 @@ public class UserService implements UserProfileUseCase {
 
     private User loadCurrentUser() {
         return userRepository.findByIdAndDeletedAtIsNull(SecurityUtils.currentUserId())
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException(Message.User.NOT_FOUND));
     }
 
     private static UserResponse toResponse(User user) {

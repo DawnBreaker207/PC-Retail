@@ -4,6 +4,7 @@ import com.dawn.common.exception.wrapper.InvalidRequestException;
 import com.dawn.common.exception.wrapper.ResourceAlreadyExistedException;
 import com.dawn.common.exception.wrapper.ResourceNotFoundException;
 import com.dawn.common.exception.wrapper.UnauthorizedException;
+import com.dawn.common.message.Message;
 import com.dawn.user.controller.request.*;
 import com.dawn.user.controller.response.AuthResponse;
 import com.dawn.user.controller.response.RegisterInitResponse;
@@ -40,7 +41,7 @@ public class AuthService implements RegisterUseCase, LoginUseCase, TokenRefreshU
     @Transactional
     public RegisterInitResponse register(RegisterRequest request) {
         if (userRepository.existsByEmailAndDeletedAtIsNull(request.email())) {
-            throw new ResourceAlreadyExistedException("Email already exists");
+            throw new ResourceAlreadyExistedException(Message.User.EMAIL_ALREADY_USED);
         }
 
         User user = User.builder()
@@ -69,14 +70,14 @@ public class AuthService implements RegisterUseCase, LoginUseCase, TokenRefreshU
 
         String storeOtp = emailVerificationCachePort.consumerOtp(email);
         if (storeOtp == null || !storeOtp.equals(request.otpCode())) {
-            throw new InvalidRequestException("Mã xác thực không hợp lệ hoặc đã hết hạn");
+            throw new InvalidRequestException(Message.Auth.TOKEN_INVALID_OR_EXPIRED);
         }
         User user = userRepository
                 .findByEmailAndDeletedAtIsNull(email)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException(Message.User.USERNAME_NOT_FOUND));
 
         if (user.getStatus() != UserStatus.PENDING_VERIFICATION) {
-            throw new InvalidRequestException("Tài khoản đã được xác thực trước đó");
+            throw new InvalidRequestException(Message.User.USER_ALREADY_VERIFICATION);
         }
 
         user.setStatus(UserStatus.ACTIVE);
@@ -95,13 +96,13 @@ public class AuthService implements RegisterUseCase, LoginUseCase, TokenRefreshU
         String normalizedEmail = email.toLowerCase();
 
         if (emailVerificationCachePort.isOnCooldown(normalizedEmail)) {
-            throw new InvalidRequestException("Vui lòng chờ 60 giây trước khi gửi lại mã");
+            throw new InvalidRequestException(Message.Auth.OTP_RESEND_COOLDOWN);
         }
 
         User user = userRepository.findByEmailAndDeletedAtIsNull(normalizedEmail)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException(Message.User.NOT_FOUND));
         if (user.getStatus() != UserStatus.PENDING_VERIFICATION) {
-            throw new InvalidRequestException("Tài khoản đã được xác thực");
+            throw new InvalidRequestException(Message.User.USER_ALREADY_VERIFICATION);
         }
 
         sendOtp(user.getEmail(), user.getFullName());
@@ -112,18 +113,18 @@ public class AuthService implements RegisterUseCase, LoginUseCase, TokenRefreshU
     @Transactional
     public AuthResponse login(LoginRequest request) {
         User user = userRepository.findByEmailAndDeletedAtIsNull(request.email().toLowerCase())
-                .orElseThrow(() -> new UnauthorizedException("Invalid email or password"));
+                .orElseThrow(() -> new UnauthorizedException(Message.Auth.INVALID_CREDENTIALS));
 
         if (user.getStatus() == UserStatus.PENDING_VERIFICATION) {
-            throw new UnauthorizedException("Tài khoản chưa được xác thực email");
+            throw new UnauthorizedException(Message.Auth.ACCOUNT_NOT_VERIFIED);
         }
 
         if (user.getStatus() != UserStatus.ACTIVE) {
-            throw new UnauthorizedException("Account is not active");
+            throw new UnauthorizedException(Message.Auth.ACCOUNT_NOT_ACTIVE);
         }
 
         if (!passwordEncoder.matches(request.password(), user.getPasswordHash())) {
-            throw new UnauthorizedException("Invalid email or password");
+            throw new UnauthorizedException(Message.Auth.INVALID_CREDENTIALS);
         }
 
         String refreshToken = refreshTokenService.createRefreshToken(user);
@@ -163,11 +164,11 @@ public class AuthService implements RegisterUseCase, LoginUseCase, TokenRefreshU
     public void resetPassword(ResetPasswordRequest request) {
         Long userId = passwordResetPort.consumeResetToken(TokenUtils.hashToken(request.token()));
         if (userId == null) {
-            throw new InvalidRequestException("Invalid or expired reset token");
+            throw new InvalidRequestException(Message.Auth.RESET_TOKEN_INVALID);
         }
 
         User user = userRepository.findByIdAndDeletedAtIsNull(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException(Message.User.NOT_FOUND));
 
         user.setPasswordHash(passwordEncoder.encode(request.newPassword()));
         userRepository.save(user);

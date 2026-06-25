@@ -8,6 +8,7 @@ import com.dawn.catalog.repository.SkuRepository;
 import com.dawn.common.exception.wrapper.InvalidRequestException;
 import com.dawn.common.exception.wrapper.ResourceAlreadyExistedException;
 import com.dawn.common.exception.wrapper.ResourceNotFoundException;
+import com.dawn.common.message.Message;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -36,7 +37,7 @@ public class BrandService {
     @Transactional
     public BrandDto create(BrandRequest req) {
         if (brandRepository.existsByNameAndDeletedAtIsNull(req.name())) {
-            throw new ResourceAlreadyExistedException("Brand already exists");
+            throw new ResourceAlreadyExistedException(Message.Catalog.BRAND_ALREADY_EXISTS);
         }
 
         Brand brand = Brand.builder()
@@ -50,7 +51,7 @@ public class BrandService {
     @Transactional
     public BrandDto update(Long id, BrandRequest req) {
         Brand brand = brandRepository.findByIdAndDeletedAtIsNull(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Brand not found"));
+                .orElseThrow(() -> new ResourceNotFoundException(Message.Catalog.BRAND_NOT_FOUND));
         brand.setName(req.name());
         brand.setLogoUrl(req.logoUrl());
         brandRepository.save(brand);
@@ -59,9 +60,9 @@ public class BrandService {
 
     public void delete(Long id) {
         Brand brand = brandRepository.findByIdAndDeletedAtIsNull(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Brand not found"));
+                .orElseThrow(() -> new ResourceNotFoundException(Message.Catalog.BRAND_NOT_FOUND));
         if (skuRepository.existsByBrandIdAndDeletedAtIsNull(id)) {
-            throw new InvalidRequestException("Cannot delete brand with existing SKUs");
+            throw new InvalidRequestException(Message.Catalog.BRAND_HAS_SKU);
         }
 
         brand.setDeletedAt(Instant.now());

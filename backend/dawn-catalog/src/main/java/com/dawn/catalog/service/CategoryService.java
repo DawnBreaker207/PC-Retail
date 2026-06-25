@@ -8,6 +8,7 @@ import com.dawn.catalog.repository.SkuRepository;
 import com.dawn.common.exception.wrapper.InvalidRequestException;
 import com.dawn.common.exception.wrapper.ResourceAlreadyExistedException;
 import com.dawn.common.exception.wrapper.ResourceNotFoundException;
+import com.dawn.common.message.Message;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -47,12 +48,12 @@ public class CategoryService {
     @Transactional
     public CategoryDto create(CategoryRequest req) {
         if (categoryRepository.existsBySlugAndDeletedAtIsNull(req.slug())) {
-            throw new ResourceAlreadyExistedException("Slug already existed");
+            throw new ResourceAlreadyExistedException(Message.Catalog.CATEGORY_SLUG_EXISTS);
         }
 
         if (req.parentId() != null) {
             categoryRepository.findByIdAndDeletedAtIsNull(req.parentId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Parent category not found"));
+                    .orElseThrow(() -> new ResourceNotFoundException(Message.Catalog.CATEGORY_PARENT_NOT_FOUND));
         }
         Category category = Category.builder()
                 .name(req.name())
@@ -66,10 +67,10 @@ public class CategoryService {
     @Transactional
     public CategoryDto update(Long id, CategoryRequest req) {
         Category category = categoryRepository.findByIdAndDeletedAtIsNull(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
+                .orElseThrow(() -> new ResourceNotFoundException(Message.Catalog.CATEGORY_NOT_FOUND));
         if (!category.getSlug().equals(req.slug()) &&
                 categoryRepository.existsBySlugAndDeletedAtIsNull(req.slug())) {
-            throw new ResourceAlreadyExistedException("Slug already existed");
+            throw new ResourceAlreadyExistedException(Message.Catalog.CATEGORY_SLUG_EXISTS);
         }
 
         category.setName(req.name());
@@ -80,12 +81,12 @@ public class CategoryService {
 
     public void delete(Long id) {
         Category category = categoryRepository.findByIdAndDeletedAtIsNull(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
+                .orElseThrow(() -> new ResourceNotFoundException(Message.Catalog.CATEGORY_NOT_FOUND));
         if (categoryRepository.existsByParentIdAndDeletedAtIsNull(id)) {
-            throw new InvalidRequestException("Cannot delete category with subcategories");
+            throw new InvalidRequestException(Message.Catalog.CATEGORY_HAS_CHILDREN);
         }
         if (skuRepository.existsByCategoryIdAndDeletedAtIsNull(id)) {
-            throw new InvalidRequestException("Cannot delete sku with existing SKUs");
+            throw new InvalidRequestException(Message.Catalog.CATEGORY_HAS_SKU);
         }
         category.setDeletedAt(Instant.now());
         categoryRepository.save(category);

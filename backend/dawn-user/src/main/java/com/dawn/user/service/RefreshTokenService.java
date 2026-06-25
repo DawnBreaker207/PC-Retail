@@ -1,6 +1,7 @@
 package com.dawn.user.service;
 
 import com.dawn.common.exception.wrapper.UnauthorizedException;
+import com.dawn.common.message.Message;
 import com.dawn.common.utils.JWTUtils;
 import com.dawn.user.controller.response.AuthResponse;
 import com.dawn.user.dto.UserMapper;
@@ -43,22 +44,22 @@ public class RefreshTokenService {
     public AuthResponse rotateRefreshToken(String rawRefreshToken) {
         RefreshToken storedToken = refreshTokenRepository
                 .findByTokenHash(TokenUtils.hashToken(rawRefreshToken))
-                .orElseThrow(() -> new UnauthorizedException("Invalid refresh token"));
+                .orElseThrow(() -> new UnauthorizedException(Message.Auth.RESET_TOKEN_INVALID));
 
         if (storedToken.isRevoked()) {
             revokeAllForUser(storedToken.getUserId());
-            throw new UnauthorizedException("Refresh token reuse detected");
+            throw new UnauthorizedException(Message.Auth.REFRESH_TOKEN_REUSE_DETECTED);
         }
 
         if (storedToken.isExpired()) {
-            throw new UnauthorizedException("Refresh token expired");
+            throw new UnauthorizedException(Message.Auth.REFRESH_TOKEN_EXPIRED);
         }
 
         storedToken.setRevokedAt(Instant.now());
         refreshTokenRepository.save(storedToken);
 
         User user = userRepository.findByIdAndDeletedAtIsNull(storedToken.getUserId())
-                .orElseThrow(() -> new UnauthorizedException("User not found"));
+                .orElseThrow(() -> new UnauthorizedException(Message.User.NOT_FOUND));
 
         String newRefreshToken = createRefreshToken(user);
         return buildAuthResponse(user, newRefreshToken);

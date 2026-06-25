@@ -12,6 +12,7 @@ import com.dawn.catalog.repository.CategoryRepository;
 import com.dawn.catalog.repository.SkuRepository;
 import com.dawn.common.exception.wrapper.ResourceAlreadyExistedException;
 import com.dawn.common.exception.wrapper.ResourceNotFoundException;
+import com.dawn.common.message.Message;
 import com.dawn.common.response.ResponsePage;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
@@ -56,20 +57,20 @@ public class SkuService {
     @Transactional(readOnly = true)
     public SkuDetailDto getDetail(Long id) {
         Sku sku = skuRepository.findByIdAndDeletedAtIsNull(id)
-                .orElseThrow(() -> new ResourceNotFoundException("SKU not found"));
+                .orElseThrow(() -> new ResourceNotFoundException(Message.Catalog.SKU_NOT_FOUND));
         return toDetail(sku);
     }
 
     @Transactional
     public SkuDetailDto create(SkuCreatedRequest request) {
         if (skuRepository.existsBySkuCodeAndDeletedAtIsNull(request.skuCode())) {
-            throw new ResourceAlreadyExistedException("SKU code already exists");
+            throw new ResourceAlreadyExistedException(Message.Catalog.SKU_CODE_ALREADY_EXISTS);
         }
         categoryRepository.findByIdAndDeletedAtIsNull(request.categoryId())
-                .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
+                .orElseThrow(() -> new ResourceNotFoundException(Message.Catalog.CATEGORY_NOT_FOUND));
         if (request.brandId() != null) {
             brandRepository.findByIdAndDeletedAtIsNull(request.brandId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Brand not found"));
+                    .orElseThrow(() -> new ResourceNotFoundException(Message.Catalog.BRAND_NOT_FOUND));
         }
 
         String slug = generateSlug(request.name());
