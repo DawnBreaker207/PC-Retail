@@ -1,6 +1,7 @@
 package com.dawn.order.service;
 
 import com.dawn.common.exception.wrapper.ResourceNotFoundException;
+import com.dawn.common.message.Message;
 import com.dawn.order.dto.StockDecrementCommand;
 import com.dawn.order.dto.SubOrderDto;
 import com.dawn.order.entity.SubOrder;
@@ -32,7 +33,7 @@ public class SubOrderCommandService implements TransitionSubOrderUseCase {
     public SubOrderDto transition(Long subOrderId, SubOrderStatus target, Long staffId) {
         SubOrder subOrder = subOrderRepo
                 .findById(subOrderId)
-                .orElseThrow(() -> new ResourceNotFoundException("SubOrder not found"));
+                .orElseThrow(() -> new ResourceNotFoundException(Message.Order.SUB_ORDER_NOT_FOUND));
 
 
         stateMachine.assertValidTransition(subOrder.getStatus(), target);
@@ -56,7 +57,7 @@ public class SubOrderCommandService implements TransitionSubOrderUseCase {
     public SubOrderDto cancel(Long subOrderId, Long userId) {
         SubOrder subOrder = subOrderRepo
                 .findById(subOrderId)
-                .orElseThrow(() -> new ResourceNotFoundException("SubOrder not found"));
+                .orElseThrow(() -> new ResourceNotFoundException(Message.Order.SUB_ORDER_NOT_FOUND));
         // User only can self cancel when in PENDING_PAYMENT
         stateMachine.assertValidTransition(subOrder.getStatus(), SubOrderStatus.CANCELLED);
 

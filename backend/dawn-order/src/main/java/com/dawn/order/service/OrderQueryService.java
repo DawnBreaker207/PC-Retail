@@ -1,6 +1,7 @@
 package com.dawn.order.service;
 
 import com.dawn.common.exception.wrapper.ResourceNotFoundException;
+import com.dawn.common.message.Message;
 import com.dawn.common.response.ResponsePage;
 import com.dawn.order.dto.OrderDto;
 import com.dawn.order.dto.SubOrderDto;
@@ -31,10 +32,10 @@ public class OrderQueryService implements QueryOrderUseCase {
     @Override
     public OrderDto getById(Long orderId, Long userId) {
         Order order = orderRepo.findById(orderId)
-                .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
+                .orElseThrow(() -> new ResourceNotFoundException(Message.Order.NOT_FOUND));
 
         if (!order.getUserId().equals(userId)) {
-            throw new ResourceNotFoundException("Order not found");
+            throw new ResourceNotFoundException(Message.Order.NOT_FOUND);
         }
         return toOrderDto(order);
     }

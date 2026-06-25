@@ -1,6 +1,7 @@
 package com.dawn.order.service;
 
 import com.dawn.common.exception.wrapper.InvalidRequestException;
+import com.dawn.common.message.Message;
 import com.dawn.order.controller.request.CheckoutRequest;
 import com.dawn.order.dto.*;
 import com.dawn.order.entity.Order;
@@ -53,11 +54,11 @@ public class CheckoutService implements CheckoutUseCase {
         // Step 2: Load + Validate cart
         List<CartItemSnapshot> cartItems = cartClient.getItems(userId);
         if (cartItems.isEmpty()) {
-            throw new InvalidRequestException("Cart is empty");
+            throw new InvalidRequestException(Message.Order.CART_EMPTY);
         }
 
         if (req.fulfillmentType() == FulfillmentType.DELIVERY && (req.shippingAddress() == null || req.shippingAddress().isEmpty())) {
-            throw new InvalidRequestException("Shipping address is required for DELIVERY");
+            throw new InvalidRequestException(Message.Order.SHIPPING_ADDRESS_REQUIRED);
         }
 
         List<Long> skuIds = cartItems.stream().map(CartItemSnapshot::skuId).toList();
@@ -92,7 +93,7 @@ public class CheckoutService implements CheckoutUseCase {
         List<Long> failedSkuIds = inventoryClient.decrementBatch(stockItems);
         if (!failedSkuIds.isEmpty()) {
             if (!voucherCodes.isEmpty()) promotionClient.rollBackPromotions(voucherCodes, List.of());
-            throw new InvalidRequestException("Not enough stock for SKU: " + failedSkuIds);
+            throw new InvalidRequestException(Message.format(Message.Order.INSUFFICIENT_STOCK_SKUS, failedSkuIds));
         }
 
         try {

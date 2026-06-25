@@ -122,6 +122,15 @@ public class Message {
     public static final class Order {
         private Order() {
         }
+
+        // Order
+        public static final String NOT_FOUND = "Order not found";
+        public static final String CART_EMPTY = "Cart is empty";
+        public static final String SHIPPING_ADDRESS_REQUIRED = "Shipping address is required for DELIVERY";
+        public static final String INSUFFICIENT_STOCK_SKUS = "Not enough stock for SKU: {0}";
+
+        // SubOrder
+        public static final String SUB_ORDER_NOT_FOUND = "SubOrder not found";
     }
 
     // Payment
