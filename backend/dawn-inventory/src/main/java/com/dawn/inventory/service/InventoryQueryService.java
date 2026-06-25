@@ -1,6 +1,7 @@
 package com.dawn.inventory.service;
 
 import com.dawn.common.exception.wrapper.ResourceNotFoundException;
+import com.dawn.common.message.Message;
 import com.dawn.common.response.ResponsePage;
 import com.dawn.inventory.dto.InventoryDto;
 import com.dawn.inventory.dto.InventoryTransactionDto;
@@ -58,7 +59,7 @@ public class InventoryQueryService implements QueryInventoryUseCase {
     @Transactional(readOnly = true)
     public InventoryDto getBySkuId(Long skuId) {
         Inventory inv = inventoryRepository.findBySkuId(skuId)
-                .orElseThrow(() -> new ResourceNotFoundException("Inventory not found for SKU: " + skuId));
+                .orElseThrow(() -> new ResourceNotFoundException(Message.format(Message.Inventory.NOT_FOUND_FOR_SKU, skuId)));
         return toDto(inv);
     }
 

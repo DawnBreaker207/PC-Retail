@@ -1,5 +1,6 @@
 package com.dawn.promotion.service;
 
+import com.dawn.common.message.Message;
 import com.dawn.promotion.dto.PromotionCheckoutPort;
 import com.dawn.promotion.dto.VoucherValidationResult;
 import com.dawn.promotion.entity.Voucher;
@@ -48,7 +49,7 @@ public class PromotionCheckoutService implements ValidatePromotionUseCase, Promo
 
         boolean cartHasFlashSaleItem = voucherRepo.hasActiveFlashSale(cartSkuIds);
         if (cartHasFlashSaleItem) {
-            throw new IllegalStateException("Can not apply with voucher for product in Flash Sale");
+            throw new IllegalStateException(Message.Promotion.FLASH_SALE_VOUCHER_STACK);
         }
     }
 
@@ -59,7 +60,7 @@ public class PromotionCheckoutService implements ValidatePromotionUseCase, Promo
         List<Voucher> vouchers = voucherRepo.findByCodeInAndDeletedAtIsNull(voucherCodes);
         for (Voucher voucher : vouchers) {
             if (voucherUsageRepo.existsByVoucherIdAndUserId(voucher.getId(), userId)) {
-                throw new IllegalStateException("User has used voucher " + voucher.getCode() + " before");
+                throw new IllegalStateException(Message.format(Message.Promotion.VOUCHER_ALREADY_USED, voucher.getCode()));
             }
         }
 
@@ -83,22 +84,22 @@ public class PromotionCheckoutService implements ValidatePromotionUseCase, Promo
                 .orElse(null);
 
         if (voucher == null) {
-            return VoucherValidationResult.fail("Voucher code not existed");
+            return VoucherValidationResult.fail(Message.Promotion.VOUCHER_NOT_FOUND);
         }
 
         Instant now = Instant.now();
         if (now.isBefore(voucher.getValidFrom()) || now.isAfter(voucher.getValidTo())) {
-            return VoucherValidationResult.fail("Voucher was expired or was not affected");
+            return VoucherValidationResult.fail(Message.Promotion.VOUCHER_EXPIRED);
         }
 
         // Check remaining quantity - Redis first, fallback DB
         int remaining = getRemainingFromCache(voucher);
         if (remaining <= 0) {
-            return VoucherValidationResult.fail("Voucher was out of turns");
+            return VoucherValidationResult.fail(Message.Promotion.VOUCHER_OUT_OF_STOCK);
         }
 
         if (orderTotal.compareTo(voucher.getMinOrderValue()) < 0) {
-            return VoucherValidationResult.fail("minimum amount must be greater " + voucher.getMinOrderValue() + " to use this voucher");
+            return VoucherValidationResult.fail(Message.format(Message.Promotion.VOUCHER_MIN_ORDER_NOT_MET, voucher.getMinOrderValue()));
         }
 
         BigDecimal discount = calculateDiscount(voucher, orderTotal);

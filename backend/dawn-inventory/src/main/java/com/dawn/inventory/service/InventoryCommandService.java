@@ -2,6 +2,7 @@ package com.dawn.inventory.service;
 
 import com.dawn.common.exception.wrapper.InvalidRequestException;
 import com.dawn.common.exception.wrapper.ResourceNotFoundException;
+import com.dawn.common.message.Message;
 import com.dawn.inventory.dto.StockDecrementCommandDto;
 import com.dawn.inventory.entity.Inventory;
 import com.dawn.inventory.entity.InventoryTransaction;
@@ -36,11 +37,11 @@ public class InventoryCommandService implements ReserveStockUseCase, ReleaseStoc
     public void reserve(List<StockDecrementCommandDto> items, Long orderId) {
         for (StockDecrementCommandDto item : items) {
             Inventory inv = inventoryRepository.findBySkuIdWithLock(item.skuId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Inventory not found for SKU: " + item.skuId()));
+                    .orElseThrow(() -> new ResourceNotFoundException(Message.format(Message.Inventory.NOT_FOUND_FOR_SKU, item.skuId())));
 
             // Double-check after Lua gatekeeper
             if (inv.getAvailableQuantity() < item.quantity()) {
-                throw new InvalidRequestException("Insufficient stock for SKU: " + item.skuId());
+                throw new InvalidRequestException(Message.format(Message.Inventory.INSUFFICIENT_STOCK, item.skuId()));
             }
 
             inv.setReservedQuantity(inv.getReservedQuantity() + item.quantity());

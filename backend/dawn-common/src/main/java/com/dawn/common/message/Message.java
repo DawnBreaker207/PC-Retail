@@ -105,12 +105,17 @@ public class Message {
     public static final class Inventory {
         private Inventory() {
         }
+
+        public static final String NOT_FOUND_FOR_SKU = "Inventory not found for SKU: {0}";
+        public static final String INSUFFICIENT_STOCK = "Insufficient stock for SKU: {0}";
     }
 
     // Cart
     public static final class Cart {
         private Cart() {
         }
+
+        public static final String ITEM_NOT_FOUND = "Cart item not found";
     }
 
     // Order
@@ -123,12 +128,29 @@ public class Message {
     public static final class Payment {
         private Payment() {
         }
+
+        public static final String NOT_FOUND = "Payment not found";
+        public static final String INVALID_ORDER_AMOUNT = "Invalid order amount for payment";
     }
 
     // Promotion
     public static final class Promotion {
         private Promotion() {
         }
+
+        // Voucher - validation
+        public static final String VOUCHER_NOT_FOUND = "Voucher code not existed";
+        public static final String VOUCHER_EXPIRED = "Voucher was expired or was not affected";
+        public static final String VOUCHER_OUT_OF_STOCK = "Voucher was out of turns";
+        public static final String VOUCHER_MIN_ORDER_NOT_MET = "Minimum order amount must be at least {0} to use this voucher";
+
+        // Voucher - management
+        public static final String VOUCHER_CODE_EXISTS = "Voucher code already existed";
+        public static final String VOUCHER_DATE_INVALID = "validFrom must be before validTo";
+        public static final String VOUCHER_ALREADY_USED = "User has used voucher {0} before";
+
+        // Flash Sale
+        public static final String FLASH_SALE_VOUCHER_STACK = "Cannot apply voucher for product in Flash Sale";
     }
 
 }

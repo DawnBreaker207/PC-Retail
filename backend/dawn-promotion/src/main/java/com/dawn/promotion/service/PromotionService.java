@@ -3,6 +3,7 @@ package com.dawn.promotion.service;
 import com.dawn.common.exception.wrapper.InvalidRequestException;
 import com.dawn.common.exception.wrapper.ResourceAlreadyExistedException;
 import com.dawn.common.exception.wrapper.ResourceNotFoundException;
+import com.dawn.common.message.Message;
 import com.dawn.common.response.ResponsePage;
 import com.dawn.promotion.controller.request.VoucherCreateRequest;
 import com.dawn.promotion.dto.VoucherDto;
@@ -39,10 +40,10 @@ public class PromotionService implements ManageVoucherUseCase {
     public VoucherDto create(VoucherCreateRequest req) {
         String code = req.code().toUpperCase();
         if (voucherRepo.existsByCodeAndDeletedAtIsNull(req.code())) {
-            throw new ResourceAlreadyExistedException("Voucher code already existed");
+            throw new ResourceAlreadyExistedException(Message.Promotion.VOUCHER_CODE_EXISTS);
         }
         if (req.validFrom().isAfter(req.validTo())) {
-            throw new InvalidRequestException("validFrom must be before validTo");
+            throw new InvalidRequestException(Message.Promotion.VOUCHER_DATE_INVALID);
         }
 
         Voucher voucher = Voucher.builder()
@@ -74,7 +75,7 @@ public class PromotionService implements ManageVoucherUseCase {
     public void delete(Long id) {
         Voucher voucher = voucherRepo
                 .findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Voucher not found"));
+                .orElseThrow(() -> new ResourceNotFoundException(Message.Promotion.VOUCHER_NOT_FOUND));
 
         voucher.setDeletedAt(Instant.now());
         voucherRepo.save(voucher);

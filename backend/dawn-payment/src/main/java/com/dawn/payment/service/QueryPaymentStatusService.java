@@ -1,6 +1,7 @@
 package com.dawn.payment.service;
 
 import com.dawn.common.exception.wrapper.ResourceNotFoundException;
+import com.dawn.common.message.Message;
 import com.dawn.payment.dto.PaymentDto;
 import com.dawn.payment.dto.VnpayQueryResult;
 import com.dawn.payment.entity.Payment;
@@ -27,7 +28,7 @@ public class QueryPaymentStatusService implements QueryPaymentStatusUseCase {
     @Transactional
     public PaymentDto queryAndSync(Long paymentId) {
         Payment payment = paymentRepo.findById(paymentId)
-                .orElseThrow(() -> new ResourceNotFoundException("Payment not found"));
+                .orElseThrow(() -> new ResourceNotFoundException(Message.Payment.NOT_FOUND));
 
         // Solved payment before
         if (payment.getStatus() != PaymentResultStatus.PENDING) {

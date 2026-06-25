@@ -13,6 +13,7 @@ import com.dawn.cart.port.out.CartCachePort;
 import com.dawn.catalog.dto.CatalogQueryPort;
 import com.dawn.catalog.dto.SkuPriceInfo;
 import com.dawn.common.exception.wrapper.ResourceNotFoundException;
+import com.dawn.common.message.Message;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.OptimisticLockingFailureException;
@@ -108,7 +109,7 @@ public class CartService implements GetCartUseCase, AddCartItemUseCase, UpdateCa
     @Transactional
     public CartItemDto updateItem(Long userId, Long skuId, int quantity) {
         CartItem item = cartItemRepository.findByUserIdAndSkuId(userId, skuId)
-                .orElseThrow(() -> new ResourceNotFoundException("Cart item not found"));
+                .orElseThrow(() -> new ResourceNotFoundException(Message.Cart.ITEM_NOT_FOUND));
         item.setQuantity(quantity);
         cartItemRepository.save(item);
 

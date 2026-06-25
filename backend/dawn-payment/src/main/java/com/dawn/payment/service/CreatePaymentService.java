@@ -1,6 +1,7 @@
 package com.dawn.payment.service;
 
 import com.dawn.common.exception.wrapper.InvalidRequestException;
+import com.dawn.common.message.Message;
 import com.dawn.payment.dto.CreatePaymentResult;
 import com.dawn.payment.entity.Payment;
 import com.dawn.payment.entity.enums.PaymentMethod;
@@ -40,7 +41,7 @@ public class CreatePaymentService implements CreatePaymentUseCase {
 
         BigDecimal amount = orderClient.getOrderTotalAmount(orderId);
         if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new InvalidRequestException("Invalid order amount for payment");
+            throw new InvalidRequestException(Message.Payment.INVALID_ORDER_AMOUNT);
         }
 
 
