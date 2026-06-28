@@ -34,6 +34,7 @@ public class InventoryCommandService implements ReserveStockUseCase, ReleaseStoc
 
     // RESERVE
     @Override
+    @Transactional
     public void reserve(List<StockDecrementCommandDto> items, Long orderId) {
         for (StockDecrementCommandDto item : items) {
             Inventory inv = inventoryRepository.findBySkuIdWithLock(item.skuId())
@@ -115,6 +116,7 @@ public class InventoryCommandService implements ReserveStockUseCase, ReleaseStoc
 
     // RESTOCK
     @Override
+    @Transactional
     public void restock(Long skuId, int quantity, BigDecimal unitCost, Long userId) {
         Inventory inv = inventoryRepository.findBySkuId(skuId)
                 .orElseGet(() -> Inventory.builder()

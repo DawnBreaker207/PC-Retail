@@ -11,7 +11,7 @@ import lombok.experimental.SuperBuilder;
 import java.math.BigDecimal;
 
 @Entity
-@Table(name = "inventory")
+@Table(name = "inventory_transaction")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

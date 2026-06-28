@@ -2,6 +2,7 @@ package com.dawn.inventory.controller;
 
 import com.dawn.common.response.ResponseObject;
 import com.dawn.common.response.ResponsePage;
+import com.dawn.common.utils.SecurityUtils;
 import com.dawn.inventory.controller.request.RestockRequest;
 import com.dawn.inventory.dto.InventoryDto;
 import com.dawn.inventory.dto.InventoryTransactionDto;
@@ -36,7 +37,8 @@ public class InventoryController {
     public ResponseObject<Void> restock(
             @PathVariable Long skuId,
             @Valid @RequestBody RestockRequest req) {
-        restockUseCase.restock(skuId, req.quantity(), req.unitCost(), null);
+        Long userId = SecurityUtils.getCurrentUserId();
+        restockUseCase.restock(skuId, req.quantity(), req.unitCost(), userId);
         return ResponseObject.success(null, "Restocked successfully");
     }
 

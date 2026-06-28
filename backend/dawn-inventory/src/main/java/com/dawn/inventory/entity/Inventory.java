@@ -1,6 +1,6 @@
 package com.dawn.inventory.entity;
 
-import com.dawn.common.entity.BaseEntity;
+import com.dawn.common.entity.AuditableEntity;
 import io.swagger.v3.oas.annotations.Hidden;
 import jakarta.persistence.*;
 import lombok.*;
@@ -17,7 +17,7 @@ import java.time.Instant;
 @Hidden
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-public class Inventory extends BaseEntity {
+public class Inventory extends AuditableEntity {
 
     @Column(name = "sku_id", nullable = false, unique = true)
     private Long skuId;
@@ -28,13 +28,10 @@ public class Inventory extends BaseEntity {
     @Column(name = "reserved_quantity", nullable = false)
     private int reservedQuantity;
 
-    @Column(name = "updated_at", nullable = false)
-    private Instant updatedAt;
-
     @PrePersist
     @PreUpdate
     void touch() {
-        this.updatedAt = Instant.now();
+        this.setUpdatedAt(Instant.now());
     }
 
     public int getAvailableQuantity() {
