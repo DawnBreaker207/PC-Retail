@@ -116,6 +116,7 @@ public class Message {
         }
 
         public static final String ITEM_NOT_FOUND = "Cart item not found";
+        public static final String INSUFFICIENT_STOCK = "SKU #%d only has %d item(s) available but in cart have %d item(s)";
     }
 
     // Order

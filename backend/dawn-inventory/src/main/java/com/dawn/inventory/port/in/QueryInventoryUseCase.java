@@ -11,5 +11,4 @@ public interface QueryInventoryUseCase {
 
     ResponsePage<InventoryTransactionDto> getTransactions(Long skuId, int page, int size);
 
-    Integer getAvailableQuantity(Long skuId);
 }

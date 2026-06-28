@@ -4,6 +4,7 @@ import com.dawn.common.exception.wrapper.ResourceNotFoundException;
 import com.dawn.common.message.Message;
 import com.dawn.common.response.ResponsePage;
 import com.dawn.inventory.dto.InventoryDto;
+import com.dawn.inventory.dto.InventoryQueryPort;
 import com.dawn.inventory.dto.InventoryTransactionDto;
 import com.dawn.inventory.entity.Inventory;
 import com.dawn.inventory.entity.InventoryTransaction;
@@ -25,7 +26,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class InventoryQueryService implements QueryInventoryUseCase {
+public class InventoryQueryService implements QueryInventoryUseCase, InventoryQueryPort {
 
     private static final int LOW_STOCK_THRESHOLD = 5;
 

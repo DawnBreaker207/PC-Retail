@@ -12,8 +12,10 @@ import com.dawn.cart.port.in.UpdateCartItemUseCase;
 import com.dawn.cart.port.out.CartCachePort;
 import com.dawn.catalog.dto.CatalogQueryPort;
 import com.dawn.catalog.dto.SkuPriceInfo;
+import com.dawn.common.exception.wrapper.ResourceInsufficientException;
 import com.dawn.common.exception.wrapper.ResourceNotFoundException;
 import com.dawn.common.message.Message;
+import com.dawn.inventory.dto.InventoryQueryPort;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.OptimisticLockingFailureException;
@@ -33,6 +35,7 @@ public class CartService implements GetCartUseCase, AddCartItemUseCase, UpdateCa
     private final JpaCartItemRepository cartItemRepository;
     private final CartCachePort cartCachePort;
     private final CatalogQueryPort catalogQueryPort;
+    private final InventoryQueryPort inventoryQueryPort;
 
     // READ
     @Override
@@ -90,14 +93,27 @@ public class CartService implements GetCartUseCase, AddCartItemUseCase, UpdateCa
     @Transactional
     @Override
     public CartItemDto addItem(Long userId, Long skuId, int quantity) {
+        Integer existingQuantity = inventoryQueryPort.getAvailableQuantity(skuId);
+        log.info("Get existing quantity {}", existingQuantity);
         CartItem item = cartItemRepository.findByUserIdAndSkuId(userId, skuId).map(existing -> {
-            existing.setQuantity(existing.getQuantity() + quantity);
+            int newTotal = existing.getQuantity() + quantity;
+            log.info("Get existing quantity {} and total in cart {}", existingQuantity, newTotal);
+            if (newTotal > existingQuantity) {
+                throw new ResourceInsufficientException(Message.Cart.INSUFFICIENT_STOCK.formatted(skuId, existingQuantity, newTotal));
+            }
+            existing.setQuantity(newTotal);
             return existing;
-        }).orElseGet(() -> CartItem.builder()
-                .userId(userId)
-                .skuId(skuId)
-                .quantity(quantity)
-                .build());
+        }).orElseGet(() -> {
+                    if (quantity > existingQuantity) {
+                        throw new ResourceInsufficientException(Message.Cart.INSUFFICIENT_STOCK.formatted(skuId, existingQuantity, quantity));
+                    }
+                    return CartItem.builder()
+                            .userId(userId)
+                            .skuId(skuId)
+                            .quantity(quantity)
+                            .build();
+                }
+        );
 
         cartItemRepository.save(item);
         cartCachePort.evict(userId);
