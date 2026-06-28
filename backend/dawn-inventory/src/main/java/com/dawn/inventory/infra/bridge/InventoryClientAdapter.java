@@ -1,7 +1,9 @@
 package com.dawn.inventory.infra.bridge;
 
+import com.dawn.cart.port.out.InventoryQueryPort;
 import com.dawn.inventory.dto.StockDecrementCommandDto;
 import com.dawn.inventory.port.in.DeductStockUseCase;
+import com.dawn.inventory.port.in.QueryInventoryUseCase;
 import com.dawn.inventory.port.in.ReleaseStockUseCase;
 import com.dawn.inventory.port.in.ReserveStockUseCase;
 import com.dawn.inventory.port.out.InventoryCachePort;
@@ -11,16 +13,16 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
-public class InventoryClientAdapter implements InventoryClientPort {
+public class InventoryClientAdapter implements InventoryClientPort, InventoryQueryPort {
 
     private final InventoryCachePort cachePort;
     private final ReserveStockUseCase reserveStockUseCase;
     private final ReleaseStockUseCase releaseStockUseCase;
     private final DeductStockUseCase deductStockUseCase;
+    private final QueryInventoryUseCase queryInventoryUseCase;
 
     @Override
     public List<Long> decrementBatch(List<StockDecrementCommand> items) {
@@ -45,6 +47,11 @@ public class InventoryClientAdapter implements InventoryClientPort {
     @Override
     public void deduct(List<StockDecrementCommand> items, Long orderId) {
         deductStockUseCase.deduct(toInventoryCommands(items), orderId);
+    }
+
+    @Override
+    public Integer getAvailableQuantity(Long skuId) {
+        return queryInventoryUseCase.getAvailableQuantity(skuId);
     }
 
     private List<StockDecrementCommandDto> toInventoryCommands(List<StockDecrementCommand> items) {
