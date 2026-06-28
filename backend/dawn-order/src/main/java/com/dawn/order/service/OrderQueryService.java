@@ -4,9 +4,12 @@ import com.dawn.common.exception.wrapper.ResourceNotFoundException;
 import com.dawn.common.message.Message;
 import com.dawn.common.response.ResponsePage;
 import com.dawn.order.dto.OrderDto;
+import com.dawn.order.dto.OrderItemDto;
 import com.dawn.order.dto.SubOrderDto;
 import com.dawn.order.entity.Order;
 import com.dawn.order.port.in.QueryOrderUseCase;
+import com.dawn.order.port.out.CatalogClientPort;
+import com.dawn.order.port.out.OrderItemRepositoryPort;
 import com.dawn.order.port.out.OrderRepositoryPort;
 import com.dawn.order.port.out.SubOrderRepositoryPort;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Service
@@ -22,6 +26,7 @@ import java.util.List;
 public class OrderQueryService implements QueryOrderUseCase {
     private final OrderRepositoryPort orderRepo;
     private final SubOrderRepositoryPort subOrderRepo;
+    private final OrderItemRepositoryPort orderItemRepo;
 
     @Override
     public ResponsePage<OrderDto> getMyOrders(Long userId, int page, int size) {
@@ -43,15 +48,26 @@ public class OrderQueryService implements QueryOrderUseCase {
     @Override
     public OrderDto toOrderDto(Order order) {
         List<SubOrderDto> subOrders = subOrderRepo.findByOrderId(order.getId()).stream()
-                .map(s -> new SubOrderDto(
-                        s.getId(),
-                        s.getFulfillmentType(),
-                        s.getSubtotal(),
-                        s.getShippingFee(),
-                        s.getDiscountAmount(),
-                        s.getFinalAmount(),
-                        s.getStatus(),
-                        List.of()))
+                .map(s -> {
+                    List<OrderItemDto> items = orderItemRepo.findBySubOrderId(s.getId()).stream()
+                            .map(i ->
+                                    new OrderItemDto(
+                                            i.getSkuId(),
+                                            null,
+                                            i.getQuantity(),
+                                            i.getUnitPrice(),
+                                            i.getUnitPrice().multiply(BigDecimal.valueOf(i.getQuantity()))))
+                            .toList();
+                    return new SubOrderDto(
+                            s.getId(),
+                            s.getFulfillmentType(),
+                            s.getSubtotal(),
+                            s.getShippingFee(),
+                            s.getDiscountAmount(),
+                            s.getFinalAmount(),
+                            s.getStatus(),
+                            items);
+                })
                 .toList();
 
         return new OrderDto(

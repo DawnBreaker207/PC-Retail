@@ -18,7 +18,7 @@ import java.util.List;
 @Slf4j
 public class InventoryCacheAdapter implements InventoryCachePort {
 
-    private static final String KEY_PREFIX = "inventory:available";
+    private static final String KEY_PREFIX = "inventory:available:";
 
     private final StringRedisTemplate redisTemplate;
 
