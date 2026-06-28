@@ -1,6 +1,6 @@
 package com.dawn.promotion.entity;
 
-import com.dawn.common.entity.AuditableEntity;
+import com.dawn.common.entity.AbstractMappedEntity;
 import com.dawn.promotion.entity.enums.DiscountType;
 import com.dawn.promotion.entity.enums.ScopeType;
 import io.swagger.v3.oas.annotations.Hidden;
@@ -20,7 +20,7 @@ import java.time.Instant;
 @Hidden
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-public class Voucher extends AuditableEntity {
+public class Voucher extends AbstractMappedEntity {
 
     @Column(name = "code", nullable = false, unique = true, length = 50)
     private String code;

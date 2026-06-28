@@ -43,7 +43,8 @@ public class PromotionCheckoutService implements ValidatePromotionUseCase, Promo
 
         List<Voucher> vouchers = voucherRepo.findByCodeInAndDeletedAtIsNull(voucherCodes);
         boolean hasStorewideOrProductVoucher = vouchers.stream()
-                .anyMatch(v -> v.getScopeType() == ScopeType.STOREWIDE || v.getScopeType() == ScopeType.PRODUCT);
+                .anyMatch(v -> v.getScopeType() == ScopeType.STOREWIDE
+                        || v.getScopeType() == ScopeType.PRODUCT);
 
         if (!hasStorewideOrProductVoucher) return;
 
@@ -53,6 +54,7 @@ public class PromotionCheckoutService implements ValidatePromotionUseCase, Promo
         }
     }
 
+    @Transactional
     @Override
     public void recordUsage(Long userId, Long orderId, List<String> voucherCodes) {
         if (voucherCodes == null || voucherCodes.isEmpty()) return;
@@ -65,8 +67,6 @@ public class PromotionCheckoutService implements ValidatePromotionUseCase, Promo
         }
 
         for (Voucher voucher : vouchers) {
-            voucher.setRemainingQuantity(voucher.getRemainingQuantity() - 1);
-            voucherRepo.save(voucher);
             voucherUsageRepo.save(VoucherUsage.builder()
                     .voucherId(voucher.getId())
                     .userId(userId)
@@ -120,7 +120,7 @@ public class PromotionCheckoutService implements ValidatePromotionUseCase, Promo
             discount = orderTotal
                     .multiply(voucher.getDiscountValue())
                     .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
-            if (voucher.getDiscountValue() != null) {
+            if (voucher.getMaxDiscountAmount() != null) {
                 discount = discount.min(voucher.getMaxDiscountAmount());
             }
         }
