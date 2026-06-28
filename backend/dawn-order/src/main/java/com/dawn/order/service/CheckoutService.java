@@ -1,9 +1,13 @@
 package com.dawn.order.service;
 
+import com.dawn.common.event.OrderCreatedEvent;
 import com.dawn.common.exception.wrapper.InvalidRequestException;
 import com.dawn.common.message.Message;
 import com.dawn.order.controller.request.CheckoutRequest;
-import com.dawn.order.dto.*;
+import com.dawn.order.dto.CartItemSnapshot;
+import com.dawn.order.dto.OrderDto;
+import com.dawn.order.dto.StockDecrementCommand;
+import com.dawn.order.dto.VoucherApplyResult;
 import com.dawn.order.entity.Order;
 import com.dawn.order.entity.OrderItem;
 import com.dawn.order.entity.SubOrder;
@@ -14,11 +18,10 @@ import com.dawn.order.port.in.CheckoutUseCase;
 import com.dawn.order.port.out.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionSynchronization;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -33,6 +36,8 @@ import java.util.stream.Collectors;
 public class CheckoutService implements CheckoutUseCase {
     private static final String VOUCHER_KEY = "voucher:remaining";
     private static final BigDecimal DELIVERY_FEE = BigDecimal.valueOf(30000);
+
+    private final ApplicationEventPublisher eventPublisher;
 
     private final OrderRepositoryPort orderRepository;
     private final SubOrderRepositoryPort subOrderRepository;
@@ -150,13 +155,8 @@ public class CheckoutService implements CheckoutUseCase {
                 promotionClient.recordUsage(userId, order.getId(), voucherCodes);
             }
 
-            // Step 7: AFTER COMMIT - Clear Cart
-            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-                @Override
-                public void afterCommit() {
-                    cartClient.clearCart(userId);
-                }
-            });
+            // Step 7: Clear Cart
+            eventPublisher.publishEvent(new OrderCreatedEvent(order.getId(), userId));
 
             return orderQueryService.toOrderDto(order);
         } catch (DataIntegrityViolationException dup) {

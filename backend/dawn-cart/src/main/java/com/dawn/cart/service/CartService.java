@@ -16,7 +16,6 @@ import com.dawn.catalog.dto.SkuPriceInfo;
 import com.dawn.common.exception.wrapper.ResourceInsufficientException;
 import com.dawn.common.exception.wrapper.ResourceNotFoundException;
 import com.dawn.common.message.Message;
-import com.dawn.order.port.out.InventoryClientPort;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.OptimisticLockingFailureException;
@@ -86,7 +85,10 @@ public class CartService implements GetCartUseCase, AddCartItemUseCase, UpdateCa
 
     @Override
     public List<CartItemDto> getItems(Long userId) {
-        return List.of();
+        return cartItemRepository.findByUserId(userId)
+                .stream()
+                .map(this::toDto)
+                .toList();
     }
 
     // WRITE
