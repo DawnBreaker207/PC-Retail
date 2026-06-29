@@ -2,6 +2,7 @@ package com.dawn.user.service;
 
 import com.dawn.common.exception.wrapper.ResourceNotFoundException;
 import com.dawn.common.message.Message;
+import com.dawn.common.utils.SecurityUtils;
 import com.dawn.user.controller.request.AddressRequest;
 import com.dawn.user.controller.request.UpdateProfileRequest;
 import com.dawn.user.controller.response.UserResponse;
@@ -11,7 +12,6 @@ import com.dawn.user.entity.AddressEntry;
 import com.dawn.user.entity.User;
 import com.dawn.user.infra.persistence.UserRepository;
 import com.dawn.user.port.in.UserProfileUseCase;
-import com.dawn.user.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -123,7 +123,7 @@ public class UserService implements UserProfileUseCase {
     }
 
     private User loadCurrentUser() {
-        return userRepository.findByIdAndDeletedAtIsNull(SecurityUtils.currentUserId())
+        return userRepository.findByIdAndDeletedAtIsNull(SecurityUtils.getCurrentUserId())
                 .orElseThrow(() -> new ResourceNotFoundException(Message.User.NOT_FOUND));
     }
 
