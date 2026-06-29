@@ -8,8 +8,8 @@ import com.dawn.order.dto.SubOrderDto;
 import com.dawn.order.port.in.CheckoutUseCase;
 import com.dawn.order.port.in.QueryOrderUseCase;
 import com.dawn.order.port.in.TransitionSubOrderUseCase;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -21,7 +21,7 @@ public class OrderController {
     private final TransitionSubOrderUseCase transitionUseCase;
 
     @PostMapping("/checkout")
-    public OrderDto checkout(@RequestBody CheckoutRequest req) {
+    public OrderDto checkout(@Valid @RequestBody CheckoutRequest req) {
         Long userId = SecurityUtils.getCurrentUserId();
         return checkoutUseCase.checkout(req, userId);
     }

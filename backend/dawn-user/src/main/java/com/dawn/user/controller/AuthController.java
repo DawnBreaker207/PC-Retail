@@ -56,7 +56,7 @@ public class AuthController {
     }
 
     @PostMapping("/verify-otp")
-    public ResponseObject<AuthResponse> verifyOtp(@RequestBody VerifyOtpRequest req) {
+    public ResponseObject<AuthResponse> verifyOtp(@Valid @RequestBody VerifyOtpRequest req) {
         return ResponseObject.success(verifyOtpUseCase.verify(req));
     }
 

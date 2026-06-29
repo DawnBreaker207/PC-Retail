@@ -1,5 +1,6 @@
 package com.dawn.promotion.service;
 
+import com.dawn.common.exception.wrapper.InvalidRequestException;
 import com.dawn.common.message.Message;
 import com.dawn.promotion.port.out.PromotionCheckoutPort;
 import com.dawn.promotion.dto.VoucherValidationResult;
@@ -50,7 +51,7 @@ public class PromotionCheckoutService implements ValidatePromotionUseCase, Promo
 
         boolean cartHasFlashSaleItem = voucherRepo.hasActiveFlashSale(cartSkuIds);
         if (cartHasFlashSaleItem) {
-            throw new IllegalStateException(Message.Promotion.FLASH_SALE_VOUCHER_STACK);
+            throw new InvalidRequestException(Message.Promotion.FLASH_SALE_VOUCHER_STACK);
         }
     }
 
@@ -62,7 +63,7 @@ public class PromotionCheckoutService implements ValidatePromotionUseCase, Promo
         List<Voucher> vouchers = voucherRepo.findByCodeInAndDeletedAtIsNull(voucherCodes);
         for (Voucher voucher : vouchers) {
             if (voucherUsageRepo.existsByVoucherIdAndUserId(voucher.getId(), userId)) {
-                throw new IllegalStateException(Message.format(Message.Promotion.VOUCHER_ALREADY_USED, voucher.getCode()));
+                throw new InvalidRequestException(Message.format(Message.Promotion.VOUCHER_ALREADY_USED, voucher.getCode()));
             }
         }
 

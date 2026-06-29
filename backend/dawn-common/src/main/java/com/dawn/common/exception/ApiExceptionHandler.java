@@ -50,7 +50,7 @@ public class ApiExceptionHandler {
     //  500 Error
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ExceptionMessage> handleAllException(final Exception ex) {
-        log.warn("Unhandled exception: {}", ex.getMessage());
+        log.error("Unhandled exception: {}", ex.getMessage());
         String errorMsg = "Internal server error";
         return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, errorMsg);
     }
