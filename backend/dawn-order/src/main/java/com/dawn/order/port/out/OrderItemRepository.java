@@ -4,7 +4,7 @@ import com.dawn.order.entity.OrderItem;
 
 import java.util.List;
 
-public interface OrderItemRepositoryPort {
+public interface OrderItemRepository {
     List<OrderItem> saveAll(List<OrderItem> items);
 
     List<OrderItem> findBySubOrderId(Long subOrderId);

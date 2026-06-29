@@ -6,7 +6,7 @@ import com.dawn.payment.entity.enums.PaymentMethod;
 import java.util.List;
 import java.util.Optional;
 
-public interface PaymentRepositoryPort {
+public interface PaymentRepository {
     Payment save(Payment payment);
 
     Optional<Payment> findById(Long id);

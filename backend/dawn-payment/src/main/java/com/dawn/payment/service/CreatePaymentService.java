@@ -8,7 +8,7 @@ import com.dawn.payment.entity.enums.PaymentMethod;
 import com.dawn.payment.entity.enums.PaymentResultStatus;
 import com.dawn.payment.port.in.CreatePaymentUseCase;
 import com.dawn.payment.port.out.OrderClientPort;
-import com.dawn.payment.port.out.PaymentRepositoryPort;
+import com.dawn.payment.port.out.PaymentRepository;
 import com.dawn.payment.port.out.VnpayGatewayPort;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,7 +21,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CreatePaymentService implements CreatePaymentUseCase {
 
-    private final PaymentRepositoryPort paymentRepo;
+    private final PaymentRepository paymentRepo;
     private final OrderClientPort orderClient;
     private final VnpayGatewayPort vnpayGateway;
 

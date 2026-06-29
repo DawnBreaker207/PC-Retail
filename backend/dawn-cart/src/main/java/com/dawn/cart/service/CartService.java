@@ -1,15 +1,15 @@
 package com.dawn.cart.service;
 
 import com.dawn.cart.dto.CartItemDto;
-import com.dawn.cart.dto.CartQueryPort;
+import com.dawn.cart.port.out.CartQueryPort;
 import com.dawn.cart.dto.CartSummaryDto;
 import com.dawn.cart.entity.CartItem;
-import com.dawn.cart.infra.persistence.JpaCartItemRepository;
 import com.dawn.cart.port.in.AddCartItemUseCase;
 import com.dawn.cart.port.in.GetCartUseCase;
 import com.dawn.cart.port.in.RemoveCartItemUseCase;
 import com.dawn.cart.port.in.UpdateCartItemUseCase;
 import com.dawn.cart.port.out.CartCachePort;
+import com.dawn.cart.port.out.CartItemRepository;
 import com.dawn.cart.port.out.InventoryQueryPort;
 import com.dawn.catalog.dto.CatalogQueryPort;
 import com.dawn.catalog.dto.SkuPriceInfo;
@@ -32,7 +32,7 @@ import java.util.Map;
 @Slf4j
 public class CartService implements GetCartUseCase, AddCartItemUseCase, UpdateCartItemUseCase, RemoveCartItemUseCase, CartQueryPort {
 
-    private final JpaCartItemRepository cartItemRepository;
+    private final CartItemRepository cartItemRepository;
     private final CartCachePort cartCachePort;
     private final CatalogQueryPort catalogQueryPort;
     private final InventoryQueryPort inventoryQueryPort;

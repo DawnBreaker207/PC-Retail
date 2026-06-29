@@ -8,13 +8,13 @@ import com.dawn.inventory.entity.Inventory;
 import com.dawn.inventory.entity.InventoryTransaction;
 import com.dawn.inventory.entity.enums.ReferenceType;
 import com.dawn.inventory.entity.enums.TransactionType;
-import com.dawn.inventory.infra.persistence.JpaInventoryRepository;
-import com.dawn.inventory.infra.persistence.JpaInventoryTransactionRepository;
 import com.dawn.inventory.port.in.DeductStockUseCase;
 import com.dawn.inventory.port.in.ReleaseStockUseCase;
 import com.dawn.inventory.port.in.ReserveStockUseCase;
 import com.dawn.inventory.port.in.RestockUseCase;
 import com.dawn.inventory.port.out.InventoryCachePort;
+import com.dawn.inventory.port.out.InventoryRepository;
+import com.dawn.inventory.port.out.InventoryTransactionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,8 +28,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class InventoryCommandService implements ReserveStockUseCase, ReleaseStockUseCase, DeductStockUseCase, RestockUseCase {
 
-    private final JpaInventoryRepository inventoryRepository;
-    private final JpaInventoryTransactionRepository transactionRepository;
+    private final InventoryRepository inventoryRepository;
+    private final InventoryTransactionRepository transactionRepository;
     private final InventoryCachePort cachePort;
 
     // RESERVE

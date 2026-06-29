@@ -4,8 +4,8 @@ import com.dawn.order.entity.Order;
 import com.dawn.order.entity.SubOrder;
 import com.dawn.order.entity.enums.PaymentStatus;
 import com.dawn.order.entity.enums.SubOrderStatus;
-import com.dawn.order.port.out.OrderRepositoryPort;
-import com.dawn.order.port.out.SubOrderRepositoryPort;
+import com.dawn.order.port.out.OrderRepository;
+import com.dawn.order.port.out.SubOrderRepository;
 import com.dawn.order.statemachine.SubOrderStateMachine;
 import com.dawn.payment.port.out.OrderClientPort;
 import jakarta.transaction.Transactional;
@@ -19,8 +19,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class OrderClientAdapter implements OrderClientPort {
 
-    private final OrderRepositoryPort orderRepo;
-    private final SubOrderRepositoryPort subOrderRepo;
+    private final OrderRepository orderRepo;
+    private final SubOrderRepository subOrderRepo;
     private final SubOrderStateMachine stateMachine;
 
     @Override

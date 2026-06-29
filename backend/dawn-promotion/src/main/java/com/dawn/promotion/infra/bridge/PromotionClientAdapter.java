@@ -2,7 +2,7 @@ package com.dawn.promotion.infra.bridge;
 
 import com.dawn.order.dto.VoucherApplyResult;
 import com.dawn.order.port.out.PromotionClientPort;
-import com.dawn.promotion.dto.PromotionCheckoutPort;
+import com.dawn.promotion.port.out.PromotionCheckoutPort;
 import com.dawn.promotion.dto.VoucherValidationResult;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;

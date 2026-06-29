@@ -10,7 +10,7 @@ import com.dawn.promotion.dto.VoucherDto;
 import com.dawn.promotion.entity.Voucher;
 import com.dawn.promotion.port.in.ManageVoucherUseCase;
 import com.dawn.promotion.port.out.PromotionCachePort;
-import com.dawn.promotion.port.out.VoucherRepositoryPort;
+import com.dawn.promotion.port.out.VoucherRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -24,7 +24,7 @@ import java.time.Instant;
 @RequiredArgsConstructor
 public class PromotionService implements ManageVoucherUseCase {
 
-    private final VoucherRepositoryPort voucherRepo;
+    private final VoucherRepository voucherRepo;
     private final PromotionCachePort cachePort;
 
     @Transactional(readOnly = true)

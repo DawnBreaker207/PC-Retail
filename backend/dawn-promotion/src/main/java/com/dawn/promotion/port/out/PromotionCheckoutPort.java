@@ -1,4 +1,6 @@
-package com.dawn.promotion.dto;
+package com.dawn.promotion.port.out;
+
+import com.dawn.promotion.dto.VoucherValidationResult;
 
 import java.math.BigDecimal;
 import java.util.List;

@@ -8,7 +8,7 @@ import com.dawn.payment.entity.Payment;
 import com.dawn.payment.entity.enums.PaymentResultStatus;
 import com.dawn.payment.port.in.QueryPaymentStatusUseCase;
 import com.dawn.payment.port.out.OrderClientPort;
-import com.dawn.payment.port.out.PaymentRepositoryPort;
+import com.dawn.payment.port.out.PaymentRepository;
 import com.dawn.payment.port.out.VnpayGatewayPort;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 public class QueryPaymentStatusService implements QueryPaymentStatusUseCase {
 
-    private final PaymentRepositoryPort paymentRepo;
+    private final PaymentRepository paymentRepo;
     private final VnpayGatewayPort vnpayGateway;
     private final OrderClientPort orderClient;
 

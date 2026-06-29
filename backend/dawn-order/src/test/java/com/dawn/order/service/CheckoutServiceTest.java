@@ -29,13 +29,13 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 public class CheckoutServiceTest {
     @Mock
-    OrderRepositoryPort orderRepository;
+    OrderRepository orderRepository;
 
     @Mock
-    SubOrderRepositoryPort subOrderRepository;
+    SubOrderRepository subOrderRepository;
 
     @Mock
-    OrderItemRepositoryPort orderItemRepository;
+    OrderItemRepository orderItemRepository;
 
     @Mock
     OrderQueryService orderQueryService;

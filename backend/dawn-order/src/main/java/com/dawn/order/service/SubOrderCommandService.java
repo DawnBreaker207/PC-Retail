@@ -8,8 +8,8 @@ import com.dawn.order.entity.SubOrder;
 import com.dawn.order.entity.enums.SubOrderStatus;
 import com.dawn.order.port.in.TransitionSubOrderUseCase;
 import com.dawn.order.port.out.InventoryClientPort;
-import com.dawn.order.port.out.OrderItemRepositoryPort;
-import com.dawn.order.port.out.SubOrderRepositoryPort;
+import com.dawn.order.port.out.OrderItemRepository;
+import com.dawn.order.port.out.SubOrderRepository;
 import com.dawn.order.statemachine.SubOrderStateMachine;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,8 +23,8 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class SubOrderCommandService implements TransitionSubOrderUseCase {
 
-    private final SubOrderRepositoryPort subOrderRepo;
-    private final OrderItemRepositoryPort orderItemRepo;
+    private final SubOrderRepository subOrderRepo;
+    private final OrderItemRepository orderItemRepo;
     private final SubOrderStateMachine stateMachine;
     private final InventoryClientPort inventoryClient;
 

@@ -1,7 +1,7 @@
 package com.dawn.promotion.service;
 
 import com.dawn.common.message.Message;
-import com.dawn.promotion.dto.PromotionCheckoutPort;
+import com.dawn.promotion.port.out.PromotionCheckoutPort;
 import com.dawn.promotion.dto.VoucherValidationResult;
 import com.dawn.promotion.entity.Voucher;
 import com.dawn.promotion.entity.VoucherUsage;
@@ -9,8 +9,8 @@ import com.dawn.promotion.entity.enums.DiscountType;
 import com.dawn.promotion.entity.enums.ScopeType;
 import com.dawn.promotion.port.in.ValidatePromotionUseCase;
 import com.dawn.promotion.port.out.PromotionCachePort;
-import com.dawn.promotion.port.out.VoucherRepositoryPort;
-import com.dawn.promotion.port.out.VoucherUsageRepositoryPort;
+import com.dawn.promotion.port.out.VoucherRepository;
+import com.dawn.promotion.port.out.VoucherUsageRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,8 +23,8 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class PromotionCheckoutService implements ValidatePromotionUseCase, PromotionCheckoutPort {
-    private final VoucherRepositoryPort voucherRepo;
-    private final VoucherUsageRepositoryPort voucherUsageRepo;
+    private final VoucherRepository voucherRepo;
+    private final VoucherUsageRepository voucherUsageRepo;
     private final PromotionCachePort cachePort;
 
     @Override

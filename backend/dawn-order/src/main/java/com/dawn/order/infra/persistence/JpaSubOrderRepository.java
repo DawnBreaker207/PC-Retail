@@ -2,7 +2,7 @@ package com.dawn.order.infra.persistence;
 
 import com.dawn.order.entity.SubOrder;
 import com.dawn.order.entity.enums.SubOrderStatus;
-import com.dawn.order.port.out.SubOrderRepositoryPort;
+import com.dawn.order.port.out.SubOrderRepository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -10,7 +10,7 @@ import java.time.Instant;
 import java.util.List;
 
 @Repository
-public interface JpaSubOrderRepository extends JpaRepository<SubOrder, Long>, SubOrderRepositoryPort {
+public interface JpaSubOrderRepository extends JpaRepository<SubOrder, Long>, SubOrderRepository {
     @Override
     List<SubOrder> findByOrderId(Long orderId);
 

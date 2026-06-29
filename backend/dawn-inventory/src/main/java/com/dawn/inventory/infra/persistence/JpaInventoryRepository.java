@@ -24,4 +24,11 @@ public interface JpaInventoryRepository extends JpaRepository<Inventory, Long>, 
     @Override
     @Query("SELECT i FROM Inventory i WHERE ( i.stockQuantity - i.reservedQuantity ) <= :threshold")
     List<Inventory> findLowStock(@Param("threshold") int threshold);
+
+    @Override
+    default Inventory save(Inventory inventory) {
+        return saveAndFlush(inventory);
+    }
+
+
 }

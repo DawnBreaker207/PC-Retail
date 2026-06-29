@@ -8,10 +8,9 @@ import com.dawn.order.dto.OrderItemDto;
 import com.dawn.order.dto.SubOrderDto;
 import com.dawn.order.entity.Order;
 import com.dawn.order.port.in.QueryOrderUseCase;
-import com.dawn.order.port.out.CatalogClientPort;
-import com.dawn.order.port.out.OrderItemRepositoryPort;
-import com.dawn.order.port.out.OrderRepositoryPort;
-import com.dawn.order.port.out.SubOrderRepositoryPort;
+import com.dawn.order.port.out.OrderItemRepository;
+import com.dawn.order.port.out.OrderRepository;
+import com.dawn.order.port.out.SubOrderRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -24,9 +23,9 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class OrderQueryService implements QueryOrderUseCase {
-    private final OrderRepositoryPort orderRepo;
-    private final SubOrderRepositoryPort subOrderRepo;
-    private final OrderItemRepositoryPort orderItemRepo;
+    private final OrderRepository orderRepo;
+    private final SubOrderRepository subOrderRepo;
+    private final OrderItemRepository orderItemRepo;
 
     @Override
     public ResponsePage<OrderDto> getMyOrders(Long userId, int page, int size) {

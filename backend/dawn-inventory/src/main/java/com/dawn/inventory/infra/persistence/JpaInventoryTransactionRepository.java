@@ -7,4 +7,10 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface JpaInventoryTransactionRepository extends JpaRepository<InventoryTransaction, Long>, InventoryTransactionRepository {
+    @Override
+    default InventoryTransaction save(InventoryTransaction inventoryTransaction) {
+        return saveAndFlush(inventoryTransaction);
+    }
+
+    ;
 }

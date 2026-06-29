@@ -57,7 +57,7 @@ public class CheckoutIntegrationTest {
     @Autowired
     CheckoutService checkoutService;
     @Autowired
-    OrderRepositoryPort orderRepository;
+    OrderRepository orderRepository;
 
 
     @MockitoBean

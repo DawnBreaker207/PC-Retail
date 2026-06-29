@@ -1,9 +1,6 @@
 package com.dawn.cart.service;
 
-import com.dawn.cart.port.out.CartCachePort;
-import com.dawn.cart.port.out.CartItemRepository;
 import com.dawn.common.event.OrderCreatedEvent;
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
@@ -16,14 +13,12 @@ import org.springframework.transaction.event.TransactionalEventListener;
 @RequiredArgsConstructor
 public class CartCleanupListener {
 
-    private final CartItemRepository cartItemRepository;
-    private final CartCachePort cartCachePort;
+    private final CartService cartService;
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     @Retryable(maxAttempts = 3)
     public void onOrderCreated(OrderCreatedEvent event) {
-        cartItemRepository.deleteByUserId(event.userId());
-        cartCachePort.evict(event.userId());
+        cartService.clearCart(event.userId());
     }
 }

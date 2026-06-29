@@ -1,5 +1,5 @@
 package com.dawn.promotion.port.out;
 
-public interface FlashSaleRepositoryPort {
+public interface FlashSaleRepository {
     boolean isSkuInActiveFlashSale(Long skuId);
 }

@@ -6,8 +6,8 @@ import com.dawn.promotion.entity.VoucherUsage;
 import com.dawn.promotion.entity.enums.DiscountType;
 import com.dawn.promotion.entity.enums.ScopeType;
 import com.dawn.promotion.port.out.PromotionCachePort;
-import com.dawn.promotion.port.out.VoucherRepositoryPort;
-import com.dawn.promotion.port.out.VoucherUsageRepositoryPort;
+import com.dawn.promotion.port.out.VoucherRepository;
+import com.dawn.promotion.port.out.VoucherUsageRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -29,10 +29,10 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 public class PromotionCheckoutServiceTest {
     @Mock
-    VoucherRepositoryPort voucherRepo;
+    VoucherRepository voucherRepo;
 
     @Mock
-    VoucherUsageRepositoryPort voucherUsageRepo;
+    VoucherUsageRepository voucherUsageRepo;
 
     @Mock
     PromotionCachePort cachePort;

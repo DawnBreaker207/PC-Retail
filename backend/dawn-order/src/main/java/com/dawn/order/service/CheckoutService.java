@@ -39,9 +39,9 @@ public class CheckoutService implements CheckoutUseCase {
 
     private final ApplicationEventPublisher eventPublisher;
 
-    private final OrderRepositoryPort orderRepository;
-    private final SubOrderRepositoryPort subOrderRepository;
-    private final OrderItemRepositoryPort orderItemRepository;
+    private final OrderRepository orderRepository;
+    private final SubOrderRepository subOrderRepository;
+    private final OrderItemRepository orderItemRepository;
     private final OrderQueryService orderQueryService;
 
     private final CartClientPort cartClient;

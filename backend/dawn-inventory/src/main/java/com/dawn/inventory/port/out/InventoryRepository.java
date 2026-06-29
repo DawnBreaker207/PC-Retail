@@ -11,4 +11,6 @@ public interface InventoryRepository {
     Optional<Inventory> findBySkuIdWithLock(Long skuId);
 
     List<Inventory> findLowStock(int threshold);
+
+    Inventory save(Inventory inv);
 }

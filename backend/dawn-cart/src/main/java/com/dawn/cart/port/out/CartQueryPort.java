@@ -1,4 +1,6 @@
-package com.dawn.cart.dto;
+package com.dawn.cart.port.out;
+
+import com.dawn.cart.dto.CartItemDto;
 
 import java.util.List;
 

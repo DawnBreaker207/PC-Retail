@@ -9,7 +9,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
-public interface SubOrderRepositoryPort {
+public interface SubOrderRepository {
     SubOrder save(SubOrder subOrder);
 
     Optional<SubOrder> findById(Long id);
