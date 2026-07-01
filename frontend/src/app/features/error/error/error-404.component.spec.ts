@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 
 import { Error404Component } from './error-404.component';
 
@@ -9,6 +10,7 @@ describe('Error404Component', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [Error404Component],
+      providers: [provideRouter([])],
     }).compileComponents();
 
     fixture = TestBed.createComponent(Error404Component);

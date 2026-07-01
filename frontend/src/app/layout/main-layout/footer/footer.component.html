@@ -1,1 +1,120 @@
-<p>footer works!</p>
+<footer class="bg-[#1a1a2e] text-white mt-auto">
+  <!-- Shipping & payment trust bar -->
+  <div class="border-b border-white/10">
+    <div class="max-w-screen-2xl mx-auto px-4">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 py-5">
+        <div class="flex items-center gap-3">
+          <span nz-icon nzType="car" nzTheme="fill" class="text-primary text-2xl"></span>
+          <div>
+            <p class="text-sm font-semibold">Miễn phí vận chuyển</p>
+            <p class="text-[11px] text-white/50">Cho đơn hàng trên 10 triệu</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-3">
+          <span nz-icon nzType="sync" nzTheme="fill" class="text-primary text-2xl"></span>
+          <div>
+            <p class="text-sm font-semibold">Đổi trả 30 ngày</p>
+            <p class="text-[11px] text-white/50">Nếu sản phẩm lỗi</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-3">
+          <span nz-icon nzType="check-circle" nzTheme="fill" class="text-primary text-2xl"></span>
+          <div>
+            <p class="text-sm font-semibold">Cam kết chính hãng</p>
+            <p class="text-[11px] text-white/50">100% sản phẩm chính hãng</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-3">
+          <span nz-icon nzType="credit-card" nzTheme="fill" class="text-primary text-2xl"></span>
+          <div>
+            <p class="text-sm font-semibold">Thanh toán an toàn</p>
+            <p class="text-[11px] text-white/50">Visa, Master, JCB, VNPay</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="max-w-screen-2xl mx-auto px-4 py-10">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+      <div>
+        <h4 class="font-bold text-primary text-base mb-4">VỀ DAWN</h4>
+        <ul class="space-y-2">
+          <li><a routerLink="/" class="text-white/50 hover:text-white text-sm transition-colors">Giới thiệu</a></li>
+          <li><a routerLink="/" class="text-white/50 hover:text-white text-sm transition-colors">Tuyển dụng</a></li>
+          <li><a routerLink="/" class="text-white/50 hover:text-white text-sm transition-colors">Tin tức</a></li>
+          <li><a routerLink="/" class="text-white/50 hover:text-white text-sm transition-colors">Hệ thống showroom</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4 class="font-bold text-primary text-base mb-4">CHÍNH SÁCH</h4>
+        <ul class="space-y-2">
+          <li><a routerLink="/" class="text-white/50 hover:text-white text-sm transition-colors">Chính sách bảo hành</a></li>
+          <li><a routerLink="/" class="text-white/50 hover:text-white text-sm transition-colors">Chính sách đổi trả</a></li>
+          <li><a routerLink="/" class="text-white/50 hover:text-white text-sm transition-colors">Chính sách vận chuyển</a></li>
+          <li><a routerLink="/" class="text-white/50 hover:text-white text-sm transition-colors">Chính sách bảo mật</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4 class="font-bold text-primary text-base mb-4">HỖ TRỢ</h4>
+        <ul class="space-y-2">
+          <li><a routerLink="/" class="text-white/50 hover:text-white text-sm transition-colors">Trung tâm bảo hành</a></li>
+          <li><a routerLink="/" class="text-white/50 hover:text-white text-sm transition-colors">Hướng dẫn mua hàng</a></li>
+          <li><a routerLink="/" class="text-white/50 hover:text-white text-sm transition-colors">Hướng dẫn thanh toán</a></li>
+          <li><a routerLink="/" class="text-white/50 hover:text-white text-sm transition-colors">Tra cứu đơn hàng</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4 class="font-bold text-primary text-base mb-4">LIÊN HỆ</h4>
+        <ul class="space-y-2 text-sm text-white/50">
+          <li class="flex items-start gap-2">
+            <span nz-icon nzType="phone" class="mt-0.5 shrink-0 text-primary"></span>
+            <span>Hotline: <span class="text-white font-semibold">1900 5301</span></span>
+          </li>
+          <li class="flex items-start gap-2">
+            <span nz-icon nzType="mail" class="mt-0.5 shrink-0 text-primary"></span>
+            <span>Email: support@dawn.vn</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <span nz-icon nzType="environment" class="mt-0.5 shrink-0 text-primary"></span>
+            <span>123 Đường ABC, Quận Hà Đông, Hà Nội</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Payment methods -->
+    <div class="border-t border-white/10 mt-8 pt-6">
+      <div class="flex flex-wrap items-center justify-between gap-4">
+        <div class="flex items-center gap-4">
+          <span class="text-white/50 text-xs">Phương thức thanh toán:</span>
+          <div class="flex items-center gap-2">
+            <span class="bg-white/10 text-white/70 text-[10px] px-2.5 py-1 rounded font-medium">VISA</span>
+            <span class="bg-white/10 text-white/70 text-[10px] px-2.5 py-1 rounded font-medium">Mastercard</span>
+            <span class="bg-white/10 text-white/70 text-[10px] px-2.5 py-1 rounded font-medium">JCB</span>
+            <span class="bg-white/10 text-white/70 text-[10px] px-2.5 py-1 rounded font-medium">VNPay</span>
+            <span class="bg-white/10 text-white/70 text-[10px] px-2.5 py-1 rounded font-medium">Momo</span>
+            <span class="bg-white/10 text-white/70 text-[10px] px-2.5 py-1 rounded font-medium">Ship COD</span>
+          </div>
+        </div>
+        <div class="flex items-center gap-4">
+          <span class="text-white/50 text-xs">Đơn vị vận chuyển:</span>
+          <div class="flex items-center gap-2">
+            <span class="bg-white/10 text-white/70 text-[10px] px-2.5 py-1 rounded font-medium">GHN</span>
+            <span class="bg-white/10 text-white/70 text-[10px] px-2.5 py-1 rounded font-medium">GHTK</span>
+            <span class="bg-white/10 text-white/70 text-[10px] px-2.5 py-1 rounded font-medium">Viettel Post</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="border-t border-white/10 py-4">
+    <p class="text-center text-white/40 text-xs">
+      &copy; 2026 DAWN PC Retail. Tất cả quyền được bảo lưu.
+    </p>
+  </div>
+</footer>

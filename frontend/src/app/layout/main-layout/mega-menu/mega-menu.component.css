@@ -1,0 +1,21 @@
+:host ::ng-deep .ant-menu-horizontal {
+  border-bottom: none !important;
+  line-height: 40px;
+}
+
+:host ::ng-deep .ant-menu-horizontal > .ant-menu-item:hover::after,
+:host ::ng-deep .ant-menu-horizontal > .ant-menu-item-active::after {
+  border-bottom: none !important;
+}
+
+:host ::ng-deep .ant-menu-item-selected::after {
+  border-bottom: none !important;
+}
+
+:host ::ng-deep .ant-menu-horizontal > .ant-menu-item a {
+  color: inherit !important;
+}
+
+:host ::ng-deep .ant-menu-horizontal > .ant-menu-item {
+  padding: 0 8px !important;
+}

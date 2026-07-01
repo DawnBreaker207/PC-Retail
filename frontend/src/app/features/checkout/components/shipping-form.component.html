@@ -1,0 +1,63 @@
+<form nz-form [formGroup]="form" (ngSubmit)="submit()" class="bg-surface dark:bg-surface-dark rounded-card border border-border/80 dark:border-border-dark/80 shadow-sm p-6 lg:p-8">
+  <h2 class="text-xl font-semibold mb-6 tracking-tight">Địa chỉ giao hàng</h2>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6">
+    <nz-form-item class="sm:col-span-2">
+      <nz-form-label nzFor="fullName" nzRequired class="!pb-1.5 !text-sm !font-medium">Họ và tên</nz-form-label>
+      <nz-form-control [nzErrorTip]="'Vui lòng nhập họ tên'">
+        <input nz-input id="fullName" formControlName="fullName" placeholder="Nguyễn Văn A" class="!rounded-lg !py-2.5" />
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item class="sm:col-span-2">
+      <nz-form-label nzFor="phone" nzRequired class="!pb-1.5 !text-sm !font-medium">Số điện thoại</nz-form-label>
+      <nz-form-control [nzErrorTip]="'Số điện thoại không hợp lệ'">
+        <input nz-input id="phone" formControlName="phone" placeholder="0912 345 678" class="!rounded-lg !py-2.5" />
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-label nzFor="city" nzRequired class="!pb-1.5 !text-sm !font-medium">Tỉnh/Thành phố</nz-form-label>
+      <nz-form-control [nzErrorTip]="'Vui lòng chọn tỉnh/thành phố'">
+        <nz-select id="city" formControlName="city" nzPlaceHolder="Chọn tỉnh/thành phố" class="w-full">
+          @for (c of cities; track c) {
+            <nz-option [nzValue]="c" [nzLabel]="c"></nz-option>
+          }
+        </nz-select>
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-label nzFor="district" nzRequired class="!pb-1.5 !text-sm !font-medium">Quận/Huyện</nz-form-label>
+      <nz-form-control [nzErrorTip]="'Vui lòng nhập quận/huyện'">
+        <input nz-input id="district" formControlName="district" placeholder="Quận Hà Đông" class="!rounded-lg !py-2.5" />
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item class="sm:col-span-2">
+      <nz-form-label nzFor="street" nzRequired class="!pb-1.5 !text-sm !font-medium">Địa chỉ</nz-form-label>
+      <nz-form-control [nzErrorTip]="'Vui lòng nhập địa chỉ'">
+        <input nz-input id="street" formControlName="street" placeholder="123 Đường ABC" class="!rounded-lg !py-2.5" />
+      </nz-form-control>
+    </nz-form-item>
+  </div>
+
+  <nz-form-item class="mb-0">
+    <nz-form-label class="!pb-1.5 !text-sm !font-medium">Phương thức nhận hàng</nz-form-label>
+    <nz-form-control>
+      <div class="flex flex-col sm:flex-row gap-3 sm:gap-4">
+        <label nz-radio nzId="ship-delivery" for="ship-delivery" formControlName="fulfillmentType" nzValue="DELIVERY" class="!py-2.5 !px-4 !rounded-lg !border !border-border dark:!border-border-dark hover:!border-primary !transition-colors [&.ant-radio-wrapper-checked]:!border-primary">🚚 Giao hàng tận nơi</label>
+        <label nz-radio nzId="ship-pickup" for="ship-pickup" formControlName="fulfillmentType" nzValue="PICKUP" nzDisabled class="!py-2.5 !px-4 !rounded-lg !border !border-border dark:!border-border-dark !opacity-50">🏪 Nhận tại cửa hàng</label>
+      </div>
+    </nz-form-control>
+  </nz-form-item>
+
+  <button
+    nz-button
+    nzType="primary"
+    [disabled]="form.invalid"
+    class="mt-8 !rounded-lg !py-2.5 !h-auto !font-semibold !px-8 !shadow-sm hover:!shadow-md !transition-all !duration-200"
+  >
+    Tiếp tục
+  </button>
+</form>

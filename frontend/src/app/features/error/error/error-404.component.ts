@@ -1,9 +1,11 @@
 import { Component } from '@angular/core';
+import { RouterLink } from '@angular/router';
+import { NzButtonModule } from 'ng-zorro-antd/button';
+import { NzResultModule } from 'ng-zorro-antd/result';
 
 @Component({
-  selector: 'app-error',
-  imports: [],
+  selector: 'app-error-404',
+  imports: [RouterLink, NzButtonModule, NzResultModule],
   templateUrl: './error-404.component.html',
-  styleUrl: './error-404.component.css',
 })
 export class Error404Component {}

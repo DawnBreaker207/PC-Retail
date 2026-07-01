@@ -1,0 +1,54 @@
+<div class="max-w-screen-2xl mx-auto px-4 py-6 lg:py-8 min-h-[60vh]">
+  <nz-steps [nzCurrent]="currentStep()" nzSize="small" class="mb-8 max-sm:text-xs [&_.ant-steps-item-title]:!text-xs sm:[&_.ant-steps-item-title]:!text-sm">
+    <nz-step nzTitle="Thông tin giao hàng"></nz-step>
+    <nz-step nzTitle="Xác nhận đơn"></nz-step>
+    <nz-step nzTitle="Thanh toán"></nz-step>
+  </nz-steps>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+    <div class="lg:col-span-2 animate-fade-in-up">
+      @switch (currentStep()) {
+        @case (0) {
+          <app-shipping-form (shippingComplete)="onShippingComplete($event)" />
+        }
+        @case (1) {
+          <app-order-review
+            [shippingAddress]="shippingData()"
+            [items]="selectedItems()"
+            [total]="selectedAmount()"
+            [isPlacing]="isPlacing()"
+            (back)="backToShipping()"
+            (placeOrder)="placeOrder()"
+          />
+        }
+      }
+    </div>
+
+    <div class="lg:col-span-1">
+      @if (selectedItems().length > 0) {
+        <div class="bg-surface dark:bg-surface-dark rounded-card border border-border/80 dark:border-border-dark/80 shadow-sm p-5 lg:sticky lg:top-28">
+          <h3 class="font-semibold text-base mb-4 tracking-tight">Tóm tắt đơn</h3>
+          <div class="space-y-3">
+            @for (item of selectedItems(); track item.skuId) {
+              <div class="flex gap-3 text-sm group">
+                <div class="w-12 h-12 rounded-lg bg-bg dark:bg-bg-dark flex items-center justify-center overflow-hidden shrink-0">
+                  <img [src]="item.imageUrl" alt="{{ item.name }}" class="w-full h-full object-contain p-0.5 group-hover:scale-110 transition-transform duration-300" />
+                </div>
+                <div class="flex-1 min-w-0">
+                  <p class="line-clamp-1 text-sm font-medium">{{ item.name }}</p>
+                  <p class="text-xs text-muted dark:text-muted-dark mt-0.5">x{{ item.quantity }}</p>
+                </div>
+                <span class="shrink-0 text-sm font-medium">{{ item.price * item.quantity | currencyFormat }}</span>
+              </div>
+            }
+          </div>
+          <hr class="my-4 border-border/60 dark:border-border-dark/60" />
+          <div class="flex justify-between items-baseline">
+            <span class="font-semibold">Tổng</span>
+            <span class="text-primary text-xl font-bold">{{ selectedAmount() | currencyFormat }}</span>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</div>

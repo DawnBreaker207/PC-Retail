@@ -1,0 +1,43 @@
+<div class="bg-surface dark:bg-surface-dark rounded-card border border-border/80 dark:border-border-dark/80 shadow-sm p-6 lg:sticky lg:top-28">
+  <h3 class="font-semibold text-lg mb-5 tracking-tight">Thông tin đơn hàng</h3>
+
+  <div class="space-y-3 text-sm">
+    <div class="flex justify-between">
+      <span class="text-muted dark:text-muted-dark">Tạm tính</span>
+      <span class="font-medium">{{ totalAmount() | currencyFormat }}</span>
+    </div>
+
+    <div class="flex justify-between">
+      <span class="text-muted dark:text-muted-dark">Giảm giá</span>
+      @if (totalAmount() !== selectedAmount()) {
+        <span class="text-success font-medium">-{{ (totalAmount() - selectedAmount()) | currencyFormat }}</span>
+      } @else {
+        <span class="text-muted dark:text-muted-dark">—</span>
+      }
+    </div>
+
+    <div class="flex justify-between">
+      <span class="text-muted dark:text-muted-dark">Phí vận chuyển</span>
+      <span class="text-success font-medium text-xs bg-success/10 px-2 py-0.5 rounded-full">Miễn phí</span>
+    </div>
+
+    <hr class="border-border/60 dark:border-border-dark/60 my-3" />
+
+    <div class="flex justify-between items-baseline">
+      <span class="text-base font-semibold">Tổng cộng</span>
+      <span class="text-primary text-xl font-bold">{{ selectedAmount() | currencyFormat }}</span>
+    </div>
+  </div>
+
+  @if (selectedCount().length > 0) {
+    <button
+      nz-button
+      nzType="primary"
+      nzBlock
+      routerLink="/checkout"
+      class="mt-6 !rounded-lg !py-2.5 !h-auto !font-semibold !shadow-sm hover:!shadow-md !transition-all !duration-200"
+    >
+      Đặt hàng ({{ selectedCount().length }} sản phẩm)
+    </button>
+  }
+</div>

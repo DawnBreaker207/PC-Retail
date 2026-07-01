@@ -1,0 +1,77 @@
+<form nz-form [formGroup]="form" (ngSubmit)="submit()" class="space-y-4">
+  <nz-form-item class="!mb-0">
+    <nz-form-control [nzErrorTip]="emailError">
+      <input
+        nz-input
+        formControlName="email"
+        placeholder="Email"
+        class="!rounded-lg !py-2.5 !px-3 !border-border dark:!border-border-dark !bg-bg dark:!bg-bg-dark !text-sm !w-full"
+      />
+    </nz-form-control>
+    <ng-template #emailError>
+      @if (form.controls.email.hasError('required')) { Vui lòng nhập email }
+      @if (form.controls.email.hasError('email')) { Email không hợp lệ }
+    </ng-template>
+  </nz-form-item>
+
+  <nz-form-item class="!mb-0">
+    <nz-form-control [nzErrorTip]="'Mật khẩu phải có ít nhất 6 ký tự'">
+      <nz-input-group [nzSuffix]="pwdIcon" class="[&_.ant-input]:!rounded-lg [&_.ant-input]:!py-2.5 [&_.ant-input]:!px-3 [&_.ant-input]:!bg-bg">
+        <input
+          nz-input
+          [type]="passwordVisible() ? 'text' : 'password'"
+          formControlName="password"
+          placeholder="Mật khẩu"
+          class="dark:!bg-bg-dark"
+        />
+      </nz-input-group>
+      <ng-template #pwdIcon>
+        <span
+          nz-icon
+          [nzType]="passwordVisible() ? 'eye' : 'eye-invisible'"
+          (click)="passwordVisible.set(!passwordVisible())"
+          (keyup.enter)="passwordVisible.set(!passwordVisible())"
+          tabindex="0"
+          role="button"
+          class="cursor-pointer text-muted dark:text-muted-dark hover:text-primary transition-colors"
+        ></span>
+      </ng-template>
+    </nz-form-control>
+  </nz-form-item>
+
+  <div class="text-right">
+    <a routerLink="/auth/forgot-password" class="text-xs text-muted dark:text-muted-dark hover:text-primary transition-colors">Quên mật khẩu email?</a>
+  </div>
+
+  <button
+    nz-button
+    nzType="primary"
+    nzBlock
+    nzSize="large"
+    [nzLoading]="isLoading()"
+    [disabled]="form.invalid"
+    class="!rounded-lg !font-bold !shadow-sm hover:!shadow-md !transition-all !duration-200 !h-11 !uppercase !tracking-wide !text-sm"
+  >
+    Đăng nhập
+  </button>
+
+  <div class="relative my-5">
+    <div class="absolute inset-0 flex items-center">
+      <div class="w-full border-t border-border/60 dark:border-border-dark/60"></div>
+    </div>
+    <div class="relative flex justify-center text-xs">
+      <span class="px-3 bg-surface dark:bg-surface-dark text-muted dark:text-muted-dark">hoặc đăng nhập bằng</span>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-2 gap-3">
+    <button nz-button nzType="default" nzBlock class="!rounded-lg !h-10 !text-sm !font-medium !border-border dark:!border-border-dark hover:!border-primary !transition-colors">
+      <img src="https://www.google.com/favicon.ico" alt="Google" class="w-4 h-4 mr-2" />
+      Google
+    </button>
+    <button nz-button nzType="default" nzBlock class="!rounded-lg !h-10 !text-sm !font-medium !border-border dark:!border-border-dark hover:!border-primary !transition-colors">
+      <span nz-icon nzType="facebook" class="text-blue-600 text-base mr-2"></span>
+      Facebook
+    </button>
+  </div>
+</form>

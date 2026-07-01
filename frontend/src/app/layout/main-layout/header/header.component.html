@@ -1,1 +1,168 @@
-<p>header works!</p>
+<header class="fixed top-0 left-0 right-0 z-50 bg-surface dark:bg-surface-dark shadow-sm">
+  <div class="max-w-screen-2xl mx-auto">
+    <!-- Top promo bar -->
+    <div class="hidden lg:flex items-center justify-between h-8 px-4 bg-bg dark:bg-bg-dark border-b border-border/60 dark:border-border-dark/60">
+      <a href="https://gearvn.com/pages/pc-gvn" target="_blank" class="flex items-center gap-1.5 text-xs text-muted dark:text-muted-dark hover:text-primary transition-colors">
+        <span class="text-primary font-medium">PC GVN Tháng 11</span>
+      </a>
+      <div class="flex items-center gap-4 text-xs text-muted dark:text-muted-dark">
+        <a href="tel:19005301" class="hover:text-primary transition-colors flex items-center gap-1">
+          <span nz-icon nzType="phone" class="text-[11px]"></span>
+          <span>Hotline: <strong>1900 5301</strong></span>
+        </a>
+        <a routerLink="/" class="hover:text-primary transition-colors">hệ thống Showroom</a>
+        <a routerLink="/" class="hover:text-primary transition-colors">Tra cứu đơn hàng</a>
+      </div>
+    </div>
+
+    <!-- Main header row -->
+    <div class="flex items-center h-14 lg:h-16 px-4 gap-2 sm:gap-4">
+      <!-- Hamburger mobile -->
+      <button nz-button nzType="text" class="lg:!hidden !inline-flex !items-center !justify-center !w-9 !h-9 !rounded-full hover:!bg-black/5 dark:hover:!bg-white/10" (click)="showMobileMenu.set(!showMobileMenu())">
+        <span nz-icon nzType="menu" class="text-lg"></span>
+      </button>
+
+      <!-- Danh mục + Logo -->
+      <a routerLink="/" class="flex items-center gap-2 shrink-0">
+        <span class="text-primary font-black text-2xl lg:text-3xl tracking-tight hover:opacity-80 transition-opacity">DAWN</span>
+      </a>
+
+      <!-- Search bar - desktop -->
+      <div class="hidden sm:block flex-1 max-w-2xl mx-auto lg:mx-6">
+        <div class="relative">
+          <input
+            #searchInput
+            type="text"
+            nz-input
+            placeholder="Bạn cần tìm gì?"
+            class="!rounded-full !pl-11 !pr-5 !py-2 !border-border dark:!border-border-dark !bg-bg dark:!bg-bg-dark !text-sm !w-full !transition-all !duration-200 focus:!border-primary focus:!shadow-md"
+            (keyup.enter)="search(searchInput.value)"
+          />
+          <button nz-button nzType="text" class="!absolute !left-1.5 !top-1/2 !-translate-y-1/2 !flex !items-center !justify-center !w-8 !h-8" (click)="search(searchInput.value)">
+            <span nz-icon nzType="search" class="text-muted dark:text-muted-dark text-sm"></span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Right actions -->
+      <div class="flex items-center gap-1 sm:gap-2 ml-auto">
+        <!-- Search mobile trigger -->
+        <button nz-button nzType="text" class="sm:!hidden !inline-flex !items-center !justify-center !w-9 !h-9 !rounded-full hover:!bg-black/5 dark:hover:!bg-white/10" (click)="showMobileSearch.set(!showMobileSearch())">
+          <span nz-icon nzType="search" class="text-lg"></span>
+        </button>
+
+        <!-- Cart -->
+        <button nz-button nzType="text" routerLink="/cart" class="!inline-flex !items-center !justify-center !w-9 !h-9 !rounded-full hover:!bg-black/5 dark:hover:!bg-white/10 !transition-colors relative">
+          <nz-badge [nzCount]="cartCount()" [nzShowZero]="false" class="[&_.ant-badge-count]:!shadow-sm [&_.ant-badge-count]:!text-[10px] [&_.ant-badge-count]:!font-bold">
+            <span nz-icon nzType="shopping-cart" class="text-xl"></span>
+          </nz-badge>
+        </button>
+
+        <!-- Desktop utility links -->
+        <div class="hidden lg:flex items-center gap-1">
+          <button nz-button nzType="text" nz-tooltip="Thông báo" class="!inline-flex !items-center !justify-center !w-9 !h-9 !rounded-full hover:!bg-black/5 dark:hover:!bg-white/10">
+            <span nz-icon nzType="bell" class="text-lg"></span>
+          </button>
+
+          <button nz-button nzType="text" (click)="toggleTheme()" nz-tooltip="Giao diện" class="!inline-flex !items-center !justify-center !w-9 !h-9 !rounded-full hover:!bg-black/5 dark:hover:!bg-white/10">
+            @if (isDark()) {
+              <span nz-icon nzType="sun" class="text-lg"></span>
+            } @else {
+              <span nz-icon nzType="moon" class="text-lg"></span>
+            }
+          </button>
+        </div>
+
+        <!-- User -->
+        @if (isLoggedIn()) {
+          <div nz-dropdown [nzDropdownMenu]="userMenu" nzPlacement="bottomRight">
+            <nz-avatar nzIcon="user" class="cursor-pointer !bg-primary/10 !text-primary hover:!bg-primary/20 !transition-colors !w-8 !h-8 lg:!w-9 lg:!h-9"></nz-avatar>
+          </div>
+          <nz-dropdown-menu #userMenu="nzDropdownMenu">
+            <ul nz-menu class="!rounded-lg !shadow-lg !border !border-border dark:!border-border-dark !overflow-hidden !min-w-[180px]">
+              <li nz-menu-item routerLink="/orders" class="!flex !items-center !gap-2 !py-2.5">
+                <span nz-icon nzType="file-text"></span>
+                Đơn hàng của tôi
+              </li>
+              <li nz-menu-divider class="!my-1"></li>
+              <li nz-menu-item (click)="logout()" (keyup.enter)="logout()" tabindex="0" class="!flex !items-center !gap-2 !py-2.5 !text-error">
+                <span nz-icon nzType="logout"></span>
+                Đăng xuất
+              </li>
+            </ul>
+          </nz-dropdown-menu>
+        } @else {
+          <a nz-button nzType="primary" routerLink="/auth/login" class="!rounded-full !px-4 lg:!px-5 !text-sm !font-medium !shadow-sm hover:!shadow-md !transition-all !duration-200 !h-8 lg:!h-9">
+            Đăng nhập
+          </a>
+        }
+      </div>
+    </div>
+
+    <!-- Category strip - desktop -->
+    <div class="hidden lg:block border-t border-border/60 dark:border-border-dark/60 bg-surface dark:bg-surface-dark">
+      <div class="flex items-center overflow-x-auto px-4 gap-0 scrollbar-none">
+        <div class="flex items-center gap-0.5 text-sm">
+          @for (cat of categories; track cat.slug) {
+            <a [routerLink]="['/products']" [queryParams]="{ category: cat.slug }"
+              class="whitespace-nowrap px-3 py-2.5 text-muted dark:text-muted-dark hover:text-primary hover:bg-primary/5 dark:hover:bg-primary/10 transition-colors text-[13px] font-medium">
+              {{ cat.name }}
+            </a>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile search -->
+  @if (showMobileSearch()) {
+    <div class="sm:hidden px-4 pb-3 bg-surface/95 dark:bg-surface-dark/95 border-b border-border/80 dark:border-border-dark/80 animate-slide-down">
+      <div class="relative">
+        <input #mobileSearchInput type="text" nz-input placeholder="Bạn cần tìm gì?" class="!rounded-full !pl-10 !pr-4 !py-2 !border-border dark:!border-border-dark !bg-bg dark:!bg-bg-dark !text-sm !w-full" (keyup.enter)="search(mobileSearchInput.value); showMobileSearch.set(false)" />
+        <button nz-button nzType="text" class="!absolute !left-1 !top-1/2 !-translate-y-1/2 !flex !items-center !justify-center !w-8 !h-8" (click)="search(mobileSearchInput.value); showMobileSearch.set(false)">
+          <span nz-icon nzType="search" class="text-muted dark:text-muted-dark text-sm"></span>
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- Mobile menu drawer -->
+  @if (showMobileMenu()) {
+    <div class="fixed inset-0 z-50 lg:hidden" (click)="showMobileMenu.set(false)" (keydown.enter)="showMobileMenu.set(false)" tabindex="0">
+      <div class="absolute inset-0 bg-black/50"></div>
+      <div class="absolute left-0 top-0 bottom-0 w-72 max-w-[80vw] bg-surface dark:bg-surface-dark overflow-y-auto shadow-2xl" (click)="$event.stopPropagation()" (keydown.enter)="$event.stopPropagation()" tabindex="0">
+        <div class="flex items-center justify-between p-4 border-b border-border/80 dark:border-border-dark/80">
+          <span class="text-primary font-black text-xl">DAWN</span>
+          <button nz-button nzType="text" (click)="showMobileMenu.set(false)">
+            <span nz-icon nzType="close" class="text-lg"></span>
+          </button>
+        </div>
+        <div class="p-4 space-y-0.5">
+          @for (cat of categories; track cat.slug) {
+            <a [routerLink]="['/products']" [queryParams]="{ category: cat.slug }" class="block px-4 py-3 text-sm text-muted dark:text-muted-dark hover:text-primary hover:bg-primary/5 dark:hover:bg-primary/10 rounded-lg transition-colors" (click)="showMobileMenu.set(false)">
+              {{ cat.name }}
+            </a>
+          }
+        </div>
+        <div class="border-t border-border/80 dark:border-border-dark/80 p-4 space-y-3 text-sm text-muted dark:text-muted-dark">
+          <a href="tel:19005301" class="flex items-center gap-2 hover:text-primary transition-colors">
+            <span nz-icon nzType="phone"></span>
+            Hotline: <strong>1900 5301</strong>
+          </a>
+          <a routerLink="/" class="flex items-center gap-2 hover:text-primary transition-colors">
+            <span nz-icon nzType="environment"></span>
+            Hệ thống Showroom
+          </a>
+          <a routerLink="/" class="flex items-center gap-2 hover:text-primary transition-colors">
+            <span nz-icon nzType="search"></span>
+            Tra cứu đơn hàng
+          </a>
+          <button nz-button nzType="text" (click)="toggleTheme()" class="!flex !items-center !gap-2 !w-full !justify-start !px-0 !text-muted dark:!text-muted-dark hover:!text-primary">
+            <span nz-icon [nzType]="isDark() ? 'sun' : 'moon'" class="text-base"></span>
+            {{ isDark() ? 'Giao diện sáng' : 'Giao diện tối' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</header>

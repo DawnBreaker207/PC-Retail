@@ -1,0 +1,48 @@
+<div class="flex items-start gap-3 sm:gap-4 p-4 sm:p-5 bg-surface dark:bg-surface-dark rounded-card border border-border/80 dark:border-border-dark/80 shadow-sm hover:shadow-md transition-all duration-300 hover:border-border dark:hover:border-border-dark">
+  <label nz-checkbox nzId="cart-item-sel" for="cart-item-sel" [nzChecked]="item().selected" (nzCheckedChange)="toggleSelect()" class="mt-1"></label>
+
+  <a [routerLink]="['/products', item().slug]" class="shrink-0 group">
+    <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-lg bg-bg dark:bg-bg-dark flex items-center justify-center overflow-hidden">
+      <img
+        [src]="item().imageUrl"
+        [alt]="item().name"
+        class="w-full h-full object-contain p-1 group-hover:scale-110 transition-transform duration-300"
+      />
+    </div>
+  </a>
+
+  <div class="flex-1 min-w-0">
+    <a
+      [routerLink]="['/products', item().slug]"
+      class="font-medium text-sm sm:text-base line-clamp-2 hover:text-primary transition-colors duration-200"
+    >
+      {{ item().name }}
+    </a>
+    <p class="text-xs text-muted dark:text-muted-dark mt-1">{{ item().brandName }}</p>
+  </div>
+
+  <div class="text-right shrink-0 min-w-0 flex flex-col items-end">
+    <p class="text-primary font-bold text-sm sm:text-base">{{ item().price | currencyFormat }}</p>
+
+    <nz-input-number
+      [ngModel]="item().quantity"
+      (ngModelChange)="onQtyChange($event)"
+      [nzMin]="1"
+      [nzMax]="item().stock"
+      class="mt-2 w-20 sm:w-24 [&_.ant-input-number]:!rounded-lg"
+    ></nz-input-number>
+
+    <button
+      nz-button
+      nzType="link"
+      nzDanger
+      nzSize="small"
+      nz-popconfirm
+      nzPopconfirmTitle="Xóa sản phẩm?"
+      (nzOnConfirm)="remove()"
+      class="block mt-1.5 text-xs sm:text-sm opacity-60 hover:opacity-100 transition-opacity"
+    >
+      Xóa
+    </button>
+  </div>
+</div>
