@@ -46,6 +46,6 @@ public class Payment extends AbstractMappedEntity {
     @Column(name = "settled_at")
     private Instant settledAt;
 
-    @Column(name = "settlement_batch_id", nullable = false, updatable = false)
+    @Column(name = "settlement_batch_id", nullable = true, updatable = false)
     private String settlementBatchId;
 }
