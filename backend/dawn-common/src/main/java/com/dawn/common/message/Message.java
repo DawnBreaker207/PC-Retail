@@ -29,6 +29,7 @@ public class Message {
         public static final String INVALID_CREDENTIALS = "Invalid email or password";
         public static final String ACCOUNT_NOT_VERIFIED = "Account email has not been verified";
         public static final String ACCOUNT_NOT_ACTIVE = "Account is not active";
+        public static final String REQUIRED_LOGIN = "Required login";
 
         // OTP / Resend
         public static final String OTP_RESEND_COOLDOWN = "Please wait 60 seconds before requesting a new code";
@@ -129,7 +130,8 @@ public class Message {
         public static final String CART_EMPTY = "Cart is empty";
         public static final String SHIPPING_ADDRESS_REQUIRED = "Shipping address is required for DELIVERY";
         public static final String INSUFFICIENT_STOCK_SKUS = "Not enough stock for SKU: {0}";
-
+        public static final String EXPIRED = "Order expired, please checkout again";
+        public static final String INVALID_TRANSITION = "Invalid transition from {0} -> {1}";
         // SubOrder
         public static final String SUB_ORDER_NOT_FOUND = "SubOrder not found";
     }
@@ -141,6 +143,9 @@ public class Message {
 
         public static final String NOT_FOUND = "Payment not found";
         public static final String INVALID_ORDER_AMOUNT = "Invalid order amount for payment";
+        public static final String GATEWAY_NOT_FOUND = "Payment gateway not found for: {0}";
+        public static final String WEBHOOK_NOT_SUPPORTED = "Webhook is not supported for this payment method";
+        public static final String CALLBACK_NOT_SUPPORTED = "Callback is not supported for this payment method";
     }
 
     // Promotion
