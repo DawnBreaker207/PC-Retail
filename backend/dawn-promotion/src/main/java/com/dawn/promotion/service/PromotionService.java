@@ -39,7 +39,7 @@ public class PromotionService implements ManageVoucherUseCase {
     @Transactional
     public VoucherDto create(VoucherCreateRequest req) {
         String code = req.code().toUpperCase();
-        if (voucherRepo.existsByCodeAndDeletedAtIsNull(req.code())) {
+        if (voucherRepo.existsByCodeAndDeletedAtIsNull(code)) {
             throw new ConflictException(Message.Promotion.VOUCHER_CODE_EXISTS);
         }
         if (req.validFrom().isAfter(req.validTo())) {

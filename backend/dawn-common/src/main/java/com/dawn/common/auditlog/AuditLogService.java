@@ -9,8 +9,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 
 @Service
 @RequiredArgsConstructor
@@ -39,7 +39,7 @@ public class AuditLogService {
         LocalDateTime threshold = LocalDateTime.now().minusMonths(6);
         log.info("Starting clean audit log before: {}", threshold);
 
-        auditLogRepository.deleteOlderThan(Instant.from(threshold));
+        auditLogRepository.deleteOlderThan(threshold.toInstant(ZoneOffset.UTC));
         log.info("Auto start clean Audit Log before: {}", threshold);
     }
 }

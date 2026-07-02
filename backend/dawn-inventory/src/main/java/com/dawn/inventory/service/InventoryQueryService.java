@@ -81,7 +81,7 @@ public class InventoryQueryService implements QueryInventoryUseCase {
         // Fallback DB
         return inventoryRepository.findBySkuId(skuId)
                 .map(Inventory::getAvailableQuantity)
-                .orElse(null);
+                .orElse(0);
     }
 
 
