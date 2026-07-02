@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -33,6 +34,13 @@ public class OrderQueryService implements QueryOrderUseCase {
     public ResponsePage<OrderDto> getMyOrders(Long userId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
         return ResponsePage.of(orderRepo.findByUserId(userId, pageable).map(this::toOrderDto));
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public Optional<OrderDto> findByIdempotencyKey(String key) {
+        return orderRepo.findByIdempotencyKey(key)
+                .map(this::toOrderDto);
     }
 
     @Override
@@ -80,4 +88,6 @@ public class OrderQueryService implements QueryOrderUseCase {
                 order.getReservedUntil(),
                 subOrders);
     }
+
+
 }
