@@ -79,6 +79,7 @@ public class CategoryService {
         return new CategoryDto(category.getId(), category.getName(), category.getSlug(), category.getParentId(), List.of());
     }
 
+    @Transactional
     public void delete(Long id) {
         Category category = categoryRepository.findByIdAndDeletedAtIsNull(id)
                 .orElseThrow(() -> new ResourceNotFoundException(Message.Catalog.CATEGORY_NOT_FOUND));

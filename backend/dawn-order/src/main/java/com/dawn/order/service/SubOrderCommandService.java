@@ -54,6 +54,7 @@ public class SubOrderCommandService implements TransitionSubOrderUseCase {
     }
 
     @Override
+    @Transactional
     public SubOrderDto cancel(Long subOrderId, Long userId) {
         SubOrder subOrder = subOrderRepo
                 .findById(subOrderId)
@@ -71,6 +72,7 @@ public class SubOrderCommandService implements TransitionSubOrderUseCase {
     }
 
     @Override
+    @Transactional
     public void expiredUnpaidOrders() {
         Instant threshold = Instant.now().minusSeconds(15 * 60);
         List<SubOrder> expired = subOrderRepo.findByStatusAndCreatedAtBefore(SubOrderStatus.PENDING_PAYMENT, threshold);

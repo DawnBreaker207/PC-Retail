@@ -58,6 +58,7 @@ public class BrandService {
         return new BrandDto(brand.getId(), brand.getName(), brand.getLogoUrl());
     }
 
+    @Transactional
     public void delete(Long id) {
         Brand brand = brandRepository.findByIdAndDeletedAtIsNull(id)
                 .orElseThrow(() -> new ResourceNotFoundException(Message.Catalog.BRAND_NOT_FOUND));

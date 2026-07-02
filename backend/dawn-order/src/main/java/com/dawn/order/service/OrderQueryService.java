@@ -16,6 +16,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -28,12 +29,14 @@ public class OrderQueryService implements QueryOrderUseCase {
     private final OrderItemRepository orderItemRepo;
 
     @Override
+    @Transactional(readOnly = true)
     public ResponsePage<OrderDto> getMyOrders(Long userId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
         return ResponsePage.of(orderRepo.findByUserId(userId, pageable).map(this::toOrderDto));
     }
 
     @Override
+    @Transactional(readOnly = true)
     public OrderDto getById(Long orderId, Long userId) {
         Order order = orderRepo.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException(Message.Order.NOT_FOUND));
