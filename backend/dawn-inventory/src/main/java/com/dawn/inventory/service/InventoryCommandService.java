@@ -110,6 +110,13 @@ public class InventoryCommandService implements ReserveStockUseCase, ReleaseStoc
                     .referenceType(ReferenceType.ORDER_ITEM)
                     .referenceId(orderId)
                     .build());
+
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    cachePort.setStock(item.skuId(), inv.getAvailableQuantity());
+                }
+            });
         }
     }
 
