@@ -29,7 +29,10 @@ public class CatalogQueryService implements CatalogQueryPort {
                         sku -> new SkuPriceInfo(
                                 sku.getId(),
                                 sku.getName(),
-                                sku.getName(),
+                                sku.getImageUrls() != null
+                                        && !sku.getImageUrls().isEmpty()
+                                        ? sku.getImageUrls().getFirst()
+                                        : null,
                                 sku.getPrice())));
     }
 }

@@ -52,14 +52,15 @@ public class CartService implements GetCartUseCase, AddCartItemUseCase, UpdateCa
                 SkuPriceInfo skuInfo = skuInfoMap.get(item.getSkuId());
                 BigDecimal unitPrice = (skuInfo != null) ? skuInfo.unitPrice() : BigDecimal.ZERO;
                 String productName = (skuInfo != null) ? skuInfo.productName() : "";
-                String skuName = (skuInfo != null) ? skuInfo.skuName() : "";
+                String imageUrl = (skuInfo != null) ? skuInfo.primaryImageUrl() : "";
 
                 BigDecimal subTotal = unitPrice.multiply(BigDecimal.valueOf(item.getQuantity()));
 
                 return new CartItemDto(
                         item.getSkuId(),
                         productName,
-                        skuName, unitPrice,
+                        imageUrl,
+                        unitPrice,
                         item.getQuantity(),
                         subTotal);
             }).toList();

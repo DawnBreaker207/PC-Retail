@@ -5,6 +5,6 @@ import java.math.BigDecimal;
 public record SkuPriceInfo(
         Long skuId,
         String productName,
-        String skuName,
+        String primaryImageUrl,
         BigDecimal unitPrice) {
 }
