@@ -1,4 +1,4 @@
-CREATE TABLE audit_log
+CREATE TABLE audit_logs
 (
     id            BIGSERIAL PRIMARY KEY,
     actor_id      BIGINT,
@@ -15,6 +15,6 @@ CREATE TABLE audit_log
     created_at    TIMESTAMPTZ  NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_audit_log_entity ON audit_log (entity_type, entity_id);
-CREATE INDEX idx_audit_log_actor ON audit_log (actor_id);
-CREATE INDEX idx_audit_log_created_at ON audit_log (created_at);
+CREATE INDEX idx_audit_log_entity ON audit_logs (entity_type, entity_id);
+CREATE INDEX idx_audit_log_actor ON audit_logs (actor_id);
+CREATE INDEX idx_audit_log_created_at ON audit_logs (created_at);
