@@ -43,7 +43,7 @@ public class QueryPaymentStatusService implements QueryPaymentStatusUseCase {
             payment.setTransactionRef(result.transactionNo());
             paymentRepo.save(payment);
             orderClient.markOrderPaid(payment.getOrderId());
-        } else if ("UNKNOW".equals(result.responseCode())) {
+        } else if ("UNKNOWN".equals(result.responseCode())) {
             payment.setStatus(PaymentResultStatus.UNKNOWN);
             paymentRepo.save(payment);
             log.warn("Payment {} status UNKNOWN after VNPay query, need to solve manual", paymentId);
