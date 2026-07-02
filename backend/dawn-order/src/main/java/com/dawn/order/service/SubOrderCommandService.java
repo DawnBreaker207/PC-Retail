@@ -74,8 +74,8 @@ public class SubOrderCommandService implements TransitionSubOrderUseCase {
     @Override
     @Transactional
     public void expiredUnpaidOrders() {
-        Instant threshold = Instant.now().minusSeconds(15 * 60);
-        List<SubOrder> expired = subOrderRepo.findByStatusAndCreatedAtBefore(SubOrderStatus.PENDING_PAYMENT, threshold);
+        Instant threshold = Instant.now().minusSeconds(120 * 60);
+        List<SubOrder> expired = subOrderRepo.findByStatusAndReservedUntilBefore(SubOrderStatus.PENDING_PAYMENT, threshold);
 
         for (SubOrder subOrder : expired) {
             List<StockDecrementCommand> items = toStockCommands(subOrder.getId());

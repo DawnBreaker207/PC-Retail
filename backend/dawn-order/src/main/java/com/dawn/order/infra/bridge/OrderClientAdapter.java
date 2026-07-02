@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.List;
 
 @Component
@@ -27,6 +28,13 @@ public class OrderClientAdapter implements OrderClientPort {
     public BigDecimal getOrderTotalAmount(Long orderId) {
         return orderRepo.findById(orderId)
                 .map(Order::getTotalAmount)
+                .orElse(null);
+    }
+
+    @Override
+    public Instant getOrderReservedUntil(Long orderId) {
+        return orderRepo.findById(orderId)
+                .map(Order::getReservedUntil)
                 .orElse(null);
     }
 

@@ -1,6 +1,7 @@
 package com.dawn.order.statemachine;
 
 import com.dawn.common.exception.wrapper.ConflictException;
+import com.dawn.common.message.Message;
 import com.dawn.order.entity.enums.SubOrderStatus;
 import org.springframework.stereotype.Component;
 
@@ -33,7 +34,7 @@ public class SubOrderStateMachine {
     public void assertValidTransition(SubOrderStatus from, SubOrderStatus to) {
         Set<SubOrderStatus> allowed = TRANSITIONS.getOrDefault(from, Set.of());
         if (!allowed.contains(to)) {
-            throw new ConflictException("Invalid transition from " + from + " -> " + to);
+            throw new ConflictException(Message.format(Message.Order.INVALID_TRANSITION, from, to));
         }
     }
 }

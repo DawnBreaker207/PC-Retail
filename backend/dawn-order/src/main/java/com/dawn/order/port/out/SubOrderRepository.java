@@ -20,4 +20,6 @@ public interface SubOrderRepository {
 
     List<SubOrder> findByStatusAndCreatedAtBefore(SubOrderStatus status, Instant threshold);
 
+    List<SubOrder> findByStatusAndReservedUntilBefore(SubOrderStatus status, Instant threshold);
+
 }
