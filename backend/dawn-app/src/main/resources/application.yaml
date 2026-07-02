@@ -102,7 +102,7 @@ payment:
   # VNPay
   VNPay:
     url: ${VNPAY_URL}
-    queryUrl: ${VNPAY_ORDER_TYPE}
+    queryUrl: ${VNPAY_QUERY_URL}
     tmnCode: ${VNPAY_TMN_CODE}
     secretKey: ${VNPAY_SECRET_KEY}
     returnUrl: ${VNPAY_RETURN_URL}

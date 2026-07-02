@@ -106,7 +106,7 @@ public class VnpayGatewayAdapter implements VnpayGatewayPort {
             String transactionNo = String.valueOf(response.get("vnp_TransactionNo"));
             boolean success = "00".equals(responseCode);
 
-            return new VnpayQueryResult(success, responseCode, transactionNo);
+            return new VnpayQueryResult(success, transactionNo, responseCode);
         } catch (Exception e) {
             return new VnpayQueryResult(false, null, "UNKNOWN");
         }
