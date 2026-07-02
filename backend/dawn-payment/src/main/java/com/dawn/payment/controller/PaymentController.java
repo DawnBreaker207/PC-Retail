@@ -28,7 +28,7 @@ public class PaymentController {
 
     @GetMapping("/callback/{provider}")
     public PaymentDto handleCallback(
-            @PathVariable Long provider,
+            @PathVariable String provider,
             @RequestParam Map<String, String> params) {
         Long paymentId = Long.parseLong(params.get("vnp_TxnRef"));
         return queryPaymentStatusUseCase.queryAndSync(paymentId);
