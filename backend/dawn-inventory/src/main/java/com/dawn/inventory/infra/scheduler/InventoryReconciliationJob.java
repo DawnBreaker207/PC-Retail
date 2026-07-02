@@ -1,5 +1,6 @@
 package com.dawn.inventory.infra.scheduler;
 
+import com.dawn.inventory.entity.Inventory;
 import com.dawn.inventory.infra.persistence.JpaInventoryRepository;
 import com.dawn.inventory.port.out.InventoryCachePort;
 import lombok.RequiredArgsConstructor;
@@ -7,6 +8,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.stream.Stream;
 
 @Component
 @RequiredArgsConstructor
@@ -19,7 +22,9 @@ public class InventoryReconciliationJob {
     @Transactional(readOnly = true)
     public void sync() {
         log.info("Inventory reconciliation started");
-        inventoryRepository.findAll().forEach(inv -> cachePort.syncFromDb(inv.getSkuId(), inv.getAvailableQuantity()));
+        try (Stream<Inventory> stream = inventoryRepository.streamAll()) {
+            stream.forEach(inv -> cachePort.syncFromDb(inv.getSkuId(), inv.getAvailableQuantity()));
+        }
         log.info("Inventory reconciliation completed");
     }
 
