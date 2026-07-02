@@ -12,6 +12,8 @@ import java.util.Optional;
 public interface SubOrderRepository {
     SubOrder save(SubOrder subOrder);
 
+    void saveAll(List<SubOrder> subOrders);
+
     Optional<SubOrder> findById(Long id);
 
     List<SubOrder> findByOrderId(Long orderId);

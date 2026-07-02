@@ -30,4 +30,7 @@ public interface JpaSubOrderRepository extends JpaRepository<SubOrder, Long>, Su
     List<SubOrder> findByStatusAndReservedUntilBefore(
             @Param("status") SubOrderStatus status,
             @Param("now") Instant threshold);
+
+    @Override
+    void saveAll(List<SubOrder> subOrders);
 }

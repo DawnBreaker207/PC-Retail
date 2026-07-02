@@ -4,6 +4,7 @@ import com.dawn.common.exception.wrapper.ResourceNotFoundException;
 import com.dawn.common.message.Message;
 import com.dawn.order.dto.StockDecrementCommand;
 import com.dawn.order.dto.SubOrderDto;
+import com.dawn.order.entity.OrderItem;
 import com.dawn.order.entity.SubOrder;
 import com.dawn.order.entity.enums.SubOrderStatus;
 import com.dawn.order.port.in.TransitionSubOrderUseCase;
@@ -18,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -77,14 +79,23 @@ public class SubOrderCommandService implements TransitionSubOrderUseCase {
         Instant threshold = Instant.now().minusSeconds(120 * 60);
         List<SubOrder> expired = subOrderRepo.findByStatusAndReservedUntilBefore(SubOrderStatus.PENDING_PAYMENT, threshold);
 
+        List<Long> subOrderIds = expired.stream().map(SubOrder::getId).toList();
+        Map<Long, List<StockDecrementCommand>> itemsMap = orderItemRepo.findBySubOrderIdIn(subOrderIds)
+                .stream()
+                .collect(Collectors.groupingBy(
+                        OrderItem::getSubOrderId,
+                        Collectors.mapping(
+                                item -> new StockDecrementCommand(item.getSkuId(), item.getQuantity()),
+                                Collectors.toList())));
+
         for (SubOrder subOrder : expired) {
-            List<StockDecrementCommand> items = toStockCommands(subOrder.getId());
+            List<StockDecrementCommand> items = itemsMap.getOrDefault(subOrder.getId(), List.of());
             inventoryClient.release(items, subOrder.getOrderId());
 
             appendHistory(subOrder, SubOrderStatus.EXPIRED, null);
             subOrder.setStatus(SubOrderStatus.EXPIRED);
-            subOrderRepo.save(subOrder);
         }
+        subOrderRepo.saveAll(expired);
     }
 
     private List<StockDecrementCommand> toStockCommands(Long subOrderId) {

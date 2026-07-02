@@ -9,5 +9,7 @@ public interface OrderItemRepository {
 
     List<OrderItem> findBySubOrderId(Long subOrderId);
 
+    List<OrderItem> findBySubOrderIdIn(List<Long> subOrderId);
+
     boolean existsBySkuId(Long skuId);
 }

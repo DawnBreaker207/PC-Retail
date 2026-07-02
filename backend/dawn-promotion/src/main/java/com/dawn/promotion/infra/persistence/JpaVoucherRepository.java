@@ -17,13 +17,8 @@ public interface JpaVoucherRepository extends JpaRepository<Voucher, Long>, Vouc
             FROM FlashSaleItem i
             JOIN FlashSaleCampaign c ON c.id = i.campaignId
             WHERE i.skuId IN :skuIds
-            AND c.status = 'ACTICE'
+            AND c.status = 'ACTIVE'
             """)
     @Override
-    default boolean hasActiveFlashSale(
-            @Param("skuIds") List<Long> skuIds) {
-        return false;
-    }
-
-
+    boolean hasActiveFlashSale(@Param("skuIds") List<Long> skuIds);
 }
