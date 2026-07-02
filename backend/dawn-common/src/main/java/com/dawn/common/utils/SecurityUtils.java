@@ -1,6 +1,7 @@
 package com.dawn.common.utils;
 
 import com.dawn.common.exception.wrapper.UnauthorizedException;
+import com.dawn.common.message.Message;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -30,7 +31,7 @@ public class SecurityUtils {
     public static Long requiredCurrentUserId() {
         Long userId = getCurrentUserId();
         if (userId == null) {
-            throw new UnauthorizedException("Required login");
+            throw new UnauthorizedException(Message.Auth.REQUIRED_LOGIN);
         }
         return userId;
     }
