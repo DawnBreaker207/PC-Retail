@@ -22,6 +22,8 @@ import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -120,7 +122,7 @@ public class CartService implements GetCartUseCase, AddCartItemUseCase, UpdateCa
         );
 
         cartItemRepository.save(item);
-        cartCachePort.evict(userId);
+        evictAfterCommit(userId);
 
         return toDto(item);
     }
@@ -133,21 +135,21 @@ public class CartService implements GetCartUseCase, AddCartItemUseCase, UpdateCa
         item.setQuantity(quantity);
         cartItemRepository.save(item);
 
-        cartCachePort.evict(userId);
+        evictAfterCommit(userId);
         return toDto(item);
     }
 
     @Transactional
     public void removeItem(Long userId, Long skuId) {
         cartItemRepository.deleteByUserIdAndSkuId(userId, skuId);
-        cartCachePort.evict(userId);
+        evictAfterCommit(userId);
     }
 
     // Call AFTER_COMMIT from CheckoutService
     @Transactional
     public void clearCart(Long userId) {
         cartItemRepository.deleteByUserId(userId);
-        cartCachePort.evict(userId);
+        evictAfterCommit(userId);
     }
 
     // Take raw cart items for CheckoutService
@@ -167,5 +169,15 @@ public class CartService implements GetCartUseCase, AddCartItemUseCase, UpdateCa
                 BigDecimal.ZERO);
     }
 
+    private void evictAfterCommit(Long userId) {
+        TransactionSynchronizationManager.registerSynchronization(
+                new TransactionSynchronization() {
+                    @Override
+                    public void afterCommit() {
+                        cartCachePort.evict(userId);
+                    }
+                }
+        );
+    }
 
 }
