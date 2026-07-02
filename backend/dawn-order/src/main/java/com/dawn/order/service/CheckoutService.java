@@ -113,7 +113,7 @@ public class CheckoutService implements CheckoutUseCase {
                     .totalAmount(finalAmount)
                     .taxAmount(BigDecimal.ZERO)
                     .paymentStatus(PaymentStatus.PENDING)
-                    .reservedUntil(Instant.now().plusSeconds(15 * 60))
+                    .reservedUntil(Instant.now().plusSeconds(120 * 60))
                     .idempotencyKey(req.idempotencyKey())
                     .taxInfo(req.taxInfo())
                     .build();
