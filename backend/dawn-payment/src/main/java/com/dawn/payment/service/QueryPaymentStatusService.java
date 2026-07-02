@@ -6,10 +6,11 @@ import com.dawn.payment.dto.PaymentDto;
 import com.dawn.payment.dto.VnpayQueryResult;
 import com.dawn.payment.entity.Payment;
 import com.dawn.payment.entity.enums.PaymentResultStatus;
+import com.dawn.payment.infra.gateway.PaymentGatewayRegistry;
+import com.dawn.payment.infra.vnpay.VnpayGatewayAdapter;
 import com.dawn.payment.port.in.QueryPaymentStatusUseCase;
 import com.dawn.payment.port.out.OrderClientPort;
 import com.dawn.payment.port.out.PaymentRepository;
-import com.dawn.payment.port.out.VnpayGatewayPort;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -21,7 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class QueryPaymentStatusService implements QueryPaymentStatusUseCase {
 
     private final PaymentRepository paymentRepo;
-    private final VnpayGatewayPort vnpayGateway;
+    private final PaymentGatewayRegistry gatewayRegistry;
     private final OrderClientPort orderClient;
 
     @Override
@@ -36,7 +37,8 @@ public class QueryPaymentStatusService implements QueryPaymentStatusUseCase {
         }
 
         // Always call VNPAY Query API to get real status - Not trusted query param on URL redirect
-        VnpayQueryResult result = vnpayGateway.queryTransaction(payment.getTransactionRef(), payment.getId());
+        VnpayQueryResult result = ((VnpayGatewayAdapter) gatewayRegistry.get(payment.getMethod()))
+                .queryTransaction(payment.getTransactionRef(), payment.getId());
 
         if (result.success()) {
             payment.setStatus(PaymentResultStatus.COMPLETED);

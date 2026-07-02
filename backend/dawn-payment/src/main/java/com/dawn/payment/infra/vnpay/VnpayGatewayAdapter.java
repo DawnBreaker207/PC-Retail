@@ -1,7 +1,12 @@
 package com.dawn.payment.infra.vnpay;
 
+import com.dawn.common.message.Message;
+import com.dawn.payment.dto.CreatePaymentResult;
+import com.dawn.payment.dto.PaymentDto;
 import com.dawn.payment.dto.VnpayQueryResult;
-import com.dawn.payment.port.out.VnpayGatewayPort;
+import com.dawn.payment.entity.Payment;
+import com.dawn.payment.entity.enums.PaymentMethod;
+import com.dawn.payment.infra.gateway.PaymentGateway;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,12 +19,14 @@ import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
-public class VnpayGatewayAdapter implements VnpayGatewayPort {
+public class VnpayGatewayAdapter implements PaymentGateway {
 
     @Value("${payment.VNPay.url}")
     private String vnp_PayUrl;
@@ -47,8 +54,39 @@ public class VnpayGatewayAdapter implements VnpayGatewayPort {
 
     private final RestTemplate restTemplate;
 
+
     @Override
-    public String buildPaymentUrl(Long paymentId, BigDecimal amount, String orderInfo) {
+    public PaymentMethod supportedMethod() {
+        return PaymentMethod.VNPAY;
+    }
+
+    @Override
+    public CreatePaymentResult createPayment(Payment payment) {
+        String url = buildPaymentUrl(
+                payment.getId(),
+                payment.getAmount(),
+                "Order #" + payment.getOrderId(),
+                payment.getCreatedAt());
+        return new CreatePaymentResult(payment.getId(), url);
+    }
+
+    @Override
+    public PaymentDto processCallback(Long paymentId, Map<String, String> params) {
+        return queryStatus(paymentId, params.get("vnp_TransactionNo"));
+    }
+
+    @Override
+    public PaymentDto processWebhook(Long paymentId, Map<String, String> params) {
+        throw new UnsupportedOperationException(Message.Payment.WEBHOOK_NOT_SUPPORTED);
+    }
+
+    @Override
+    public PaymentDto queryStatus(Long paymentId, String transactionRef) {
+        VnpayQueryResult result = queryTransaction(transactionRef, paymentId);
+        return null;
+    }
+
+    public String buildPaymentUrl(Long paymentId, BigDecimal amount, String orderInfo, Instant createdAt) {
         Map<String, String> vnpParamsMap = new HashMap<>();
         vnpParamsMap.put("vnp_Version", this.vnp_Version);
         vnpParamsMap.put("vnp_Command", this.vnp_Command);
@@ -66,7 +104,9 @@ public class VnpayGatewayAdapter implements VnpayGatewayPort {
         SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
         formatter.setTimeZone(TimeZone.getTimeZone("Asia/Ho_Chi_Minh"));
         vnpParamsMap.put("vnp_CreateDate", formatter.format(calendar.getTime()));
-        calendar.add(Calendar.MINUTE, 15);
+
+        long diffMinutes = ChronoUnit.MINUTES.between(createdAt, Instant.now());
+        calendar.add(Calendar.MINUTE, Math.toIntExact(Math.max(15, 120 - diffMinutes)));
         vnpParamsMap.put("vnp_ExpireDate", formatter.format(calendar.getTime()));
 
         String hashData = buildHashData(vnpParamsMap);
@@ -78,7 +118,6 @@ public class VnpayGatewayAdapter implements VnpayGatewayPort {
     }
 
 
-    @Override
     public VnpayQueryResult queryTransaction(String transactionRef, Long paymentId) {
         Map<String, String> params = new HashMap<>();
         params.put("vnp_Version", vnp_Version);
@@ -167,4 +206,5 @@ public class VnpayGatewayAdapter implements VnpayGatewayPort {
                     return key + "=" + value;
                 }).collect(Collectors.joining("&"));
     }
+
 }
