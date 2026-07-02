@@ -6,7 +6,7 @@ import com.dawn.catalog.entity.Brand;
 import com.dawn.catalog.repository.BrandRepository;
 import com.dawn.catalog.repository.SkuRepository;
 import com.dawn.common.exception.wrapper.InvalidRequestException;
-import com.dawn.common.exception.wrapper.ResourceAlreadyExistedException;
+import com.dawn.common.exception.wrapper.ConflictException;
 import com.dawn.common.exception.wrapper.ResourceNotFoundException;
 import com.dawn.common.message.Message;
 import lombok.RequiredArgsConstructor;
@@ -37,7 +37,7 @@ public class BrandService {
     @Transactional
     public BrandDto create(BrandRequest req) {
         if (brandRepository.existsByNameAndDeletedAtIsNull(req.name())) {
-            throw new ResourceAlreadyExistedException(Message.Catalog.BRAND_ALREADY_EXISTS);
+            throw new ConflictException(Message.Catalog.BRAND_ALREADY_EXISTS);
         }
 
         Brand brand = Brand.builder()

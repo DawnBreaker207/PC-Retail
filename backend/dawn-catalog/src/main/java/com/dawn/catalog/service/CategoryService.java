@@ -6,7 +6,7 @@ import com.dawn.catalog.entity.Category;
 import com.dawn.catalog.repository.CategoryRepository;
 import com.dawn.catalog.repository.SkuRepository;
 import com.dawn.common.exception.wrapper.InvalidRequestException;
-import com.dawn.common.exception.wrapper.ResourceAlreadyExistedException;
+import com.dawn.common.exception.wrapper.ConflictException;
 import com.dawn.common.exception.wrapper.ResourceNotFoundException;
 import com.dawn.common.message.Message;
 import lombok.RequiredArgsConstructor;
@@ -48,7 +48,7 @@ public class CategoryService {
     @Transactional
     public CategoryDto create(CategoryRequest req) {
         if (categoryRepository.existsBySlugAndDeletedAtIsNull(req.slug())) {
-            throw new ResourceAlreadyExistedException(Message.Catalog.CATEGORY_SLUG_EXISTS);
+            throw new ConflictException(Message.Catalog.CATEGORY_SLUG_EXISTS);
         }
 
         if (req.parentId() != null) {
@@ -70,7 +70,7 @@ public class CategoryService {
                 .orElseThrow(() -> new ResourceNotFoundException(Message.Catalog.CATEGORY_NOT_FOUND));
         if (!category.getSlug().equals(req.slug()) &&
                 categoryRepository.existsBySlugAndDeletedAtIsNull(req.slug())) {
-            throw new ResourceAlreadyExistedException(Message.Catalog.CATEGORY_SLUG_EXISTS);
+            throw new ConflictException(Message.Catalog.CATEGORY_SLUG_EXISTS);
         }
 
         category.setName(req.name());

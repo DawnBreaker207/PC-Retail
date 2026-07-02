@@ -10,7 +10,7 @@ import com.dawn.catalog.entity.enums.SkuStatus;
 import com.dawn.catalog.repository.BrandRepository;
 import com.dawn.catalog.repository.CategoryRepository;
 import com.dawn.catalog.repository.SkuRepository;
-import com.dawn.common.exception.wrapper.ResourceAlreadyExistedException;
+import com.dawn.common.exception.wrapper.ConflictException;
 import com.dawn.common.exception.wrapper.ResourceNotFoundException;
 import com.dawn.common.message.Message;
 import com.dawn.common.response.ResponsePage;
@@ -64,7 +64,7 @@ public class SkuService {
     @Transactional
     public SkuDetailDto create(SkuCreatedRequest request) {
         if (skuRepository.existsBySkuCodeAndDeletedAtIsNull(request.skuCode())) {
-            throw new ResourceAlreadyExistedException(Message.Catalog.SKU_CODE_ALREADY_EXISTS);
+            throw new ConflictException(Message.Catalog.SKU_CODE_ALREADY_EXISTS);
         }
         categoryRepository.findByIdAndDeletedAtIsNull(request.categoryId())
                 .orElseThrow(() -> new ResourceNotFoundException(Message.Catalog.CATEGORY_NOT_FOUND));

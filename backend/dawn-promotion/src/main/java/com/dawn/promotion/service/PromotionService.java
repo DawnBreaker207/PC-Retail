@@ -1,7 +1,7 @@
 package com.dawn.promotion.service;
 
 import com.dawn.common.exception.wrapper.InvalidRequestException;
-import com.dawn.common.exception.wrapper.ResourceAlreadyExistedException;
+import com.dawn.common.exception.wrapper.ConflictException;
 import com.dawn.common.exception.wrapper.ResourceNotFoundException;
 import com.dawn.common.message.Message;
 import com.dawn.common.response.ResponsePage;
@@ -40,7 +40,7 @@ public class PromotionService implements ManageVoucherUseCase {
     public VoucherDto create(VoucherCreateRequest req) {
         String code = req.code().toUpperCase();
         if (voucherRepo.existsByCodeAndDeletedAtIsNull(req.code())) {
-            throw new ResourceAlreadyExistedException(Message.Promotion.VOUCHER_CODE_EXISTS);
+            throw new ConflictException(Message.Promotion.VOUCHER_CODE_EXISTS);
         }
         if (req.validFrom().isAfter(req.validTo())) {
             throw new InvalidRequestException(Message.Promotion.VOUCHER_DATE_INVALID);

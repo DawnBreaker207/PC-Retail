@@ -1,7 +1,7 @@
 package com.dawn.user.service;
 
 import com.dawn.common.exception.wrapper.InvalidRequestException;
-import com.dawn.common.exception.wrapper.ResourceAlreadyExistedException;
+import com.dawn.common.exception.wrapper.ConflictException;
 import com.dawn.common.exception.wrapper.ResourceNotFoundException;
 import com.dawn.common.exception.wrapper.UnauthorizedException;
 import com.dawn.common.message.Message;
@@ -41,7 +41,7 @@ public class AuthService implements RegisterUseCase, LoginUseCase, TokenRefreshU
     @Transactional
     public RegisterInitResponse register(RegisterRequest request) {
         if (userRepository.existsByEmailAndDeletedAtIsNull(request.email())) {
-            throw new ResourceAlreadyExistedException(Message.User.EMAIL_ALREADY_USED);
+            throw new ConflictException(Message.User.EMAIL_ALREADY_USED);
         }
 
         User user = User.builder()
