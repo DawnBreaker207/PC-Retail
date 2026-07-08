@@ -5,6 +5,7 @@
         nz-input
         formControlName="email"
         placeholder="Email"
+        aria-label="Email"
         class="!rounded-lg !py-2.5 !px-3 !border-border dark:!border-border-dark !bg-bg dark:!bg-bg-dark !text-sm !w-full"
       />
     </nz-form-control>
@@ -16,42 +17,41 @@
 
   <nz-form-item class="!mb-0">
     <nz-form-control [nzErrorTip]="'Mật khẩu phải có ít nhất 6 ký tự'">
-      <nz-input-group [nzSuffix]="pwdIcon" class="[&_.ant-input]:!rounded-lg [&_.ant-input]:!py-2.5 [&_.ant-input]:!px-3 [&_.ant-input]:!bg-bg">
+      <nz-input-group [nzSuffix]="pwdIcon" class="[&_.ant-input]:!rounded-lg [&_.ant-input]:!py-2.5 [&_.ant-input]:!px-3 [&_.ant-input]:!bg-bg [&_.ant-input]:dark:!bg-bg-dark">
         <input
           nz-input
           [type]="passwordVisible() ? 'text' : 'password'"
           formControlName="password"
           placeholder="Mật khẩu"
+          aria-label="Mật khẩu"
           class="dark:!bg-bg-dark"
         />
       </nz-input-group>
       <ng-template #pwdIcon>
-        <span
-          nz-icon
-          [nzType]="passwordVisible() ? 'eye' : 'eye-invisible'"
+        <button type="button"
           (click)="passwordVisible.set(!passwordVisible())"
-          (keyup.enter)="passwordVisible.set(!passwordVisible())"
-          tabindex="0"
-          role="button"
-          class="cursor-pointer text-muted dark:text-muted-dark hover:text-primary transition-colors"
-        ></span>
+          [attr.aria-label]="passwordVisible() ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'"
+          [attr.aria-pressed]="passwordVisible()"
+          class="!border-0 !bg-transparent !p-0 cursor-pointer text-muted dark:text-muted-dark hover:text-primary transition-colors"
+        >
+          <span nz-icon [nzType]="passwordVisible() ? 'eye' : 'eye-invisible'"></span>
+        </button>
       </ng-template>
     </nz-form-control>
   </nz-form-item>
 
   <div class="text-right">
-    <a routerLink="/auth/forgot-password" class="text-xs text-muted dark:text-muted-dark hover:text-primary transition-colors">Quên mật khẩu email?</a>
+    <a routerLink="/auth/forgot-password" class="text-xs text-muted dark:text-muted-dark hover:text-primary transition-colors" aria-label="Quên mật khẩu">Quên mật khẩu?</a>
   </div>
 
   <button
-    nz-button
-    nzType="primary"
-    nzBlock
-    nzSize="large"
-    [nzLoading]="isLoading()"
+    type="submit"
     [disabled]="form.invalid"
-    class="!rounded-lg !font-bold !shadow-sm hover:!shadow-md !transition-all !duration-200 !h-11 !uppercase !tracking-wide !text-sm"
+    class="w-full rounded-lg font-bold shadow-sm hover:shadow-md transition-all duration-200 h-11 leading-none uppercase tracking-wide text-sm bg-primary text-white hover:bg-primary-dark disabled:opacity-50 disabled:cursor-not-allowed"
   >
+    @if (isLoading()) {
+      <span nz-icon nzType="loading" class="mr-2"></span>
+    }
     Đăng nhập
   </button>
 
@@ -64,13 +64,13 @@
     </div>
   </div>
 
-  <div class="grid grid-cols-2 gap-3">
-    <button nz-button nzType="default" nzBlock class="!rounded-lg !h-10 !text-sm !font-medium !border-border dark:!border-border-dark hover:!border-primary !transition-colors">
-      <img src="https://www.google.com/favicon.ico" alt="Google" class="w-4 h-4 mr-2" />
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+    <button type="button" nz-button nzType="default" nzBlock class="!rounded-lg !h-10 !text-sm !font-medium !border-border dark:!border-border-dark hover:!border-primary !transition-colors">
+      <img src="https://www.google.com/favicon.ico" alt="Google logo" loading="lazy" class="w-4 h-4 mr-2" />
       Google
     </button>
-    <button nz-button nzType="default" nzBlock class="!rounded-lg !h-10 !text-sm !font-medium !border-border dark:!border-border-dark hover:!border-primary !transition-colors">
-      <span nz-icon nzType="facebook" class="text-blue-600 text-base mr-2"></span>
+    <button type="button" nz-button nzType="default" nzBlock class="!rounded-lg !h-10 !text-sm !font-medium !border-border dark:!border-border-dark hover:!border-primary !transition-colors" aria-label="Đăng nhập bằng Facebook">
+      <span nz-icon nzType="facebook" class="text-info text-base mr-2"></span>
       Facebook
     </button>
   </div>

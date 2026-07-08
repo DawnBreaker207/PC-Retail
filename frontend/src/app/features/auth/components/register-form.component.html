@@ -5,6 +5,7 @@
         nz-input
         formControlName="fullName"
         placeholder="Họ và tên"
+        aria-label="Họ và tên"
         class="!rounded-lg !py-2.5 !px-3 !border-border dark:!border-border-dark !bg-bg dark:!bg-bg-dark !text-sm !w-full"
       />
     </nz-form-control>
@@ -16,6 +17,7 @@
         nz-input
         formControlName="email"
         placeholder="Email"
+        aria-label="Email"
         class="!rounded-lg !py-2.5 !px-3 !border-border dark:!border-border-dark !bg-bg dark:!bg-bg-dark !text-sm !w-full"
       />
     </nz-form-control>
@@ -31,6 +33,7 @@
         nz-input
         formControlName="phone"
         placeholder="Số điện thoại"
+        aria-label="Số điện thoại"
         class="!rounded-lg !py-2.5 !px-3 !border-border dark:!border-border-dark !bg-bg dark:!bg-bg-dark !text-sm !w-full"
       />
     </nz-form-control>
@@ -38,55 +41,56 @@
 
   <nz-form-item class="!mb-0">
     <nz-form-control [nzErrorTip]="'Mật khẩu phải có ít nhất 6 ký tự'">
-      <nz-input-group [nzSuffix]="pwdIcon" class="[&_.ant-input]:!rounded-lg [&_.ant-input]:!py-2.5 [&_.ant-input]:!px-3 [&_.ant-input]:!bg-bg">
+      <nz-input-group [nzSuffix]="pwdIcon" class="[&_.ant-input]:!rounded-lg [&_.ant-input]:!py-2.5 [&_.ant-input]:!px-3 [&_.ant-input]:!bg-bg [&_.ant-input]:dark:!bg-bg-dark">
         <input
           nz-input
           [type]="passwordVisible() ? 'text' : 'password'"
           formControlName="password"
           placeholder="Mật khẩu"
+          aria-label="Mật khẩu"
           class="dark:!bg-bg-dark"
         />
       </nz-input-group>
       <ng-template #pwdIcon>
-        <span
-          nz-icon
-          [nzType]="passwordVisible() ? 'eye' : 'eye-invisible'"
+        <button type="button"
           (click)="passwordVisible.set(!passwordVisible())"
-          (keyup.enter)="passwordVisible.set(!passwordVisible())"
-          tabindex="0"
-          role="button"
-          class="cursor-pointer text-muted dark:text-muted-dark hover:text-primary transition-colors"
-        ></span>
+          [attr.aria-label]="passwordVisible() ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'"
+          [attr.aria-pressed]="passwordVisible()"
+          class="!border-0 !bg-transparent !p-0 cursor-pointer text-muted dark:text-muted-dark hover:text-primary transition-colors"
+        >
+          <span nz-icon [nzType]="passwordVisible() ? 'eye' : 'eye-invisible'"></span>
+        </button>
       </ng-template>
     </nz-form-control>
   </nz-form-item>
 
   <nz-form-item class="!mb-0">
     <nz-form-control [nzErrorTip]="'Mật khẩu không khớp'">
-      <nz-input-group [nzSuffix]="confirmIcon" class="[&_.ant-input]:!rounded-lg [&_.ant-input]:!py-2.5 [&_.ant-input]:!px-3 [&_.ant-input]:!bg-bg">
+      <nz-input-group [nzSuffix]="confirmIcon" class="[&_.ant-input]:!rounded-lg [&_.ant-input]:!py-2.5 [&_.ant-input]:!px-3 [&_.ant-input]:!bg-bg [&_.ant-input]:dark:!bg-bg-dark">
         <input
           nz-input
           [type]="confirmVisible() ? 'text' : 'password'"
           formControlName="confirmPassword"
           placeholder="Nhập lại mật khẩu"
+          aria-label="Nhập lại mật khẩu"
           class="dark:!bg-bg-dark"
         />
       </nz-input-group>
       <ng-template #confirmIcon>
-        <span
-          nz-icon
-          [nzType]="confirmVisible() ? 'eye' : 'eye-invisible'"
+        <button type="button"
           (click)="confirmVisible.set(!confirmVisible())"
-          (keyup.enter)="confirmVisible.set(!confirmVisible())"
-          tabindex="0"
-          role="button"
-          class="cursor-pointer text-muted dark:text-muted-dark hover:text-primary transition-colors"
-        ></span>
+          [attr.aria-label]="confirmVisible() ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'"
+          [attr.aria-pressed]="confirmVisible()"
+          class="!border-0 !bg-transparent !p-0 cursor-pointer text-muted dark:text-muted-dark hover:text-primary transition-colors"
+        >
+          <span nz-icon [nzType]="confirmVisible() ? 'eye' : 'eye-invisible'"></span>
+        </button>
       </ng-template>
     </nz-form-control>
   </nz-form-item>
 
   <button
+    type="submit"
     nz-button
     nzType="primary"
     nzBlock

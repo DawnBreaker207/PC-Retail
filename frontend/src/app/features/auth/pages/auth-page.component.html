@@ -11,14 +11,14 @@
         <app-login-form (loginSuccess)="onLoginSuccess()" />
         <div class="text-center mt-5 text-sm text-muted dark:text-muted-dark">
           Bạn chưa có tài khoản?
-          <button nz-button nzType="link" class="!p-0 !h-auto !text-sm !font-semibold" (click)="isLoginMode.set(false)">Đăng ký ngay!</button>
+          <button type="button" nz-button nzType="link" class="!p-0 !h-auto !text-sm !font-semibold" (click)="isLoginMode.set(false)">Đăng ký ngay!</button>
         </div>
       } @else {
         <h1 class="text-center text-lg font-bold mb-6">TẠO TÀI KHOẢN</h1>
         <app-register-form (registerSuccess)="onRegisterSuccess()" />
         <div class="text-center mt-5 text-sm text-muted dark:text-muted-dark">
           Đã có tài khoản?
-          <button nz-button nzType="link" class="!p-0 !h-auto !text-sm !font-semibold" (click)="isLoginMode.set(true)">Đăng nhập</button>
+          <button type="button" nz-button nzType="link" class="!p-0 !h-auto !text-sm !font-semibold" (click)="isLoginMode.set(true)">Đăng nhập</button>
         </div>
       }
     </div>
