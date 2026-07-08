@@ -6,6 +6,7 @@
       <img
         [src]="item().imageUrl"
         [alt]="item().name"
+        loading="lazy"
         class="w-full h-full object-contain p-1 group-hover:scale-110 transition-transform duration-300"
       />
     </div>
@@ -29,6 +30,7 @@
       (ngModelChange)="onQtyChange($event)"
       [nzMin]="1"
       [nzMax]="item().stock"
+      aria-label="Số lượng"
       class="mt-2 w-20 sm:w-24 [&_.ant-input-number]:!rounded-lg"
     ></nz-input-number>
 

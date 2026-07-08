@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { NzStepsModule } from 'ng-zorro-antd/steps';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { CurrencyFormatPipe } from '@shared/pipes/currency-format.pipe';
+import { FallbackImageDirective } from '@shared/directives/fallback-image.directive';
 import { ShippingFormComponent } from '../components/shipping-form.component';
 import { OrderReviewComponent } from '../components/order-review.component';
 import { CheckoutService } from '@core/services/checkout.service';
@@ -16,7 +17,7 @@ import { switchMap, finalize } from 'rxjs';
   imports: [
     NzStepsModule,
     NzButtonModule,
-    CurrencyFormatPipe,
+    CurrencyFormatPipe, FallbackImageDirective,
     ShippingFormComponent,
     OrderReviewComponent,
   ],
@@ -31,15 +32,22 @@ export class CheckoutComponent {
   currentStep = signal(0);
   shippingData = signal<ShippingAddress | null>(null);
   isPlacing = signal(false);
+  windowWidth = signal(0);
+  private createdOrderId = 0;
+
+  constructor() {
+    if (typeof window !== 'undefined') {
+      this.windowWidth.set(window.innerWidth);
+      const onResize = () => this.windowWidth.set(window.innerWidth);
+      window.addEventListener('resize', onResize);
+    }
+    if (this.selectedItems().length === 0) {
+      this.router?.navigate(['/cart']);
+    }
+  }
 
   selectedItems = this.store.selectedItems;
   selectedAmount = this.store.selectedAmount;
-
-  constructor() {
-    if (this.selectedItems().length === 0) {
-      this.router.navigate(['/cart']);
-    }
-  }
 
   onShippingComplete(data: ShippingAddress) {
     this.shippingData.set(data);
@@ -64,12 +72,23 @@ export class CheckoutComponent {
     this.checkoutService
       .checkout(req)
       .pipe(
-        switchMap((res) => this.checkoutService.initiatePayment(res.id)),
+        switchMap((res) => {
+          this.createdOrderId = res.id;
+          return this.checkoutService.initiatePayment(res.id);
+        }),
         finalize(() => this.isPlacing.set(false)),
         takeUntilDestroyed(this.destroyRef),
       )
-      .subscribe((res) => {
-        window.location.href = res.paymentUrl;
+      .subscribe({
+        next: () => {
+          const ok = window.confirm('Mô phỏng thanh toán VNPay\n\nOK = Thành công\nHuỷ = Thất bại');
+          const code = ok ? '00' : '01';
+          window.location.href = `/checkout/result?orderId=${this.createdOrderId}&vnp_ResponseCode=${code}&vnp_TransactionNo=MOCK${Date.now()}`;
+        },
+        error: (err) => {
+          console.error('Checkout/initiate failed:', err);
+          window.alert('Lỗi: không thể tạo đơn hàng. Vui lòng thử lại.');
+        },
       });
   }
 }

@@ -1,5 +1,5 @@
 <div class="max-w-screen-2xl mx-auto px-4 py-6 lg:py-8 min-h-[60vh]">
-  <nz-steps [nzCurrent]="currentStep()" nzSize="small" class="mb-8 max-sm:text-xs [&_.ant-steps-item-title]:!text-xs sm:[&_.ant-steps-item-title]:!text-sm">
+  <nz-steps [nzCurrent]="currentStep()" nzSize="small" [nzDirection]="(windowWidth() < 640) ? 'vertical' : 'horizontal'" class="mb-8 max-sm:text-xs [&_.ant-steps-item-title]:!text-xs sm:[&_.ant-steps-item-title]:!text-sm">
     <nz-step nzTitle="Thông tin giao hàng"></nz-step>
     <nz-step nzTitle="Xác nhận đơn"></nz-step>
     <nz-step nzTitle="Thanh toán"></nz-step>
@@ -32,7 +32,7 @@
             @for (item of selectedItems(); track item.skuId) {
               <div class="flex gap-3 text-sm group">
                 <div class="w-12 h-12 rounded-lg bg-bg dark:bg-bg-dark flex items-center justify-center overflow-hidden shrink-0">
-                  <img [src]="item.imageUrl" alt="{{ item.name }}" class="w-full h-full object-contain p-0.5 group-hover:scale-110 transition-transform duration-300" />
+                  <img [src]="item.imageUrl" loading="lazy" appFallbackImage alt="{{ item.name }}" class="w-full h-full object-contain p-0.5 group-hover:scale-110 transition-transform duration-300" />
                 </div>
                 <div class="flex-1 min-w-0">
                   <p class="line-clamp-1 text-sm font-medium">{{ item.name }}</p>
@@ -52,3 +52,4 @@
     </div>
   </div>
 </div>
+

@@ -6,7 +6,7 @@
   >
     <div nz-result-extra>
       <button nz-button nzType="primary" [routerLink]="['/orders', orderId()]">Xem đơn hàng</button>
-      <button nz-button routerLink="/">Tiếp tục mua sắm</button>
+      <button type="button" nz-button routerLink="/">Tiếp tục mua sắm</button>
     </div>
   </nz-result>
 } @else {
@@ -17,7 +17,7 @@
   >
     <div nz-result-extra>
       <button nz-button nzType="primary" routerLink="/checkout">Thử lại</button>
-      <button nz-button routerLink="/orders">Hủy đơn</button>
+      <button type="button" nz-button routerLink="/orders">Hủy đơn</button>
     </div>
   </nz-result>
 }
