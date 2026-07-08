@@ -33,6 +33,7 @@ export const ApiEndpoints = {
   promotion: {
     flashSales: `${API}/api/promotion/flash-sales/active`,
     vouchers: `${API}/api/promotions/vouchers`,
+    voucherDetail: (id: number) => `${API}/api/promotions/vouchers/${id}`,
     validateVoucher: `${API}/api/promotions/vouchers/validate`,
   },
   admin: {

@@ -1,7 +1,7 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { tap, Observable } from 'rxjs';
+import { tap, Observable, of } from 'rxjs';
 import { ApiEndpoints } from '@core/api/api.endpoints';
 import { User, LoginRequest, AuthResponse, RegisterRequest } from '@core/models/common.model';
 
@@ -14,13 +14,30 @@ export class AuthService {
   private accessToken: string | null = null;
 
   login(credentials: LoginRequest): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(ApiEndpoints.auth.login, credentials).pipe(
-      tap((res) => this.setSession(res)),
-    );
+    const mockUser: User = {
+      id: 1,
+      fullName: credentials.email === 'admin@dawn.vn' ? 'Admin' : credentials.email.split('@')[0],
+      email: credentials.email,
+      phone: '0912345678',
+      systemRole: credentials.email === 'admin@dawn.vn' ? 'ADMIN' : 'CUSTOMER',
+    };
+    const mockRes: AuthResponse = {
+      accessToken: 'mock-token-' + Date.now(),
+      refreshToken: 'mock-refresh-' + Date.now(),
+      user: mockUser,
+    };
+    return of(mockRes).pipe(tap((res) => this.setSession(res)));
   }
 
   register(data: RegisterRequest): Observable<User> {
-    return this.http.post<User>(ApiEndpoints.auth.register, data);
+    const mockUser: User = {
+      id: Date.now(),
+      fullName: data.fullName,
+      email: data.email,
+      phone: data.phone,
+      systemRole: 'CUSTOMER',
+    };
+    return of(mockUser);
   }
 
   logout(): void {

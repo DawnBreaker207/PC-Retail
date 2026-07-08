@@ -175,3 +175,55 @@ export interface CreateReviewRequest {
   comment: string;
   images?: string[];
 }
+
+export type BuilderSlotType =
+  | 'CPU' | 'Mainboard' | 'RAM' | 'GPU' | 'PSU'
+  | 'Case' | 'Storage' | 'Cooler'
+  | 'Monitor' | 'Keyboard' | 'Mouse' | 'Headphone';
+
+export interface BuilderSlot {
+  slotType: BuilderSlotType;
+  slotName: string;
+  isRemovable: boolean;
+  isRequired: boolean;
+}
+
+export interface BuilderSelection {
+  slotType: BuilderSlotType;
+  slotName: string;
+  sku: Sku;
+}
+
+export interface BuilderConflict {
+  slotType: BuilderSlotType;
+  message: string;
+}
+
+export interface BuilderValidation {
+  valid: boolean;
+  conflicts: BuilderConflict[];
+  warnings: string[];
+}
+
+export interface BuildTemplate {
+  id: number;
+  name: string;
+  description?: string;
+  tags: string[];
+  totalPrice: number;
+  imageUrl?: string;
+  slots: Record<string, string>;
+}
+
+export interface BuildTemplateDetail {
+  id: number;
+  name: string;
+  description?: string;
+  slots: {
+    slotType: BuilderSlotType;
+    slotName: string;
+    isRemovable: boolean;
+    defaultSku?: Sku;
+    allowedSkus?: Sku[];
+  }[];
+}
