@@ -18,10 +18,10 @@ import { HomeSection, Sku } from '@core/models/common.model';
       </div>
 
       @if (section().subNav && section().subNav.length > 0) {
-        <div class="flex flex-wrap gap-1.5 mb-5">
+        <div class="flex flex-wrap gap-1.5 mb-5" role="tablist" [attr.aria-label]="'Danh mục ' + section().title">
           @for (nav of section().subNav; track nav.slug; let i = $index) {
             <button
-              class="px-3.5 py-1.5 text-xs font-medium rounded-full border transition-all duration-200"
+              class="min-h-11 px-4 text-xs font-medium rounded-full border transition-all duration-200 focus-visible:outline-2 focus-visible:outline-primary/60 focus-visible:outline-offset-1"
               [class.bg-surface-card]="activeSubNav() !== nav.slug"
               [class.text-muted]="activeSubNav() !== nav.slug"
               [class.border-border/80]="activeSubNav() !== nav.slug"
@@ -32,6 +32,10 @@ import { HomeSection, Sku } from '@core/models/common.model';
               [class.text-white]="activeSubNav() === nav.slug"
               [class.border-primary]="activeSubNav() === nav.slug"
               (click)="filterBy(nav.slug)"
+              role="tab"
+              [attr.aria-selected]="activeSubNav() === nav.slug"
+              [attr.aria-controls]="'section-panel-' + section().title"
+              [id]="'section-tab-' + section().title + '-' + i"
             >
               {{ nav.label }}
             </button>
@@ -39,7 +43,10 @@ import { HomeSection, Sku } from '@core/models/common.model';
         </div>
       }
 
-      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4">
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4"
+           role="tabpanel"
+           [attr.aria-label]="'Sản phẩm ' + section().title"
+           [id]="'section-panel-' + section().title">
         @for (product of filteredProducts(); track product.id) {
           <app-product-card
             [product]="product"
