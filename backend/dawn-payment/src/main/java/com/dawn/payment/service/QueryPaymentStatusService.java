@@ -16,10 +16,18 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.ExecutionException;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class QueryPaymentStatusService implements QueryPaymentStatusUseCase {
+
+    private static final Duration VNPAY_TIMEOUT = Duration.ofSeconds(5);
 
     private final PaymentRepository paymentRepo;
     private final PaymentGatewayRegistry gatewayRegistry;
@@ -31,14 +39,17 @@ public class QueryPaymentStatusService implements QueryPaymentStatusUseCase {
         Payment payment = paymentRepo.findById(paymentId)
                 .orElseThrow(() -> new ResourceNotFoundException(Message.Payment.NOT_FOUND));
 
-        // Solved payment before
         if (payment.getStatus() != PaymentResultStatus.PENDING) {
             return toDto(payment);
         }
 
-        // Always call VNPAY Query API to get real status - Not trusted query param on URL redirect
-        VnpayQueryResult result = ((VnpayGatewayAdapter) gatewayRegistry.get(payment.getMethod()))
-                .queryTransaction(payment.getTransactionRef(), payment.getId());
+        VnpayQueryResult result = queryWithTimeout(payment);
+        if (result == null) {
+            payment.setStatus(PaymentResultStatus.UNKNOWN);
+            paymentRepo.save(payment);
+            log.warn("Payment {} VNPay query timed out, marked UNKNOWN for retry", paymentId);
+            return toDto(payment);
+        }
 
         if (result.success()) {
             payment.setStatus(PaymentResultStatus.COMPLETED);
@@ -48,7 +59,7 @@ public class QueryPaymentStatusService implements QueryPaymentStatusUseCase {
         } else if ("UNKNOWN".equals(result.responseCode())) {
             payment.setStatus(PaymentResultStatus.UNKNOWN);
             paymentRepo.save(payment);
-            log.warn("Payment {} status UNKNOWN after VNPay query, need to solve manual", paymentId);
+            log.warn("Payment {} status UNKNOWN after VNPay query", paymentId);
         } else {
             payment.setStatus(PaymentResultStatus.FAILED);
             paymentRepo.save(payment);
@@ -56,6 +67,24 @@ public class QueryPaymentStatusService implements QueryPaymentStatusUseCase {
         }
 
         return toDto(payment);
+    }
+
+    private VnpayQueryResult queryWithTimeout(Payment payment) {
+        try {
+            return CompletableFuture
+                    .supplyAsync(() -> ((VnpayGatewayAdapter) gatewayRegistry.get(payment.getMethod()))
+                            .queryTransaction(payment.getTransactionRef(), payment.getId()))
+                    .orTimeout(VNPAY_TIMEOUT.toMillis(), java.util.concurrent.TimeUnit.MILLISECONDS)
+                    .join();
+        } catch (CancellationException | CompletionException e) {
+            if (e.getCause() instanceof java.util.concurrent.TimeoutException
+                    || e.getMessage() != null && e.getMessage().contains("timed out")) {
+                log.warn("VNPay query timed out after {}ms for payment {}", VNPAY_TIMEOUT.toMillis(), payment.getId());
+            } else {
+                log.error("VNPay query failed for payment {}", payment.getId(), e);
+            }
+            return null;
+        }
     }
 
     private PaymentDto toDto(Payment p) {
