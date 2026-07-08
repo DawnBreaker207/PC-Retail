@@ -3,7 +3,9 @@ package com.dawn.promotion.infra.persistence;
 import com.dawn.promotion.entity.Voucher;
 import com.dawn.promotion.port.out.VoucherRepository;
 import io.lettuce.core.dynamic.annotation.Param;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
@@ -21,4 +23,9 @@ public interface JpaVoucherRepository extends JpaRepository<Voucher, Long>, Vouc
             """)
     @Override
     boolean hasActiveFlashSale(@Param("skuIds") List<Long> skuIds);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT v FROM Voucher v WHERE v.code IN :codes AND v.deletedAt IS NULL")
+    @Override
+    List<Voucher> findWithLockByCodeInAndDeletedAtIsNull(@Param("codes") List<String> codes);
 }

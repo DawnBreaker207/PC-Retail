@@ -60,7 +60,7 @@ public class PromotionCheckoutService implements ValidatePromotionUseCase, Promo
     public void recordUsage(Long userId, Long orderId, List<String> voucherCodes) {
         if (voucherCodes == null || voucherCodes.isEmpty()) return;
 
-        List<Voucher> vouchers = voucherRepo.findByCodeInAndDeletedAtIsNull(voucherCodes);
+        List<Voucher> vouchers = voucherRepo.findWithLockByCodeInAndDeletedAtIsNull(voucherCodes);
         for (Voucher voucher : vouchers) {
             if (voucherUsageRepo.existsByVoucherIdAndUserId(voucher.getId(), userId)) {
                 throw new InvalidRequestException(Message.format(Message.Promotion.VOUCHER_ALREADY_USED, voucher.getCode()));

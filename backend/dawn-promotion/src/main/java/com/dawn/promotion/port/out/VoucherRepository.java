@@ -14,6 +14,8 @@ public interface VoucherRepository {
 
     List<Voucher> findByCodeInAndDeletedAtIsNull(List<String> codes);
 
+    List<Voucher> findWithLockByCodeInAndDeletedAtIsNull(List<String> codes);
+
     Page<Voucher> findAllByDeletedAtIsNull(Pageable pageable);
 
     boolean hasActiveFlashSale(List<Long> skuIds);
