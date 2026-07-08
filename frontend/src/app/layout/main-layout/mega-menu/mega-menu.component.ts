@@ -170,6 +170,15 @@ export class MegaMenuComponent {
       'linh-kien': 'tool',
       'man-hinh': 'monitor',
       'phu-kien': 'tags',
+      'case-nguon-tan': 'build',
+      'o-cung-ram': 'folder',
+      'loa-micro-webcam': 'audio',
+      'ban-phim': 'keyboard',
+      chuot: 'scan',
+      'tai-nghe': 'audio',
+      'ghe-ban': 'build',
+      'phan-mem-mang': 'global',
+      'handheld-console': 'play-circle',
     };
     return map[slug] || 'appstore';
   }

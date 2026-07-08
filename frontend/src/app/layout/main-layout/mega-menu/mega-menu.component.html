@@ -3,7 +3,7 @@
     <a routerLink="/products" class="flex items-center gap-1.5 text-white/90 hover:text-white px-3 py-1.5 rounded hover:bg-white/10 transition-colors text-sm font-medium mr-6">
       <span nz-icon nzType="appstore" nzTheme="fill" class="text-sm"></span>
       <span>Danh mục</span>
-      <span nz-icon nzType="down" nzTheme="outline" class="text-[10px]"></span>
+      <span nz-icon nzType="down" nzTheme="outline" class="text-[11px]"></span>
     </a>
 
     @for (cat of categories(); track cat.slug) {
@@ -19,8 +19,8 @@
 
         @if (cat.children) {
           <div class="absolute top-full left-0 hidden group-hover:block pt-1 z-50">
-            <div class="bg-white dark:bg-surface-dark rounded-xl shadow-2xl border border-border/80 dark:border-border-dark/80 p-6 min-w-[600px] animate-slide-down">
-              <div class="grid grid-cols-4 gap-6">
+            <div class="bg-surface dark:bg-surface-dark rounded-xl shadow-2xl border border-border/80 dark:border-border-dark/80 p-6 min-w-[500px] max-w-[90vw] animate-slide-down">
+              <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
                 @for (col of cat.children; track col.title) {
                   <div>
                     <p class="font-semibold text-xs text-primary uppercase tracking-wider mb-3">{{ col.title }}</p>

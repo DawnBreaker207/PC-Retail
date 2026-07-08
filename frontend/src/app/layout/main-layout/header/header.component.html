@@ -7,7 +7,7 @@
       </a>
       <div class="flex items-center gap-4 text-xs text-muted dark:text-muted-dark">
         <a href="tel:19005301" class="hover:text-primary transition-colors flex items-center gap-1">
-          <span nz-icon nzType="phone" class="text-[11px]"></span>
+          <span nz-icon nzType="phone" class="text-xs"></span>
           <span>Hotline: <strong>1900 5301</strong></span>
         </a>
         <a routerLink="/" class="hover:text-primary transition-colors">hệ thống Showroom</a>
@@ -18,7 +18,7 @@
     <!-- Main header row -->
     <div class="flex items-center h-14 lg:h-16 px-4 gap-2 sm:gap-4">
       <!-- Hamburger mobile -->
-      <button nz-button nzType="text" class="lg:!hidden !inline-flex !items-center !justify-center !w-9 !h-9 !rounded-full hover:!bg-black/5 dark:hover:!bg-white/10" (click)="showMobileMenu.set(!showMobileMenu())">
+      <button nz-button nzType="text" aria-label="Mở menu" [attr.aria-expanded]="showMobileMenu()" class="lg:!hidden !inline-flex !items-center !justify-center !w-9 !h-9 !min-w-[44px] !min-h-[44px] !rounded-full hover:!bg-black/5 dark:hover:!bg-white/10" (click)="showMobileMenu.set(!showMobileMenu())">
         <span nz-icon nzType="menu" class="text-lg"></span>
       </button>
 
@@ -35,10 +35,11 @@
             type="text"
             nz-input
             placeholder="Bạn cần tìm gì?"
+            aria-label="Tìm kiếm sản phẩm"
             class="!rounded-full !pl-11 !pr-5 !py-2 !border-border dark:!border-border-dark !bg-bg dark:!bg-bg-dark !text-sm !w-full !transition-all !duration-200 focus:!border-primary focus:!shadow-md"
             (keyup.enter)="search(searchInput.value)"
           />
-          <button nz-button nzType="text" class="!absolute !left-1.5 !top-1/2 !-translate-y-1/2 !flex !items-center !justify-center !w-8 !h-8" (click)="search(searchInput.value)">
+          <button nz-button nzType="text" aria-label="Tìm kiếm" class="!absolute !left-1.5 !top-1/2 !-translate-y-1/2 !flex !items-center !justify-center !w-8 !h-8 !min-w-[44px] !min-h-[44px]" (click)="search(searchInput.value)">
             <span nz-icon nzType="search" class="text-muted dark:text-muted-dark text-sm"></span>
           </button>
         </div>
@@ -47,24 +48,24 @@
       <!-- Right actions -->
       <div class="flex items-center gap-1 sm:gap-2 ml-auto">
         <!-- Search mobile trigger -->
-        <button nz-button nzType="text" class="sm:!hidden !inline-flex !items-center !justify-center !w-9 !h-9 !rounded-full hover:!bg-black/5 dark:hover:!bg-white/10" (click)="showMobileSearch.set(!showMobileSearch())">
+        <button nz-button nzType="text" aria-label="Mở tìm kiếm" class="sm:!hidden !inline-flex !items-center !justify-center !w-9 !h-9 !min-w-[44px] !min-h-[44px] !rounded-full hover:!bg-black/5 dark:hover:!bg-white/10" (click)="showMobileSearch.set(!showMobileSearch())">
           <span nz-icon nzType="search" class="text-lg"></span>
         </button>
 
         <!-- Cart -->
-        <button nz-button nzType="text" routerLink="/cart" class="!inline-flex !items-center !justify-center !w-9 !h-9 !rounded-full hover:!bg-black/5 dark:hover:!bg-white/10 !transition-colors relative">
-          <nz-badge [nzCount]="cartCount()" [nzShowZero]="false" class="[&_.ant-badge-count]:!shadow-sm [&_.ant-badge-count]:!text-[10px] [&_.ant-badge-count]:!font-bold">
+        <button nz-button nzType="text" routerLink="/cart" aria-label="Giỏ hàng" class="!inline-flex !items-center !justify-center !w-9 !h-9 !min-w-[44px] !min-h-[44px] !rounded-full hover:!bg-black/5 dark:hover:!bg-white/10 !transition-colors relative">
+          <nz-badge [nzCount]="cartCount()" [nzShowZero]="false" class="[&_.ant-badge-count]:!shadow-sm [&_.ant-badge-count]:!text-[11px] [&_.ant-badge-count]:!font-bold">
             <span nz-icon nzType="shopping-cart" class="text-xl"></span>
           </nz-badge>
         </button>
 
         <!-- Desktop utility links -->
-        <div class="hidden lg:flex items-center gap-1">
-          <button nz-button nzType="text" nz-tooltip="Thông báo" class="!inline-flex !items-center !justify-center !w-9 !h-9 !rounded-full hover:!bg-black/5 dark:hover:!bg-white/10">
+          <div class="hidden lg:flex items-center gap-1">
+          <button type="button" nz-button nzType="text" nz-tooltip="Thông báo" aria-label="Thông báo" class="!inline-flex !items-center !justify-center !w-9 !h-9 !rounded-full hover:!bg-black/5 dark:hover:!bg-white/10">
             <span nz-icon nzType="bell" class="text-lg"></span>
           </button>
 
-          <button nz-button nzType="text" (click)="toggleTheme()" nz-tooltip="Giao diện" class="!inline-flex !items-center !justify-center !w-9 !h-9 !rounded-full hover:!bg-black/5 dark:hover:!bg-white/10">
+          <button type="button" nz-button nzType="text" (click)="toggleTheme()" nz-tooltip="Giao diện" aria-label="Chuyển giao diện" class="!inline-flex !items-center !justify-center !w-9 !h-9 !rounded-full hover:!bg-black/5 dark:hover:!bg-white/10">
             @if (isDark()) {
               <span nz-icon nzType="sun" class="text-lg"></span>
             } @else {
@@ -76,7 +77,7 @@
         <!-- User -->
         @if (isLoggedIn()) {
           <div nz-dropdown [nzDropdownMenu]="userMenu" nzPlacement="bottomRight">
-            <nz-avatar nzIcon="user" class="cursor-pointer !bg-primary/10 !text-primary hover:!bg-primary/20 !transition-colors !w-8 !h-8 lg:!w-9 lg:!h-9"></nz-avatar>
+            <nz-avatar nzIcon="user" aria-label="Tài khoản" class="cursor-pointer !bg-primary/10 !text-primary hover:!bg-primary/20 !transition-colors !w-8 !h-8 !min-w-[44px] !min-h-[44px] lg:!w-9 lg:!h-9"></nz-avatar>
           </div>
           <nz-dropdown-menu #userMenu="nzDropdownMenu">
             <ul nz-menu class="!rounded-lg !shadow-lg !border !border-border dark:!border-border-dark !overflow-hidden !min-w-[180px]">
@@ -92,34 +93,21 @@
             </ul>
           </nz-dropdown-menu>
         } @else {
-          <a nz-button nzType="primary" routerLink="/auth/login" class="!rounded-full !px-4 lg:!px-5 !text-sm !font-medium !shadow-sm hover:!shadow-md !transition-all !duration-200 !h-8 lg:!h-9">
+          <a routerLink="/auth/login" class="inline-flex items-center justify-center rounded-full px-5 text-sm font-medium shadow-sm hover:shadow-md transition-all duration-200 min-h-[44px] bg-primary text-white hover:bg-primary-dark">
             Đăng nhập
           </a>
         }
       </div>
     </div>
 
-    <!-- Category strip - desktop -->
-    <div class="hidden lg:block border-t border-border/60 dark:border-border-dark/60 bg-surface dark:bg-surface-dark">
-      <div class="flex items-center overflow-x-auto px-4 gap-0 scrollbar-none">
-        <div class="flex items-center gap-0.5 text-sm">
-          @for (cat of categories; track cat.slug) {
-            <a [routerLink]="['/products']" [queryParams]="{ category: cat.slug }"
-              class="whitespace-nowrap px-3 py-2.5 text-muted dark:text-muted-dark hover:text-primary hover:bg-primary/5 dark:hover:bg-primary/10 transition-colors text-[13px] font-medium">
-              {{ cat.name }}
-            </a>
-          }
-        </div>
-      </div>
-    </div>
   </div>
 
   <!-- Mobile search -->
   @if (showMobileSearch()) {
     <div class="sm:hidden px-4 pb-3 bg-surface/95 dark:bg-surface-dark/95 border-b border-border/80 dark:border-border-dark/80 animate-slide-down">
       <div class="relative">
-        <input #mobileSearchInput type="text" nz-input placeholder="Bạn cần tìm gì?" class="!rounded-full !pl-10 !pr-4 !py-2 !border-border dark:!border-border-dark !bg-bg dark:!bg-bg-dark !text-sm !w-full" (keyup.enter)="search(mobileSearchInput.value); showMobileSearch.set(false)" />
-        <button nz-button nzType="text" class="!absolute !left-1 !top-1/2 !-translate-y-1/2 !flex !items-center !justify-center !w-8 !h-8" (click)="search(mobileSearchInput.value); showMobileSearch.set(false)">
+        <input #mobileSearchInput type="text" nz-input placeholder="Bạn cần tìm gì?" aria-label="Tìm kiếm sản phẩm" class="!rounded-full !pl-10 !pr-4 !py-2 !border-border dark:!border-border-dark !bg-bg dark:!bg-bg-dark !text-sm !w-full" (keyup.enter)="search(mobileSearchInput.value); showMobileSearch.set(false)" />
+        <button nz-button nzType="text" aria-label="Tìm kiếm" class="!absolute !left-1 !top-1/2 !-translate-y-1/2 !flex !items-center !justify-center !w-8 !h-8 !min-w-[44px] !min-h-[44px]" (click)="search(mobileSearchInput.value); showMobileSearch.set(false)">
           <span nz-icon nzType="search" class="text-muted dark:text-muted-dark text-sm"></span>
         </button>
       </div>
@@ -133,7 +121,7 @@
       <div class="absolute left-0 top-0 bottom-0 w-72 max-w-[80vw] bg-surface dark:bg-surface-dark overflow-y-auto shadow-2xl" (click)="$event.stopPropagation()" (keydown.enter)="$event.stopPropagation()" tabindex="0">
         <div class="flex items-center justify-between p-4 border-b border-border/80 dark:border-border-dark/80">
           <span class="text-primary font-black text-xl">DAWN</span>
-          <button nz-button nzType="text" (click)="showMobileMenu.set(false)">
+          <button nz-button nzType="text" aria-label="Đóng menu" (click)="showMobileMenu.set(false)">
             <span nz-icon nzType="close" class="text-lg"></span>
           </button>
         </div>
@@ -157,6 +145,10 @@
             <span nz-icon nzType="search"></span>
             Tra cứu đơn hàng
           </a>
+          <button nz-button nzType="text" class="!flex !items-center !gap-2 !w-full !justify-start !px-0 !text-muted dark:!text-muted-dark hover:!text-primary">
+            <span nz-icon nzType="bell" class="text-base"></span>
+            Thông báo
+          </button>
           <button nz-button nzType="text" (click)="toggleTheme()" class="!flex !items-center !gap-2 !w-full !justify-start !px-0 !text-muted dark:!text-muted-dark hover:!text-primary">
             <span nz-icon [nzType]="isDark() ? 'sun' : 'moon'" class="text-base"></span>
             {{ isDark() ? 'Giao diện sáng' : 'Giao diện tối' }}
