@@ -14,6 +14,7 @@ import { NzDividerModule } from 'ng-zorro-antd/divider';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzEmptyModule } from 'ng-zorro-antd/empty';
 import { CurrencyFormatPipe } from '@shared/pipes/currency-format.pipe';
+import { FallbackImageDirective } from '@shared/directives/fallback-image.directive';
 import { ProductCardComponent } from '@shared/components/product-card.component';
 import { LoadingSpinnerComponent } from '@shared/components/loading-spinner.component';
 import { MockDataService } from '@core/services/mock-data.service';
@@ -25,7 +26,7 @@ import { CartStore } from '@features/cart/store/cart.store';
   imports: [
     RouterLink, FormsModule, DatePipe, NzButtonModule, NzIconModule, NzInputNumberModule, NzTagModule,
     NzRateModule, NzTabsModule, NzBreadCrumbModule, NzDividerModule, NzSpinModule,
-    NzEmptyModule, CurrencyFormatPipe, ProductCardComponent, LoadingSpinnerComponent,
+    NzEmptyModule, CurrencyFormatPipe, FallbackImageDirective, ProductCardComponent, LoadingSpinnerComponent,
   ],
   template: `
     @if (loading) {
@@ -42,7 +43,7 @@ import { CartStore } from '@features/cart/store/cart.store';
           <!-- Left: Images -->
           <div class="lg:col-span-5">
             <div class="relative aspect-square rounded-xl overflow-hidden bg-bg dark:bg-bg-dark border border-border/80 dark:border-border-dark/80 mb-3 shadow-sm">
-              <img [src]="selectedImage()" [alt]="p.name" class="w-full h-full object-contain p-6 cursor-crosshair" />
+              <img [src]="selectedImage()" loading="lazy" appFallbackImage [alt]="p.name" class="w-full h-full object-contain p-6 cursor-crosshair" />
               @if (p.originalPrice && p.originalPrice > p.price) {
                 <span class="absolute top-3 left-3 bg-error text-white text-xs font-bold px-3 py-1 rounded-full shadow-sm">
                   -{{ discountPercent }}%
@@ -58,7 +59,7 @@ import { CartStore } from '@features/cart/store/cart.store';
                     [class.border-border]="i !== selectedIndex"
                     (click)="selectImage(i)"
                   >
-                    <img [src]="img" alt="{{ p.name }} thumbnail" class="w-full h-full object-contain p-1" />
+                    <img [src]="img" loading="lazy" appFallbackImage alt="{{ p.name }} thumbnail" class="w-full h-full object-contain p-1" />
                   </button>
                 }
               </div>
@@ -113,11 +114,11 @@ import { CartStore } from '@features/cart/store/cart.store';
             <!-- Quantity + Buttons -->
             <div class="flex items-center gap-4 mb-5">
               <div class="flex items-center border border-border dark:border-border-dark rounded-lg overflow-hidden">
-                <button nz-button nzType="text" class="!w-9 !h-9 !rounded-none" (click)="decrementQty()" [disabled]="quantity <= 1">
+                <button nz-button nzType="text" class="!w-9 !h-9 !rounded-none" (click)="decrementQty()" [disabled]="quantity <= 1" aria-label="Giảm số lượng">
                   <span nz-icon nzType="minus" class="text-xs"></span>
                 </button>
-                <span class="w-12 text-center text-sm font-medium select-none">{{ quantity }}</span>
-                <button nz-button nzType="text" class="!w-9 !h-9 !rounded-none" (click)="incrementQty()" [disabled]="p.stockAvailable !== undefined && quantity >= p.stockAvailable">
+                <span class="w-12 text-center text-sm font-medium select-none" aria-live="polite">{{ quantity }}</span>
+                <button nz-button nzType="text" class="!w-9 !h-9 !rounded-none" (click)="incrementQty()" [disabled]="p.stockAvailable !== undefined && quantity >= p.stockAvailable" aria-label="Tăng số lượng">
                   <span nz-icon nzType="plus" class="text-xs"></span>
                 </button>
               </div>
@@ -125,6 +126,7 @@ import { CartStore } from '@features/cart/store/cart.store';
 
             <div class="flex flex-col sm:flex-row gap-3 mb-6">
               <button
+                type="button"
                 nz-button
                 nzType="primary"
                 nzSize="large"
@@ -136,6 +138,7 @@ import { CartStore } from '@features/cart/store/cart.store';
                 Thêm vào giỏ
               </button>
               <button
+                type="button"
                 nz-button
                 nzSize="large"
                 class="!rounded-lg !px-8 !h-12 !text-base !font-bold flex-1 sm:flex-none !bg-primary !border-primary !text-white hover:!bg-primary-dark !shadow-sm hover:!shadow-md !transition-all"
@@ -143,7 +146,7 @@ import { CartStore } from '@features/cart/store/cart.store';
               >
                 Mua ngay
               </button>
-              <button nz-button nzType="default" nzSize="large" class="!rounded-lg !w-12 !h-12">
+              <button type="button" nz-button nzType="default" nzSize="large" class="!rounded-lg !w-12 !h-12" aria-label="Yêu thích">
                 <span nz-icon nzType="heart" nzTheme="outline"></span>
               </button>
             </div>
@@ -153,29 +156,29 @@ import { CartStore } from '@features/cart/store/cart.store';
               <div class="flex items-center gap-2.5">
                 <span nz-icon nzType="check-circle" nzTheme="fill" class="text-success text-lg"></span>
                 <div>
-                  <p class="text-[11px] font-semibold">Chính hãng</p>
-                  <p class="text-[10px] text-muted">100%</p>
+                  <p class="text-xs font-semibold">Chính hãng</p>
+                  <p class="text-[11px] text-muted">100%</p>
                 </div>
               </div>
               <div class="flex items-center gap-2.5">
-                <span nz-icon nzType="sync" nzTheme="fill" class="text-primary text-lg"></span>
+                <span nz-icon nzType="sync" class="text-primary text-lg"></span>
                 <div>
-                  <p class="text-[11px] font-semibold">Đổi trả</p>
-                  <p class="text-[10px] text-muted">30 ngày</p>
+                  <p class="text-xs font-semibold">Đổi trả</p>
+                  <p class="text-[11px] text-muted">30 ngày</p>
                 </div>
               </div>
               <div class="flex items-center gap-2.5">
                 <span nz-icon nzType="car" nzTheme="fill" class="text-warning text-lg"></span>
                 <div>
-                  <p class="text-[11px] font-semibold">Miễn phí ship</p>
-                  <p class="text-[10px] text-muted">Toàn quốc</p>
+                  <p class="text-xs font-semibold">Miễn phí ship</p>
+                  <p class="text-[11px] text-muted">Toàn quốc</p>
                 </div>
               </div>
               <div class="flex items-center gap-2.5">
                 <span nz-icon nzType="security-scan" nzTheme="fill" class="text-primary text-lg"></span>
                 <div>
-                  <p class="text-[11px] font-semibold">Bảo hành</p>
-                  <p class="text-[10px] text-muted">24 tháng</p>
+                  <p class="text-xs font-semibold">Bảo hành</p>
+                  <p class="text-[11px] text-muted">24 tháng</p>
                 </div>
               </div>
             </div>

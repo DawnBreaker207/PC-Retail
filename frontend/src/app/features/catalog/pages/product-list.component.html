@@ -1,0 +1,101 @@
+<div class="max-w-screen-2xl mx-auto px-4 py-6 lg:py-8">
+  <nz-breadcrumb class="mb-4">
+    <nz-breadcrumb-item><a routerLink="/">Trang chủ</a></nz-breadcrumb-item>
+    <nz-breadcrumb-item>{{ headerTitle() }}</nz-breadcrumb-item>
+  </nz-breadcrumb>
+
+  <div class="flex items-start gap-6">
+    <!-- Desktop sidebar -->
+    <aside class="hidden lg:block w-60 shrink-0">
+      <div class="sticky top-24">
+        <app-filter-sidebar
+          [(filters)]="filters"
+          [categories]="categories"
+          [brands]="brands"
+          (filterChange)="onFiltersChanged()"
+          (clear)="onClearFilters()"
+        />
+      </div>
+    </aside>
+
+    <!-- Main content -->
+    <div class="flex-1 min-w-0">
+      <!-- Header row -->
+      <div class="flex flex-wrap items-center gap-3 mb-5">
+        <span class="text-sm text-muted font-medium">{{ totalElements }} sản phẩm</span>
+
+        <nz-select
+          [ngModel]="filters().sort"
+          (ngModelChange)="setSort($event)"
+          nzPlaceHolder="Sắp xếp"
+          aria-label="Sắp xếp sản phẩm"
+          class="min-w-[160px] ml-auto"
+        >
+          @for (opt of sortOptions; track opt.value) {
+            <nz-option [nzValue]="opt.value" [nzLabel]="opt.label" />
+          }
+        </nz-select>
+
+        <button
+          nz-button
+          nzType="default"
+          class="lg:!hidden"
+          (click)="drawerOpen.set(true)"
+        >
+          <span nz-icon nzType="filter" nzTheme="outline"></span>
+          Bộ lọc
+        </button>
+      </div>
+
+      <!-- Product grid -->
+      @if (isLoading) {
+        <app-loading-spinner />
+      } @else if (products.length === 0) {
+        <div class="flex flex-col items-center justify-center py-20 text-center">
+          <span nz-icon nzType="search-off" nzTheme="outline" class="text-5xl text-muted/30 mb-4"></span>
+          <h3 class="text-lg font-semibold text-muted mb-1">Không tìm thấy sản phẩm</h3>
+          <p class="text-sm text-muted/60">Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm</p>
+        </div>
+      } @else {
+        <div class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-4">
+          @for (product of products; track product.id) {
+            <app-product-card
+              [product]="product"
+              [badge]="getBadge(product)"
+              (addToCart)="addToCart(product)"
+            />
+          }
+        </div>
+
+        @if (totalPages > 1) {
+          <div class="flex justify-center mt-8">
+            <nz-pagination
+              [nzPageIndex]="filters().page"
+              [nzTotal]="totalElements"
+              [nzPageSize]="filters().size"
+              [nzShowSizeChanger]="false"
+              (nzPageIndexChange)="onPageChange($event)"
+            />
+          </div>
+        }
+      }
+    </div>
+  </div>
+
+  <!-- Mobile drawer -->
+  <nz-drawer
+    [nzVisible]="drawerOpen()"
+    nzPlacement="left"
+    nzWidth="300px"
+    nzTitle="Bộ lọc"
+    (nzOnClose)="drawerOpen.set(false)"
+  >
+    <app-filter-sidebar
+      [(filters)]="filters"
+      [categories]="categories"
+      [brands]="brands"
+      (filterChange)="onFiltersChanged()"
+      (clear)="onClearFilters()"
+    />
+  </nz-drawer>
+</div>
