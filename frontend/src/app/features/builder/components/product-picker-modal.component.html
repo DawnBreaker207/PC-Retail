@@ -1,0 +1,54 @@
+<nz-modal
+  [nzVisible]="true"
+  nzTitle="Chọn linh kiện"
+  nzWidth="720px"
+  [nzFooter]="null"
+  (nzOnCancel)="onClose()"
+>
+  <div class="contents">
+    <div class="mb-4">
+      <input
+        nz-input
+        placeholder="Tìm kiếm sản phẩm..."
+        aria-label="Tìm kiếm sản phẩm"
+        class="w-full px-4 py-2 rounded-lg border border-border dark:border-border-dark bg-surface dark:bg-surface-dark text-sm"
+        [(ngModel)]="searchQuery"
+      />
+    </div>
+
+    @if (loading()) {
+      <div class="flex justify-center items-center py-16">
+        <nz-spin nzSize="large"></nz-spin>
+      </div>
+    } @else if (filtered.length === 0) {
+      <nz-empty nzNotFoundImage="simple" [nzNotFoundContent]="'Không tìm thấy sản phẩm'"></nz-empty>
+    } @else {
+      <div class="grid grid-cols-2 md:grid-cols-3 gap-3 max-h-[480px] overflow-y-auto -mx-2 px-2">
+        @for (sku of filtered; track sku.id) {
+          <div
+            class="border border-border/60 dark:border-border-dark/60 rounded-lg p-3 cursor-pointer transition-all hover:border-primary hover:shadow-md bg-surface dark:bg-surface-dark"
+            (click)="selectProduct(sku)"
+          >
+            <div class="aspect-square bg-bg dark:bg-bg-dark rounded-lg overflow-hidden mb-2 flex items-center justify-center">
+              <img [src]="sku.imageUrls[0]" loading="lazy" appFallbackImage [alt]="sku.name" class="w-full h-full object-contain p-2" />
+            </div>
+            <p class="text-xs text-muted dark:text-muted-dark line-clamp-2 leading-tight mb-1">{{ sku.name }}</p>
+            <p class="text-sm font-bold text-primary">{{ sku.price | currencyFormat }}</p>
+            @if (sku.brandName) {
+              <nz-tag nzColor="default" class="text-xs">{{ sku.brandName }}</nz-tag>
+            }
+            <button
+              nz-button
+              nzSize="small"
+              nzType="primary"
+              class="w-full mt-2 text-xs"
+              (click)="selectProduct(sku)"
+            >
+              Chọn
+            </button>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</nz-modal>

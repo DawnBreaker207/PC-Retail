@@ -1,0 +1,31 @@
+<div class="max-w-[1400px] mx-auto px-4 py-6">
+  <div class="flex items-center justify-between mb-6">
+    <h1 class="text-2xl font-bold tracking-tight">PC Custom Build</h1>
+  </div>
+
+  @if (loading) {
+    <app-loading-spinner />
+  } @else {
+    <div class="flex flex-col lg:flex-row gap-6">
+      <div class="w-full lg:w-[320px] shrink-0">
+        <app-slot-list
+          [slots]="slots"
+          [selections]="selections"
+          [conflicts]="validation?.conflicts ?? []"
+          (selectSlot)="onSlotSelected($event)"
+          (removeSlot)="onSlotRemoved($event)"
+        />
+      </div>
+      <div class="flex-1 min-w-0">
+        <app-build-summary
+          [selections]="selections"
+          [slots]="slots"
+          [validation]="validation"
+          [canAddToCart]="canAddToCart"
+          [missingRequired]="missingRequired"
+          (addToCart)="onAddToCart()"
+        />
+      </div>
+    </div>
+  }
+</div>

@@ -1,0 +1,60 @@
+<div class="max-w-[1400px] mx-auto px-4 py-6">
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h1 class="text-2xl font-bold tracking-tight">Build Template</h1>
+      <p class="text-sm text-muted dark:text-muted-dark">Cấu hình PC có sẵn từ cửa hàng, bạn có thể tùy chỉnh thêm</p>
+    </div>
+    <a routerLink="/pc-builder/custom" nz-button nzType="default">
+      <i nz-icon nzType="tool" nzTheme="outline"></i>
+      Tự chọn linh kiện
+    </a>
+  </div>
+
+  @if (loading()) {
+    <div class="flex justify-center py-20">
+      <nz-spin nzSize="large"></nz-spin>
+    </div>
+  } @else if (templates().length === 0) {
+    <nz-empty nzNotFoundImage="simple" nzNotFoundContent="Chưa có template nào"></nz-empty>
+  } @else {
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+      @for (tpl of templates(); track tpl.id) {
+        <a [routerLink]="['/pc-builder/templates', tpl.id]" class="block group">
+          <div class="bg-surface dark:bg-surface-dark rounded-card border border-border/80 dark:border-border-dark/80 shadow-sm overflow-hidden transition-all group-hover:shadow-md group-hover:-translate-y-1">
+            <div class="aspect-video bg-bg dark:bg-bg-dark flex items-center justify-center p-6">
+              <div class="text-center">
+                <i nz-icon nzType="build" nzTheme="outline" class="text-4xl text-primary"></i>
+                <p class="text-xs text-muted dark:text-muted-dark mt-2">PC Build</p>
+              </div>
+            </div>
+            <div class="p-4">
+              <div class="flex items-center gap-1 mb-2 flex-wrap">
+                @for (tag of getTags(tpl.tags); track tag) {
+                  <nz-tag [nzColor]="tagColor(tag)">{{ tag }}</nz-tag>
+                }
+              </div>
+              <h3 class="font-bold mb-2">{{ tpl.name }}</h3>
+              @if (tpl.description) {
+                <p class="text-xs text-muted dark:text-muted-dark line-clamp-2 mb-3">{{ tpl.description }}</p>
+              }
+              <div class="text-xs text-muted dark:text-muted-dark mb-3 space-y-1">
+                @for (entry of tpl.slots | keyvalue; track entry.key) {
+                  <div class="flex justify-between">
+                    <span>{{ entry.key }}:</span>
+                    <span class="font-medium">{{ entry.value }}</span>
+                  </div>
+                }
+              </div>
+              <div class="flex items-center justify-between pt-3 border-t border-border/60 dark:border-border-dark/60">
+                <span class="text-lg font-bold text-primary">{{ tpl.totalPrice | currencyFormat }}</span>
+                <span nz-button nzSize="small" nzType="primary" class="text-xs">
+                  Xem cấu hình
+                </span>
+              </div>
+            </div>
+          </div>
+        </a>
+      }
+    </div>
+  }
+</div>

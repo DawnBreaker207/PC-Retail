@@ -1,0 +1,68 @@
+<div class="bg-surface dark:bg-surface-dark rounded-card border border-border/80 dark:border-border-dark/80 shadow-sm overflow-hidden">
+  <div class="px-4 py-3 border-b border-border/60 dark:border-border-dark/60 font-semibold">
+    Danh sách linh kiện
+  </div>
+  <div class="divide-y divide-border/60 dark:divide-border-dark/60">
+    @for (slot of slots(); track slot.slotType) {
+      @let selection = getSelection(slot.slotType);
+      @let conflict = getConflict(slot.slotType);
+      <div class="px-4 py-3 hover:bg-bg dark:hover:bg-surface-card-dark transition-colors">
+        <div class="flex items-center justify-between gap-2">
+          <div class="flex items-center gap-2 min-w-0">
+            <span class="text-muted dark:text-muted-dark shrink-0">
+              <i nz-icon [nzType]="slotIcons[slot.slotType] || 'tool'" nzTheme="outline"></i>
+            </span>
+            <div class="min-w-0">
+              <span class="text-sm font-medium">{{ slot.slotName }}</span>
+              @if (!slot.isRequired) {
+                <span class="text-xs text-muted dark:text-muted-dark ml-1">(Tùy chọn)</span>
+              }
+            </div>
+          </div>
+          @if (!selection) {
+            <button nz-button nzSize="small" nzType="default" class="shrink-0" (click)="openPicker(slot.slotType)">
+              + Chọn
+            </button>
+          } @else {
+            <div class="flex items-center gap-1 shrink-0">
+              <button nz-button nzSize="small" nzType="text" nzTooltipTitle="Đổi" aria-label="Đổi linh kiện" (click)="openPicker(slot.slotType)">
+                <i nz-icon nzType="edit" nzTheme="outline"></i>
+              </button>
+              @if (slot.isRemovable) {
+                <button nz-button nzSize="small" nzType="text" nzDanger nzTooltipTitle="Bỏ" aria-label="Bỏ linh kiện" (click)="confirmRemove(slot.slotType)">
+                  <i nz-icon nzType="close" nzTheme="outline"></i>
+                </button>
+              }
+            </div>
+          }
+        </div>
+        @if (selection) {
+          <div class="mt-2 flex items-center gap-2 pl-7">
+            <img [src]="selection.sku.imageUrls[0]" loading="lazy" appFallbackImage [alt]="selection.sku.name" class="w-9 h-9 rounded object-contain bg-bg dark:bg-bg-dark" />
+            <div class="min-w-0 flex-1">
+              <p class="text-xs text-muted dark:text-muted-dark truncate">{{ selection.sku.name }}</p>
+              <p class="text-xs font-semibold text-primary">{{ selection.sku.price | currencyFormat }}</p>
+            </div>
+          </div>
+        }
+        @if (conflict) {
+          <nz-alert
+            nzType="error"
+            [nzMessage]="conflict.message"
+            nzShowIcon
+            nzBanner
+            class="mt-2"
+          ></nz-alert>
+        }
+      </div>
+    }
+  </div>
+</div>
+
+@if (showPicker && pickerSlotType) {
+  <app-product-picker-modal
+    [slotType]="pickerSlotType"
+    (selected)="onProductPicked($event)"
+    (close)="closePicker()"
+  />
+}

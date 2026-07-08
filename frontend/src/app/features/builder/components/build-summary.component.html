@@ -1,0 +1,81 @@
+<div class="bg-surface dark:bg-surface-dark rounded-card border border-border/80 dark:border-border-dark/80 shadow-sm p-6 sticky top-24">
+  <h3 class="text-lg font-bold tracking-tight mb-4">Tóm tắt cấu hình</h3>
+
+  @if (selectedItems.length === 0) {
+    <p class="text-sm text-muted dark:text-muted-dark text-center py-6">
+      Chưa chọn linh kiện nào
+    </p>
+  } @else {
+    <div class="space-y-3 mb-4">
+      @for (item of selectedItems; track item.slotType) {
+        <div class="flex items-center justify-between gap-2">
+          <div class="flex items-center gap-2 min-w-0">
+            <img [src]="item.sku.imageUrls[0]" loading="lazy" appFallbackImage [alt]="item.sku.name" class="w-8 h-8 rounded object-contain bg-bg dark:bg-bg-dark shrink-0" />
+            <div class="min-w-0">
+              <p class="text-xs text-muted dark:text-muted-dark truncate">{{ item.slotName }}</p>
+              <p class="text-xs text-muted dark:text-muted-dark truncate">{{ item.sku.name }}</p>
+            </div>
+          </div>
+          <span class="text-sm font-semibold text-primary shrink-0">{{ item.sku.price | currencyFormat }}</span>
+        </div>
+      }
+    </div>
+
+    <nz-divider class="my-3"></nz-divider>
+
+    <div class="flex items-center justify-between mb-4">
+      <span class="text-base font-semibold">Tổng cộng</span>
+      <span class="text-2xl font-bold text-primary">{{ totalPrice | currencyFormat }}</span>
+    </div>
+  }
+
+  @if (missingRequired()) {
+    <nz-alert
+      nzType="warning"
+      nzMessage="Vui lòng chọn đủ linh kiện bắt buộc (CPU, Mainboard, RAM, GPU, PSU, Case, Storage)"
+      nzShowIcon
+      nzBanner
+      class="mb-3"
+    ></nz-alert>
+  }
+
+  @if (conflicts.length > 0) {
+    <nz-alert
+      nzType="error"
+      [nzMessage]="'Phát hiện ' + conflicts.length + ' xung đột cấu hình'"
+      nzShowIcon
+      nzBanner
+      class="mb-3"
+    ></nz-alert>
+  }
+
+  @if (!isValid) {
+    <nz-alert
+      nzType="error"
+      nzMessage="Cấu hình không hợp lệ"
+      nzShowIcon
+      nzBanner
+      class="mb-3"
+    ></nz-alert>
+  } @else if (selectedItems.length > 0) {
+    <nz-alert
+      nzType="success"
+      nzMessage="Cấu hình hợp lệ"
+      nzShowIcon
+      nzBanner
+      class="mb-3"
+    ></nz-alert>
+  }
+
+  <button
+    nz-button
+    nzType="primary"
+    nzSize="large"
+    class="w-full font-semibold"
+    [disabled]="!canAddToCart()"
+    (click)="onAddToCart()"
+  >
+    <i nz-icon nzType="shopping-cart" nzTheme="outline"></i>
+    Thêm vào giỏ ({{ selectedItems.length }} linh kiện)
+  </button>
+</div>
