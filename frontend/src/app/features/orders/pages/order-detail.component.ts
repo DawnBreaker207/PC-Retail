@@ -8,6 +8,7 @@ import { NzAlertModule } from 'ng-zorro-antd/alert';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
 import { CurrencyFormatPipe } from '@shared/pipes/currency-format.pipe';
+import { FallbackImageDirective } from '@shared/directives/fallback-image.directive';
 import { DateHelper } from '@shared/utils/date.helper';
 import { OrderService } from '@core/services/order.service';
 import { Order, OrderItem } from '@core/models/common.model';
@@ -24,7 +25,7 @@ const STATUS_STEP_MAP: Record<string, number> = {
 @Component({
   selector: 'app-order-detail',
   imports: [
-    RouterLink,
+    RouterLink, FallbackImageDirective,
     NzStepsModule,
     NzTableModule,
     NzTagModule,

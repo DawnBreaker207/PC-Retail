@@ -7,6 +7,7 @@ import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzEmptyModule } from 'ng-zorro-antd/empty';
 import { NzTabsModule } from 'ng-zorro-antd/tabs';
 import { CurrencyFormatPipe } from '@shared/pipes/currency-format.pipe';
+import { FallbackImageDirective } from '@shared/directives/fallback-image.directive';
 import { DateHelper } from '@shared/utils/date.helper';
 import { OrderService } from '@core/services/order.service';
 import { Order } from '@core/models/common.model';
@@ -35,7 +36,7 @@ const STATUS_COLOR: Record<string, string> = {
 @Component({
   selector: 'app-order-list',
   imports: [
-    RouterLink,
+    RouterLink, FallbackImageDirective,
     NzTableModule,
     NzTagModule,
     NzButtonModule,

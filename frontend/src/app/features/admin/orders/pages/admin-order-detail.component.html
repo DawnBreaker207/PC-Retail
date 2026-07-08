@@ -1,0 +1,158 @@
+<div class="mb-6">
+  <button nz-button nzType="link" (click)="goBack()" class="!p-0 !mb-2">
+    <span nz-icon nzType="arrow-left"></span>
+    Quay lại
+  </button>
+  @if (order(); as o) {
+    <h1 class="text-2xl font-bold tracking-tight">Đơn hàng #ORD-{{ o.id }}</h1>
+  }
+</div>
+
+@if (loading()) {
+  <div class="flex justify-center py-20"><nz-spin nzSize="large"></nz-spin></div>
+} @else if (order(); as o) {
+  <!-- Status Steps -->
+  @if (o.subOrders[0]?.status !== 'CANCELLED' && o.subOrders[0]?.status !== 'EXPIRED') {
+    <nz-steps [nzCurrent]="currentStep" nzSize="small" class="mb-6 bg-surface dark:bg-surface-dark p-5 rounded-card border border-border/80 dark:border-border-dark/80 shadow-sm">
+      <nz-step nzTitle="Đặt hàng"></nz-step>
+      <nz-step nzTitle="Đã thanh toán"></nz-step>
+      <nz-step nzTitle="Đang xử lý"></nz-step>
+      <nz-step nzTitle="Đang giao"></nz-step>
+      <nz-step nzTitle="Đã giao"></nz-step>
+    </nz-steps>
+  }
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Main column -->
+    <div class="lg:col-span-2 space-y-6">
+      <!-- Customer info -->
+      <div class="bg-surface dark:bg-surface-dark rounded-card border border-border/80 dark:border-border-dark/80 shadow-sm p-5">
+        <h3 class="font-semibold mb-3 tracking-tight">Thông tin khách hàng</h3>
+        <div class="space-y-1.5 text-sm">
+          <div class="flex items-center gap-2">
+            <span nz-icon nzType="user" class="text-muted"></span>
+            <span class="font-medium">{{ o.shippingAddress?.fullName || '—' }}</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span nz-icon nzType="mail" class="text-muted"></span>
+            <span>{{ o.shippingAddress?.phone || '—' }}</span>
+          </div>
+          @if (o.shippingAddress) {
+            <div class="flex items-start gap-2">
+              <span nz-icon nzType="environment" class="text-muted mt-0.5"></span>
+              <span>{{ o.shippingAddress.street }}, {{ o.shippingAddress.district }}, {{ o.shippingAddress.city }}</span>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Order items -->
+      <div class="bg-surface dark:bg-surface-dark rounded-card border border-border/80 dark:border-border-dark/80 shadow-sm p-5">
+        <h3 class="font-semibold mb-4 tracking-tight">Sản phẩm</h3>
+        <nz-table [nzData]="flatItems" [nzFrontPagination]="false" [nzShowPagination]="false" nzSize="small">
+          <thead>
+            <tr>
+              <th>Sản phẩm</th>
+              <th nzWidth="80px">SL</th>
+              <th nzWidth="130px" nzRight>Đơn giá</th>
+              <th nzWidth="130px" nzRight>Thành tiền</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of flatItems; track item.id) {
+              <tr>
+                <td>
+                  <div class="flex items-center gap-2">
+                    <img [src]="item.imageUrl" loading="lazy" appFallbackImage [alt]="item.name" class="w-9 h-9 rounded object-contain bg-bg shrink-0" />
+                    <span class="text-sm line-clamp-2">{{ item.name }}</span>
+                  </div>
+                </td>
+                <td>{{ item.quantity }}</td>
+                <td nzRight class="text-muted">{{ item.unitPrice | currencyFormat }}</td>
+                <td nzRight class="font-semibold">{{ item.unitPrice * item.quantity | currencyFormat }}</td>
+              </tr>
+            }
+          </tbody>
+        </nz-table>
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="space-y-6">
+      <!-- Payment summary -->
+      <div class="bg-surface dark:bg-surface-dark rounded-card border border-border/80 dark:border-border-dark/80 shadow-sm p-5">
+        <h3 class="font-semibold mb-4 tracking-tight">Thanh toán</h3>
+        <div class="space-y-2.5 text-sm">
+          <div class="flex justify-between items-center">
+            <span class="text-muted">Trạng thái</span>
+            <nz-tag [nzColor]="o.paymentStatus === 'PAID' ? 'success' : 'gold'" class="!rounded-full !border-0 !px-3 !font-medium">
+              {{ o.paymentStatus === 'PAID' ? 'Đã thanh toán' : 'Chưa thanh toán' }}
+            </nz-tag>
+          </div>
+          @for (sub of o.subOrders; track sub.id) {
+            <div class="flex justify-between">
+              <span class="text-muted">Tạm tính</span>
+              <span>{{ sub.subtotal | currencyFormat }}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-muted">Giảm giá</span>
+              <span class="text-success font-medium">-{{ sub.discountAmount | currencyFormat }}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-muted">Phí ship</span>
+              <span>{{ sub.shippingFee === 0 ? 'Miễn phí' : (sub.shippingFee | currencyFormat) }}</span>
+            </div>
+            <nz-divider class="!my-2"></nz-divider>
+            <div class="flex justify-between items-baseline">
+              <span class="text-base font-semibold">Tổng</span>
+              <span class="text-primary text-xl font-bold">{{ sub.finalAmount | currencyFormat }}</span>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="bg-surface dark:bg-surface-dark rounded-card border border-border/80 dark:border-border-dark/80 shadow-sm p-5">
+        <h3 class="font-semibold mb-4 tracking-tight">Thao tác</h3>
+        @if (o.subOrders[0]?.status === 'PAID') {
+          <button nz-button nzType="primary" nzBlock [nzLoading]="updating()" (click)="updateStatus('PROCESSING')" class="!mb-2">
+            Xác nhận xử lý
+          </button>
+        }
+        @if (o.subOrders[0]?.status === 'PROCESSING') {
+          <div class="space-y-3">
+            <input nz-input placeholder="Mã vận đơn (tracking code)" aria-label="Mã vận đơn" [(ngModel)]="trackingCode" />
+            <button nz-button nzType="primary" nzBlock [nzLoading]="updating()" (click)="updateStatus('SHIPPED')">
+              Đánh dấu đã giao shipper
+            </button>
+          </div>
+        }
+        @if (o.subOrders[0]?.status === 'SHIPPED') {
+          <button nz-button nzType="primary" nzBlock [nzLoading]="updating()" (click)="updateStatus('DELIVERED')">
+            Xác nhận đã giao
+          </button>
+        }
+        @if (o.subOrders[0]?.status === 'RETURN_REQUESTED') {
+          <button nz-button nzType="primary" nzBlock routerLink="/admin/orders/{{ o.id }}">
+            Xem yêu cầu đổi trả
+          </button>
+        }
+      </div>
+
+      <!-- Status history -->
+      <div class="bg-surface dark:bg-surface-dark rounded-card border border-border/80 dark:border-border-dark/80 shadow-sm p-5">
+        <h3 class="font-semibold mb-3 tracking-tight">Lịch sử trạng thái</h3>
+        <div class="space-y-3">
+          @for (sub of o.subOrders; track sub.id) {
+            <div class="flex items-center gap-2 text-sm">
+              <nz-tag [nzColor]="STATUS_COLOR[sub.status] || 'default'" class="!rounded-full !border-0 !text-xs !px-2">
+                {{ sub.status }}
+              </nz-tag>
+              <span class="text-xs text-muted">{{ sub.fulfillmentType === 'DELIVERY' ? 'Giao hàng' : 'Tự đến lấy' }}</span>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+}

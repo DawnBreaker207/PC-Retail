@@ -7,6 +7,7 @@ import { NzUploadChangeParam, NzUploadModule, NzUploadFile } from 'ng-zorro-antd
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzIconModule } from 'ng-zorro-antd/icon';
+import { FallbackImageDirective } from '@shared/directives/fallback-image.directive';
 import { OrderService } from '@core/services/order.service';
 
 interface ReviewFormData {
@@ -25,10 +26,12 @@ interface ReviewFormData {
     NzUploadModule,
     NzButtonModule,
     NzIconModule,
+    FallbackImageDirective,
   ],
+
   template: `
     <div class="text-center mb-6">
-      <img [src]="data.productImage" alt="{{ data.productName }}" class="w-20 h-20 object-contain mx-auto mb-3" />
+      <img [src]="data.productImage" loading="lazy" appFallbackImage alt="{{ data.productName }}" class="w-20 h-20 object-contain mx-auto mb-3" />
       <p class="font-medium">{{ data.productName }}</p>
     </div>
 
@@ -38,7 +41,7 @@ interface ReviewFormData {
     </div>
 
     <div class="mb-4">
-      <label for="review-comment" class="text-sm font-medium mb-1 block">Nhận xét</label>
+      <label for="review-comment" class="text-sm font-medium mb-1 block" id="review-comment-label">Nhận xét</label>
       <textarea
         nz-input
         [(ngModel)]="comment"
@@ -67,10 +70,11 @@ interface ReviewFormData {
     </div>
 
     <div class="flex justify-end gap-3">
-      <button nz-button (click)="onCancel()">Hủy</button>
+      <button nz-button type="button" (click)="onCancel()">Hủy</button>
       <button
         nz-button
         nzType="primary"
+        type="button"
         [nzLoading]="isSubmitting()"
         [disabled]="rating === 0"
         (click)="onSubmit()"

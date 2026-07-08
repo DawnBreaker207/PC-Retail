@@ -1,0 +1,73 @@
+<div class="mb-6 flex flex-wrap items-center justify-between gap-3">
+  <div>
+    <h1 class="text-2xl font-bold tracking-tight">Quản lý mã giảm giá</h1>
+    <p class="text-muted text-sm mt-1">Tạo và quản lý các chương trình khuyến mãi</p>
+  </div>
+  <button type="button" nz-button nzType="primary" (click)="openCreateModal()">
+    <span nz-icon nzType="plus"></span>
+    Tạo voucher
+  </button>
+</div>
+
+@if (loading()) {
+  <div class="flex justify-center py-20"><nz-spin nzSize="large"></nz-spin></div>
+} @else {
+  <nz-table
+    [nzData]="vouchers()"
+    [nzFrontPagination]="false"
+    [nzTotal]="total()"
+    [nzPageIndex]="page"
+    [nzPageSize]="size"
+    [nzPageSizeOptions]="pageSizeOptions"
+    (nzPageIndexChange)="onPageChange($event)"
+    (nzPageSizeChange)="onPageSizeChange($event)"
+    nzShowSizeChanger
+    nzSize="middle"
+    nzScrollX="900px"
+  >
+    <thead>
+      <tr>
+        <th>Mã</th>
+        <th>Phạm vi</th>
+        <th>Loại giảm</th>
+        <th>Giá trị</th>
+        <th>Đã dùng</th>
+        <th>Hiệu lực</th>
+        <th>Trạng thái</th>
+        <th nzRight>Thao tác</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (v of vouchers(); track v.id) {
+        <tr>
+          <td class="font-mono font-semibold text-sm">{{ v.code }}</td>
+          <td>{{ SCOPE_LABEL[v.scopeType] }}</td>
+          <td>{{ DISCOUNT_LABEL[v.discountType] }}</td>
+          <td class="font-medium">{{ formatDiscount(v) }}</td>
+          <td>{{ getUsage(v) }}</td>
+          <td class="text-xs text-muted">
+            {{ v.validFrom | date:'dd/MM/yyyy' }} — {{ v.validTo | date:'dd/MM/yyyy' }}
+          </td>
+          <td>
+            <nz-tag [nzColor]="getStatus(v).color" class="!rounded-full !border-0 !font-medium">
+              {{ getStatus(v).label }}
+            </nz-tag>
+          </td>
+          <td nzRight>
+            <button
+              nz-button
+              nzSize="small"
+              nzDanger
+              nz-popconfirm
+              nzPopconfirmTitle="Xóa mã {{ v.code }}?"
+              (nzOnConfirm)="deleteVoucher(v.id)"
+              aria-label="Xóa voucher"
+            >
+              <span nz-icon nzType="delete"></span>
+            </button>
+          </td>
+        </tr>
+      }
+    </tbody>
+  </nz-table>
+}

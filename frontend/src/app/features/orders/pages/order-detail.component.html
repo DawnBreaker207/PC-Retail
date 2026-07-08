@@ -45,7 +45,7 @@
         @for (item of sub.items; track item.skuId) {
           <div class="flex flex-wrap items-center gap-3 sm:gap-4 py-3.5 border-b last:border-0 border-border/60 dark:border-border-dark/60">
             <div class="w-12 h-12 sm:w-16 sm:h-16 rounded-lg bg-bg dark:bg-bg-dark flex items-center justify-center overflow-hidden shrink-0">
-              <img [src]="item.imageUrl" alt="{{ item.name }}" class="w-full h-full object-contain p-0.5" />
+              <img [src]="item.imageUrl" loading="lazy" appFallbackImage alt="{{ item.name }}" class="w-full h-full object-contain p-0.5" />
             </div>
             <div class="flex-1 min-w-0 w-full sm:w-auto order-last sm:order-none mt-2 sm:mt-0">
               <p class="font-medium text-sm line-clamp-2">{{ item.name }}</p>

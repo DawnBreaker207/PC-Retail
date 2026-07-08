@@ -1,0 +1,82 @@
+<div class="mb-6">
+  <h1 class="text-2xl font-bold tracking-tight">Quản lý tồn kho</h1>
+  <p class="text-muted text-sm mt-1">Theo dõi và nhập hàng cho các sản phẩm</p>
+</div>
+
+<!-- Filters -->
+<div class="flex flex-wrap items-center gap-3 mb-5">
+  <input
+    nz-input
+    placeholder="Tìm kiếm sản phẩm..."
+    aria-label="Tìm kiếm sản phẩm"
+    [(ngModel)]="search"
+    (keydown.enter)="onSearch()"
+    class="!w-full sm:!w-64"
+  />
+  <button nz-button nzType="default" (click)="onSearch()">
+    <span nz-icon nzType="search"></span>
+    Tìm kiếm
+  </button>
+  <button nz-button [nzType]="lowStockOnly() ? 'primary' : 'default'" (click)="onLowStockToggle()" class="!ml-2">
+    <span nz-icon [nzType]="lowStockOnly() ? 'check-square' : 'border'"></span>
+    Chỉ hiện tồn kho thấp (&lt; 5)
+  </button>
+</div>
+
+<!-- Table -->
+@if (loading()) {
+  <div class="flex justify-center py-20"><nz-spin nzSize="large"></nz-spin></div>
+} @else {
+  <nz-table
+    [nzData]="items()"
+    [nzFrontPagination]="false"
+    [nzTotal]="total()"
+    [(nzPageIndex)]="page"
+    [nzPageSize]="size"
+    [nzPageSizeOptions]="pageSizeOptions"
+    (nzPageIndexChange)="onPageChange($event)"
+    (nzPageSizeChange)="onPageSizeChange($event)"
+    nzShowSizeChanger
+    nzSize="middle"
+    nzScrollX="750px"
+  >
+    <thead>
+      <tr>
+        <th nzWidth="80px">SKU</th>
+        <th>Sản phẩm</th>
+        <th nzWidth="120px" nzRight>Tồn kho</th>
+        <th nzWidth="120px" nzRight>Đã đặt</th>
+        <th nzWidth="120px" nzRight>Có thể bán</th>
+        <th nzWidth="140px" nzRight>Thao tác</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (item of items(); track item.skuId) {
+        <tr [class]="item.availableQuantity < 5 ? '!bg-red-50 dark:!bg-red-900' : ''">
+          <td class="font-mono text-xs font-semibold">#{{ item.skuId }}</td>
+          <td>
+            <div class="flex items-center gap-2">
+              @if (item.imageUrl) {
+                <img [src]="item.imageUrl" loading="lazy" appFallbackImage [alt]="item.skuName" class="w-9 h-9 rounded object-contain bg-bg shrink-0" />
+              }
+              <span class="text-sm line-clamp-2">{{ item.skuName }}</span>
+            </div>
+          </td>
+          <td nzRight class="font-medium">{{ item.stockQuantity }}</td>
+          <td nzRight class="font-medium text-muted">{{ item.reservedQuantity }}</td>
+          <td nzRight>
+            <span class="font-semibold" [class]="item.availableQuantity < 5 ? '!text-error' : '!text-success'">
+              {{ item.availableQuantity }}
+            </span>
+          </td>
+          <td nzRight>
+            <button nz-button nzSize="small" nzType="primary" (click)="openRestockModal(item)">
+              <span nz-icon nzType="plus-circle"></span>
+              Nhập thêm
+            </button>
+          </td>
+        </tr>
+      }
+    </tbody>
+  </nz-table>
+}
