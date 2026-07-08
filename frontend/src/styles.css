@@ -1,27 +1,35 @@
 @import 'tailwindcss';
-@import 'ng-zorro-antd/ng-zorro-antd.min.css';
+@import 'ng-zorro-antd/ng-zorro-antd.variable.min.css';
 
 @theme {
   --color-primary: #e53935;
   --color-primary-dark: #b71c1c;
   --color-primary-light: #ffebee;
 
-  --color-bg: #f7fafc;
+  --color-bg: #fafafa;
   --color-surface: #ffffff;
   --color-surface-card: #f8fafc;
   --color-border: #e2e8f0;
-  --color-muted: #718096;
+  --color-muted: #64748b;
 
-  --color-bg-dark: #0f172a;
-  --color-surface-dark: #1e293b;
-  --color-surface-card-dark: #243147;
-  --color-border-dark: #334155;
-  --color-muted-dark: #94a3b8;
+  --color-bg-dark: #0c1220;
+  --color-surface-dark: #162032;
+  --color-surface-card-dark: #1e2a3e;
+  --color-border-dark: #2a344a;
+  --color-muted-dark: #8895b0;
+
+  --color-ink: #111111;
+  --color-ink-dark: #e2eaf5;
 
   --color-success: #2d7d46;
   --color-warning: #d97706;
   --color-error: #dc2626;
   --color-info: #2563eb;
+
+  --color-purple: #7c3aed;
+  --color-cyan: #0891b2;
+  --color-green: #059669;
+  --color-pink: #be123c;
 
   --font-sans: 'Be Vietnam Pro', sans-serif;
 
@@ -46,26 +54,58 @@
     from { opacity: 0; transform: translateY(-8px); }
     to { opacity: 1; transform: translateY(0); }
   }
+
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-overlay: 300;
+  --z-modal-backdrop: 400;
+  --z-modal: 500;
+  --z-toast: 600;
+  --z-tooltip: 700;
 }
 
 @variant dark (&:where(.dark, .dark *));
 
-html {
-  scroll-behavior: smooth;
+@utility text-primary {
+  color: var(--color-ink) !important;
+}
+
+.hover\:text-primary:hover {
+  color: var(--color-ink) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
 }
 
 body {
   font-family: var(--font-sans);
   background-color: var(--color-bg);
-  color: #1e293b;
+  color: var(--color-ink);
   margin: 0;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  text-wrap: pretty;
+}
+
+h1, h2, h3 {
+  text-wrap: balance;
 }
 
 .dark body {
   background-color: var(--color-bg-dark);
-  color: #f1f5f9;
+  color: var(--color-ink-dark);
 }
 
 ::selection {
@@ -74,13 +114,14 @@ body {
 }
 
 ::-webkit-scrollbar { width: 6px; height: 6px; }
+* { scrollbar-width: thin; }
 ::-webkit-scrollbar-track { background: #f1f1f1; }
 ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: #aaa; }
 
-.dark ::-webkit-scrollbar-track { background: #1e293b; }
-.dark ::-webkit-scrollbar-thumb { background: #475569; }
-.dark ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+.dark ::-webkit-scrollbar-track { background: #162032; }
+.dark ::-webkit-scrollbar-thumb { background: #2a344a; border-radius: 3px; }
+.dark ::-webkit-scrollbar-thumb:hover { background: #3d4a63; }
 
 *:focus-visible {
   outline: 2px solid var(--color-primary);
@@ -89,6 +130,9 @@ body {
 }
 
 :root {
+  --ant-primary-color: var(--color-ink);
+  --ant-primary-color-hover: #ef5350;
+  --ant-primary-color-active: #c62828;
   --ant-color-primary: #e53935;
   --ant-color-primary-hover: #b71c1c;
   --ant-color-primary-active: #9b2c2c;
@@ -98,16 +142,31 @@ body {
   --ant-font-family: 'Be Vietnam Pro', sans-serif;
   --ant-color-border: #e2e8f0;
   --ant-color-bg-container: #ffffff;
-  --ant-color-text: #1e293b;
-  --ant-color-text-secondary: #718096;
-  --ant-color-bg-layout: #f7fafc;
+  --ant-color-text: #111111;
+  --ant-text-color: #111111;
+  --ant-color-text-secondary: #64748b;
+  --ant-color-bg-layout: #fafafa;
 }
 
 html.dark {
-  --ant-color-bg-container: #1e293b;
-  --ant-color-bg-layout: #0f172a;
-  --ant-color-text: #f1f5f9;
-  --ant-color-text-secondary: #94a3b8;
-  --ant-color-border: #334155;
-  --ant-color-bg-elevated: #243147;
+  --color-primary: #ef5350;
+  --color-primary-dark: #ef5350;
+  --color-primary-light: #2a1518;
+  --ant-primary-color: var(--color-ink-dark);
+
+  --ant-color-bg-container: #162032;
+  --ant-color-bg-layout: #0c1220;
+  --ant-color-text: #e6edf3;
+  --ant-text-color: #e6edf3;
+  --ant-color-text-secondary: #8895b0;
+  --ant-color-border: #2a344a;
+  --ant-color-bg-elevated: #1e2a3e;
+  --ant-color-primary: var(--color-ink-dark);
+  --ant-color-primary-hover: var(--color-ink-dark);
+  --ant-color-primary-active: var(--color-ink-dark);
+
+  .ant-btn-text,
+  .ant-btn-text:not(:disabled) {
+    color: var(--ant-color-text);
+  }
 }
