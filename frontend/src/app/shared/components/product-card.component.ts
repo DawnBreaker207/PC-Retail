@@ -1,31 +1,37 @@
 import { Component, input, output } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { CurrencyFormatPipe } from '@shared/pipes/currency-format.pipe';
+import { FallbackImageDirective } from '@shared/directives/fallback-image.directive';
 import { Sku } from '@core/models/common.model';
 
 @Component({
   selector: 'app-product-card',
-  imports: [RouterLink, NzButtonModule, NzIconModule, CurrencyFormatPipe],
+  imports: [RouterLink, NzIconModule, CurrencyFormatPipe, FallbackImageDirective],
   template: `
-    <div
-      class="group bg-surface dark:bg-surface-dark rounded-card border border-border/80 dark:border-border-dark/80 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col cursor-pointer"
-      (click)="cardClick.emit()"
-      (keyup.enter)="cardClick.emit()"
-      tabindex="0"
+    <article
+      class="w-full group bg-surface dark:bg-surface-dark rounded-card border border-border/80 dark:border-border-dark/80 shadow-sm hover:shadow-lg hover:-translate-y-1 hover:border-primary/30 dark:hover:border-primary/40 transition-all duration-300 overflow-hidden flex flex-col cursor-pointer focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2"
       role="button"
+      tabindex="0"
+      (click)="cardClick.emit()"
+      (keydown.enter)="cardClick.emit()"
+      (keydown.space)="$event.preventDefault(); cardClick.emit()"
     >
-      <div class="relative aspect-square bg-bg dark:bg-bg-dark overflow-hidden">
+      <a
+        [routerLink]="['/products', product().slug]"
+        class="block relative aspect-square bg-bg dark:bg-bg-dark overflow-hidden"
+        (click)="$event.stopPropagation()"
+      >
         <img
           [src]="product().imageUrls[0]"
+          appFallbackImage
           [alt]="product().name"
           class="w-full h-full object-contain p-4 sm:p-6 group-hover:scale-110 transition-transform duration-500"
           loading="lazy"
         />
         @if (badge()) {
           <span
-            class="absolute top-2 left-2 text-[10px] font-bold px-2.5 py-1 rounded-md z-10 shadow-sm text-white"
+            class="absolute top-2 left-2 text-[11px] font-bold px-2.5 py-1 rounded-md z-10 shadow-sm text-white"
             [class.bg-primary]="badge() === 'flash'"
             [class.bg-warning]="badge() === 'discount'"
           >
@@ -36,17 +42,17 @@ import { Sku } from '@core/models/common.model';
           </span>
         }
         <button
-          nz-button
-          nzType="text"
-          class="!absolute !top-2 !right-2 !w-8 !h-8 !rounded-full !bg-white/80 dark:!bg-slate-800/80 !opacity-0 group-hover:!opacity-100 !transition-opacity !duration-200 !shadow-sm"
+          type="button"
+          aria-label="Yêu thích"
+           class="absolute top-2 right-2 w-11 h-11 rounded-full bg-white/80 dark:bg-surface-card-dark/80 shadow-sm opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center focus-visible:outline-2 focus-visible:outline-primary/60"
           (click)="$event.stopPropagation()"
         >
-          <span nz-icon nzType="heart" nzTheme="outline" class="text-muted dark:text-muted-dark"></span>
+          <span nz-icon nzType="heart" nzTheme="outline" class="text-muted dark:text-muted-dark text-sm"></span>
         </button>
-      </div>
+      </a>
 
       <div class="p-3 sm:p-4 flex-1 flex flex-col">
-        <p class="text-[11px] text-muted dark:text-muted-dark mb-1 uppercase tracking-wider font-medium">{{ product().brandName }}</p>
+        <p class="text-xs text-muted dark:text-muted-dark mb-1 uppercase tracking-wider font-medium">{{ product().brandName }}</p>
         <a
           [routerLink]="['/products', product().slug]"
           class="text-sm font-medium line-clamp-2 hover:text-primary transition-colors duration-200 mb-2 flex-1 leading-snug"
@@ -58,8 +64,8 @@ import { Sku } from '@core/models/common.model';
         @if (product().specChips && product().specChips!.length > 0) {
           <div class="flex flex-wrap gap-1 mb-2">
             @for (chip of product().specChips!.slice(0, 4); track chip.label) {
-              <span class="inline-flex items-center gap-0.5 text-[10px] bg-bg dark:bg-bg-dark text-muted dark:text-muted-dark px-1.5 py-0.5 rounded border border-border/60 dark:border-border-dark/60">
-                <span nz-icon [nzType]="chip.icon" class="text-[9px]"></span>
+              <span class="inline-flex items-center gap-0.5 text-[11px] bg-bg dark:bg-bg-dark text-muted dark:text-muted-dark px-1.5 py-0.5 rounded border border-border/60 dark:border-border-dark/60">
+                <span nz-icon [nzType]="chip.icon" class="text-[10px]"></span>
                 <span>{{ chip.value }}</span>
               </span>
             }
@@ -76,34 +82,34 @@ import { Sku } from '@core/models/common.model';
         @if (product().soldCount > 0 || product().rating) {
           <div class="flex items-center gap-2 mt-0.5">
             @if (product().rating) {
-              <div class="flex items-center text-warning text-[11px]">
+              <div class="flex items-center text-warning text-xs">
                 <span nz-icon nzType="star" nzTheme="fill"></span>
                 <span class="ml-0.5 text-muted dark:text-muted-dark font-medium">{{ product().rating }}</span>
               </div>
               @if (product().reviewCount) {
-                <span class="text-[11px] text-muted dark:text-muted-dark">({{ product().reviewCount }})</span>
+                <span class="text-xs text-muted dark:text-muted-dark">({{ product().reviewCount }})</span>
               }
             }
             @if (product().soldCount > 0) {
-              <span class="text-[11px] text-muted dark:text-muted-dark ml-auto">Đã bán {{ product().soldCount }}</span>
+              <span class="text-xs text-muted dark:text-muted-dark ml-auto">Đã bán {{ product().soldCount }}</span>
             }
           </div>
         }
 
         <button
-          nz-button
-          class="!mt-2.5 !w-full !rounded-lg !border-primary !text-primary hover:!bg-primary hover:!text-white !transition-all !duration-200 !text-xs sm:!text-sm !font-semibold !h-9"
-          [class.!bg-primary]="isAdding()"
-          [class.!text-white]="isAdding()"
+          type="button"
+          class="mt-2.5 w-full rounded-lg border border-primary text-primary hover:bg-primary hover:text-white transition-all duration-200 text-xs sm:text-sm font-semibold h-9 flex items-center justify-center gap-1 focus-visible:outline-2 focus-visible:outline-primary/60"
+          [class.bg-primary]="isAdding()"
+          [class.text-white]="isAdding()"
           (click)="$event.stopPropagation(); addToCart.emit()"
         >
           @if (isAdding()) {
-            <span nz-icon nzType="loading" nzTheme="outline" class="mr-1"></span>
+            <span nz-icon nzType="loading" nzTheme="outline"></span>
           }
           + Thêm vào giỏ
         </button>
       </div>
-    </div>
+    </article>
   `,
 })
 export class ProductCardComponent {
