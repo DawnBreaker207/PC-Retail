@@ -1,6 +1,7 @@
 package com.dawn.user.controller;
 
 import com.dawn.common.response.ResponseObject;
+import com.dawn.common.security.AuthorizationConstants;
 import com.dawn.user.controller.request.AddressRequest;
 import com.dawn.user.controller.request.UpdateProfileRequest;
 import com.dawn.user.controller.response.UserResponse;
@@ -8,6 +9,7 @@ import com.dawn.user.dto.AddressDto;
 import com.dawn.user.port.in.UserProfileUseCase;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,26 +22,31 @@ public class UserController {
     private final UserProfileUseCase userProfileUseCase;
 
     @GetMapping("/me")
+    @PreAuthorize(AuthorizationConstants.CUSTOMER_ONLY)
     public ResponseObject<UserResponse> getCurrentUser() {
         return ResponseObject.success(userProfileUseCase.getCurrentUser());
     }
 
     @PutMapping("/me")
+    @PreAuthorize(AuthorizationConstants.CUSTOMER_ONLY)
     public ResponseObject<UserResponse> updateProfile(@Valid @RequestBody UpdateProfileRequest request) {
         return ResponseObject.success(userProfileUseCase.updateProfile(request));
     }
 
     @GetMapping("/me/addresses")
+    @PreAuthorize(AuthorizationConstants.CUSTOMER_ONLY)
     public ResponseObject<List<AddressDto>> getAddresses() {
         return ResponseObject.success(userProfileUseCase.getAddresses());
     }
 
     @PostMapping("/me/addresses")
+    @PreAuthorize(AuthorizationConstants.CUSTOMER_ONLY)
     public ResponseObject<AddressDto> addAddress(@Valid @RequestBody AddressRequest request) {
         return ResponseObject.created(userProfileUseCase.addAddress(request));
     }
 
     @PutMapping("/me/addresses/{addressId}")
+    @PreAuthorize(AuthorizationConstants.CUSTOMER_ONLY)
     public ResponseObject<AddressDto> updateAddress(
             @PathVariable String addressId,
             @Valid @RequestBody AddressRequest request) {
@@ -47,6 +54,7 @@ public class UserController {
     }
 
     @DeleteMapping("/me/addresses/{addressId}")
+    @PreAuthorize(AuthorizationConstants.CUSTOMER_ONLY)
     public ResponseObject<Void> deleteAddress(@PathVariable String addressId) {
         userProfileUseCase.deleteAddress(addressId);
         return ResponseObject.deleted();

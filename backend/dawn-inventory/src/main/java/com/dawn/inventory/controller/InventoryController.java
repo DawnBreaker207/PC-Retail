@@ -2,6 +2,7 @@ package com.dawn.inventory.controller;
 
 import com.dawn.common.response.ResponseObject;
 import com.dawn.common.response.ResponsePage;
+import com.dawn.common.security.AuthorizationConstants;
 import com.dawn.common.utils.SecurityUtils;
 import com.dawn.inventory.controller.request.RestockRequest;
 import com.dawn.inventory.dto.InventoryDto;
@@ -10,6 +11,7 @@ import com.dawn.inventory.port.in.QueryInventoryUseCase;
 import com.dawn.inventory.port.in.RestockUseCase;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -20,6 +22,7 @@ public class InventoryController {
     private final RestockUseCase restockUseCase;
 
     @GetMapping
+    @PreAuthorize(AuthorizationConstants.STAFF_OR_ADMIN)
     public ResponseObject<ResponsePage<InventoryDto>> getAll(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
@@ -29,11 +32,13 @@ public class InventoryController {
     }
 
     @GetMapping("/{skuId}")
+    @PreAuthorize(AuthorizationConstants.STAFF_OR_ADMIN)
     public ResponseObject<InventoryDto> getBySkuId(@PathVariable Long skuId) {
         return ResponseObject.success(queryInventoryUseCase.getBySkuId(skuId));
     }
 
     @PutMapping("/{skuId}/restock")
+    @PreAuthorize(AuthorizationConstants.STAFF_OR_ADMIN)
     public ResponseObject<Void> restock(
             @PathVariable Long skuId,
             @Valid @RequestBody RestockRequest req) {
@@ -44,6 +49,7 @@ public class InventoryController {
 
 
     @GetMapping("/{skuId}/transactions")
+    @PreAuthorize(AuthorizationConstants.STAFF_OR_ADMIN)
     public ResponseObject<ResponsePage<InventoryTransactionDto>> getTransactions(
             @PathVariable Long skuId,
             @RequestParam(defaultValue = "0") int page,

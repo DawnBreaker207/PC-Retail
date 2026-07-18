@@ -2,16 +2,22 @@ package com.dawn.catalog.controller;
 
 import com.dawn.catalog.controller.request.SkuCreatedRequest;
 import com.dawn.catalog.controller.request.SkuUpdatedRequest;
+import com.dawn.catalog.dto.SkuCompareResponse;
 import com.dawn.catalog.dto.SkuDetailDto;
 import com.dawn.catalog.dto.SkuSummaryDto;
 import com.dawn.catalog.service.SkuService;
 import com.dawn.common.response.ResponseObject;
 import com.dawn.common.response.ResponsePage;
+import com.dawn.common.security.AuthorizationConstants;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @RestController
 @RequestMapping("/skus")
@@ -38,22 +44,28 @@ public class SkuController {
     }
 
     @PostMapping("")
-//    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize(AuthorizationConstants.ADMIN_ONLY)
     public ResponseObject<SkuDetailDto> create(@Valid @RequestBody SkuCreatedRequest request) {
         return ResponseObject.created(skuService.create(request));
     }
 
     @PutMapping("/{id}")
-//    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize(AuthorizationConstants.ADMIN_ONLY)
     public ResponseObject<SkuDetailDto> update(@PathVariable Long id,
                                                @RequestBody SkuUpdatedRequest request) {
         return ResponseObject.success(skuService.update(id, request));
     }
 
     @DeleteMapping("/{id}")
-//    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize(AuthorizationConstants.ADMIN_ONLY)
     public ResponseObject<Void> softDelete(@PathVariable Long id) {
         skuService.softDelete(id);
         return ResponseObject.deleted();
+    }
+
+    @GetMapping("/compare")
+    public ResponseObject<List<SkuCompareResponse>> compare(
+            @RequestParam("ids") @NotEmpty @Size(min = 4) List<Long> ids) {
+        return ResponseObject.created(skuService.getSkusForCompare(ids));
     }
 }
