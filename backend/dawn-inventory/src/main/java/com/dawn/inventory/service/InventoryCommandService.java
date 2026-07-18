@@ -3,6 +3,8 @@ package com.dawn.inventory.service;
 import com.dawn.common.exception.wrapper.InvalidRequestException;
 import com.dawn.common.exception.wrapper.ResourceNotFoundException;
 import com.dawn.common.message.Message;
+import com.dawn.common.auditlog.LogConstant;
+import com.dawn.common.auditlog.Loggable;
 import com.dawn.inventory.dto.StockDecrementCommandDto;
 import com.dawn.inventory.entity.Inventory;
 import com.dawn.inventory.entity.InventoryTransaction;
@@ -124,6 +126,7 @@ public class InventoryCommandService implements ReserveStockUseCase, ReleaseStoc
     // RESTOCK
     @Override
     @Transactional
+    @Loggable(action = LogConstant.Action.IMPORT_STOCK, entity = LogConstant.Entity.WAREHOUSE)
     public void restock(Long skuId, int quantity, BigDecimal unitCost, Long userId) {
         Inventory inv = inventoryRepository.findBySkuId(skuId)
                 .orElseGet(() -> Inventory.builder()

@@ -1,5 +1,7 @@
 package com.dawn.order.service;
 
+import com.dawn.common.auditlog.LogConstant;
+import com.dawn.common.auditlog.Loggable;
 import com.dawn.common.exception.wrapper.ResourceNotFoundException;
 import com.dawn.common.message.Message;
 import com.dawn.order.dto.StockDecrementCommand;
@@ -32,6 +34,7 @@ public class SubOrderCommandService implements TransitionSubOrderUseCase {
 
     @Override
     @Transactional
+    @Loggable(action = LogConstant.Action.TRANSITION_ORDER, entity = LogConstant.Entity.SUB_ORDER)
     public SubOrderDto transition(Long subOrderId, SubOrderStatus target, Long staffId) {
         SubOrder subOrder = subOrderRepo
                 .findById(subOrderId)

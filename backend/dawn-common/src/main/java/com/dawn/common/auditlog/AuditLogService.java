@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,5 +42,25 @@ public class AuditLogService {
 
         auditLogRepository.deleteOlderThan(threshold.toInstant(ZoneOffset.UTC));
         log.info("Auto start clean Audit Log before: {}", threshold);
+    }
+
+    @Async
+    public void log(String action, String entityType, Long entityId, String oldValue, String newValue, Long actorId, String actorRole, int tier) {
+        try {
+            AuditLog log = AuditLog.builder()
+                    .action(action)
+                    .entityType(entityType)
+                    .entityId(entityId)
+                    .oldValue(oldValue != null ? oldValue : "{}")
+                    .newValue(newValue != null ? newValue : "{}")
+                    .actorId(actorId)
+                    .actorRole(actorRole)
+                    .tier(tier)
+                    .status("SUCCESS")
+                    .build();
+            auditLogRepository.save(log);
+        } catch (Exception e) {
+            log.warn("Audit log save failed (non-critical)", e);
+        }
     }
 }

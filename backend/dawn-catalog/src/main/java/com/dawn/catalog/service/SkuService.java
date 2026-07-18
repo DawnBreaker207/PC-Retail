@@ -2,18 +2,23 @@ package com.dawn.catalog.service;
 
 import com.dawn.catalog.controller.request.SkuCreatedRequest;
 import com.dawn.catalog.controller.request.SkuUpdatedRequest;
+import com.dawn.catalog.dto.SkuCompareResponse;
 import com.dawn.catalog.dto.SkuDetailDto;
 import com.dawn.catalog.dto.SkuSummaryDto;
 import com.dawn.catalog.entity.Sku;
+import com.dawn.common.auditlog.LogConstant;
+import com.dawn.common.auditlog.Loggable;
 import com.dawn.catalog.entity.enums.ProductType;
 import com.dawn.catalog.entity.enums.SkuStatus;
 import com.dawn.catalog.repository.BrandRepository;
 import com.dawn.catalog.repository.CategoryRepository;
 import com.dawn.catalog.repository.SkuRepository;
 import com.dawn.common.exception.wrapper.ConflictException;
+import com.dawn.common.exception.wrapper.InvalidRequestException;
 import com.dawn.common.exception.wrapper.ResourceNotFoundException;
 import com.dawn.common.message.Message;
 import com.dawn.common.response.ResponsePage;
+import com.dawn.order.port.out.OrderItemRepository;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,6 +44,7 @@ public class SkuService {
     private final SkuRepository skuRepository;
     private final BrandRepository brandRepository;
     private final CategoryRepository categoryRepository;
+    private final OrderItemRepository orderItemRepository;
 
     @Transactional(readOnly = true)
     public ResponsePage<SkuSummaryDto> search(
@@ -62,6 +68,7 @@ public class SkuService {
     }
 
     @Transactional
+    @Loggable(action = LogConstant.Action.CREATE, entity = LogConstant.Entity.PRODUCT)
     public SkuDetailDto create(SkuCreatedRequest request) {
         if (skuRepository.existsBySkuCodeAndDeletedAtIsNull(request.skuCode())) {
             throw new ConflictException(Message.Catalog.SKU_CODE_ALREADY_EXISTS);
@@ -95,6 +102,7 @@ public class SkuService {
     }
 
     @Transactional
+    @Loggable(action = LogConstant.Action.UPDATE, entity = LogConstant.Entity.PRODUCT)
     public SkuDetailDto update(Long id, SkuUpdatedRequest request) {
         Sku sku = skuRepository.findByIdAndDeletedAtIsNull(id)
                 .orElseThrow(() -> new ResourceNotFoundException("SKU not found"));
@@ -112,11 +120,42 @@ public class SkuService {
     }
 
     @Transactional
+    @Loggable(action = LogConstant.Action.DELETE, entity = LogConstant.Entity.PRODUCT)
     public void softDelete(Long id) {
         Sku sku = skuRepository.findByIdAndDeletedAtIsNull(id)
                 .orElseThrow(() -> new ResourceNotFoundException("SKU not found"));
-        sku.setDeletedAt(Instant.now());
+        if (orderItemRepository.existsBySkuId(id)) {
+            sku.setDeletedAt(Instant.now());
+        } else {
+            skuRepository.deleteById(id);
+        }
         skuRepository.save(sku);
+    }
+
+    public List<SkuCompareResponse> getSkusForCompare(List<Long> ids) {
+        List<Sku> skus = skuRepository.findAllActiveByIds(ids);
+        if (skus.isEmpty()) return List.of();
+
+        long distinctCategories = skus.stream()
+                .map(Sku::getCategoryId)
+                .distinct()
+                .count();
+
+        if (distinctCategories > 1) {
+            throw new InvalidRequestException("Cannot compare SKUs from different categories");
+        }
+
+        return skus.stream().map(sku -> new SkuCompareResponse(
+                        sku.getId(),
+                        sku.getName(),
+                        sku.getSlug(),
+                        sku.getPrice(),
+                        sku.getImageUrls() != null
+                                && !sku.getImageUrls().isEmpty()
+                                ? sku.getImageUrls().getFirst()
+                                : null,
+                        sku.getSpecs()))
+                .toList();
     }
 
     // Private helpers

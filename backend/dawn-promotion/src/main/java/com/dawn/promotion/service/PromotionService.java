@@ -1,5 +1,7 @@
 package com.dawn.promotion.service;
 
+import com.dawn.common.auditlog.LogConstant;
+import com.dawn.common.auditlog.Loggable;
 import com.dawn.common.exception.wrapper.InvalidRequestException;
 import com.dawn.common.exception.wrapper.ConflictException;
 import com.dawn.common.exception.wrapper.ResourceNotFoundException;
@@ -37,6 +39,7 @@ public class PromotionService implements ManageVoucherUseCase {
 
     @Override
     @Transactional
+    @Loggable(action = LogConstant.Action.CREATE, entity = LogConstant.Entity.VOUCHER)
     public VoucherDto create(VoucherCreateRequest req) {
         String code = req.code().toUpperCase();
         if (voucherRepo.existsByCodeAndDeletedAtIsNull(code)) {
@@ -72,6 +75,7 @@ public class PromotionService implements ManageVoucherUseCase {
 
     @Transactional
     @Override
+    @Loggable(action = LogConstant.Action.DELETE, entity = LogConstant.Entity.VOUCHER)
     public void delete(Long id) {
         Voucher voucher = voucherRepo
                 .findById(id)
