@@ -63,7 +63,7 @@ public class SkuService {
     @Transactional(readOnly = true)
     public SkuDetailDto getDetail(Long id) {
         Sku sku = skuRepository.findByIdAndDeletedAtIsNull(id)
-                .orElseThrow(() -> new ResourceNotFoundException(Message.Catalog.SKU_NOT_FOUND));
+                .orElseThrow(() -> new ResourceNotFoundException(Message.format(Message.Catalog.SKU_NOT_FOUND, id)));
         return toDetail(sku);
     }
 
@@ -105,7 +105,7 @@ public class SkuService {
     @Loggable(action = LogConstant.Action.UPDATE, entity = LogConstant.Entity.PRODUCT)
     public SkuDetailDto update(Long id, SkuUpdatedRequest request) {
         Sku sku = skuRepository.findByIdAndDeletedAtIsNull(id)
-                .orElseThrow(() -> new ResourceNotFoundException("SKU not found"));
+                .orElseThrow(() -> new ResourceNotFoundException(Message.format(Message.Catalog.SKU_NOT_FOUND, id)));
 
         if (request.name() != null) sku.setName(request.name());
         if (request.description() != null) sku.setDescription(request.description());
@@ -123,7 +123,7 @@ public class SkuService {
     @Loggable(action = LogConstant.Action.DELETE, entity = LogConstant.Entity.PRODUCT)
     public void softDelete(Long id) {
         Sku sku = skuRepository.findByIdAndDeletedAtIsNull(id)
-                .orElseThrow(() -> new ResourceNotFoundException("SKU not found"));
+                .orElseThrow(() -> new ResourceNotFoundException(Message.format(Message.Catalog.SKU_NOT_FOUND, id)));
         if (orderItemRepository.existsBySkuId(id)) {
             sku.setDeletedAt(Instant.now());
         } else {
@@ -142,7 +142,7 @@ public class SkuService {
                 .count();
 
         if (distinctCategories > 1) {
-            throw new InvalidRequestException("Cannot compare SKUs from different categories");
+            throw new InvalidRequestException(Message.Catalog.SKU_CATEGORY_MISMATCH);
         }
 
         return skus.stream().map(sku -> new SkuCompareResponse(

@@ -51,7 +51,7 @@ public class BrandService {
     @Transactional
     public BrandDto update(Long id, BrandRequest req) {
         Brand brand = brandRepository.findByIdAndDeletedAtIsNull(id)
-                .orElseThrow(() -> new ResourceNotFoundException(Message.Catalog.BRAND_NOT_FOUND));
+                .orElseThrow(() -> new ResourceNotFoundException(Message.format(Message.Catalog.BRAND_NOT_FOUND, id)));
         brand.setName(req.name());
         brand.setLogoUrl(req.logoUrl());
         brandRepository.save(brand);
@@ -61,7 +61,7 @@ public class BrandService {
     @Transactional
     public void delete(Long id) {
         Brand brand = brandRepository.findByIdAndDeletedAtIsNull(id)
-                .orElseThrow(() -> new ResourceNotFoundException(Message.Catalog.BRAND_NOT_FOUND));
+                .orElseThrow(() -> new ResourceNotFoundException(Message.format(Message.Catalog.BRAND_NOT_FOUND, id)));
         if (skuRepository.existsByBrandIdAndDeletedAtIsNull(id)) {
             throw new InvalidRequestException(Message.Catalog.BRAND_HAS_SKU);
         }

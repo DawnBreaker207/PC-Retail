@@ -85,7 +85,11 @@ public class PromotionCheckoutService implements ValidatePromotionUseCase, Promo
                 .orElse(null);
 
         if (voucher == null) {
-            return VoucherValidationResult.fail(Message.Promotion.VOUCHER_NOT_FOUND);
+            return VoucherValidationResult.fail(Message.format(Message.Promotion.VOUCHER_NOT_FOUND, code));
+        }
+
+        if(voucher.getRemainingQuantity() <= 0){
+            return VoucherValidationResult.fail(Message.Promotion.VOUCHER_EXPIRED);
         }
 
         Instant now = Instant.now();

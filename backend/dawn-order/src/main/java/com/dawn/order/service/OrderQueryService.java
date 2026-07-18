@@ -47,10 +47,10 @@ public class OrderQueryService implements QueryOrderUseCase {
     @Transactional(readOnly = true)
     public OrderDto getById(Long orderId, Long userId) {
         Order order = orderRepo.findById(orderId)
-                .orElseThrow(() -> new ResourceNotFoundException(Message.Order.NOT_FOUND));
+                .orElseThrow(() -> new ResourceNotFoundException(Message.format(Message.Order.NOT_FOUND, orderId)));
 
         if (!order.getUserId().equals(userId)) {
-            throw new ResourceNotFoundException(Message.Order.NOT_FOUND);
+            throw new ResourceNotFoundException(Message.format(Message.Order.NOT_FOUND, orderId));
         }
         return toOrderDto(order);
     }

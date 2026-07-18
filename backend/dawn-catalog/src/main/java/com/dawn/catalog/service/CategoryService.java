@@ -53,7 +53,7 @@ public class CategoryService {
 
         if (req.parentId() != null) {
             categoryRepository.findByIdAndDeletedAtIsNull(req.parentId())
-                    .orElseThrow(() -> new ResourceNotFoundException(Message.Catalog.CATEGORY_PARENT_NOT_FOUND));
+                    .orElseThrow(() -> new ResourceNotFoundException(Message.format(Message.Catalog.CATEGORY_PARENT_NOT_FOUND, req.parentId())));
         }
         Category category = Category.builder()
                 .name(req.name())
@@ -67,7 +67,7 @@ public class CategoryService {
     @Transactional
     public CategoryDto update(Long id, CategoryRequest req) {
         Category category = categoryRepository.findByIdAndDeletedAtIsNull(id)
-                .orElseThrow(() -> new ResourceNotFoundException(Message.Catalog.CATEGORY_NOT_FOUND));
+                .orElseThrow(() -> new ResourceNotFoundException(Message.format(Message.Catalog.CATEGORY_NOT_FOUND, id)));
         if (!category.getSlug().equals(req.slug()) &&
                 categoryRepository.existsBySlugAndDeletedAtIsNull(req.slug())) {
             throw new ConflictException(Message.Catalog.CATEGORY_SLUG_EXISTS);
@@ -82,7 +82,7 @@ public class CategoryService {
     @Transactional
     public void delete(Long id) {
         Category category = categoryRepository.findByIdAndDeletedAtIsNull(id)
-                .orElseThrow(() -> new ResourceNotFoundException(Message.Catalog.CATEGORY_NOT_FOUND));
+                .orElseThrow(() -> new ResourceNotFoundException(Message.format(Message.Catalog.CATEGORY_NOT_FOUND, id)));
         if (categoryRepository.existsByParentIdAndDeletedAtIsNull(id)) {
             throw new InvalidRequestException(Message.Catalog.CATEGORY_HAS_CHILDREN);
         }

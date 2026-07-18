@@ -61,14 +61,13 @@ public class Message {
         private User() {
         }
 
-        public static final String NOT_FOUND = "User not found";
-        public static final String NOT_FOUND_WITH_ID = "User not found: {0}";
+        public static final String NOT_FOUND = "User not found: {0}";
         public static final String EMAIL_NOT_FOUND = "No account found with this email";
         public static final String EMAIL_ALREADY_USED = "Email is already in use";
         public static final String EMAIL_INVALID_FORMAT = "Invalid email format";
         public static final String EMAIL_NOT_EMPTY = "Email cannot be empty";
         public static final String USERNAME_EXISTED = "Username already exists";
-        public static final String USERNAME_NOT_FOUND = "Username not found";
+        public static final String USERNAME_NOT_FOUND = "Username not found: {0}";
         public static final String PASSWORD_NOT_MATCH = "Passwords do not match";
         public static final String PASSWORD_TOO_SHORT = "Password must be at least 8 characters";
         public static final String USER_INACTIVE = "Account is locked or not yet activated";
@@ -77,7 +76,7 @@ public class Message {
         public static final String CANNOT_CHANGE_OWN_ROLE = "You cannot change your own role";
         public static final String CANNOT_ASSIGN_ADMIN_ROLE = "Admin role cannot be assigned via this API";
         // Address
-        public static final String ADDRESS_NOT_FOUND = "Address not found";
+        public static final String ADDRESS_NOT_FOUND = "Address not found: {0}";
     }
 
     // Catalog
@@ -86,20 +85,21 @@ public class Message {
         }
 
         // SKU
-        public static final String SKU_NOT_FOUND = "SKU not found";
+        public static final String SKU_NOT_FOUND = "SKU not found: {0}";
         public static final String SKU_CODE_ALREADY_EXISTS = "SKU code already exists";
+        public static final String SKU_CATEGORY_MISMATCH = "Cannot compare SKUs from different categories";
 
         // Brand
-        public static final String BRAND_NOT_FOUND = "Brand not found";
+        public static final String BRAND_NOT_FOUND = "Brand not found: {0}";
         public static final String BRAND_ALREADY_EXISTS = "Brand already exists";
         public static final String BRAND_HAS_SKU = "Cannot delete brand with existing SKUs";
 
         // Category
-        public static final String CATEGORY_NOT_FOUND = "Category not found";
+        public static final String CATEGORY_NOT_FOUND = "Category not found: {0}";
         public static final String CATEGORY_SLUG_EXISTS = "Slug already existed";
         public static final String CATEGORY_HAS_CHILDREN = "Cannot delete category with subcategories";
         public static final String CATEGORY_HAS_SKU = "Cannot delete category with existing SKUs";
-        public static final String CATEGORY_PARENT_NOT_FOUND = "Parent category not found";
+        public static final String CATEGORY_PARENT_NOT_FOUND = "Parent category not found: {0}";
     }
 
     // Inventory
@@ -116,7 +116,7 @@ public class Message {
         private Cart() {
         }
 
-        public static final String ITEM_NOT_FOUND = "Cart item not found";
+        public static final String ITEM_NOT_FOUND = "Cart item not found: sku={0}";
         public static final String INSUFFICIENT_STOCK = "SKU #%d only has %d item(s) available but in cart have %d item(s)";
     }
 
@@ -126,14 +126,14 @@ public class Message {
         }
 
         // Order
-        public static final String NOT_FOUND = "Order not found";
+        public static final String NOT_FOUND = "Order not found: {0}";
         public static final String CART_EMPTY = "Cart is empty";
         public static final String SHIPPING_ADDRESS_REQUIRED = "Shipping address is required for DELIVERY";
         public static final String INSUFFICIENT_STOCK_SKUS = "Not enough stock for SKU: {0}";
         public static final String EXPIRED = "Order expired, please checkout again";
         public static final String INVALID_TRANSITION = "Invalid transition from {0} -> {1}";
         // SubOrder
-        public static final String SUB_ORDER_NOT_FOUND = "SubOrder not found";
+        public static final String SUB_ORDER_NOT_FOUND = "SubOrder not found: {0}";
     }
 
     // Payment
@@ -141,7 +141,7 @@ public class Message {
         private Payment() {
         }
 
-        public static final String NOT_FOUND = "Payment not found";
+        public static final String NOT_FOUND = "Payment not found: {0}";
         public static final String INVALID_ORDER_AMOUNT = "Invalid order amount for payment";
         public static final String GATEWAY_NOT_FOUND = "Payment gateway not found for: {0}";
         public static final String WEBHOOK_NOT_SUPPORTED = "Webhook is not supported for this payment method";
@@ -154,7 +154,7 @@ public class Message {
         }
 
         // Voucher - validation
-        public static final String VOUCHER_NOT_FOUND = "Voucher code not existed";
+        public static final String VOUCHER_NOT_FOUND = "Voucher code not existed: {0}";
         public static final String VOUCHER_EXPIRED = "Voucher was expired or was not affected";
         public static final String VOUCHER_OUT_OF_STOCK = "Voucher was out of turns";
         public static final String VOUCHER_MIN_ORDER_NOT_MET = "Minimum order amount must be at least {0} to use this voucher";

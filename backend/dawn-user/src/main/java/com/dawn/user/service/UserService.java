@@ -90,7 +90,7 @@ public class UserService implements UserProfileUseCase {
                     entry.setId(addressId);
                     return entry;
                 })
-                .orElseThrow(() -> new ResourceNotFoundException(Message.User.ADDRESS_NOT_FOUND));
+                .orElseThrow(() -> new ResourceNotFoundException(Message.format(Message.User.ADDRESS_NOT_FOUND, addressId)));
 
         if (updated.isDefault()) {
             addresses.forEach(address -> address.setDefault(false));
@@ -111,7 +111,7 @@ public class UserService implements UserProfileUseCase {
                 .collect(java.util.stream.Collectors.toCollection(ArrayList::new));
 
         if (addresses.size() == user.getAddresses().size()) {
-            throw new ResourceNotFoundException(Message.User.ADDRESS_NOT_FOUND);
+            throw new ResourceNotFoundException(Message.format(Message.User.ADDRESS_NOT_FOUND, addressId));
         }
 
         if (addresses.stream().noneMatch(AddressEntry::isDefault) && !addresses.isEmpty()) {
@@ -124,7 +124,7 @@ public class UserService implements UserProfileUseCase {
 
     private User loadCurrentUser() {
         return userRepository.findByIdAndDeletedAtIsNull(SecurityUtils.getCurrentUserId())
-                .orElseThrow(() -> new ResourceNotFoundException(Message.User.NOT_FOUND));
+                .orElseThrow(() -> new ResourceNotFoundException(Message.format(Message.User.NOT_FOUND, SecurityUtils.getCurrentUserId())));
     }
 
     private static UserResponse toResponse(User user) {

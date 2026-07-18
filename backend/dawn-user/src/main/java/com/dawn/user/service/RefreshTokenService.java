@@ -59,7 +59,7 @@ public class RefreshTokenService {
         refreshTokenRepository.save(storedToken);
 
         User user = userRepository.findByIdAndDeletedAtIsNull(storedToken.getUserId())
-                .orElseThrow(() -> new UnauthorizedException(Message.User.NOT_FOUND));
+                .orElseThrow(() -> new UnauthorizedException(Message.format(Message.User.NOT_FOUND, storedToken.getUserId())));
 
         String newRefreshToken = createRefreshToken(user);
         return buildAuthResponse(user, newRefreshToken);

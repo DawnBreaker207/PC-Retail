@@ -66,7 +66,7 @@ public class InventoryCommandService implements ReserveStockUseCase, ReleaseStoc
     public void release(List<StockDecrementCommandDto> items, Long orderId) {
         for (StockDecrementCommandDto item : items) {
             Inventory inv = inventoryRepository.findBySkuIdWithLock(item.skuId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Inventory not found for SKU: " + item.skuId()));
+                    .orElseThrow(() -> new ResourceNotFoundException(Message.format(Message.Inventory.NOT_FOUND_FOR_SKU, item.skuId())));
 
             int newReserved = Math.max(0, inv.getReservedQuantity() - item.quantity());
             inv.setReservedQuantity(newReserved);
@@ -98,7 +98,7 @@ public class InventoryCommandService implements ReserveStockUseCase, ReleaseStoc
     public void deduct(List<StockDecrementCommandDto> items, Long orderId) {
         for (StockDecrementCommandDto item : items) {
             Inventory inv = inventoryRepository.findBySkuIdWithLock(item.skuId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Inventory not found for SKU: " + item.skuId()));
+                    .orElseThrow(() -> new ResourceNotFoundException(Message.format(Message.Inventory.NOT_FOUND_FOR_SKU, item.skuId())));
 
             inv.setStockQuantity(inv.getStockQuantity() - item.quantity());
             inv.setReservedQuantity(Math.max(0, inv.getReservedQuantity() - item.quantity()));

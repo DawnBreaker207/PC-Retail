@@ -131,7 +131,7 @@ public class CartService implements GetCartUseCase, AddCartItemUseCase, UpdateCa
     @Transactional
     public CartItemDto updateItem(Long userId, Long skuId, int quantity) {
         CartItem item = cartItemRepository.findByUserIdAndSkuId(userId, skuId)
-                .orElseThrow(() -> new ResourceNotFoundException(Message.Cart.ITEM_NOT_FOUND));
+                .orElseThrow(() -> new ResourceNotFoundException(Message.format(Message.Cart.ITEM_NOT_FOUND, skuId)));
         item.setQuantity(quantity);
         cartItemRepository.save(item);
 

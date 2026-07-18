@@ -38,7 +38,7 @@ public class SubOrderCommandService implements TransitionSubOrderUseCase {
     public SubOrderDto transition(Long subOrderId, SubOrderStatus target, Long staffId) {
         SubOrder subOrder = subOrderRepo
                 .findById(subOrderId)
-                .orElseThrow(() -> new ResourceNotFoundException(Message.Order.SUB_ORDER_NOT_FOUND));
+                .orElseThrow(() -> new ResourceNotFoundException(Message.format(Message.Order.SUB_ORDER_NOT_FOUND, subOrderId)));
 
 
         stateMachine.assertValidTransition(subOrder.getStatus(), target);
@@ -63,7 +63,7 @@ public class SubOrderCommandService implements TransitionSubOrderUseCase {
     public SubOrderDto cancel(Long subOrderId, Long userId) {
         SubOrder subOrder = subOrderRepo
                 .findById(subOrderId)
-                .orElseThrow(() -> new ResourceNotFoundException(Message.Order.SUB_ORDER_NOT_FOUND));
+                .orElseThrow(() -> new ResourceNotFoundException(Message.format(Message.Order.SUB_ORDER_NOT_FOUND, subOrderId)));
         // User only can self cancel when in PENDING_PAYMENT
         stateMachine.assertValidTransition(subOrder.getStatus(), SubOrderStatus.CANCELLED);
 

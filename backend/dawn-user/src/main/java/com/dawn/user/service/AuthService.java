@@ -74,7 +74,7 @@ public class AuthService implements RegisterUseCase, LoginUseCase, TokenRefreshU
         }
         User user = userRepository
                 .findByEmailAndDeletedAtIsNull(email)
-                .orElseThrow(() -> new ResourceNotFoundException(Message.User.USERNAME_NOT_FOUND));
+                .orElseThrow(() -> new ResourceNotFoundException(Message.format(Message.User.USERNAME_NOT_FOUND, email)));
 
         if (user.getStatus() != UserStatus.PENDING_VERIFICATION) {
             throw new InvalidRequestException(Message.User.USER_ALREADY_VERIFICATION);
@@ -100,7 +100,7 @@ public class AuthService implements RegisterUseCase, LoginUseCase, TokenRefreshU
         }
 
         User user = userRepository.findByEmailAndDeletedAtIsNull(normalizedEmail)
-                .orElseThrow(() -> new ResourceNotFoundException(Message.User.NOT_FOUND));
+                .orElseThrow(() -> new ResourceNotFoundException(Message.format(Message.User.NOT_FOUND, normalizedEmail)));
         if (user.getStatus() != UserStatus.PENDING_VERIFICATION) {
             throw new InvalidRequestException(Message.User.USER_ALREADY_VERIFICATION);
         }
@@ -168,7 +168,7 @@ public class AuthService implements RegisterUseCase, LoginUseCase, TokenRefreshU
         }
 
         User user = userRepository.findByIdAndDeletedAtIsNull(userId)
-                .orElseThrow(() -> new ResourceNotFoundException(Message.User.NOT_FOUND));
+                .orElseThrow(() -> new ResourceNotFoundException(Message.format(Message.User.NOT_FOUND, userId)));
 
         user.setPasswordHash(passwordEncoder.encode(request.newPassword()));
         userRepository.save(user);

@@ -79,7 +79,7 @@ public class PromotionService implements ManageVoucherUseCase {
     public void delete(Long id) {
         Voucher voucher = voucherRepo
                 .findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(Message.Promotion.VOUCHER_NOT_FOUND));
+                .orElseThrow(() -> new ResourceNotFoundException(Message.format(Message.Promotion.VOUCHER_NOT_FOUND, id)));
 
         voucher.setDeletedAt(Instant.now());
         voucherRepo.save(voucher);

@@ -37,7 +37,7 @@ public class QueryPaymentStatusService implements QueryPaymentStatusUseCase {
     @Transactional
     public PaymentDto queryAndSync(Long paymentId) {
         Payment payment = paymentRepo.findById(paymentId)
-                .orElseThrow(() -> new ResourceNotFoundException(Message.Payment.NOT_FOUND));
+                .orElseThrow(() -> new ResourceNotFoundException(Message.format(Message.Payment.NOT_FOUND, paymentId)));
 
         if (payment.getStatus() != PaymentResultStatus.PENDING) {
             return toDto(payment);
