@@ -20,7 +20,7 @@
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
       @for (tpl of templates(); track tpl.id) {
         <a [routerLink]="['/pc-builder/templates', tpl.id]" class="block group">
-          <div class="bg-surface dark:bg-surface-dark rounded-card border border-border/80 dark:border-border-dark/80 shadow-sm overflow-hidden transition-all group-hover:shadow-md group-hover:-translate-y-1">
+          <div class="bg-surface dark:bg-surface-dark rounded-card border border-border/80 dark:border-border-dark/80 shadow-sm overflow-hidden transition-transform group-hover:shadow-md group-hover:-translate-y-1">
             <div class="aspect-video bg-bg dark:bg-bg-dark flex items-center justify-center p-6">
               <div class="text-center">
                 <i nz-icon nzType="build" nzTheme="outline" class="text-4xl text-primary"></i>
@@ -33,7 +33,7 @@
                   <nz-tag [nzColor]="tagColor(tag)">{{ tag }}</nz-tag>
                 }
               </div>
-              <h3 class="font-bold mb-2">{{ tpl.name }}</h3>
+              <h2 class="font-bold mb-2 text-base">{{ tpl.name }}</h2>
               @if (tpl.description) {
                 <p class="text-xs text-muted dark:text-muted-dark line-clamp-2 mb-3">{{ tpl.description }}</p>
               }

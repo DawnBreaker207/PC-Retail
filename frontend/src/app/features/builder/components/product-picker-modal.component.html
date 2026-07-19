@@ -26,7 +26,7 @@
       <div class="grid grid-cols-2 md:grid-cols-3 gap-3 max-h-[480px] overflow-y-auto -mx-2 px-2">
         @for (sku of filtered; track sku.id) {
           <div
-            class="border border-border/60 dark:border-border-dark/60 rounded-lg p-3 cursor-pointer transition-all hover:border-primary hover:shadow-md bg-surface dark:bg-surface-dark"
+            class="border border-border/60 dark:border-border-dark/60 rounded-lg p-3 cursor-pointer transition-shadow hover:border-primary hover:shadow-md bg-surface dark:bg-surface-dark"
             (click)="selectProduct(sku)"
           >
             <div class="aspect-square bg-bg dark:bg-bg-dark rounded-lg overflow-hidden mb-2 flex items-center justify-center">

@@ -1,4 +1,5 @@
-import { Component, inject, OnInit, signal, ViewContainerRef } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy, signal, ViewContainerRef, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { NzStepsModule } from 'ng-zorro-antd/steps';
 import { NzTableModule } from 'ng-zorro-antd/table';
@@ -37,20 +38,27 @@ const STATUS_STEP_MAP: Record<string, number> = {
   ],
   templateUrl: './order-detail.component.html',
 })
-export class OrderDetailComponent implements OnInit {
+export class OrderDetailComponent implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
   private orderService = inject(OrderService);
   private modal = inject(NzModalService);
   private viewContainerRef = inject(ViewContainerRef);
+  private destroyRef = inject(DestroyRef);
 
   order = signal<Order | null>(null);
   isLoading = signal(false);
   windowWidth = signal(window.innerWidth);
+  private onResize = () => this.windowWidth.set(window.innerWidth);
 
   constructor() {
     if (typeof window !== 'undefined') {
-      const onResize = () => this.windowWidth.set(window.innerWidth);
-      window.addEventListener('resize', onResize);
+      window.addEventListener('resize', this.onResize);
+    }
+  }
+
+  ngOnDestroy() {
+    if (typeof window !== 'undefined') {
+      window.removeEventListener('resize', this.onResize);
     }
   }
 
@@ -61,7 +69,9 @@ export class OrderDetailComponent implements OnInit {
 
   private loadOrder(id: number) {
     this.isLoading.set(true);
-    this.orderService.getOrderDetail(id).subscribe((res) => {
+    this.orderService.getOrderDetail(id).pipe(
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe((res) => {
       this.order.set(res);
       this.isLoading.set(false);
     });
@@ -70,7 +80,9 @@ export class OrderDetailComponent implements OnInit {
   cancelOrder() {
     const o = this.order();
     if (!o) return;
-    this.orderService.cancelOrder(o.id).subscribe(() => this.loadOrder(o.id));
+    this.orderService.cancelOrder(o.id).pipe(
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe(() => this.loadOrder(o.id));
   }
 
   get currentStep(): number {

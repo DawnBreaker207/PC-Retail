@@ -1,5 +1,5 @@
 <div class="bg-surface dark:bg-surface-dark rounded-card border border-border/80 dark:border-border-dark/80 shadow-sm p-6 sticky top-24">
-  <h3 class="text-lg font-bold tracking-tight mb-4">Tóm tắt cấu hình</h3>
+  <h2 class="text-lg font-bold tracking-tight mb-4">Tóm tắt cấu hình</h2>
 
   @if (selectedItems.length === 0) {
     <p class="text-sm text-muted dark:text-muted-dark text-center py-6">
@@ -71,7 +71,7 @@
     nz-button
     nzType="primary"
     nzSize="large"
-    class="w-full font-semibold"
+    class="w-full font-semibold min-h-[44px]"
     [disabled]="!canAddToCart()"
     (click)="onAddToCart()"
   >

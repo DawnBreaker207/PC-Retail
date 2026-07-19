@@ -1,4 +1,5 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { BuilderService } from '../services/builder.service';
 import { BuilderSlot, BuilderSelection, BuilderValidation } from '@core/models/common.model';
@@ -14,6 +15,7 @@ import { LoadingSpinnerComponent } from '@shared/components/loading-spinner.comp
 })
 export class CustomBuildComponent {
   private builderService = inject(BuilderService);
+  private destroyRef = inject(DestroyRef);
 
   slots: BuilderSlot[] = [];
   selections = new Map<string, BuilderSelection>();
@@ -26,7 +28,9 @@ export class CustomBuildComponent {
 
   private loadSlots() {
     this.loading = true;
-    this.builderService.getSlots().subscribe(res => {
+    this.builderService.getSlots().pipe(
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe(res => {
       this.slots = res.content;
       this.loading = false;
     });
@@ -44,7 +48,9 @@ export class CustomBuildComponent {
 
   private revalidate() {
     const items = Array.from(this.selections.values());
-    this.builderService.validate(items).subscribe(v => {
+    this.builderService.validate(items).pipe(
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe(v => {
       this.validation = v;
     });
   }

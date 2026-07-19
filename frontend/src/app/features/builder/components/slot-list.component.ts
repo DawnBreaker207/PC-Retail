@@ -2,9 +2,8 @@ import { Component, input, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzIconModule } from 'ng-zorro-antd/icon';
-import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzAlertModule } from 'ng-zorro-antd/alert';
-import { BuilderSlot, BuilderSelection, BuilderConflict } from '@core/models/common.model';
+import { BuilderSlot, BuilderSelection, BuilderConflict, Sku } from '@core/models/common.model';
 import { CurrencyFormatPipe } from '@shared/pipes/currency-format.pipe';
 import { FallbackImageDirective } from '@shared/directives/fallback-image.directive';
 import { ProductPickerModalComponent } from './product-picker-modal.component';
@@ -12,7 +11,7 @@ import { ProductPickerModalComponent } from './product-picker-modal.component';
 @Component({
   selector: 'app-slot-list',
   imports: [
-    CommonModule, FallbackImageDirective, NzButtonModule, NzIconModule, NzTagModule, NzAlertModule,
+    CommonModule, FallbackImageDirective, NzButtonModule, NzIconModule, NzAlertModule,
     CurrencyFormatPipe, ProductPickerModalComponent,
   ],
   templateUrl: './slot-list.component.html',
@@ -32,7 +31,7 @@ export class SlotListComponent {
   slotIcons: Record<string, string> = {
     CPU: 'tool', Mainboard: 'layout', RAM: 'database', GPU: 'thunderbolt',
     PSU: 'thunderbolt', Case: 'build', Storage: 'folder', Cooler: 'fire',
-    Monitor: 'monitor', Keyboard: 'keyboard', Mouse: 'scan', Headphone: 'audio',
+    Monitor: 'monitor', Keyboard: 'tool', Mouse: 'scan', Headphone: 'audio',
   };
 
   getConflict(slotType: string): BuilderConflict | undefined {
@@ -53,7 +52,7 @@ export class SlotListComponent {
     this.pickerSlotType = null;
   }
 
-  onProductPicked(sku: any) {
+  onProductPicked(sku: Sku) {
     if (this.pickerSlotType) {
       this.selectSlot.emit({
         slotType: this.pickerSlotType as BuilderSlot['slotType'],

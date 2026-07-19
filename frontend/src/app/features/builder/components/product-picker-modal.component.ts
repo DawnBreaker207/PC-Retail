@@ -5,10 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { NzModalModule } from 'ng-zorro-antd/modal';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzInputModule } from 'ng-zorro-antd/input';
-import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
-import { NzGridModule } from 'ng-zorro-antd/grid';
-import { NzCardModule } from 'ng-zorro-antd/card';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzEmptyModule } from 'ng-zorro-antd/empty';
 import { CurrencyFormatPipe } from '@shared/pipes/currency-format.pipe';
@@ -19,8 +16,8 @@ import { ApiEndpoints } from '@core/api/api.endpoints';
 @Component({
   selector: 'app-product-picker-modal',
   imports: [
-    CommonModule, FallbackImageDirective, FormsModule, NzModalModule, NzButtonModule, NzInputModule, NzIconModule,
-    NzSpinModule, NzGridModule, NzCardModule, NzTagModule, NzEmptyModule,
+    CommonModule, FallbackImageDirective, FormsModule, NzModalModule, NzButtonModule, NzInputModule,
+    NzSpinModule, NzTagModule, NzEmptyModule,
     CurrencyFormatPipe,
   ],
   templateUrl: './product-picker-modal.component.html',

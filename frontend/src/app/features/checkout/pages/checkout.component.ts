@@ -1,4 +1,4 @@
-import { Component, inject, signal, DestroyRef } from '@angular/core';
+import { Component, inject, signal, DestroyRef, OnInit, OnDestroy } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { NzStepsModule } from 'ng-zorro-antd/steps';
@@ -23,7 +23,7 @@ import { switchMap, finalize } from 'rxjs';
   ],
   templateUrl: './checkout.component.html',
 })
-export class CheckoutComponent {
+export class CheckoutComponent implements OnDestroy {
   private checkoutService = inject(CheckoutService);
   private store = inject(CartStore);
   private router = inject(Router);
@@ -34,15 +34,21 @@ export class CheckoutComponent {
   isPlacing = signal(false);
   windowWidth = signal(0);
   private createdOrderId = 0;
+  private onResize = () => this.windowWidth.set(window.innerWidth);
 
   constructor() {
     if (typeof window !== 'undefined') {
       this.windowWidth.set(window.innerWidth);
-      const onResize = () => this.windowWidth.set(window.innerWidth);
-      window.addEventListener('resize', onResize);
+      window.addEventListener('resize', this.onResize);
     }
     if (this.selectedItems().length === 0) {
       this.router?.navigate(['/cart']);
+    }
+  }
+
+  ngOnDestroy() {
+    if (typeof window !== 'undefined') {
+      window.removeEventListener('resize', this.onResize);
     }
   }
 
