@@ -6,7 +6,6 @@ import { ThemeService } from '@core/services/theme.service';
   selector: 'app-root',
   imports: [RouterOutlet],
   templateUrl: './app.html',
-  styleUrl: './app.css',
 })
 export class App {
   private themeService = inject(ThemeService);

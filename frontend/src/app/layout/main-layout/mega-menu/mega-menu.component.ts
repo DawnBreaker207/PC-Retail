@@ -173,7 +173,7 @@ export class MegaMenuComponent {
       'case-nguon-tan': 'build',
       'o-cung-ram': 'folder',
       'loa-micro-webcam': 'audio',
-      'ban-phim': 'keyboard',
+      'ban-phim': 'tool',
       chuot: 'scan',
       'tai-nghe': 'audio',
       'ghe-ban': 'build',

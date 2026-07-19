@@ -6,6 +6,7 @@ import { FooterComponent } from './footer/footer.component';
 
 @Component({
   selector: 'app-main-layout',
+  host: { class: 'bg-bg dark:bg-bg-dark' },
   imports: [
     RouterOutlet,
     HeaderComponent,

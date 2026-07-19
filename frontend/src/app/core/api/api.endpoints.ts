@@ -44,6 +44,7 @@ export const ApiEndpoints = {
   },
   inventory: {
     base: `${API}/api/inventory`,
+    lowStock: `${API}/api/inventory/low-stock`,
     restock: (skuId: number) => `${API}/api/inventory/${skuId}/restock`,
   },
   builder: {

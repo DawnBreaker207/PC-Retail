@@ -1,3 +1,7 @@
-:host {
-  display: block;
+:host .ant-btn-text,
+:host .ant-btn-text:not(:disabled) {
+  color: white;
+}
+:host .ant-btn-text:hover:not(:disabled) {
+  color: rgba(255, 255, 255, 0.85);
 }

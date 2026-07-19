@@ -1,0 +1,33 @@
+export const MOCK_CATEGORIES = [
+  { id: 1, name: 'Laptop', slug: 'laptop', parentId: null, imageUrl: 'https://dummyimage.com/80x80/1e293b/white?text=L', icon: 'laptop' },
+  { id: 2, name: 'Laptop Gaming', slug: 'laptop-gaming', parentId: null, imageUrl: 'https://dummyimage.com/80x80/1e293b/white?text=LG', icon: 'play-circle' },
+  { id: 3, name: 'PC GVN', slug: 'pc', parentId: null, imageUrl: 'https://dummyimage.com/80x80/1e293b/white?text=PC', icon: 'desktop' },
+  { id: 4, name: 'Main, CPU, VGA', slug: 'linh-kien', parentId: null, imageUrl: 'https://dummyimage.com/80x80/1e293b/white?text=CPU', icon: 'tool' },
+  { id: 5, name: 'Case, Nguồn, Tản', slug: 'case-nguon-tan', parentId: null, imageUrl: 'https://dummyimage.com/80x80/1e293b/white?text=PSU', icon: 'build' },
+  { id: 6, name: 'Ổ cứng, RAM, Thẻ nhớ', slug: 'o-cung-ram', parentId: null, imageUrl: 'https://dummyimage.com/80x80/1e293b/white?text=SSD', icon: 'database' },
+  { id: 7, name: 'Loa, Micro, Webcam', slug: 'loa-micro-webcam', parentId: null, imageUrl: 'https://dummyimage.com/80x80/1e293b/white?text=LOA', icon: 'customer-service' },
+  { id: 8, name: 'Màn hình', slug: 'man-hinh', parentId: null, imageUrl: 'https://dummyimage.com/80x80/1e293b/white?text=MH', icon: 'monitor' },
+  { id: 9, name: 'Bàn phím', slug: 'ban-phim', parentId: null, imageUrl: 'https://dummyimage.com/80x80/1e293b/white?text=BP', icon: 'edit' },
+  { id: 10, name: 'Chuột + Lót chuột', slug: 'chuot', parentId: null, imageUrl: 'https://dummyimage.com/80x80/1e293b/white?text=CH', icon: 'scan' },
+  { id: 11, name: 'Tai Nghe', slug: 'tai-nghe', parentId: null, imageUrl: 'https://dummyimage.com/80x80/1e293b/white?text=TN', icon: 'audio' },
+  { id: 12, name: 'Ghế - Bàn', slug: 'ghe-ban', parentId: null, imageUrl: 'https://dummyimage.com/80x80/1e293b/white?text=GB', icon: 'column-height' },
+  { id: 13, name: 'Phần mềm, mạng', slug: 'phan-mem-mang', parentId: null, imageUrl: 'https://dummyimage.com/80x80/1e293b/white?text=PM', icon: 'cloud' },
+  { id: 14, name: 'Handheld, Console', slug: 'handheld-console', parentId: null, imageUrl: 'https://dummyimage.com/80x80/1e293b/white?text=HC', icon: 'play-circle' },
+  { id: 15, name: 'Phụ kiện (Hub, sạc, cáp)', slug: 'phu-kien', parentId: null, imageUrl: 'https://dummyimage.com/80x80/1e293b/white?text=PK', icon: 'appstore' },
+  { id: 16, name: 'Dịch vụ và thông tin khác', slug: 'dich-vu', parentId: null, imageUrl: 'https://dummyimage.com/80x80/1e293b/white?text=DV', icon: 'solution' },
+];
+
+export const MOCK_BRANDS = [
+  { id: 1, name: 'ASUS', slug: 'asus' },
+  { id: 2, name: 'MSI', slug: 'msi' },
+  { id: 3, name: 'ACER', slug: 'acer' },
+  { id: 4, name: 'LENOVO', slug: 'lenovo' },
+  { id: 5, name: 'DELL', slug: 'dell' },
+  { id: 6, name: 'SAMSUNG', slug: 'samsung' },
+  { id: 7, name: 'LG', slug: 'lg' },
+  { id: 8, name: 'LOGITECH', slug: 'logitech' },
+  { id: 9, name: 'GIGABYTE', slug: 'gigabyte' },
+  { id: 10, name: 'INTEL', slug: 'intel' },
+  { id: 11, name: 'AMD', slug: 'amd' },
+  { id: 12, name: 'NVIDIA', slug: 'nvidia' },
+];
