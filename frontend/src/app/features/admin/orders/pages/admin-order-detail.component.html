@@ -27,19 +27,19 @@
     <div class="lg:col-span-2 space-y-6">
       <!-- Customer info -->
       <div class="bg-surface dark:bg-surface-dark rounded-card border border-border/80 dark:border-border-dark/80 shadow-sm p-5">
-        <h3 class="font-semibold mb-3 tracking-tight">Thông tin khách hàng</h3>
+        <h2 class="font-semibold mb-3 tracking-tight text-sm">Thông tin khách hàng</h2>
         <div class="space-y-1.5 text-sm">
           <div class="flex items-center gap-2">
-            <span nz-icon nzType="user" class="text-muted"></span>
+            <span nz-icon nzType="user" class="text-muted dark:text-muted-dark"></span>
             <span class="font-medium">{{ o.shippingAddress?.fullName || '—' }}</span>
           </div>
           <div class="flex items-center gap-2">
-            <span nz-icon nzType="mail" class="text-muted"></span>
+            <span nz-icon nzType="mail" class="text-muted dark:text-muted-dark"></span>
             <span>{{ o.shippingAddress?.phone || '—' }}</span>
           </div>
           @if (o.shippingAddress) {
             <div class="flex items-start gap-2">
-              <span nz-icon nzType="environment" class="text-muted mt-0.5"></span>
+              <span nz-icon nzType="environment" class="text-muted dark:text-muted-dark mt-0.5"></span>
               <span>{{ o.shippingAddress.street }}, {{ o.shippingAddress.district }}, {{ o.shippingAddress.city }}</span>
             </div>
           }
@@ -48,7 +48,7 @@
 
       <!-- Order items -->
       <div class="bg-surface dark:bg-surface-dark rounded-card border border-border/80 dark:border-border-dark/80 shadow-sm p-5">
-        <h3 class="font-semibold mb-4 tracking-tight">Sản phẩm</h3>
+        <h2 class="font-semibold mb-4 tracking-tight text-sm">Sản phẩm</h2>
         <nz-table [nzData]="flatItems" [nzFrontPagination]="false" [nzShowPagination]="false" nzSize="small">
           <thead>
             <tr>
@@ -68,7 +68,7 @@
                   </div>
                 </td>
                 <td>{{ item.quantity }}</td>
-                <td nzRight class="text-muted">{{ item.unitPrice | currencyFormat }}</td>
+                <td nzRight class="text-muted dark:text-muted-dark">{{ item.unitPrice | currencyFormat }}</td>
                 <td nzRight class="font-semibold">{{ item.unitPrice * item.quantity | currencyFormat }}</td>
               </tr>
             }
@@ -81,25 +81,25 @@
     <div class="space-y-6">
       <!-- Payment summary -->
       <div class="bg-surface dark:bg-surface-dark rounded-card border border-border/80 dark:border-border-dark/80 shadow-sm p-5">
-        <h3 class="font-semibold mb-4 tracking-tight">Thanh toán</h3>
+        <h2 class="font-semibold mb-4 tracking-tight text-sm">Thanh toán</h2>
         <div class="space-y-2.5 text-sm">
           <div class="flex justify-between items-center">
-            <span class="text-muted">Trạng thái</span>
+            <span class="text-muted dark:text-muted-dark">Trạng thái</span>
             <nz-tag [nzColor]="o.paymentStatus === 'PAID' ? 'success' : 'gold'" class="!rounded-full !border-0 !px-3 !font-medium">
               {{ o.paymentStatus === 'PAID' ? 'Đã thanh toán' : 'Chưa thanh toán' }}
             </nz-tag>
           </div>
           @for (sub of o.subOrders; track sub.id) {
             <div class="flex justify-between">
-              <span class="text-muted">Tạm tính</span>
+              <span class="text-muted dark:text-muted-dark">Tạm tính</span>
               <span>{{ sub.subtotal | currencyFormat }}</span>
             </div>
             <div class="flex justify-between">
-              <span class="text-muted">Giảm giá</span>
-              <span class="text-success font-medium">-{{ sub.discountAmount | currencyFormat }}</span>
+              <span class="text-muted dark:text-muted-dark">Giảm giá</span>
+              <span class="text-success dark:text-success-dark font-medium">-{{ sub.discountAmount | currencyFormat }}</span>
             </div>
             <div class="flex justify-between">
-              <span class="text-muted">Phí ship</span>
+              <span class="text-muted dark:text-muted-dark">Phí ship</span>
               <span>{{ sub.shippingFee === 0 ? 'Miễn phí' : (sub.shippingFee | currencyFormat) }}</span>
             </div>
             <nz-divider class="!my-2"></nz-divider>
@@ -113,7 +113,7 @@
 
       <!-- Actions -->
       <div class="bg-surface dark:bg-surface-dark rounded-card border border-border/80 dark:border-border-dark/80 shadow-sm p-5">
-        <h3 class="font-semibold mb-4 tracking-tight">Thao tác</h3>
+        <h2 class="font-semibold mb-4 tracking-tight text-sm">Thao tác</h2>
         @if (o.subOrders[0]?.status === 'PAID') {
           <button nz-button nzType="primary" nzBlock [nzLoading]="updating()" (click)="updateStatus('PROCESSING')" class="!mb-2">
             Xác nhận xử lý
@@ -141,14 +141,14 @@
 
       <!-- Status history -->
       <div class="bg-surface dark:bg-surface-dark rounded-card border border-border/80 dark:border-border-dark/80 shadow-sm p-5">
-        <h3 class="font-semibold mb-3 tracking-tight">Lịch sử trạng thái</h3>
+        <h2 class="font-semibold mb-3 tracking-tight text-sm">Lịch sử trạng thái</h2>
         <div class="space-y-3">
           @for (sub of o.subOrders; track sub.id) {
             <div class="flex items-center gap-2 text-sm">
-              <nz-tag [nzColor]="STATUS_COLOR[sub.status] || 'default'" class="!rounded-full !border-0 !text-xs !px-2">
-                {{ sub.status }}
+              <nz-tag [nzColor]="sub.status | statusFormat" class="!rounded-full !border-0 !text-xs !px-2">
+                {{ sub.status | statusFormat:'label' }}
               </nz-tag>
-              <span class="text-xs text-muted">{{ sub.fulfillmentType === 'DELIVERY' ? 'Giao hàng' : 'Tự đến lấy' }}</span>
+              <span class="text-xs text-muted dark:text-muted-dark">{{ sub.fulfillmentType === 'DELIVERY' ? 'Giao hàng' : 'Tự đến lấy' }}</span>
             </div>
           }
         </div>

@@ -1,4 +1,5 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, computed, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink, ActivatedRoute, Router } from '@angular/router';
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzTagModule } from 'ng-zorro-antd/tag';
@@ -7,6 +8,7 @@ import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzEmptyModule } from 'ng-zorro-antd/empty';
 import { NzTabsModule } from 'ng-zorro-antd/tabs';
 import { CurrencyFormatPipe } from '@shared/pipes/currency-format.pipe';
+import { StatusFormatPipe } from '@shared/pipes/status-format.pipe';
 import { FallbackImageDirective } from '@shared/directives/fallback-image.directive';
 import { DateHelper } from '@shared/utils/date.helper';
 import { OrderService } from '@core/services/order.service';
@@ -21,18 +23,6 @@ const STATUS_TABS = [
   { key: 'CANCELLED', label: 'Đã hủy' },
 ] as const;
 
-const STATUS_COLOR: Record<string, string> = {
-  PENDING_PAYMENT: 'gold',
-  PAID: 'blue',
-  PROCESSING: 'processing',
-  SHIPPED: 'purple',
-  DELIVERED: 'success',
-  CANCELLED: 'error',
-  EXPIRED: 'default',
-  RETURN_REQUESTED: 'warning',
-  RETURNED: 'magenta',
-};
-
 @Component({
   selector: 'app-order-list',
   imports: [
@@ -43,7 +33,7 @@ const STATUS_COLOR: Record<string, string> = {
     NzSpinModule,
     NzEmptyModule,
     NzTabsModule,
-    CurrencyFormatPipe,
+    CurrencyFormatPipe, StatusFormatPipe,
   ],
   templateUrl: './order-list.component.html',
 })
@@ -51,15 +41,22 @@ export class OrderListComponent implements OnInit {
   private orderService = inject(OrderService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
+  private destroyRef = inject(DestroyRef);
 
   orders = signal<Order[]>([]);
   isLoading = signal(false);
   activeTab = signal('');
   statusTabs = STATUS_TABS;
-  statusColor = STATUS_COLOR;
+
+  activeTabIndex = computed(() => {
+    const idx = this.statusTabs.findIndex((t) => t.key === this.activeTab());
+    return Math.max(0, idx);
+  });
 
   ngOnInit() {
-    this.route.queryParams.subscribe((params) => {
+    this.route.queryParams.pipe(
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe((params) => {
       this.activeTab.set(params['status'] || '');
       this.loadOrders();
     });
@@ -68,7 +65,9 @@ export class OrderListComponent implements OnInit {
   private loadOrders() {
     this.isLoading.set(true);
     this.orderService
-      .getMyOrders({ status: this.activeTab() || undefined })
+      .getMyOrders({ status: this.activeTab() || undefined }).pipe(
+        takeUntilDestroyed(this.destroyRef),
+      )
       .subscribe((res) => {
         this.orders.set(res.content);
         this.isLoading.set(false);
@@ -80,19 +79,6 @@ export class OrderListComponent implements OnInit {
       queryParams: { status: key || undefined },
       queryParamsHandling: 'merge',
     });
-  }
-
-  getStatusColor(subOrders: { status: string }[]): string {
-    return this.statusColor[subOrders[0]?.status] || 'default';
-  }
-
-  getStatusLabel(subOrders: { status: string }[]): string {
-    return subOrders[0]?.status || '';
-  }
-
-  getActiveTabIndex(): number {
-    const idx = this.statusTabs.findIndex((t) => t.key === this.activeTab());
-    return Math.max(0, idx);
   }
 
   protected readonly DateHelper = DateHelper;

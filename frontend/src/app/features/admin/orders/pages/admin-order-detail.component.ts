@@ -14,6 +14,7 @@ import { NzCardModule } from 'ng-zorro-antd/card';
 import { NzDividerModule } from 'ng-zorro-antd/divider';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { CurrencyFormatPipe } from '@shared/pipes/currency-format.pipe';
+import { StatusFormatPipe } from '@shared/pipes/status-format.pipe';
 import { FallbackImageDirective } from '@shared/directives/fallback-image.directive';
 import { ApiEndpoints } from '@core/api/api.endpoints';
 import { Order } from '@core/models/common.model';
@@ -26,23 +27,13 @@ const STATUS_STEP_MAP: Record<string, number> = {
   DELIVERED: 4,
 };
 
-const STATUS_COLOR: Record<string, string> = {
-  PENDING_PAYMENT: 'gold',
-  PAID: 'blue',
-  PROCESSING: 'processing',
-  SHIPPED: 'purple',
-  DELIVERED: 'success',
-  CANCELLED: 'error',
-  RETURN_REQUESTED: 'warning',
-};
-
 @Component({
   selector: 'app-admin-order-detail',
   imports: [
     RouterLink, FormsModule, FallbackImageDirective,
     NzStepsModule, NzTableModule, NzTagModule, NzButtonModule, NzSpinModule,
     NzInputModule, NzCardModule, NzDividerModule,
-    CurrencyFormatPipe,
+    CurrencyFormatPipe, StatusFormatPipe,
   ],
   templateUrl: './admin-order-detail.component.html',
 })
@@ -59,7 +50,6 @@ export class AdminOrderDetailComponent {
   updating = signal(false);
 
   protected readonly STATUS_STEP_MAP = STATUS_STEP_MAP;
-  protected readonly STATUS_COLOR = STATUS_COLOR;
 
   constructor() {
     const id = Number(this.route.snapshot.paramMap.get('id'));

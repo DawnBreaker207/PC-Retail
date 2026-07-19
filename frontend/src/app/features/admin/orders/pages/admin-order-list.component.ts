@@ -14,6 +14,7 @@ import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzDatePickerModule } from 'ng-zorro-antd/date-picker';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { CurrencyFormatPipe } from '@shared/pipes/currency-format.pipe';
+import { StatusFormatPipe } from '@shared/pipes/status-format.pipe';
 import { ApiEndpoints } from '@core/api/api.endpoints';
 
 interface AdminOrder {
@@ -44,23 +45,13 @@ const STATUS_OPTIONS = [
   { value: 'RETURN_REQUESTED', label: 'Yêu cầu đổi trả' },
 ];
 
-const STATUS_COLOR: Record<string, string> = {
-  PENDING_PAYMENT: 'gold',
-  PAID: 'blue',
-  PROCESSING: 'processing',
-  SHIPPED: 'purple',
-  DELIVERED: 'success',
-  CANCELLED: 'error',
-  RETURN_REQUESTED: 'warning',
-};
-
 @Component({
   selector: 'app-admin-order-list',
   imports: [
     DatePipe, RouterLink, FormsModule,
     NzTableModule, NzInputModule, NzButtonModule, NzIconModule, NzSpinModule,
     NzTagModule, NzSelectModule, NzDatePickerModule,
-    CurrencyFormatPipe,
+    CurrencyFormatPipe, StatusFormatPipe,
   ],
   templateUrl: './admin-order-list.component.html',
 })
@@ -80,7 +71,6 @@ export class AdminOrderListComponent {
   pageSizeOptions = [10, 20, 50];
 
   protected readonly STATUS_OPTIONS = STATUS_OPTIONS;
-  protected readonly STATUS_COLOR = STATUS_COLOR;
 
   constructor() {
     this.loadData();
