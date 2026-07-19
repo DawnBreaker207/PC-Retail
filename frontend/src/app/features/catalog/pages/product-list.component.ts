@@ -1,4 +1,4 @@
-import { Component, inject, signal, DestroyRef } from '@angular/core';
+import { Component, inject, signal, computed, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -56,6 +56,12 @@ export class ProductListComponent {
   totalPages = 0;
   isLoading = true;
   drawerOpen = signal(false);
+
+  headerTitle = computed(() => {
+    const cat = this.filters().category;
+    if (!cat) return 'Sản phẩm';
+    return this.categories.find(c => c.slug === cat)?.name || 'Sản phẩm';
+  });
 
   categories = this.mock.categories;
   brands = this.mock.brands.map(b => b.name);
@@ -144,12 +150,6 @@ export class ProductListComponent {
 
   addToCart(product: Sku) {
     this.cartStore.addItem(product.id, 1);
-  }
-
-  headerTitle(): string {
-    const cat = this.filters().category;
-    if (!cat) return 'Sản phẩm';
-    return this.categories.find(c => c.slug === cat)?.name || 'Sản phẩm';
   }
 
   getBadge(p: Sku): 'flash' | 'discount' | null {

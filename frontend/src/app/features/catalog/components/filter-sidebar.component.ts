@@ -1,11 +1,10 @@
-import { Component, input, model, output } from '@angular/core';
+import { Component, computed, input, model, output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { NzCheckboxModule } from 'ng-zorro-antd/checkbox';
+import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzIconModule } from 'ng-zorro-antd/icon';
-import { NzDrawerModule } from 'ng-zorro-antd/drawer';
-import { NzCollapseModule } from 'ng-zorro-antd/collapse';
+
 export interface FilterState {
   q: string;
   category: string;
@@ -33,8 +32,7 @@ export const PRICE_RANGES = [
 @Component({
   selector: 'app-filter-sidebar',
   imports: [
-    FormsModule, NzCheckboxModule, NzTagModule, NzButtonModule,
-    NzIconModule, NzDrawerModule, NzCollapseModule,
+    FormsModule, NzSelectModule, NzTagModule, NzButtonModule, NzIconModule,
   ],
   templateUrl: './filter-sidebar.component.html',
   styleUrls: ['./filter-sidebar.component.css'],
@@ -43,12 +41,17 @@ export class FilterSidebarComponent {
   filters = model.required<FilterState>();
   categories = input<{ slug: string; name: string }[]>([]);
   brands = input<string[]>([]);
-  drawerOpen = model(false);
 
   filterChange = output<void>();
   clear = output<void>();
 
   priceRanges = PRICE_RANGES;
+
+  selectedPriceLabel = computed(() => {
+    const f = this.filters();
+    const matched = PRICE_RANGES.find(r => r.min === f.minPrice && r.max === f.maxPrice);
+    return matched?.label ?? null;
+  });
 
   get activeFilters(): ActiveFilter[] {
     const f = this.filters();
@@ -79,35 +82,27 @@ export class FilterSidebarComponent {
     this.filterChange.emit();
   }
 
-  onBrandChange(brand: string, checked: boolean) {
-    const current = this.filters().brands;
-    this.selectBrand(checked ? [...current, brand] : current.filter(b => b !== brand));
-  }
-
   selectBrand(brands: string[]) {
     this.filters.update(f => ({ ...f, brands, page: 1 }));
     this.filterChange.emit();
   }
 
-  selectPriceRange(min: number, max: number) {
-    const isActive = this.filters().minPrice === min && this.filters().maxPrice === max;
-    this.filters.update(f => ({
-      ...f,
-      minPrice: isActive ? 0 : min,
-      maxPrice: isActive ? 500_000_000 : max,
-      page: 1,
-    }));
+  onPriceSelect(label: string | null) {
+    if (!label) {
+      this.filters.update(f => ({ ...f, minPrice: 0, maxPrice: 500_000_000, page: 1 }));
+    } else {
+      const range = PRICE_RANGES.find(r => r.label === label);
+      if (range) {
+        this.filters.update(f => ({ ...f, minPrice: range.min, maxPrice: range.max, page: 1 }));
+      }
+    }
     this.filterChange.emit();
   }
 
-  isPriceActive(min: number, max: number): boolean {
-    return this.filters().minPrice === min && this.filters().maxPrice === max;
-  }
-
-  selectCategory(slug: string) {
+  selectCategory(slug: string | null) {
     this.filters.update(f => ({
       ...f,
-      category: f.category === slug ? '' : slug,
+      category: slug ?? '',
       page: 1,
     }));
     this.filterChange.emit();

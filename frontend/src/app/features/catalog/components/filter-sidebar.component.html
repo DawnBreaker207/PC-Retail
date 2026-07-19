@@ -1,71 +1,55 @@
-<div class="space-y-4">
+<div class="flex flex-wrap items-center gap-2">
+  <!-- Danh mục -->
+  <nz-select
+    [ngModel]="filters().category"
+    (ngModelChange)="selectCategory($event)"
+    nzPlaceHolder="Danh mục"
+    nzAllowClear
+    class="min-w-[140px]"
+  >
+    @for (cat of categories(); track cat.slug) {
+      <nz-option [nzValue]="cat.slug" [nzLabel]="cat.name" />
+    }
+  </nz-select>
+
+  <!-- Khoảng giá -->
+  <nz-select
+    nzPlaceHolder="Khoảng giá"
+    nzAllowClear
+    class="min-w-[140px]"
+    [ngModel]="selectedPriceLabel()"
+    (ngModelChange)="onPriceSelect($event)"
+  >
+    @for (range of priceRanges; track range.label) {
+      <nz-option [nzValue]="range.label" [nzLabel]="range.label" />
+    }
+  </nz-select>
+
+  <!-- Thương hiệu -->
+  <nz-select
+    nzMode="multiple"
+    nzPlaceHolder="Thương hiệu"
+    class="min-w-[140px]"
+    [ngModel]="filters().brands"
+    (ngModelChange)="selectBrand($event)"
+  >
+    @for (brand of brands(); track brand) {
+      <nz-option [nzValue]="brand" [nzLabel]="brand" />
+    }
+  </nz-select>
+
   <!-- Active filters -->
-  @if (activeFilters.length > 0) {
-    <div class="flex flex-wrap gap-1.5 mb-3">
+  @if (hasActive()) {
+    <div class="flex flex-wrap items-center gap-1">
       @for (af of activeFilters; track af.type + af.value) {
         <nz-tag nzMode="closeable" (nzOnClose)="removeFilter(af)" class="!text-xs !rounded-md">
           {{ af.label }}
         </nz-tag>
       }
+      <button nz-button nzType="link" nzSize="small" class="!text-xs !p-0 !h-auto" (click)="clearAll()">
+        <span nz-icon nzType="delete" nzTheme="outline"></span>
+        Xóa
+      </button>
     </div>
   }
-
-  @if (hasActive()) {
-    <button nz-button nzType="link" nzSize="small" class="!text-xs !p-0 !h-auto !mb-2" (click)="clearAll()">
-      <span nz-icon nzType="delete" nzTheme="outline"></span>
-      Xóa bộ lọc
-    </button>
-  }
-
-  <nz-collapse nzAccordion>
-    <nz-collapse-panel nzHeader="Danh mục" [nzActive]="true">
-      <div class="flex flex-col gap-1">
-        @for (cat of categories(); track cat.slug) {
-          <button
-            class="w-full text-left px-3 py-2 rounded-lg text-sm transition-colors"
-            [class.bg-primary-light]="filters().category === cat.slug"
-            [class.text-primary]="filters().category === cat.slug"
-            [class.text-muted]="filters().category !== cat.slug"
-            (click)="selectCategory(cat.slug)"
-          >
-            {{ cat.name }}
-          </button>
-        }
-      </div>
-    </nz-collapse-panel>
-
-    <nz-collapse-panel nzHeader="Khoảng giá" [nzActive]="true">
-      <div class="flex flex-col gap-2">
-        @for (range of priceRanges; track range.label; let i = $index) {
-          <label
-            nz-checkbox
-            [nzId]="'price-' + i"
-            [for]="'price-' + i"
-            [nzChecked]="isPriceActive(range.min, range.max)"
-            (nzCheckedChange)="selectPriceRange(range.min, range.max)"
-            class="block text-sm"
-          >
-            {{ range.label }}
-          </label>
-        }
-      </div>
-    </nz-collapse-panel>
-
-    <nz-collapse-panel nzHeader="Thương hiệu" [nzActive]="true">
-      <div class="flex flex-col gap-2">
-        @for (brand of brands(); track brand; let i = $index) {
-          <label
-            nz-checkbox
-            [nzId]="'brand-' + i"
-            [for]="'brand-' + i"
-            [nzChecked]="filters().brands.includes(brand)"
-            (nzCheckedChange)="onBrandChange(brand, $event)"
-            class="block text-sm"
-          >
-            {{ brand }}
-          </label>
-        }
-      </div>
-    </nz-collapse-panel>
-  </nz-collapse>
 </div>
