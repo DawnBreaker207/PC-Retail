@@ -29,60 +29,8 @@ interface ReviewFormData {
     FallbackImageDirective,
   ],
 
-  template: `
-    <div class="text-center mb-6">
-      <img [src]="data.productImage" loading="lazy" appFallbackImage alt="{{ data.productName }}" class="w-20 h-20 object-contain mx-auto mb-3" />
-      <p class="font-medium">{{ data.productName }}</p>
-    </div>
-
-    <div class="text-center mb-6">
-      <p class="text-sm text-muted dark:text-muted-dark mb-2">Chất lượng sản phẩm</p>
-      <nz-rate [(ngModel)]="rating" [nzCount]="5"></nz-rate>
-    </div>
-
-    <div class="mb-4">
-      <label for="review-comment" class="text-sm font-medium mb-1 block" id="review-comment-label">Nhận xét</label>
-      <textarea
-        nz-input
-        [(ngModel)]="comment"
-        id="review-comment"
-        placeholder="Chia sẻ trải nghiệm của bạn về sản phẩm..."
-        [nzAutosize]="{ minRows: 3, maxRows: 6 }"
-      ></textarea>
-    </div>
-
-    <div class="mb-6">
-      <label for="review-images" class="text-sm font-medium mb-1 block">Hình ảnh</label>
-      <nz-upload
-        [nzAction]="''"
-        [nzBeforeUpload]="beforeUpload"
-        (nzChange)="onUploadChange($event)"
-        [nzFileList]="fileList()"
-        [nzShowButton]="fileList().length < 5"
-        [nzAccept]="'image/*'"
-        id="review-images"
-      >
-        <button nz-button>
-          <span nz-icon nzType="upload"></span>
-          Tải ảnh lên
-        </button>
-      </nz-upload>
-    </div>
-
-    <div class="flex justify-end gap-3">
-      <button nz-button type="button" (click)="onCancel()">Hủy</button>
-      <button
-        nz-button
-        nzType="primary"
-        type="button"
-        [nzLoading]="isSubmitting()"
-        [disabled]="rating === 0"
-        (click)="onSubmit()"
-      >
-        Gửi đánh giá
-      </button>
-    </div>
-  `,
+  templateUrl: './review-form.component.html',
+  styleUrl: './review-form.component.css',
 })
 export class ReviewFormComponent {
   private orderService = inject(OrderService);
