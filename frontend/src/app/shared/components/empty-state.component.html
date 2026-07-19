@@ -1,0 +1,15 @@
+<nz-empty
+  nzNotFoundImage="simple"
+  [nzNotFoundContent]="title()"
+>
+  <div nz-not-found-content>
+    <p class="text-muted dark:text-muted-dark">{{ description() }}</p>
+  </div>
+</nz-empty>
+@if (actionLabel() && actionRoute()) {
+  <div class="text-center mt-4">
+    <button nz-button nzType="primary" [routerLink]="actionRoute()">
+      {{ actionLabel() }}
+    </button>
+  </div>
+}

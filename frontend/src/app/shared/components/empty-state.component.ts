@@ -6,23 +6,8 @@ import { NzButtonModule } from 'ng-zorro-antd/button';
 @Component({
   selector: 'app-empty-state',
   imports: [RouterLink, NzEmptyModule, NzButtonModule],
-  template: `
-    <nz-empty
-      nzNotFoundImage="simple"
-      [nzNotFoundContent]="title()"
-    >
-      <div nz-not-found-content>
-        <p class="text-muted dark:text-muted-dark">{{ description() }}</p>
-      </div>
-    </nz-empty>
-    @if (actionLabel() && actionRoute()) {
-      <div class="text-center mt-4">
-        <button nz-button nzType="primary" [routerLink]="actionRoute()">
-          {{ actionLabel() }}
-        </button>
-      </div>
-    }
-  `,
+  templateUrl: './empty-state.component.html',
+  styleUrl: './empty-state.component.css',
 })
 export class EmptyStateComponent {
   title = input('Không có dữ liệu');

@@ -7,17 +7,8 @@ import { NzButtonModule } from 'ng-zorro-antd/button';
 @Component({
   selector: 'app-admin-placeholder',
   imports: [RouterLink, NzResultModule, NzButtonModule],
-  template: `
-    <nz-result
-      nzStatus="404"
-      [nzTitle]="title"
-      nzSubTitle="Tính năng đang được phát triển."
-    >
-      <div nz-result-extra>
-        <button nz-button nzType="primary" routerLink="/admin">Về Dashboard</button>
-      </div>
-    </nz-result>
-  `,
+  templateUrl: './admin-placeholder.component.html',
+  styleUrl: './admin-placeholder.component.css',
 })
 export class AdminPlaceholderComponent {
   private location = inject(Location);
