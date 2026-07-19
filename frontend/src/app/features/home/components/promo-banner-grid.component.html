@@ -1,0 +1,13 @@
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+  @for (banner of banners; track banner.id) {
+    <app-promo-card
+      [title]="banner.title"
+      [image]="banner.imageUrl"
+      [link]="banner.link"
+      [bgColor]="banner.bgColor"
+      [priceText]="banner.priceText"
+      [badgeText]="banner.badgeText"
+      class="h-[160px]"
+    />
+  }
+</div>

@@ -13,41 +13,8 @@ interface NavItem {
   selector: 'app-sidebar-nav',
   standalone: true,
   imports: [RouterLink, NzIconModule],
-  template: `
-    <nav class="w-[240px] shrink-0 bg-surface dark:bg-surface-dark rounded-xl border border-border/80 dark:border-border-dark/80 shadow-sm overflow-hidden">
-      <div class="px-4 py-3 border-b border-border/60 dark:border-border-dark/60">
-        <h3 class="text-xs font-semibold uppercase tracking-wider text-muted dark:text-muted-dark">Danh mục</h3>
-      </div>
-      <ul class="py-1">
-        @for (item of navItems; track item.label) {
-          <li class="relative group"
-              (mouseenter)="hovered.set(item.label)"
-              (mouseleave)="hovered.set(null)">
-            <a [routerLink]="item.link"
-               class="flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors hover:bg-bg dark:hover:bg-bg-dark hover:text-primary"
-               [class.text-primary]="hovered() === item.label"
-               [attr.aria-haspopup]="item.children?.length ? 'true' : null">
-              <span nz-icon [nzType]="item.icon" nzTheme="outline" class="text-base w-5 text-center shrink-0"></span>
-              <span class="flex-1 truncate">{{ item.label }}</span>
-              @if (item.children?.length) {
-                <span nz-icon nzType="right" nzTheme="outline" class="text-xs text-muted dark:text-muted-dark transition-transform group-hover:translate-x-0.5 group-focus-within:translate-x-0.5"></span>
-              }
-            </a>
-            @if (item.children?.length) {
-              <div class="absolute left-full top-0 ml-1 hidden group-hover:block group-focus-within:block z-50 min-w-[200px] max-w-[300px] bg-surface dark:bg-surface-dark rounded-xl border border-border/80 dark:border-border-dark/80 shadow-lg py-1">
-                @for (child of item.children; track child.label) {
-                  <a [routerLink]="child.link"
-                     class="block px-4 py-2 text-sm font-medium transition-colors hover:bg-bg dark:hover:bg-bg-dark hover:text-primary">
-                    {{ child.label }}
-                  </a>
-                }
-              </div>
-            }
-          </li>
-        }
-      </ul>
-    </nav>
-  `,
+  templateUrl: './sidebar-nav.component.html',
+  styleUrl: './sidebar-nav.component.css',
 })
 export class SidebarNavComponent {
   hovered = signal<string | null>(null);
@@ -88,7 +55,7 @@ export class SidebarNavComponent {
       { label: 'Màn hình Văn phòng', link: '/products?category=man-hinh' },
       { label: 'Màn hình 4K', link: '/products?category=man-hinh' },
     ]},
-    { label: 'Bàn Phím', icon: 'keyboard', link: '/products?category=ban-phim' },
+    { label: 'Bàn Phím', icon: 'tool', link: '/products?category=ban-phim' },
     { label: 'Chuột', icon: 'scan', link: '/products?category=chuot' },
     { label: 'Tai Nghe', icon: 'customer-service', link: '/products?category=tai-nghe' },
     { label: 'Linh Kiện', icon: 'tool', link: '/products?category=linh-kien', children: [
@@ -106,7 +73,7 @@ export class SidebarNavComponent {
       { label: 'Lót chuột', link: '/products?category=chuot' },
       { label: 'Webcam', link: '/products?category=loa-micro-webcam' },
     ]},
-    { label: 'Handheld, Console', icon: 'gamepad', link: '/products?category=handheld-console' },
+    { label: 'Handheld, Console', icon: 'play-circle', link: '/products?category=handheld-console' },
     { label: 'Phần Mềm, Mạng', icon: 'wifi', link: '/products?category=phan-mem-mang' },
   ];
 }
