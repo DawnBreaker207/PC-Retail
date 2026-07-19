@@ -5,8 +5,8 @@
     [nzSubTitle]="'Mã đơn hàng: #ORD-' + orderId()"
   >
     <div nz-result-extra>
-      <button nz-button nzType="primary" [routerLink]="['/orders', orderId()]">Xem đơn hàng</button>
-      <button type="button" nz-button routerLink="/">Tiếp tục mua sắm</button>
+      <button nz-button nzType="primary" [routerLink]="['/orders', orderId()]" class="!rounded-lg">Xem đơn hàng</button>
+      <button type="button" nz-button routerLink="/" class="!rounded-lg">Tiếp tục mua sắm</button>
     </div>
   </nz-result>
 } @else {
@@ -16,8 +16,8 @@
     nzSubTitle="Vui lòng thử lại hoặc liên hệ hỗ trợ."
   >
     <div nz-result-extra>
-      <button nz-button nzType="primary" routerLink="/checkout">Thử lại</button>
-      <button type="button" nz-button routerLink="/orders">Hủy đơn</button>
+      <button nz-button nzType="primary" routerLink="/checkout" class="!rounded-lg">Thử lại</button>
+      <button type="button" nz-button routerLink="/orders" class="!rounded-lg">Hủy đơn</button>
     </div>
   </nz-result>
 }

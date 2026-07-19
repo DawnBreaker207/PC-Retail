@@ -1,4 +1,4 @@
-<div class="flex items-start gap-3 sm:gap-4 p-4 sm:p-5 bg-surface dark:bg-surface-dark rounded-card border border-border/80 dark:border-border-dark/80 shadow-sm hover:shadow-md transition-all duration-300 hover:border-border dark:hover:border-border-dark">
+<div class="flex items-start gap-3 sm:gap-4 p-4 sm:p-5 bg-surface dark:bg-surface-dark rounded-card border border-border/80 dark:border-border-dark/80 shadow-sm hover:shadow-md transition-shadow duration-300 hover:border-border dark:hover:border-border-dark">
   <label nz-checkbox nzId="cart-item-sel" for="cart-item-sel" [nzChecked]="item().selected" (nzCheckedChange)="toggleSelect()" class="mt-1"></label>
 
   <a [routerLink]="['/products', item().slug]" class="shrink-0 group">

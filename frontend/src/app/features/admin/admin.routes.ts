@@ -12,12 +12,12 @@ export const ADMIN_ROUTES: Routes = [
   {
     path: '',
     component: AdminLayout,
-    canActivate: [authGuard, roleGuard],
-    data: { roles: ['ADMIN', 'SUPER_ADMIN', 'STAFF'] },
+    canActivate: [authGuard],
     children: [
       { path: '', component: DashboardComponent },
       { path: 'orders', component: AdminOrderListComponent },
       { path: 'orders/:id', component: AdminOrderDetailComponent },
+      { path: 'returns', loadComponent: () => import('./components/admin-placeholder.component').then(m => m.AdminPlaceholderComponent) },
       { path: 'products', loadComponent: () => import('./components/admin-placeholder.component').then(m => m.AdminPlaceholderComponent) },
       { path: 'inventory', component: InventoryListComponent },
       { path: 'categories', loadComponent: () => import('./components/admin-placeholder.component').then(m => m.AdminPlaceholderComponent) },

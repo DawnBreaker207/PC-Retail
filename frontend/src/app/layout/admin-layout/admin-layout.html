@@ -1,0 +1,56 @@
+<nz-layout class="min-h-screen">
+  <nz-sider
+    nzCollapsible
+    [(nzCollapsed)]="collapsed"
+    [nzWidth]="250"
+    [nzCollapsedWidth]="64"
+    class="!fixed !left-0 !top-0 !bottom-0 !z-40 !bg-surface dark:!bg-surface-dark"
+  >
+    <div class="h-16 flex items-center justify-center border-b border-border/20 dark:border-border-dark/20">
+      @if (!collapsed()) {
+        <a routerLink="/admin" class="text-ink dark:text-ink-dark font-bold text-lg tracking-tight">PC Retail</a>
+      } @else {
+        <a routerLink="/admin" class="text-ink dark:text-ink-dark font-bold text-lg">P</a>
+      }
+    </div>
+    <ul nz-menu nzMode="inline" class="!border-r-0">
+      @for (item of navItems; track item.route) {
+        <li nz-menu-item [routerLink]="item.route">
+          <span nz-icon [nzType]="item.icon" nzTheme="outline"></span>
+          <span>{{ item.label }}</span>
+        </li>
+      }
+    </ul>
+  </nz-sider>
+
+  <nz-layout [style.marginLeft.px]="collapsed() ? 64 : 250" class="!transition-[margin-left] !duration-200 !bg-bg dark:!bg-bg-dark">
+    <nz-header class="!bg-surface dark:!bg-surface-dark !h-16 !px-6 !flex !items-center !justify-between !border-b !border-border/80 !sticky !top-0 !z-30">
+      <button nz-button nzType="text" (click)="toggleCollapsed()" class="!text-lg" [attr.aria-label]="collapsed() ? 'Mở rộng menu' : 'Thu gọn menu'" [attr.aria-expanded]="!collapsed()">
+        <span nz-icon [nzType]="collapsed() ? 'menu-unfold' : 'menu-fold'"></span>
+      </button>
+
+      <div class="flex items-center gap-3">
+        <button nz-button nzType="text" (click)="toggleTheme()" aria-label="Chuyển giao diện">
+          <span nz-icon [nzType]="isDark() ? 'sun' : 'moon'"></span>
+        </button>
+        <div nz-dropdown [nzDropdownMenu]="userMenu" nzPlacement="bottomRight">
+          <div class="flex items-center gap-2 cursor-pointer">
+            <nz-avatar [nzText]="userInitials" nzSize="small" class="!bg-primary"></nz-avatar>
+            <span class="text-sm font-medium hidden sm:inline">{{ userName }}</span>
+          </div>
+        </div>
+        <nz-dropdown-menu #userMenu="nzDropdownMenu">
+          <ul nz-menu class="!bg-surface dark:!bg-surface-dark !border !border-border dark:!border-border-dark">
+            <li nz-menu-item routerLink="/admin" class="!text-ink dark:!text-ink-dark hover:!bg-bg dark:hover:!bg-white/5"><span nz-icon nzType="dashboard"></span> Dashboard</li>
+            <li nz-menu-divider class="!border-border/60 dark:!border-border-dark/60"></li>
+            <li nz-menu-item (click)="logout()" (keydown.enter)="logout()" tabindex="0" class="!text-error hover:!bg-bg dark:hover:!bg-white/5"><span nz-icon nzType="logout"></span> Đăng xuất</li>
+          </ul>
+        </nz-dropdown-menu>
+      </div>
+    </nz-header>
+
+    <nz-content class="!p-6 !bg-transparent">
+      <router-outlet />
+    </nz-content>
+  </nz-layout>
+</nz-layout>

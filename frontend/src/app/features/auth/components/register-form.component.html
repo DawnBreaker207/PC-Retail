@@ -1,54 +1,60 @@
-<form nz-form [formGroup]="form" (ngSubmit)="submit()" class="space-y-4">
-  <nz-form-item class="!mb-0">
-    <nz-form-control [nzErrorTip]="'Vui lòng nhập họ tên'">
+<form [formGroup]="form" (ngSubmit)="submit()" class="flex flex-col gap-4">
+  <nz-form-item class="!mb-0 !flex-col">
+    <label for="fullName" class="text-xs font-medium text-ink dark:text-ink-dark mb-1.5 leading-none">Họ và tên</label>
+    <nz-form-control [nzErrorTip]="nameError">
       <input
-        nz-input
+        id="fullName"
         formControlName="fullName"
         placeholder="Họ và tên"
-        aria-label="Họ và tên"
-        class="!rounded-lg !py-2.5 !px-3 !border-border dark:!border-border-dark !bg-bg dark:!bg-bg-dark !text-sm !w-full"
+        class="w-full py-2.5 px-3 text-sm bg-surface dark:bg-surface-dark text-ink dark:text-ink-dark rounded border border-border/60 dark:border-border-dark/60 placeholder:text-muted dark:placeholder:text-muted-dark outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
       />
     </nz-form-control>
-  </nz-form-item>
-
-  <nz-form-item class="!mb-0">
-    <nz-form-control [nzErrorTip]="emailError">
-      <input
-        nz-input
-        formControlName="email"
-        placeholder="Email"
-        aria-label="Email"
-        class="!rounded-lg !py-2.5 !px-3 !border-border dark:!border-border-dark !bg-bg dark:!bg-bg-dark !text-sm !w-full"
-      />
-    </nz-form-control>
-    <ng-template #emailError>
-      @if (form.controls.email.hasError('required')) { Vui lòng nhập email }
-      @if (form.controls.email.hasError('email')) { Email không hợp lệ }
+    <ng-template #nameError>
+      @if (form.controls.fullName.hasError('required') && (form.controls.fullName.dirty || form.controls.fullName.touched)) { Vui lòng nhập họ tên }
     </ng-template>
   </nz-form-item>
 
-  <nz-form-item class="!mb-0">
-    <nz-form-control [nzErrorTip]="'Số điện thoại không hợp lệ'">
+  <nz-form-item class="!mb-0 !flex-col">
+    <label for="reg-email" class="text-xs font-medium text-ink dark:text-ink-dark mb-1.5 leading-none">Email</label>
+    <nz-form-control [nzErrorTip]="emailError">
       <input
-        nz-input
-        formControlName="phone"
-        placeholder="Số điện thoại"
-        aria-label="Số điện thoại"
-        class="!rounded-lg !py-2.5 !px-3 !border-border dark:!border-border-dark !bg-bg dark:!bg-bg-dark !text-sm !w-full"
+        id="reg-email"
+        formControlName="email"
+        placeholder="Email"
+        class="w-full py-2.5 px-3 text-sm bg-surface dark:bg-surface-dark text-ink dark:text-ink-dark rounded border border-border/60 dark:border-border-dark/60 placeholder:text-muted dark:placeholder:text-muted-dark outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
       />
     </nz-form-control>
+    <ng-template #emailError>
+      @if (form.controls.email.hasError('required') && (form.controls.email.dirty || form.controls.email.touched)) { Vui lòng nhập email }
+      @if (form.controls.email.hasError('email') && (form.controls.email.dirty || form.controls.email.touched)) { Email không hợp lệ }
+    </ng-template>
   </nz-form-item>
 
-  <nz-form-item class="!mb-0">
-    <nz-form-control [nzErrorTip]="'Mật khẩu phải có ít nhất 6 ký tự'">
-      <nz-input-group [nzSuffix]="pwdIcon" class="[&_.ant-input]:!rounded-lg [&_.ant-input]:!py-2.5 [&_.ant-input]:!px-3 [&_.ant-input]:!bg-bg [&_.ant-input]:dark:!bg-bg-dark">
+  <nz-form-item class="!mb-0 !flex-col">
+    <label for="phone" class="text-xs font-medium text-ink dark:text-ink-dark mb-1.5 leading-none">Số điện thoại</label>
+    <nz-form-control [nzErrorTip]="phoneError">
+      <input
+        id="phone"
+        formControlName="phone"
+        placeholder="Số điện thoại"
+        class="w-full py-2.5 px-3 text-sm bg-surface dark:bg-surface-dark text-ink dark:text-ink-dark rounded border border-border/60 dark:border-border-dark/60 placeholder:text-muted dark:placeholder:text-muted-dark outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
+      />
+    </nz-form-control>
+    <ng-template #phoneError>
+      @if ((form.controls.phone.hasError('required') || form.controls.phone.hasError('pattern')) && (form.controls.phone.dirty || form.controls.phone.touched)) { Số điện thoại không hợp lệ }
+    </ng-template>
+  </nz-form-item>
+
+  <nz-form-item class="!mb-0 !flex-col">
+    <label for="reg-password" class="text-xs font-medium text-ink dark:text-ink-dark mb-1.5 leading-none">Mật khẩu</label>
+    <nz-form-control [nzErrorTip]="pwdError">
+      <nz-input-group [nzSuffix]="pwdIcon" class="!p-0 !bg-surface dark:!bg-surface-dark">
         <input
-          nz-input
+          id="reg-password"
           [type]="passwordVisible() ? 'text' : 'password'"
           formControlName="password"
           placeholder="Mật khẩu"
-          aria-label="Mật khẩu"
-          class="dark:!bg-bg-dark"
+          class="w-full py-2.5 px-3 text-sm bg-transparent text-ink dark:text-ink-dark placeholder:text-muted dark:placeholder:text-muted-dark outline-none"
         />
       </nz-input-group>
       <ng-template #pwdIcon>
@@ -56,24 +62,28 @@
           (click)="passwordVisible.set(!passwordVisible())"
           [attr.aria-label]="passwordVisible() ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'"
           [attr.aria-pressed]="passwordVisible()"
-          class="!border-0 !bg-transparent !p-0 cursor-pointer text-muted dark:text-muted-dark hover:text-primary transition-colors"
+          class="!border-0 !bg-transparent cursor-pointer text-muted dark:text-muted-dark hover:text-primary transition-colors !flex !items-center !justify-center !min-w-[44px] !min-h-[44px] !h-8 !my-1"
         >
-          <span nz-icon [nzType]="passwordVisible() ? 'eye' : 'eye-invisible'"></span>
+          <span nz-icon [nzType]="passwordVisible() ? 'eye' : 'eye-invisible'" class="!text-base"></span>
         </button>
+      </ng-template>
+      <ng-template #pwdError>
+        @if (form.controls.password.hasError('required') && (form.controls.password.dirty || form.controls.password.touched)) { Vui lòng nhập mật khẩu }
+        @if (form.controls.password.hasError('minlength') && (form.controls.password.dirty || form.controls.password.touched)) { Mật khẩu phải có ít nhất 6 ký tự }
       </ng-template>
     </nz-form-control>
   </nz-form-item>
 
-  <nz-form-item class="!mb-0">
-    <nz-form-control [nzErrorTip]="'Mật khẩu không khớp'">
-      <nz-input-group [nzSuffix]="confirmIcon" class="[&_.ant-input]:!rounded-lg [&_.ant-input]:!py-2.5 [&_.ant-input]:!px-3 [&_.ant-input]:!bg-bg [&_.ant-input]:dark:!bg-bg-dark">
+  <nz-form-item class="!mb-0 !flex-col">
+    <label for="confirmPassword" class="text-xs font-medium text-ink dark:text-ink-dark mb-1.5 leading-none">Nhập lại mật khẩu</label>
+    <nz-form-control [nzErrorTip]="confirmError">
+      <nz-input-group [nzSuffix]="confirmIcon" class="!p-0 !bg-surface dark:!bg-surface-dark">
         <input
-          nz-input
+          id="confirmPassword"
           [type]="confirmVisible() ? 'text' : 'password'"
           formControlName="confirmPassword"
           placeholder="Nhập lại mật khẩu"
-          aria-label="Nhập lại mật khẩu"
-          class="dark:!bg-bg-dark"
+          class="w-full py-2.5 px-3 text-sm bg-transparent text-ink dark:text-ink-dark placeholder:text-muted dark:placeholder:text-muted-dark outline-none"
         />
       </nz-input-group>
       <ng-template #confirmIcon>
@@ -81,24 +91,21 @@
           (click)="confirmVisible.set(!confirmVisible())"
           [attr.aria-label]="confirmVisible() ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'"
           [attr.aria-pressed]="confirmVisible()"
-          class="!border-0 !bg-transparent !p-0 cursor-pointer text-muted dark:text-muted-dark hover:text-primary transition-colors"
+          class="!border-0 !bg-transparent cursor-pointer text-muted dark:text-muted-dark hover:text-primary transition-colors !flex !items-center !justify-center !min-w-[44px] !min-h-[44px] !h-8 !my-1"
         >
-          <span nz-icon [nzType]="confirmVisible() ? 'eye' : 'eye-invisible'"></span>
+          <span nz-icon [nzType]="confirmVisible() ? 'eye' : 'eye-invisible'" class="!text-base"></span>
         </button>
+      </ng-template>
+      <ng-template #confirmError>
+        @if (form.controls.confirmPassword.hasError('required') && (form.controls.confirmPassword.dirty || form.controls.confirmPassword.touched)) { Vui lòng nhập lại mật khẩu }
+        @if (form.hasError('mismatch') && (form.controls.confirmPassword.dirty || form.controls.confirmPassword.touched)) { Mật khẩu không khớp }
       </ng-template>
     </nz-form-control>
   </nz-form-item>
 
-  <button
-    type="submit"
-    nz-button
-    nzType="primary"
-    nzBlock
-    nzSize="large"
-    [nzLoading]="isLoading()"
-    [disabled]="form.invalid"
-    class="!rounded-lg !font-bold !shadow-sm hover:!shadow-md !transition-all !duration-200 !h-11 !uppercase !tracking-wide !text-sm !mt-2"
-  >
+  <button type="submit" nz-button nzType="primary" nzBlock nzSize="large"
+    [nzLoading]="isLoading()" [disabled]="form.invalid"
+    class="!rounded-lg !h-11">
     Đăng ký
   </button>
 </form>

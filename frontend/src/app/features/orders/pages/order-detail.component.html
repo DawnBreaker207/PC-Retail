@@ -28,7 +28,7 @@
 
     @if (o.shippingAddress) {
       <div class="bg-surface dark:bg-surface-dark rounded-card border border-border/80 dark:border-border-dark/80 shadow-sm p-5 lg:p-6 mb-6 animate-fade-in-up">
-        <h3 class="font-semibold mb-3 tracking-tight">Địa chỉ giao hàng</h3>
+        <h2 class="font-semibold mb-3 tracking-tight text-sm">Địa chỉ giao hàng</h2>
         <div class="flex items-center gap-2 mb-1">
           <span nz-icon nzType="environment" class="text-primary text-sm"></span>
           <p class="font-medium text-sm">{{ o.shippingAddress.fullName }} — {{ o.shippingAddress.phone }}</p>
@@ -40,7 +40,7 @@
     }
 
     <div class="bg-surface dark:bg-surface-dark rounded-card border border-border/80 dark:border-border-dark/80 shadow-sm p-5 lg:p-6 mb-6 animate-fade-in-up">
-      <h3 class="font-semibold mb-4 tracking-tight">Sản phẩm</h3>
+      <h2 class="font-semibold mb-4 tracking-tight text-sm">Sản phẩm</h2>
       @for (sub of o.subOrders; track sub.id) {
         @for (item of sub.items; track item.skuId) {
           <div class="flex flex-wrap items-center gap-3 sm:gap-4 py-3.5 border-b last:border-0 border-border/60 dark:border-border-dark/60">
@@ -66,7 +66,7 @@
     </div>
 
     <div class="bg-surface dark:bg-surface-dark rounded-card border border-border/80 dark:border-border-dark/80 shadow-sm p-5 lg:p-6 animate-fade-in-up">
-      <h3 class="font-semibold mb-4 tracking-tight">Thanh toán</h3>
+      <h2 class="font-semibold mb-4 tracking-tight text-sm">Thanh toán</h2>
       <div class="space-y-2.5 text-sm">
         <div class="flex justify-between items-center">
           <span class="text-muted dark:text-muted-dark">Trạng thái</span>

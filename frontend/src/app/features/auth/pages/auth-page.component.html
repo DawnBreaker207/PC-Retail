@@ -1,20 +1,20 @@
-<div class="min-h-screen flex items-center justify-center bg-bg dark:bg-bg-dark px-4">
+<div class="flex items-center justify-center bg-bg dark:bg-bg-dark px-4 py-12">
   <div class="w-full max-w-md animate-fade-in-up">
     <div class="text-center mb-8">
       <a routerLink="/" class="text-primary font-black text-4xl tracking-tight hover:opacity-80 transition-opacity">DAWN</a>
       <p class="text-muted dark:text-muted-dark text-sm mt-1">PC Retail</p>
     </div>
 
-    <div class="bg-surface dark:bg-surface-dark rounded-2xl shadow-xl border border-border/60 dark:border-border-dark/60 p-8">
+    <div class="bg-surface dark:bg-surface-dark rounded-card shadow-sm border border-border/60 dark:border-border-dark/60 p-8">
       @if (isLoginMode()) {
-        <h1 class="text-center text-lg font-bold mb-6">ĐĂNG NHẬP HOẶC TẠO TÀI KHOẢN</h1>
+        <h1 class="text-center text-lg font-bold mb-6 !text-ink dark:!text-ink-dark">ĐĂNG NHẬP HOẶC TẠO TÀI KHOẢN</h1>
         <app-login-form (loginSuccess)="onLoginSuccess()" />
         <div class="text-center mt-5 text-sm text-muted dark:text-muted-dark">
           Bạn chưa có tài khoản?
           <button type="button" nz-button nzType="link" class="!p-0 !h-auto !text-sm !font-semibold" (click)="isLoginMode.set(false)">Đăng ký ngay!</button>
         </div>
       } @else {
-        <h1 class="text-center text-lg font-bold mb-6">TẠO TÀI KHOẢN</h1>
+        <h1 class="text-center text-lg font-bold mb-6 !text-ink dark:!text-ink-dark">TẠO TÀI KHOẢN</h1>
         <app-register-form (registerSuccess)="onRegisterSuccess()" />
         <div class="text-center mt-5 text-sm text-muted dark:text-muted-dark">
           Đã có tài khoản?

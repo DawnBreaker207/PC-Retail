@@ -1,6 +1,6 @@
 <div class="mb-6">
   <h1 class="text-2xl font-bold tracking-tight">Quản lý tồn kho</h1>
-  <p class="text-muted text-sm mt-1">Theo dõi và nhập hàng cho các sản phẩm</p>
+  <p class="text-muted dark:text-muted-dark text-sm mt-1">Theo dõi và nhập hàng cho các sản phẩm</p>
 </div>
 
 <!-- Filters -->
@@ -13,11 +13,11 @@
     (keydown.enter)="onSearch()"
     class="!w-full sm:!w-64"
   />
-  <button nz-button nzType="default" (click)="onSearch()">
+  <button nz-button nzType="default" (click)="onSearch()" class="!rounded-lg">
     <span nz-icon nzType="search"></span>
     Tìm kiếm
   </button>
-  <button nz-button [nzType]="lowStockOnly() ? 'primary' : 'default'" (click)="onLowStockToggle()" class="!ml-2">
+  <button nz-button [nzType]="lowStockOnly() ? 'primary' : 'default'" (click)="onLowStockToggle()" class="!rounded-lg !ml-2">
     <span nz-icon [nzType]="lowStockOnly() ? 'check-square' : 'border'"></span>
     Chỉ hiện tồn kho thấp (&lt; 5)
   </button>
@@ -63,14 +63,14 @@
             </div>
           </td>
           <td nzRight class="font-medium">{{ item.stockQuantity }}</td>
-          <td nzRight class="font-medium text-muted">{{ item.reservedQuantity }}</td>
+          <td nzRight class="font-medium text-muted dark:text-muted-dark">{{ item.reservedQuantity }}</td>
           <td nzRight>
             <span class="font-semibold" [class]="item.availableQuantity < 5 ? '!text-error' : '!text-success'">
               {{ item.availableQuantity }}
             </span>
           </td>
           <td nzRight>
-            <button nz-button nzSize="small" nzType="primary" (click)="openRestockModal(item)">
+            <button nz-button nzSize="small" nzType="primary" (click)="openRestockModal(item)" class="!rounded-lg !text-xs !shadow-sm">
               <span nz-icon nzType="plus-circle"></span>
               Nhập thêm
             </button>
