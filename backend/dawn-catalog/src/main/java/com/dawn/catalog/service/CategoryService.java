@@ -75,6 +75,10 @@ public class CategoryService {
 
         category.setName(req.name());
         category.setSlug(req.slug());
+
+        if (req.parentId() != null) {
+            category.setParentId(req.parentId());
+        }
         categoryRepository.save(category);
         return new CategoryDto(category.getId(), category.getName(), category.getSlug(), category.getParentId(), List.of());
     }

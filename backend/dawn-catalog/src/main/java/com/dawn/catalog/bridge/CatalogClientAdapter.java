@@ -20,7 +20,15 @@ public class CatalogClientAdapter implements CatalogClientPort {
 
     @Override
     public Map<Long, BigDecimal> getPrices(List<Long> skuIds) {
-        return skuRepository.findAllActiveByIds(skuIds).stream()
+        return skuRepository.findAllActiveByIds(skuIds)
+                .stream()
                 .collect(Collectors.toMap(BaseEntity::getId, Sku::getPrice));
+    }
+
+    @Override
+    public Map<Long, String> getNames(List<Long> skuIds) {
+        return skuRepository.findAllActiveByIds(skuIds)
+                .stream()
+                .collect(Collectors.toMap(BaseEntity::getId, Sku::getName));
     }
 }

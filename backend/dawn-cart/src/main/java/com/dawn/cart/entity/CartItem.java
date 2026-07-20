@@ -1,7 +1,6 @@
 package com.dawn.cart.entity;
 
 import com.dawn.common.entity.AbstractMappedEntity;
-import com.dawn.common.entity.BaseEntity;
 import io.swagger.v3.oas.annotations.Hidden;
 import jakarta.persistence.*;
 import lombok.*;
@@ -20,7 +19,7 @@ import java.time.Instant;
 @Hidden
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-public class CartItem extends BaseEntity {
+public class CartItem extends AbstractMappedEntity {
 
     @Column(name = "user_id", nullable = false)
     private Long userId;

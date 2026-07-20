@@ -1,5 +1,6 @@
 package com.dawn.cart.infra.bridge;
 
+import com.dawn.cart.port.out.CartCachePort;
 import com.dawn.cart.port.out.CartItemRepository;
 import com.dawn.order.dto.CartItemSnapshot;
 import com.dawn.order.port.out.CartClientPort;
@@ -13,10 +14,10 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CartClientAdapter implements CartClientPort {
 
-    private static final String CART_KEY = "cart:count";
+    private static final String CART_KEY = "cart:";
 
     private final CartItemRepository cartItemRepository;
-    private final StringRedisTemplate redisTemplate;
+    private final CartCachePort cartCache;
 
     @Override
     public List<CartItemSnapshot> getItems(Long userId) {
@@ -29,6 +30,6 @@ public class CartClientAdapter implements CartClientPort {
     @Override
     public void clearCart(Long userId) {
         cartItemRepository.deleteByUserId(userId);
-        redisTemplate.delete(CART_KEY + userId);
+        cartCache.evict(userId);
     }
 }

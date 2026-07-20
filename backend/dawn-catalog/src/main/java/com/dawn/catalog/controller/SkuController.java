@@ -51,8 +51,9 @@ public class SkuController {
 
     @PutMapping("/{id}")
     @PreAuthorize(AuthorizationConstants.ADMIN_ONLY)
-    public ResponseObject<SkuDetailDto> update(@PathVariable Long id,
-                                               @RequestBody SkuUpdatedRequest request) {
+    public ResponseObject<SkuDetailDto> update(
+            @PathVariable Long id,
+            @Valid @RequestBody SkuUpdatedRequest request) {
         return ResponseObject.success(skuService.update(id, request));
     }
 
@@ -65,7 +66,7 @@ public class SkuController {
 
     @GetMapping("/compare")
     public ResponseObject<List<SkuCompareResponse>> compare(
-            @RequestParam("ids") @NotEmpty @Size(min = 4) List<Long> ids) {
-        return ResponseObject.created(skuService.getSkusForCompare(ids));
+            @RequestParam("ids") @NotEmpty @Size(min = 2) List<Long> ids) {
+        return ResponseObject.success(skuService.getSkusForCompare(ids));
     }
 }

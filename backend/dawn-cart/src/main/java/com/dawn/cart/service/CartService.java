@@ -19,6 +19,7 @@ import com.dawn.common.message.Message;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.OptimisticLockingFailureException;
+import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -95,7 +96,10 @@ public class CartService implements GetCartUseCase, AddCartItemUseCase, UpdateCa
     }
 
     // WRITE
-    @Retryable(retryFor = OptimisticLockingFailureException.class, maxAttempts = 3)
+    @Retryable(
+            retryFor = OptimisticLockingFailureException.class,
+            maxAttempts = 3,
+            backoff = @Backoff(delay = 50, multiplier = 2))
     @Transactional
     @Override
     public CartItemDto addItem(Long userId, Long skuId, int quantity) {
@@ -127,7 +131,10 @@ public class CartService implements GetCartUseCase, AddCartItemUseCase, UpdateCa
         return toDto(item);
     }
 
-    @Retryable(retryFor = OptimisticLockingFailureException.class, maxAttempts = 3)
+    @Retryable(
+            retryFor = OptimisticLockingFailureException.class,
+            maxAttempts = 3,
+            backoff = @Backoff(delay = 50, multiplier = 2))
     @Transactional
     public CartItemDto updateItem(Long userId, Long skuId, int quantity) {
         CartItem item = cartItemRepository.findByUserIdAndSkuId(userId, skuId)

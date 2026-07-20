@@ -2,6 +2,7 @@ package com.dawn.cart.service;
 
 import com.dawn.common.event.OrderCreatedEvent;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
@@ -17,7 +18,7 @@ public class CartCleanupListener {
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    @Retryable(maxAttempts = 3)
+    @Retryable(maxAttempts = 3, retryFor = OptimisticLockingFailureException.class)
     public void onOrderCreated(OrderCreatedEvent event) {
         cartService.clearCart(event.userId());
     }

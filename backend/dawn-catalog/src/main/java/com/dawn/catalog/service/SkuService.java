@@ -108,6 +108,9 @@ public class SkuService {
                 .orElseThrow(() -> new ResourceNotFoundException(Message.format(Message.Catalog.SKU_NOT_FOUND, id)));
 
         if (request.name() != null) sku.setName(request.name());
+        if (request.name() != null) {
+            sku.setSlug(generateSlug(request.name()));
+        }
         if (request.description() != null) sku.setDescription(request.description());
         if (request.price() != null) sku.setPrice(request.price());
         if (request.status() != null) sku.setStatus(request.status());
@@ -128,6 +131,7 @@ public class SkuService {
             sku.setDeletedAt(Instant.now());
         } else {
             skuRepository.deleteById(id);
+            return;
         }
         skuRepository.save(sku);
     }
