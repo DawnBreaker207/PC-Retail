@@ -1,6 +1,6 @@
 package com.dawn.user.infra.security;
 
-import com.dawn.user.infra.persistence.UserRepository;
+import com.dawn.user.infra.persistence.JpaUserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class UserDetailsServiceImpl implements UserDetailsService {
 
-    private final UserRepository userRepository;
+    private final JpaUserRepository userRepository;
 
     @Override
     public UserDetails loadUserByUsername(String email) {

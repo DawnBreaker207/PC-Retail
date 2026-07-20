@@ -8,7 +8,7 @@ import com.dawn.user.dto.UserMapper;
 import com.dawn.user.entity.RefreshToken;
 import com.dawn.user.entity.User;
 import com.dawn.user.infra.persistence.RefreshTokenRepository;
-import com.dawn.user.infra.persistence.UserRepository;
+import com.dawn.user.infra.persistence.JpaUserRepository;
 import com.dawn.user.util.TokenUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,7 +22,7 @@ import java.time.Instant;
 public class RefreshTokenService {
 
     private final RefreshTokenRepository refreshTokenRepository;
-    private final UserRepository userRepository;
+    private final JpaUserRepository userRepository;
     private final JWTUtils jwtUtils;
 
     @Value("${app.jwtRefreshExpirationsMs:604800000}")

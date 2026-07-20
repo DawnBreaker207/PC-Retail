@@ -59,4 +59,11 @@ public class UserController {
         userProfileUseCase.deleteAddress(addressId);
         return ResponseObject.deleted();
     }
+
+    @PutMapping("/me/deactivate")
+    @PreAuthorize(AuthorizationConstants.CUSTOMER_ONLY)
+    public ResponseObject<Void> deactivateAccount() {
+        userProfileUseCase.deactivateAccount();
+        return ResponseObject.deleted();
+    }
 }

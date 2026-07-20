@@ -25,13 +25,3 @@ CREATE TABLE refresh_tokens
 
 CREATE INDEX idx_refresh_token_user ON refresh_tokens (user_id);
 CREATE INDEX idx_refresh_token_hash ON refresh_tokens (token_hash);
-
-CREATE TABLE password_reset_tokens
-(
-    id          BIGSERIAL PRIMARY KEY,
-    user_id     BIGINT       NOT NULL REFERENCES users (id),
-    token_hash  VARCHAR(255) NOT NULL UNIQUE,
-    expiry_date TIMESTAMPTZ  NOT NULL,
-    used_at     TIMESTAMPTZ,
-    created_at  TIMESTAMPTZ DEFAULT NOW()
-);

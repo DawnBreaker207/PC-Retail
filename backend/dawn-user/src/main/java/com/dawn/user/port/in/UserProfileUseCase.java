@@ -19,5 +19,7 @@ public interface UserProfileUseCase {
 
     AddressDto updateAddress(String addressId, AddressRequest request);
 
+    void deactivateAccount();
+
     void deleteAddress(String addressId);
 }

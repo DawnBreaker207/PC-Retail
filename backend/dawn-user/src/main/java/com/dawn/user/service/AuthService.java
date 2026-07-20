@@ -12,11 +12,11 @@ import com.dawn.user.dto.EmailMessage;
 import com.dawn.user.entity.User;
 import com.dawn.user.entity.enums.SystemRole;
 import com.dawn.user.entity.enums.UserStatus;
-import com.dawn.user.infra.persistence.UserRepository;
 import com.dawn.user.port.in.*;
 import com.dawn.user.port.out.EmailPublisherPort;
 import com.dawn.user.port.out.EmailVerificationCachePort;
 import com.dawn.user.port.out.PasswordResetPort;
+import com.dawn.user.port.out.UserRepositoryPort;
 import com.dawn.user.util.TokenUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -28,7 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class AuthService implements RegisterUseCase, LoginUseCase, TokenRefreshUseCase,
         LogoutUseCase, PasswordResetUseCase, VerifyRegistrationOtpUseCase, ResendRegistrationOtpUseCase {
 
-    private final UserRepository userRepository;
+    private final UserRepositoryPort userRepository;
     private final PasswordEncoder passwordEncoder;
     private final RefreshTokenService refreshTokenService;
     private final EmailPublisherPort emailPublisherPort;

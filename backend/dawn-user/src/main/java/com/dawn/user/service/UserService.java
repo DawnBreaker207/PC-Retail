@@ -10,13 +10,14 @@ import com.dawn.user.dto.AddressDto;
 import com.dawn.user.dto.UserMapper;
 import com.dawn.user.entity.AddressEntry;
 import com.dawn.user.entity.User;
-import com.dawn.user.infra.persistence.UserRepository;
+import com.dawn.user.infra.persistence.JpaUserRepository;
 import com.dawn.user.port.in.UserProfileUseCase;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -25,7 +26,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class UserService implements UserProfileUseCase {
 
-    private final UserRepository userRepository;
+    private final JpaUserRepository userRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -100,6 +101,14 @@ public class UserService implements UserProfileUseCase {
         user.setAddresses(addresses);
         userRepository.save(user);
         return UserMapper.toAddressDto(updated);
+    }
+
+    @Override
+    @Transactional
+    public void deactivateAccount() {
+        User user = loadCurrentUser();
+        user.setDeletedAt(Instant.now());
+        userRepository.save(user);
     }
 
     @Override
