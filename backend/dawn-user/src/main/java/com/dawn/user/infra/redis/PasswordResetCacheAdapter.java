@@ -1,4 +1,4 @@
-package com.dawn.user.infra.persistence;
+package com.dawn.user.infra.redis;
 
 import com.dawn.user.port.out.PasswordResetPort;
 import lombok.RequiredArgsConstructor;

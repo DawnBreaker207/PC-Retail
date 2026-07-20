@@ -1,14 +1,14 @@
 package com.dawn.user.infra.persistence;
 
 import com.dawn.user.entity.User;
-import com.dawn.user.port.out.UserRepositoryPort;
+import com.dawn.user.port.out.UserRepository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
 @Repository
-public interface JpaUserRepository extends JpaRepository<User, Long>, UserRepositoryPort {
+public interface JpaUserRepository extends JpaRepository<User, Long>, UserRepository {
 
     Optional<User> findByEmailAndDeletedAtIsNull(String email);
 

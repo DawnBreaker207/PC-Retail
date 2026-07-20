@@ -10,8 +10,9 @@ import com.dawn.user.dto.AddressDto;
 import com.dawn.user.dto.UserMapper;
 import com.dawn.user.entity.AddressEntry;
 import com.dawn.user.entity.User;
-import com.dawn.user.infra.persistence.JpaUserRepository;
-import com.dawn.user.port.in.UserProfileUseCase;
+import com.dawn.user.port.in.AddressUseCase;
+import com.dawn.user.port.in.ProfileUseCase;
+import com.dawn.user.port.out.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,9 +25,9 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-public class UserService implements UserProfileUseCase {
+public class UserService implements ProfileUseCase, AddressUseCase {
 
-    private final JpaUserRepository userRepository;
+    private final UserRepository userRepository;
 
     @Override
     @Transactional(readOnly = true)

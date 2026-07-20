@@ -1,5 +1,6 @@
 package com.dawn.user.infra.security;
 
+import com.dawn.common.message.Message;
 import com.dawn.user.infra.persistence.JpaUserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -17,6 +18,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     public UserDetails loadUserByUsername(String email) {
         return userRepository.findByEmailAndDeletedAtIsNull(email)
                 .map(UserPrincipal::new)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
+                .orElseThrow(() -> new UsernameNotFoundException(Message.format(Message.User.NOT_FOUND, email)));
     }
 }

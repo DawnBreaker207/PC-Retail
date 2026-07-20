@@ -4,7 +4,7 @@ import com.dawn.user.entity.User;
 
 import java.util.Optional;
 
-public interface UserRepositoryPort {
+public interface UserRepository {
     Optional<User> findByEmailAndDeletedAtIsNull(String email);
 
     boolean existsByEmailAndDeletedAtIsNull(String email);

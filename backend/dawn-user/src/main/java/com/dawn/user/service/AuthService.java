@@ -16,7 +16,7 @@ import com.dawn.user.port.in.*;
 import com.dawn.user.port.out.EmailPublisherPort;
 import com.dawn.user.port.out.EmailVerificationCachePort;
 import com.dawn.user.port.out.PasswordResetPort;
-import com.dawn.user.port.out.UserRepositoryPort;
+import com.dawn.user.port.out.UserRepository;
 import com.dawn.user.util.TokenUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -28,7 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class AuthService implements RegisterUseCase, LoginUseCase, TokenRefreshUseCase,
         LogoutUseCase, PasswordResetUseCase, VerifyRegistrationOtpUseCase, ResendRegistrationOtpUseCase {
 
-    private final UserRepositoryPort userRepository;
+    private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final RefreshTokenService refreshTokenService;
     private final EmailPublisherPort emailPublisherPort;
@@ -68,7 +68,7 @@ public class AuthService implements RegisterUseCase, LoginUseCase, TokenRefreshU
     public AuthResponse verify(VerifyOtpRequest request) {
         String email = request.email().toLowerCase();
 
-        String storeOtp = emailVerificationCachePort.consumerOtp(email);
+        String storeOtp = emailVerificationCachePort.consumeOtp(email);
         if (storeOtp == null || !storeOtp.equals(request.otpCode())) {
             throw new InvalidRequestException(Message.Auth.TOKEN_INVALID_OR_EXPIRED);
         }

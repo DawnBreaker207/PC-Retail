@@ -29,7 +29,7 @@ public class EmailVerificationCacheAdapter implements EmailVerificationCachePort
     }
 
     @Override
-    public String consumerOtp(String email) {
+    public String consumeOtp(String email) {
         String key = OTP_PREFIX + email;
         String otp = redis.opsForValue().get(key);
         if (otp != null) redis.delete(key);

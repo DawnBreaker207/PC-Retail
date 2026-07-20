@@ -1,5 +1,6 @@
 package com.dawn.user.util;
 
+import com.dawn.common.message.Message;
 import lombok.experimental.UtilityClass;
 
 import java.nio.charset.StandardCharsets;
@@ -37,7 +38,7 @@ public class TokenUtils {
             byte[] hash = digest.digest(rawToken.getBytes(StandardCharsets.UTF_8));
             return HexFormat.of().formatHex(hash);
         } catch (NoSuchAlgorithmException e) {
-            throw new IllegalStateException("SHA-256 not available", e);
+            throw new IllegalStateException(Message.Common.SHA256_NOT_AVAILABLE, e);
         }
     }
 }
