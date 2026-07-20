@@ -55,6 +55,7 @@ public class Message {
         public static final String EMAIL_SEND_FAILED = "Failed to send email, please contact support";
         public static final String METHOD_NOT_IMPLEMENTED = "This feature is not yet implemented";
         public static final String SHA256_NOT_AVAILABLE = "SHA-256 not available";
+        public static final String NULL_PARAM_FOR_HMAC = "Key and data must not be null for HmacSHA512";
     }
 
     // User

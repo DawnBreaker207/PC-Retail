@@ -191,7 +191,7 @@ public class VnpayGatewayAdapter implements PaymentGateway {
     public static String hmacSHA512(final String key, final String data) {
         try {
             if (key == null || data == null) {
-                throw new NullPointerException("key and data must not be null for HmacSHA512");
+                throw new NullPointerException(Message.Common.NULL_PARAM_FOR_HMAC);
             }
             final Mac hmac512 = Mac.getInstance("HmacSHA512");
             hmac512.init(new SecretKeySpec(key.getBytes(), "HmacSHA512"));
