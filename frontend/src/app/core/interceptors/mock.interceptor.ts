@@ -74,43 +74,78 @@ export const mockInterceptor: HttpInterceptorFn = (req, next) => {
   const { method, url, body } = req;
 
   // ── AUTH ──
-  if (url.includes('/api/auth/refresh') && method === 'POST') {
+  if (url.includes('/api/v1/auth/refresh') && method === 'POST') {
     return ok(mockUserSession('user@dawn.vn', 'User', 'CUSTOMER'));
+  }
+  if (url.includes('/api/v1/auth/login') && method === 'POST') {
+    const { email, password } = body as any;
+    if (email === 'admin@dawn.vn' && password === 'admin123') {
+      return ok(mockUserSession(email, 'Admin', 'ADMIN'));
+    }
+    return ok(mockUserSession(email, email.split('@')[0], 'CUSTOMER'));
+  }
+  if (url.includes('/api/v1/auth/register') && method === 'POST') {
+    return ok(null);
+  }
+  if (url.includes('/api/v1/auth/verify-otp') && method === 'POST') {
+    return ok(mockUserSession('user@dawn.vn', 'User', 'CUSTOMER'));
+  }
+  if (url.includes('/api/v1/auth/resend-otp') && method === 'POST') {
+    return ok(null);
+  }
+  if (url.includes('/api/v1/auth/forgot-password') && method === 'POST') {
+    return ok(null);
+  }
+  if (url.includes('/api/v1/auth/reset-password') && method === 'POST') {
+    return ok(null);
+  }
+
+  // ── USER ──
+  if (url.match(/\/api\/v1\/users\/me\/addresses\/(\d+)/) && method === 'PUT') {
+    return ok({ id: Number(url.match(/\/api\/v1\/users\/me\/addresses\/(\d+)/)![1]), ...(body as any) });
+  }
+  if (url.match(/\/api\/v1\/users\/me\/addresses\/(\d+)/) && method === 'DELETE') {
+    return ok(null);
+  }
+  if (url.includes('/api/v1/users/me/addresses') && method === 'GET') {
+    return ok([]);
+  }
+  if (url.includes('/api/v1/users/me/addresses') && method === 'POST') {
+    return ok({ id: Date.now(), ...(body as any) });
+  }
+  if (url.includes('/api/v1/users/me') && method === 'GET') {
+    return ok({ id: 1, fullName: 'User', email: 'user@dawn.vn', phone: '0912345678', systemRole: 'CUSTOMER' });
+  }
+  if (url.includes('/api/v1/users/me') && method === 'PUT') {
+    return ok({ id: 1, fullName: 'User', email: 'user@dawn.vn', phone: '0912345678', systemRole: 'CUSTOMER' });
   }
 
   // ── CATALOG ──
-  if (url.includes('/api/catalog/categories') && method === 'GET') {
-    return of(new HttpResponse({ status: 200, body: MOCK_CATEGORIES }));
+  if (url.includes('/api/v1/brands') && method === 'GET') {
+    return ok(MOCK_BRANDS);
   }
 
-  if (url.includes('/api/catalog/brands') && method === 'GET') {
-    return of(new HttpResponse({ status: 200, body: MOCK_BRANDS }));
+  if (url.includes('/api/v1/categories') && method === 'GET') {
+    return ok(MOCK_CATEGORIES);
   }
 
-  if (url.match(/\/api\/catalog\/skus\/([^/]+)\/reviews/) && method === 'GET') {
-    return ok(MOCK_REVIEWS);
-  }
-
-  if (url.match(/\/api\/catalog\/skus\/([^/]+)\/related/) && method === 'GET') {
-    const slug = url.split('/').pop()!;
-    const all = generateProducts();
-    const idx = all.findIndex(p => p.slug === slug);
-    return ok(all.filter((_, i) => i !== idx).slice(0, 4));
-  }
-
-  if (url.match(/\/api\/catalog\/skus\/([^/]+)/) && method === 'GET') {
-    const slug = url.split('/').pop()!;
-    const p = generateProducts().find(pr => pr.slug === slug) || null;
+  if (url.match(/\/api\/v1\/skus\/(\d+)/) && method === 'GET') {
+    const id = Number(url.match(/\/api\/v1\/skus\/(\d+)/)![1]);
+    const p = generateProducts().find(pr => pr.id === id) || null;
     return p ? ok(p) : err(404, 'Not found');
   }
 
-  if (url.includes('/api/catalog/skus') && method === 'GET') {
+  if (url.includes('/api/v1/skus/compare') && method === 'GET') {
+    return ok(generateProducts().slice(0, 3));
+  }
+
+  if (url.includes('/api/v1/skus') && method === 'GET') {
     let filtered = generateProducts();
     const params = parseParams(req);
 
-    if (params['category']) filtered = filtered.filter(p => p.categoryName === params['category']);
-    if (params['brand']) filtered = filtered.filter(p => p.brandName?.toLowerCase() === params['brand']!.toLowerCase());
-    if (params['q']) filtered = filtered.filter(p => p.name.toLowerCase().includes(params['q']!.toLowerCase()));
+    if (params['categoryId']) filtered = filtered.filter(p => p.categoryName === params['categoryId']);
+    if (params['brandId']) filtered = filtered.filter(p => p.brandName?.toLowerCase() === /* mock */ params['brandId']!.toLowerCase());
+    if (params['search']) filtered = filtered.filter(p => p.name.toLowerCase().includes(params['search']!.toLowerCase()));
     if (params['minPrice']) filtered = filtered.filter(p => p.price >= Number(params['minPrice']));
     if (params['maxPrice']) filtered = filtered.filter(p => p.price <= Number(params['maxPrice']));
     if (params['sort']) {
@@ -127,16 +162,23 @@ export const mockInterceptor: HttpInterceptorFn = (req, next) => {
     const paged = filtered.slice(start, start + size);
     return ok({
       content: paged,
-      pagination: { pageNumber: page, pageSize: size, totalElements: filtered.length },
+      page: page,
+      size: size,
+      totalElements: filtered.length,
+      totalPages: Math.ceil(filtered.length / size),
     });
   }
 
   // ── CART ──
-  if (url.includes('/api/cart') && method === 'GET') {
+  if (url.includes('/api/v1/cart/count') && method === 'GET') {
+    return ok(cartItems.reduce((s, i) => s + i.quantity, 0));
+  }
+
+  if (url.includes('/api/v1/cart') && method === 'GET') {
     return ok({ items: cartItems, version: 1 });
   }
 
-  if (url.includes('/api/cart/items') && method === 'POST') {
+  if (url.includes('/api/v1/cart/items') && method === 'POST') {
     const d = body as CartAddBody;
     const products = generateProducts();
     const sku = products.find(p => p.id === d.skuId);
@@ -155,8 +197,8 @@ export const mockInterceptor: HttpInterceptorFn = (req, next) => {
     return ok({ items: cartItems, version: 2 });
   }
 
-  if (url.match(/\/api\/cart\/items\/(\d+)/) && method === 'PUT') {
-    const id = Number(url.match(/\/api\/cart\/items\/(\d+)/)![1]);
+  if (url.match(/\/api\/v1\/cart\/items\/(\d+)/) && method === 'PUT') {
+    const id = Number(url.match(/\/api\/v1\/cart\/items\/(\d+)/)![1]);
     const d = body as CartUpdateBody;
     const idx = cartItems.findIndex(i => i.skuId === id);
     if (idx >= 0) {
@@ -165,37 +207,14 @@ export const mockInterceptor: HttpInterceptorFn = (req, next) => {
     return ok({ items: cartItems, version: 2 });
   }
 
-  if (url.match(/\/api\/cart\/items\/(\d+)/) && method === 'DELETE') {
-    const id = Number(url.match(/\/api\/cart\/items\/(\d+)/)![1]);
+  if (url.match(/\/api\/v1\/cart\/items\/(\d+)/) && method === 'DELETE') {
+    const id = Number(url.match(/\/api\/v1\/cart\/items\/(\d+)/)![1]);
     cartItems = cartItems.filter(i => i.skuId !== id);
     return ok({ items: cartItems, version: 2 });
   }
 
-  if (url.includes('/api/cart') && method === 'DELETE') {
-    cartItems = [];
-    return ok({ items: [], version: null });
-  }
-
   // ── ORDERS ──
-  if (url.includes('/api/orders/my') && method === 'GET') {
-    return ok({ content: localOrders, pagination: { pageNumber: 0, pageSize: 20, totalElements: localOrders.length } });
-  }
-
-  if (url.match(/\/api\/orders\/(\d+)\/cancel/) && method === 'PUT') {
-    return ok(null);
-  }
-
-  if (url.match(/\/api\/orders\/(\d+)\/items\/(\d+)\/reviews/) && method === 'POST') {
-    return ok({ id: Date.now(), ...(body as Record<string, unknown>), createdAt: new Date().toISOString() });
-  }
-
-  if (url.match(/\/api\/orders\/(\d+)/) && method === 'GET') {
-    const id = Number(url.match(/\/api\/orders\/(\d+)/)![1]);
-    const order = localOrders.find(o => o.id === id);
-    return order ? ok(order) : err(404, 'Not found');
-  }
-
-  if (url.includes('/api/orders/checkout') && method === 'POST') {
+  if (url.includes('/api/v1/orders/checkout') && method === 'POST') {
     const newId = Date.now();
     const newOrder = {
       id: newId,
@@ -218,17 +237,43 @@ export const mockInterceptor: HttpInterceptorFn = (req, next) => {
     return ok({ id: newId, totalAmount: 25990000, paymentStatus: 'PENDING' });
   }
 
+  if (url.match(/\/api\/v1\/orders\/sub-orders\/(\d+)\/cancel/) && method === 'POST') {
+    return ok(null);
+  }
+
+  if (url.includes('/api/v1/orders') && method === 'GET') {
+    return ok({ content: localOrders, page: 0, size: 20, totalElements: localOrders.length, totalPages: 1 });
+  }
+
+  if (url.match(/\/api\/v1\/orders\/(\d+)/) && method === 'GET') {
+    const id = Number(url.match(/\/api\/v1\/orders\/(\d+)/)![1]);
+    const order = localOrders.find(o => o.id === id);
+    return order ? ok(order) : err(404, 'Not found');
+  }
+
+  // ── STAFF ORDERS ──
+  if (url.includes('/api/v1/staff/orders/sub-orders') && method === 'POST') {
+    return ok(null);
+  }
+  if (url.includes('/api/v1/staff/orders') && method === 'GET') {
+    return ok({ content: localOrders, page: 0, size: 20, totalElements: localOrders.length, totalPages: 1 });
+  }
+
+  // ── CARRIER ──
+  if (url.match(/\/api\/v1\/sub-orders\/(\d+)\/assign-carrier/) && method === 'POST') {
+    return ok(null);
+  }
+  if (url.match(/\/api\/v1\/sub-orders\/(\d+)\/deliver/) && method === 'POST') {
+    return ok(null);
+  }
+
   // ── PAYMENT ──
-  if (url.includes('/api/payments/vnpay/initiate') && method === 'POST') {
-    return ok({ paymentUrl: 'http://localhost:4201/checkout/result' });
+  if (url.includes('/api/v1/payments/create') && method === 'POST') {
+    return ok({ paymentUrl: 'http://localhost:4200/checkout/result' });
   }
 
   // ── PROMOTION ──
-  if (url.includes('/api/promotion/flash-sales/active') && method === 'GET') {
-    return ok(MOCK_FLASH_SALE_CAMPAIGN);
-  }
-
-  if (url.includes('/api/promotions/vouchers/validate') && method === 'POST') {
+  if (url.includes('/api/v1/vouchers/validate') && method === 'POST') {
     const d = body as VoucherBody;
     if (d.code === 'WELCOME10') {
       return ok({ valid: true, code: 'WELCOME10', discount: 500000, type: 'FIXED', minOrder: 1000000 });
@@ -236,58 +281,74 @@ export const mockInterceptor: HttpInterceptorFn = (req, next) => {
     return ok({ valid: false, message: 'Mã giảm giá không hợp lệ' });
   }
 
-  if (url.includes('/api/promotions/vouchers') && method === 'GET') {
-    return ok(MOCK_VOUCHERS);
+  if (url.includes('/api/v1/vouchers') && method === 'GET') {
+    return ok({ content: MOCK_VOUCHERS, page: 0, size: 20, totalElements: MOCK_VOUCHERS.length, totalPages: 1 });
   }
 
-  // ── ADMIN ──
-  if (url.includes('/api/admin/dashboard/summary') && method === 'GET') {
-    return ok(MOCK_DASHBOARD_SUMMARY);
+  if (url.includes('/api/v1/vouchers') && method === 'POST') {
+    return ok({ id: Date.now(), ...(body as any) });
   }
 
-  if (url.includes('/api/admin/orders') && method === 'GET') {
-    return ok({ content: localOrders, pagination: { pageNumber: 0, pageSize: 20, totalElements: localOrders.length } });
-  }
-
-  if (url.match(/\/api\/admin\/orders\/(\d+)\/status/) && method === 'PUT') {
+  if (url.match(/\/api\/v1\/vouchers\/(\d+)/) && method === 'DELETE') {
     return ok(null);
   }
 
-  // ── ADMIN: REVENUE ──
-  if (url.includes('/api/admin/dashboard/revenue') && method === 'GET') {
-    return ok(MOCK_REVENUE_7_DAYS);
+  // ── REVIEW ──
+  if (url.includes('/api/v1/reviews') && method === 'POST') {
+    return ok({ id: Date.now(), ...(body as any), createdAt: new Date().toISOString() });
   }
 
   // ── INVENTORY ──
-  if (url.includes('/api/inventory/low-stock') && method === 'GET') {
-    return ok(MOCK_LOW_STOCK_ITEMS);
+  if (url.match(/\/api\/v1\/inventory\/(\d+)\/transactions/) && method === 'GET') {
+    return ok({ content: [], page: 0, size: 20, totalElements: 0, totalPages: 0 });
   }
 
-  if (url.includes('/api/inventory') && method === 'GET') {
-    const products = generateProducts();
-    return ok(products.map(p => ({
-      skuId: p.id, name: p.name, slug: p.slug, stock: p.stockAvailable || Math.floor(Math.random() * 100) + 5,
-      price: p.price, imageUrl: p.imageUrls[0], brandName: p.brandName,
-    })));
-  }
-
-  if (url.match(/\/api\/inventory\/(\d+)\/restock/) && method === 'POST') {
+  if (url.match(/\/api\/v1\/inventory\/(\d+)\/restock/) && method === 'POST') {
     return ok({ success: true });
   }
 
-  // ── BUILDER ──
-  if (url.includes('/api/builder/slots') && method === 'GET') {
+  if (url.match(/\/api\/v1\/inventory\/(\d+)/) && method === 'GET') {
+    const products = generateProducts();
+    return ok(products[0] ? { skuId: Number(url.match(/\/api\/v1\/inventory\/(\d+)/)![1]), stock: 50 } : null);
+  }
+
+  if (url.includes('/api/v1/inventory') && method === 'GET') {
+    const products = generateProducts();
+    const params = parseParams(req);
+    let filtered = [...products];
+    if (params['lowStock'] === 'true') filtered = filtered.filter(() => Math.random() > 0.7);
+    const page = params['page'] ? Number(params['page']) : 0;
+    const size = params['size'] ? Number(params['size']) : 20;
+    const start = page * size;
+    const paged = filtered.slice(start, start + size).map(p => ({
+      skuId: p.id, name: p.name, slug: p.slug, stock: p.stockAvailable || Math.floor(Math.random() * 100) + 5,
+      price: p.price, imageUrl: p.imageUrls[0], brandName: p.brandName,
+    }));
+    return ok({ content: paged, page, size, totalElements: filtered.length, totalPages: Math.ceil(filtered.length / size) });
+  }
+
+  // ── ADMIN DASHBOARD (mock-only, no BE equivalent) ──
+  if (url.includes('/api/v1/admin/dashboard/summary') && method === 'GET') {
+    return ok(MOCK_DASHBOARD_SUMMARY);
+  }
+  if (url.includes('/api/v1/admin/dashboard/revenue') && method === 'GET') {
+    return ok(MOCK_REVENUE_7_DAYS);
+  }
+  if (url.includes('/api/v1/inventory/low-stock') && method === 'GET') {
+    return ok(MOCK_LOW_STOCK_ITEMS);
+  }
+
+  // ── BUILDER (mock-only, no BE equivalent) ──
+  if (url.includes('/api/v1/builder/slots') && method === 'GET') {
     return ok({ content: MOCK_BUILDER_SLOTS });
   }
-
-  if (url.includes('/api/builder/validate') && method === 'POST') {
+  if (url.includes('/api/v1/builder/validate') && method === 'POST') {
     return ok({ valid: true, conflicts: [], warnings: [] });
   }
-
-  if (url.includes('/api/builder/templates') && method === 'GET') {
+  if (url.includes('/api/v1/builder/templates') && method === 'GET') {
     return ok({
       content: MOCK_BUILDER_TEMPLATES,
-      pagination: { pageNumber: 0, pageSize: 12, totalElements: MOCK_BUILDER_TEMPLATES.length },
+      page: 0, size: 12, totalElements: MOCK_BUILDER_TEMPLATES.length, totalPages: 1,
     });
   }
 

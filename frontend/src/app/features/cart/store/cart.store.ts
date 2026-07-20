@@ -51,7 +51,7 @@ export const CartStore = signalStore(
 
     addItem(skuId: number, quantity: number): void {
       patchState(store, { isLoading: true, error: null });
-      http.post<{ items: CartItem[]; version?: number }>(ApiEndpoints.cart.base + '/items', { skuId, quantity }).pipe(
+      http.post<{ items: CartItem[]; version?: number }>(ApiEndpoints.cart.items, { skuId, quantity }).pipe(
         catchError((err) => {
           const msg = (err as { error?: { message?: string } })?.error?.message || (err as Error)?.message || 'Có lỗi xảy ra';
           patchState(store, { isLoading: false, error: msg });

@@ -13,6 +13,6 @@ export class CheckoutService {
   }
 
   initiatePayment(orderId: number) {
-    return this.http.post<VnpayInitResponse>(ApiEndpoints.payment.vnpayInit, { orderId });
+    return this.http.post<VnpayInitResponse>(ApiEndpoints.payment.create, { orderId });
   }
 }

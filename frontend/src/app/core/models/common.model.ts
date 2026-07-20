@@ -171,6 +171,8 @@ export interface Review {
 }
 
 export interface CreateReviewRequest {
+  orderId: number;
+  orderItemId: number;
   rating: number;
   comment: string;
   images?: string[];

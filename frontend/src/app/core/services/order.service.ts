@@ -13,7 +13,7 @@ export class OrderService {
     if (params.page) httpParams = httpParams.set('page', params.page);
     if (params.size) httpParams = httpParams.set('size', params.size);
     if (params.status) httpParams = httpParams.set('status', params.status);
-    return this.http.get<ResponsePage<Order>>(ApiEndpoints.orders.my, {
+    return this.http.get<ResponsePage<Order>>(ApiEndpoints.orders.base, {
       params: httpParams,
     });
   }
@@ -23,10 +23,10 @@ export class OrderService {
   }
 
   cancelOrder(id: number) {
-    return this.http.put(ApiEndpoints.orders.cancel(id), {});
+    return this.http.put(ApiEndpoints.orders.cancelSubOrder(id), {});
   }
 
-  createReview(orderId: number, orderItemId: number, data: CreateReviewRequest): Observable<Review> {
-    return this.http.post<Review>(ApiEndpoints.orders.review(orderId, orderItemId), data);
+  createReview(data: CreateReviewRequest): Observable<Review> {
+    return this.http.post<Review>(ApiEndpoints.reviews.create, data);
   }
 }

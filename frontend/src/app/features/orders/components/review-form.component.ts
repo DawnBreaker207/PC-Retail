@@ -68,7 +68,9 @@ export class ReviewFormComponent {
     if (this.rating === 0) return;
     this.isSubmitting.set(true);
     this.orderService
-      .createReview(this.data.orderId, this.data.orderItemId, {
+      .createReview({
+        orderId: this.data.orderId,
+        orderItemId: this.data.orderItemId,
         rating: this.rating,
         comment: this.comment,
         images: this.fileList().map((f) => f.url || f.thumbUrl).filter((v): v is string => !!v),

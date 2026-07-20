@@ -39,7 +39,7 @@ export class CartService {
   }
 
   addItem(skuId: number, quantity: number): Observable<unknown> {
-    return this.http.post(ApiEndpoints.cart.base + '/items', { skuId, quantity }).pipe(
+    return this.http.post(ApiEndpoints.cart.items, { skuId, quantity }).pipe(
       tap(() => this.loadCart()),
     );
   }

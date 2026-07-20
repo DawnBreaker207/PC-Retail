@@ -153,7 +153,7 @@ export class AdminOrderListComponent {
     if (!ids.length) return;
     let completed = 0;
     ids.forEach((id) => {
-      this.http.put(ApiEndpoints.admin.orderStatus(id), { status: 'PROCESSING' })
+      this.http.put(ApiEndpoints.staffOrders.transition(id), { status: 'PROCESSING' })
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe({
           next: () => {
@@ -168,7 +168,7 @@ export class AdminOrderListComponent {
   }
 
   confirmOrder(id: number) {
-    this.http.put(ApiEndpoints.admin.orderStatus(id), { status: 'PROCESSING' })
+    this.http.put(ApiEndpoints.staffOrders.transition(id), { status: 'PROCESSING' })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
