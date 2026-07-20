@@ -1,6 +1,11 @@
+name: pc-retail
+
 networks:
   network:
     driver: bridge
+
+volumes:
+  postgres:
 
 services:
   postgres:
@@ -21,21 +26,89 @@ services:
       retries: 5
     networks:
       - network
+
   redis:
     container_name: redis
-    image: redis:latest
+    image: redis:7-alpine
     ports:
       - '6379:6379'
     networks:
       - network
     command: ['redis-server', '--notify-keyspace-events', 'Ex']
+
   rabbitmq:
     container_name: rabbitmq
-    image: rabbitmq:management
+    image: rabbitmq:4-management-alpine
     ports:
       - '5672:5672'
       - '15672:15672'
     networks:
       - network
-volumes:
-  postgres:
+    healthcheck:
+      test: ['CMD', 'rabbitmq-diagnostics', 'check_port_connectivity']
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    container_name: backend
+    ports:
+      - '8888:8888'
+    environment:
+      # Database
+      DB_URL: ${DB_URL}
+      DB_USER: ${DB_USER}
+      DB_PASS: ${DB_PASS}
+      DB_DRIVER: ${DB_DRIVER}
+      # Redis
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
+      # RabbitMQ
+      RABBITMQ_HOST: ${RABBITMQ_HOST}
+      RABBITMQ_PORT: ${RABBITMQ_PORT}
+      RABBITMQ_USER: ${RABBITMQ_USER}
+      RABBITMQ_PASS: ${RABBITMQ_PASS}
+      # JWT
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRATION_MS: ${JWT_EXPIRATION_MS}
+      JWT_REFRESH_EXPIRATION_MS: ${JWT_REFRESH_EXPIRATION_MS}
+      # VNPay
+      VNPAY_URL: ${VNPAY_URL}
+      VNPAY_QUERY_URL: ${VNPAY_QUERY_URL}
+      VNPAY_TMN_CODE: ${VNPAY_TMN_CODE}
+      VNPAY_SECRET_KEY: ${VNPAY_SECRET_KEY}
+      VNPAY_RETURN_URL: ${VNPAY_RETURN_URL}
+      VNPAY_VERSION: ${VNPAY_VERSION}
+      VNPAY_COMMAND: ${VNPAY_COMMAND}
+      VNPAY_ORDER_TYPE: ${VNPAY_ORDER_TYPE}
+      # AI
+      AI_API_KEY: ${AI_API_KEY}
+      # Mail
+      MAIL_HOST: ${MAIL_HOST}
+      MAIL_PORT: ${MAIL_PORT}
+      MAIL_USER: ${MAIL_USER}
+      MAIL_PASS: ${MAIL_PASS}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - network
+
+  nginx:
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile
+    container_name: nginx
+    ports:
+      - '4200:80'
+    depends_on:
+      - backend
+    networks:
+      - network

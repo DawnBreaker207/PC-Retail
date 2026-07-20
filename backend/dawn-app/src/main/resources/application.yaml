@@ -1,5 +1,5 @@
 server:
-  port: 8888
+  port: ${SERVER_PORT}
 # Config Springdoc
 springdoc:
   swagger-ui:
@@ -9,7 +9,7 @@ springdoc:
 spring:
   # Import ENV
   config:
-    import: "optional:file:.env[.properties]"
+    import: 'optional:file:.env[.properties]'
   application:
     name: backend
   # Virtual Thread
@@ -44,20 +44,20 @@ spring:
   # Config Redis
   data:
     redis:
-      host: ${REDIS_HOST:localhost}
-      port: ${REDIS_PORT:6379}
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
   # Config RabbitMQ
   rabbitmq:
-    host: ${RABBITMQ_HOST:localhost}
-    port: ${RABBITMQ_PORT:5672}
-    username: ${RABBITMQ_USER:guest}
-    password: ${RABBITMQ_PASS:guest}
+    host: ${RABBITMQ_HOST}
+    port: ${RABBITMQ_PORT}
+    username: ${RABBITMQ_USER}
+    password: ${RABBITMQ_PASS}
   # Config Mail
   mail:
-    host: ${MAIL_HOST:sandbox.smtp.mailtrap.io}
-    port: ${MAIL_PORT:2525}
-    username: ${MAIL_USER:}
-    password: ${MAIL_PASS:}
+    host: ${MAIL_HOST}
+    port: ${MAIL_PORT}
+    username: ${MAIL_USER}
+    password: ${MAIL_PASS}
     properties:
       mail:
         smtp:
@@ -73,24 +73,24 @@ spring:
     cache: false
 app:
   mail:
-    from: noreply@prretail.vn
+    from: ${MAIL_FROM}
   frontend:
-    url: http://localhost:4200
+    url: ${FRONTEND_URL}
   opt:
     ttlMinutes: 5
     cooldownSeconds: 60
   passwordResetExpirationMinutes: 15
   # Config JWT
-  jwtCookieName: accessToken
-  jwtRefreshCookieName: refreshToken
-  jwtSecret: ${JWT_SECRET:dGhpc2lzYXZlcnlzZWNyZXRrZXlmb3JkZXZlbG9wbWVudDI1Ng==}
-  jwtExpirationsMs: ${JWT_EXPIRATION_MS:900000}
-  jwtRefreshExpirationsMs: ${JWT_REFRESH_EXPIRATION_MS:604800000}
-openrouter:
-  base-url: https://openrouter.ai/api/v1
-  api-key: ${OPEN_ROUTER_API}
-  chat-model: openai/gpt-4o-mini
-  embedding-model: openai/text-embedding-ada-002
+  jwtCookieName: ${JWT_COOKIE_NAME}
+  jwtRefreshCookieName: ${JWT_REFRESH_COOKIE_NAME}
+  jwtSecret: ${JWT_SECRET}
+  jwtExpirationsMs: ${JWT_EXPIRATION_MS}
+  jwtRefreshExpirationsMs: ${JWT_REFRESH_EXPIRATION_MS}
+ai:
+  base-url: ${AI_BASE_URL}
+  api-key: ${AI_API_KEY}
+  chat-model: ${AI_CHAT_MODEL}
+  embedding-model: ${AI_EMBEDDING_MODEL}
 
 langchain4j:
   chat-model:

@@ -12,16 +12,16 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class AiModuleConfig {
-    @Value("${openrouter.base-url}")
+    @Value("${ai.base-url}")
     private String baseUrl;
 
-    @Value("${openrouter.api-key}")
+    @Value("${ai.api-key}")
     private String apiKey;
 
-    @Value("${openrouter.chat-model}")
+    @Value("${ai.chat-model}")
     private String chatModel;
 
-    @Value("${openrouter.embedding-model}")
+    @Value("${ai.embedding-model}")
     private String embeddingModel;
 
     @Bean
