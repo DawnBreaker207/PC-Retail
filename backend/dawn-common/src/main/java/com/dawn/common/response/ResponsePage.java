@@ -48,7 +48,7 @@ public class ResponsePage<T> {
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
-    static class Pagination {
+    public static class Pagination {
         Integer pageNumber;
         Integer pageSize;
         Long totalElements;

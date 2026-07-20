@@ -1,9 +1,7 @@
 package com.dawn.common.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -14,7 +12,8 @@ import java.io.Serializable;
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
-@Data
+@Getter
+@Setter
 @EntityListeners(AuditingEntityListener.class)
 public class BaseEntity implements Serializable {
     @Serial

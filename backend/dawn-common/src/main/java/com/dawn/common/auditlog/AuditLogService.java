@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,6 +37,7 @@ public class AuditLogService {
     }
 
     @Transactional
+    @Scheduled(cron = "0 0 3 * * ?")
     public void autoCleanLogs() {
         LocalDateTime threshold = LocalDateTime.now().minusMonths(6);
         log.info("Starting clean audit log before: {}", threshold);

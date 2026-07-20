@@ -18,14 +18,23 @@ public class AuditLogAspect {
     public Object audit(ProceedingJoinPoint joinPoint, Loggable loggable) throws Throwable {
         Long actorId = SecurityUtils.getCurrentUserId();
         String actorRole = SecurityUtils.getCurrentUserRole();
+        String entityId = loggable.entityId();
+        if (entityId == null || entityId.isEmpty()) {
+            Object[] args = joinPoint.getArgs();
+            if (args.length > 0 && args[0] instanceof Long) {
+                entityId = String.valueOf(args[0]);
+            }
+        }
+
         try {
+            long id = entityId != null && !entityId.isEmpty() ? Long.parseLong(entityId) : 0L;
             Object result = joinPoint.proceed();
             auditLogService.log(
                     loggable.action(),
                     loggable.entity(),
+                    entityId != null ? Long.parseLong(entityId) : null,
                     null,
-                    null,
-                    null,
+                    result != null ? result.toString() : null,
                     actorId,
                     actorRole,
                     loggable.tier());
@@ -34,7 +43,7 @@ public class AuditLogAspect {
             auditLogService.log(
                     loggable.action(),
                     loggable.entity(),
-                    null,
+                    entityId != null ? Long.parseLong(entityId) : null,
                     null,
                     null,
                     actorId,

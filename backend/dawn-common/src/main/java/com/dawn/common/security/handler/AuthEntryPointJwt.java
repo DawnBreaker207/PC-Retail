@@ -31,11 +31,11 @@ public class AuthEntryPointJwt implements AuthenticationEntryPoint {
                 request.getRequestURI(),
                 authException.getMessage());
 
-        response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 
         ResponseObject<String> resObj = new ResponseObject<>(
-                HttpStatus.FORBIDDEN,
+                HttpStatus.UNAUTHORIZED,
                 "Unauthorized",
                 authException.getMessage());
 
