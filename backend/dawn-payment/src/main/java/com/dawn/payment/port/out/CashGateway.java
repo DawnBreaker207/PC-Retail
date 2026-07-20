@@ -33,7 +33,12 @@ public class CashGateway implements PaymentGateway {
     }
 
     @Override
+    public boolean verifyCallback(Map<String, String> params) {
+        return true;
+    }
+
+    @Override
     public PaymentDto queryStatus(Long paymentId, String transactionRef) {
-        return null;
+        throw new UnsupportedOperationException("CASH has no external to query");
     }
 }

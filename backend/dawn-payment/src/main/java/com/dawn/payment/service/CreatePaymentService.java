@@ -55,6 +55,7 @@ public class CreatePaymentService implements CreatePaymentUseCase {
                 .method(method)
                 .amount(amount)
                 .status(PaymentResultStatus.PENDING)
+                .userId(userId)
                 .build();
         paymentRepo.save(payment);
 

@@ -16,5 +16,7 @@ public interface PaymentGateway {
 
     PaymentDto processWebhook(Long paymentId, Map<String, String> params);
 
+    boolean verifyCallback(Map<String, String> params);
+
     PaymentDto queryStatus(Long paymentId, String transactionRef);
 }

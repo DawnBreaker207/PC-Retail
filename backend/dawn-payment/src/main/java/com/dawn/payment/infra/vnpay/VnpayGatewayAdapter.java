@@ -6,17 +6,24 @@ import com.dawn.payment.dto.PaymentDto;
 import com.dawn.payment.dto.VnpayQueryResult;
 import com.dawn.payment.entity.Payment;
 import com.dawn.payment.entity.enums.PaymentMethod;
+import com.dawn.payment.entity.enums.PaymentResultStatus;
 import com.dawn.payment.infra.gateway.PaymentGateway;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
+
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
@@ -54,7 +61,6 @@ public class VnpayGatewayAdapter implements PaymentGateway {
 
     private final RestTemplate restTemplate;
 
-
     @Override
     public PaymentMethod supportedMethod() {
         return PaymentMethod.VNPAY;
@@ -81,9 +87,27 @@ public class VnpayGatewayAdapter implements PaymentGateway {
     }
 
     @Override
+    public boolean verifyCallback(Map<String, String> params) {
+        String receivedHash = params.remove("vnp_SecureHash");
+        if (receivedHash == null) return false;
+        String hashData = buildHashData(params);
+        String computedHash = hmacSHA512(vnp_SecretKey, hashData);
+        return receivedHash.equalsIgnoreCase(computedHash);
+    }
+
+    @Override
     public PaymentDto queryStatus(Long paymentId, String transactionRef) {
         VnpayQueryResult result = queryTransaction(transactionRef, paymentId);
-        return null;
+        return new PaymentDto(
+                paymentId,
+                null,
+                PaymentMethod.VNPAY,
+                null,
+                result.success()
+                        ? PaymentResultStatus.COMPLETED
+                        : PaymentResultStatus.FAILED,
+                result.transactionNo(),
+                null);
     }
 
     public String buildPaymentUrl(Long paymentId, BigDecimal amount, String orderInfo, Instant createdAt) {
@@ -137,7 +161,12 @@ public class VnpayGatewayAdapter implements PaymentGateway {
         params.put("vnp_SecureHash", hmacSHA512(vnp_SecretKey, hashData));
 
         try {
-            Map<String, Object> response = restTemplate.postForObject(vnp_QueryUrl, params, Map.class);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+            MultiValueMap<String, String> formParams = new LinkedMultiValueMap<>();
+            params.forEach(formParams::add);
+            HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(formParams, headers);
+            Map<String, Object> response = restTemplate.postForObject(vnp_QueryUrl, request, Map.class);
             if (response == null) return new VnpayQueryResult(false, null, "NO_RESPONSE");
 
 
@@ -153,7 +182,7 @@ public class VnpayGatewayAdapter implements PaymentGateway {
 
     private String buildHashData(Map<String, String> params) {
         return params.entrySet().stream()
-                .filter(e -> e.getValue() != null && !e.getValue().isEmpty())
+                .filter(e -> e.getValue() != null)
                 .sorted(Map.Entry.comparingByKey())
                 .map(e -> e.getKey() + "=" + URLEncoder.encode(e.getValue(), StandardCharsets.UTF_8))
                 .collect(Collectors.joining("&"));
