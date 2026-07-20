@@ -8,13 +8,16 @@ import com.dawn.order.dto.VoucherApplyResult;
 import com.dawn.order.entity.Order;
 import com.dawn.order.entity.enums.FulfillmentType;
 import com.dawn.order.port.out.*;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -52,8 +55,25 @@ public class CheckoutServiceTest {
     @Mock
     CatalogClientPort catalogClient;
 
-    @InjectMocks
+    @Mock
+    ApplicationEventPublisher eventPublisher;
+
+    @Spy
+    ThreadPoolTaskExecutor checkoutExecutor = new ThreadPoolTaskExecutor();
+
     CheckoutService checkoutService;
+
+    @BeforeEach
+    void setUp() {
+        checkoutExecutor.setCorePoolSize(2);
+        checkoutExecutor.initialize();
+        var orderCommandSvc = new OrderCommandService(
+                orderRepository, subOrderRepository, orderItemRepository,
+                orderQueryService, inventoryClient, promotionClient, eventPublisher);
+        checkoutService = new CheckoutService(
+                orderCommandSvc, orderQueryService, cartClient,
+                inventoryClient, promotionClient, catalogClient, checkoutExecutor);
+    }
 
 
     // Idempotency
@@ -69,8 +89,7 @@ public class CheckoutServiceTest {
             Order existing = new Order();
             OrderDto existingDto = mock(OrderDto.class);
 
-            when(orderRepository.findByIdempotencyKey(key)).thenReturn(Optional.of(existing));
-            when(orderQueryService.toOrderDto(existing)).thenReturn(existingDto);
+            when(orderQueryService.findByIdempotencyKey(key)).thenReturn(Optional.of(existingDto));
 
             OrderDto result = checkoutService.checkout(buildRequest(key, FulfillmentType.PICKUP), 1L);
 
@@ -87,7 +106,7 @@ public class CheckoutServiceTest {
         @Test
         @DisplayName("Empty cart -> throw InvalidRequestException")
         void emptyCart_throws() {
-            when(orderRepository.findByIdempotencyKey(any())).thenReturn(Optional.empty());
+            when(orderQueryService.findByIdempotencyKey(any())).thenReturn(Optional.empty());
             when(cartClient.getItems(1L)).thenReturn(List.of());
 
             assertThatThrownBy(() ->
@@ -98,7 +117,7 @@ public class CheckoutServiceTest {
         @Test
         @DisplayName("DELIVERY fulfillment without shipping address -> throw InvalidRequestException")
         void deliveryWithoutAddress_throws() {
-            when(orderRepository.findByIdempotencyKey(any())).thenReturn(Optional.empty());
+            when(orderQueryService.findByIdempotencyKey(any())).thenReturn(Optional.empty());
             when(cartClient.getItems(1L)).thenReturn(List.of(new CartItemSnapshot(10L, 2)));
 
             CheckoutRequest req = new CheckoutRequest(
@@ -116,15 +135,17 @@ public class CheckoutServiceTest {
         @Test
         @DisplayName("PICKUP fulfillment without address -> passes address validation")
         void pickupWithoutAddress_passesValidation() {
-            when(orderRepository.findByIdempotencyKey(any())).thenReturn(Optional.empty());
+            when(orderQueryService.findByIdempotencyKey(any())).thenReturn(Optional.empty());
             when(cartClient.getItems(1L)).thenReturn(List.of(new CartItemSnapshot(10L, 2)));
             when(catalogClient.getPrices(anyList())).thenReturn(Map.of(10L, BigDecimal.valueOf(500_000)));
             when(inventoryClient.decrementBatch(anyList())).thenReturn(List.of());
 
             // May fail at a later step — what matters is no InvalidRequestException for address
-            assertThatThrownBy(() ->
-                    checkoutService.checkout(buildRequest(UUID.randomUUID().toString(), FulfillmentType.PICKUP), 1L))
-                    .isNotInstanceOf(InvalidRequestException.class);
+            Throwable thrown = catchThrowable(() ->
+                    checkoutService.checkout(buildRequest(UUID.randomUUID().toString(), FulfillmentType.PICKUP), 1L));
+            if (thrown != null) {
+                assertThat(thrown).isNotInstanceOf(InvalidRequestException.class);
+            }
         }
     }
 
@@ -140,7 +161,7 @@ public class CheckoutServiceTest {
             String key = UUID.randomUUID().toString();
             List<CartItemSnapshot> items = List.of(new CartItemSnapshot(10L, 2));
 
-            when(orderRepository.findByIdempotencyKey(key)).thenReturn(Optional.empty());
+            when(orderQueryService.findByIdempotencyKey(key)).thenReturn(Optional.empty());
             when(cartClient.getItems(1L)).thenReturn(items);
             when(catalogClient.getPrices(anyList())).thenReturn(Map.of(10L, BigDecimal.valueOf(500_000)));
             when(inventoryClient.decrementBatch(anyList())).thenReturn(List.of());
@@ -159,7 +180,7 @@ public class CheckoutServiceTest {
             String key = UUID.randomUUID().toString();
             List<CartItemSnapshot> items = List.of(new CartItemSnapshot(10L, 1));
 
-            when(orderRepository.findByIdempotencyKey(key)).thenReturn(Optional.empty());
+            when(orderQueryService.findByIdempotencyKey(key)).thenReturn(Optional.empty());
             when(cartClient.getItems(1L)).thenReturn(items);
             when(catalogClient.getPrices(anyList())).thenReturn(Map.of(10L, BigDecimal.valueOf(500_000)));
             when(promotionClient.validate(anyString(), any()))
@@ -188,7 +209,7 @@ public class CheckoutServiceTest {
             String key = UUID.randomUUID().toString();
             List<CartItemSnapshot> items = List.of(new CartItemSnapshot(10L, 2));
 
-            when(orderRepository.findByIdempotencyKey(key)).thenReturn(Optional.empty());
+            when(orderQueryService.findByIdempotencyKey(key)).thenReturn(Optional.empty());
             when(cartClient.getItems(1L)).thenReturn(items);
             when(catalogClient.getPrices(anyList())).thenReturn(Map.of(10L, BigDecimal.valueOf(500_000)));
             when(inventoryClient.decrementBatch(anyList())).thenReturn(List.of(10L)); // SKU 10 failed
