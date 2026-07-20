@@ -1,11 +1,10 @@
-package com.dawn.payment.port.out;
+package com.dawn.payment.infra.gateway;
 
 import com.dawn.common.message.Message;
 import com.dawn.payment.dto.CreatePaymentResult;
 import com.dawn.payment.dto.PaymentDto;
 import com.dawn.payment.entity.Payment;
 import com.dawn.payment.entity.enums.PaymentMethod;
-import com.dawn.payment.infra.gateway.PaymentGateway;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
@@ -39,6 +38,6 @@ public class CashGateway implements PaymentGateway {
 
     @Override
     public PaymentDto queryStatus(Long paymentId, String transactionRef) {
-        throw new UnsupportedOperationException("CASH has no external to query");
+        throw new UnsupportedOperationException(Message.Payment.CASH_NO_EXTERNAL_QUERY);
     }
 }

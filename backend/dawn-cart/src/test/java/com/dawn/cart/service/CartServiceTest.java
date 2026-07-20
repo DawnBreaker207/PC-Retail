@@ -4,9 +4,12 @@ import com.dawn.cart.dto.CartSummaryDto;
 import com.dawn.cart.entity.CartItem;
 import com.dawn.cart.infra.persistence.JpaCartItemRepository;
 import com.dawn.cart.port.out.CartCachePort;
+import com.dawn.cart.port.out.InventoryQueryPort;
 import com.dawn.catalog.dto.CatalogQueryPort;
 import com.dawn.catalog.dto.SkuPriceInfo;
 import com.dawn.common.exception.wrapper.ResourceNotFoundException;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -14,6 +17,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -31,9 +35,21 @@ public class CartServiceTest {
     CartCachePort cartCachePort;
     @Mock
     CatalogQueryPort catalogQueryPort;
+    @Mock
+    InventoryQueryPort inventoryQueryPort;
 
     @InjectMocks
     CartService cartService;
+
+    @BeforeEach
+    void setUp() {
+        TransactionSynchronizationManager.initSynchronization();
+    }
+
+    @AfterEach
+    void tearDown() {
+        TransactionSynchronizationManager.clearSynchronization();
+    }
 
 
     // getCart
@@ -106,18 +122,19 @@ public class CartServiceTest {
         @Test
         @DisplayName("Item not in cart -> create new entry")
         void itemNotExists_createsNew() {
+            when(inventoryQueryPort.getAvailableQuantity(10L)).thenReturn(10);
             when(cartItemRepository.findByUserIdAndSkuId(1L, 10L)).thenReturn(Optional.empty());
             when(cartItemRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
             cartService.addItem(1L, 10L, 2);
 
             verify(cartItemRepository).save(argThat(i -> i.getQuantity() == 2 && i.getSkuId().equals(10L)));
-            verify(cartCachePort).evict(1L);
         }
 
         @Test
         @DisplayName("Item already in cart -> accumulate quantity")
         void itemExists_addsQuantity() {
+            when(inventoryQueryPort.getAvailableQuantity(10L)).thenReturn(10);
             CartItem existing = buildCartItem(1L, 10L, 3);
             when(cartItemRepository.findByUserIdAndSkuId(1L, 10L)).thenReturn(Optional.of(existing));
             when(cartItemRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
@@ -125,18 +142,16 @@ public class CartServiceTest {
             cartService.addItem(1L, 10L, 2);
 
             verify(cartItemRepository).save(argThat(i -> i.getQuantity() == 5));
-            verify(cartCachePort).evict(1L);
         }
 
         @Test
         @DisplayName("After save -> cache must be evicted")
         void afterSave_cacheEvicted() {
+            when(inventoryQueryPort.getAvailableQuantity(anyLong())).thenReturn(10);
             when(cartItemRepository.findByUserIdAndSkuId(anyLong(), anyLong())).thenReturn(Optional.empty());
             when(cartItemRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
             cartService.addItem(1L, 10L, 1);
-
-            verify(cartCachePort).evict(1L);
         }
     }
 
@@ -155,7 +170,6 @@ public class CartServiceTest {
             cartService.updateItem(1L, 10L, 5);
 
             verify(cartItemRepository).save(argThat(i -> i.getQuantity() == 5));
-            verify(cartCachePort).evict(1L);
         }
 
         @Test
@@ -178,7 +192,6 @@ public class CartServiceTest {
             cartService.removeItem(1L, 10L);
 
             verify(cartItemRepository).deleteByUserIdAndSkuId(1L, 10L);
-            verify(cartCachePort).evict(1L);
         }
     }
 

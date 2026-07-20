@@ -212,7 +212,7 @@ public class PromotionCheckoutServiceTest {
         void duplicateUsage_throws() {
             Voucher voucher = buildVoucher("SALE10", ScopeType.STOREWIDE);
             voucher.setId(1L);
-            when(voucherRepo.findByCodeInAndDeletedAtIsNull(anyList())).thenReturn(List.of(voucher));
+            when(voucherRepo.findWithLockByCodeInAndDeletedAtIsNull(anyList())).thenReturn(List.of(voucher));
             when(voucherUsageRepo.existsByVoucherIdAndUserId(1L, 99L)).thenReturn(true);
 
             assertThatThrownBy(() -> service.recordUsage(99L, 1L, List.of("SALE10"), voucher.getDiscountValue()))
@@ -226,7 +226,7 @@ public class PromotionCheckoutServiceTest {
             voucher.setId(1L);
             voucher.setRemainingQuantity(5);
             voucher.setDiscountValue(BigDecimal.valueOf(50000));
-            when(voucherRepo.findByCodeInAndDeletedAtIsNull(anyList())).thenReturn(List.of(voucher));
+            when(voucherRepo.findWithLockByCodeInAndDeletedAtIsNull(anyList())).thenReturn(List.of(voucher));
             when(voucherUsageRepo.existsByVoucherIdAndUserId(1L, 99L)).thenReturn(false);
 
             service.recordUsage(99L, 1L, List.of("SALE10"), voucher.getDiscountValue());

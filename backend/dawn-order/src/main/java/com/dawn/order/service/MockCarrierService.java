@@ -1,8 +1,10 @@
 package com.dawn.order.service;
 
 import com.dawn.common.exception.wrapper.ResourceNotFoundException;
+import com.dawn.common.message.Message;
 import com.dawn.order.entity.SubOrder;
 import com.dawn.order.entity.enums.SubOrderStatus;
+import com.dawn.order.port.in.MockCarrierUseCase;
 import com.dawn.order.port.out.SubOrderRepository;
 import com.dawn.order.statemachine.SubOrderStateMachine;
 import lombok.RequiredArgsConstructor;
@@ -14,13 +16,13 @@ import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
-public class MockCarrierService {
+public class MockCarrierService implements MockCarrierUseCase {
     private final SubOrderRepository subOrderRepository;
     private final SubOrderStateMachine stateMachine;
 
     @Transactional
     public void assignCarrier(Long subOrderId, String carrierName) {
-        SubOrder subOrder = subOrderRepository.findById(subOrderId).orElseThrow(() -> new ResourceNotFoundException("SubOrder not found: " + subOrderId));
+        SubOrder subOrder = subOrderRepository.findById(subOrderId).orElseThrow(() -> new ResourceNotFoundException(Message.format(Message.Order.SUB_ORDER_NOT_FOUND, subOrderId)));
 
         stateMachine.assertValidTransition(subOrder.getStatus(), SubOrderStatus.SHIPPED);
 
@@ -36,7 +38,7 @@ public class MockCarrierService {
     @Transactional
     public void mockDeliveryWebhook(Long subOrderId) {
         SubOrder subOrder = subOrderRepository.findById(subOrderId)
-                .orElseThrow(() -> new ResourceNotFoundException("SubOrder not found: " + subOrderId));
+                .orElseThrow(() -> new ResourceNotFoundException(Message.format(Message.Order.SUB_ORDER_NOT_FOUND, subOrderId)));
 
         stateMachine.assertValidTransition(subOrder.getStatus(), SubOrderStatus.DELIVERED);
 

@@ -109,13 +109,13 @@ public class CartService implements GetCartUseCase, AddCartItemUseCase, UpdateCa
             int newTotal = existing.getQuantity() + quantity;
             log.info("Get existing quantity {} and total in cart {}", existingQuantity, newTotal);
             if (newTotal > existingQuantity) {
-                throw new ResourceInsufficientException(Message.Cart.INSUFFICIENT_STOCK.formatted(skuId, existingQuantity, newTotal));
+                throw new ResourceInsufficientException(Message.format(Message.Cart.INSUFFICIENT_STOCK, skuId, existingQuantity, newTotal));
             }
             existing.setQuantity(newTotal);
             return existing;
         }).orElseGet(() -> {
                     if (quantity > existingQuantity) {
-                        throw new ResourceInsufficientException(Message.Cart.INSUFFICIENT_STOCK.formatted(skuId, existingQuantity, quantity));
+                        throw new ResourceInsufficientException(Message.format(Message.Cart.INSUFFICIENT_STOCK, skuId, existingQuantity, quantity));
                     }
                     return CartItem.builder()
                             .userId(userId)

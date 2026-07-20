@@ -1,5 +1,6 @@
 package com.dawn.promotion.infra.redis;
 
+import com.dawn.common.message.Message;
 import com.dawn.promotion.port.out.PromotionCachePort;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -73,7 +74,7 @@ public class PromotionCacheAdapter implements PromotionCachePort {
         List<String> failedKeys = redisTemplate.execute(decrementScript, keys, args.toArray());
 
         if (failedKeys != null && !failedKeys.isEmpty()) {
-            throw new IllegalStateException("Promotion out of stock for keys: " + failedKeys);
+            throw new IllegalStateException(Message.format(Message.Promotion.PROMOTION_OUT_OF_STOCK, failedKeys));
         }
     }
 

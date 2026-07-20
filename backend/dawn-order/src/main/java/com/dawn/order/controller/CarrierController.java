@@ -1,7 +1,7 @@
 package com.dawn.order.controller;
 
 import com.dawn.common.security.AuthorizationConstants;
-import com.dawn.order.service.MockCarrierService;
+import com.dawn.order.port.in.MockCarrierUseCase;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -12,7 +12,7 @@ import java.util.Map;
 @RequestMapping("/sub-orders")
 @RequiredArgsConstructor
 public class CarrierController {
-    private final MockCarrierService carrierService;
+    private final MockCarrierUseCase carrierService;
 
     @PostMapping("/{subOrderId}/assign-carrier")
     @PreAuthorize(AuthorizationConstants.STAFF_ONLY)

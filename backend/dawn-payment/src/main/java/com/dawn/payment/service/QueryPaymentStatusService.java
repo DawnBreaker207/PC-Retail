@@ -85,7 +85,7 @@ public class QueryPaymentStatusService implements QueryPaymentStatusUseCase {
         }
         VnpayGatewayAdapter vnpay = (VnpayGatewayAdapter) gatewayRegistry.get(PaymentMethod.VNPAY);
         if (!vnpay.verifyCallback(payload)) {
-            throw new InvalidRequestException("Invalid VNPay webhook signature");
+            throw new InvalidRequestException(Message.Payment.VNPAY_WEBHOOK_INVALID_SIGNATURE);
         }
         Long paymentId = Long.parseLong(payload.get("vnp_TxnRef"));
         String responseCode = payload.get("vnp_ResponseCode");
@@ -116,14 +116,14 @@ public class QueryPaymentStatusService implements QueryPaymentStatusUseCase {
         if ("vnpay".equals(provider)) {
             VnpayGatewayAdapter vnpay = (VnpayGatewayAdapter) gatewayRegistry.get(PaymentMethod.VNPAY);
             if (!vnpay.verifyCallback(params)) {
-                throw new InvalidRequestException("Invalid VNPay callback signature");
+                throw new InvalidRequestException(Message.Payment.VNPAY_CALLBACK_INVALID_SIGNATURE);
             }
             paymentId = Long.parseLong(params.get("vnp_TxnRef"));
         } else {
             PaymentMethod method = PaymentMethod.valueOf(provider.toUpperCase());
             PaymentGateway gateway = gatewayRegistry.get(method);
             PaymentDto result = gateway.processCallback(null, params);
-            if (result == null) throw new InvalidRequestException("Unsupported callback provider: " + provider);
+            if (result == null) throw new InvalidRequestException(Message.format(Message.Payment.CALLBACK_PROVIDER_UNSUPPORTED, provider));
             return result;
         }
 
