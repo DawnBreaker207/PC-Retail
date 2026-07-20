@@ -57,7 +57,7 @@ public class PromotionCheckoutService implements ValidatePromotionUseCase, Promo
 
     @Transactional
     @Override
-    public void recordUsage(Long userId, Long orderId, List<String> voucherCodes) {
+    public void recordUsage(Long userId, Long orderId, List<String> voucherCodes, BigDecimal orderTotal) {
         if (voucherCodes == null || voucherCodes.isEmpty()) return;
 
         List<Voucher> vouchers = voucherRepo.findWithLockByCodeInAndDeletedAtIsNull(voucherCodes);
@@ -72,8 +72,10 @@ public class PromotionCheckoutService implements ValidatePromotionUseCase, Promo
                     .voucherId(voucher.getId())
                     .userId(userId)
                     .orderId(orderId)
-                    .discountAmount(voucher.getDiscountValue())
+                    .discountAmount(calculateDiscount(voucher, orderTotal))
                     .build());
+            voucher.setRemainingQuantity(voucher.getRemainingQuantity() - 1);
+            voucherRepo.save(voucher);
         }
     }
 
@@ -88,8 +90,8 @@ public class PromotionCheckoutService implements ValidatePromotionUseCase, Promo
             return VoucherValidationResult.fail(Message.format(Message.Promotion.VOUCHER_NOT_FOUND, code));
         }
 
-        if(voucher.getRemainingQuantity() <= 0){
-            return VoucherValidationResult.fail(Message.Promotion.VOUCHER_EXPIRED);
+        if (voucher.getRemainingQuantity() <= 0) {
+            return VoucherValidationResult.fail(Message.Promotion.VOUCHER_OUT_OF_STOCK);
         }
 
         Instant now = Instant.now();

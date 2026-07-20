@@ -1,5 +1,6 @@
 package com.dawn.promotion.service;
 
+import com.dawn.common.exception.wrapper.InvalidRequestException;
 import com.dawn.promotion.dto.VoucherValidationResult;
 import com.dawn.promotion.entity.Voucher;
 import com.dawn.promotion.entity.VoucherUsage;
@@ -53,7 +54,7 @@ public class PromotionCheckoutServiceTest {
             when(voucherRepo.hasActiveFlashSale(anyList())).thenReturn(true);
 
             assertThatThrownBy(() -> service.validateStack(List.of(1L, 2L), List.of("SALE10")))
-                    .isInstanceOf(IllegalStateException.class);
+                    .isInstanceOf(InvalidRequestException.class);
         }
 
         @Test
@@ -64,7 +65,7 @@ public class PromotionCheckoutServiceTest {
             when(voucherRepo.hasActiveFlashSale(anyList())).thenReturn(true);
 
             assertThatThrownBy(() -> service.validateStack(List.of(1L), List.of("PROD10")))
-                    .isInstanceOf(IllegalStateException.class);
+                    .isInstanceOf(InvalidRequestException.class);
         }
 
         @Test
@@ -214,8 +215,8 @@ public class PromotionCheckoutServiceTest {
             when(voucherRepo.findByCodeInAndDeletedAtIsNull(anyList())).thenReturn(List.of(voucher));
             when(voucherUsageRepo.existsByVoucherIdAndUserId(1L, 99L)).thenReturn(true);
 
-            assertThatThrownBy(() -> service.recordUsage(99L, 1L, List.of("SALE10")))
-                    .isInstanceOf(IllegalStateException.class);
+            assertThatThrownBy(() -> service.recordUsage(99L, 1L, List.of("SALE10"), voucher.getDiscountValue()))
+                    .isInstanceOf(InvalidRequestException.class);
         }
 
         @Test
@@ -228,7 +229,7 @@ public class PromotionCheckoutServiceTest {
             when(voucherRepo.findByCodeInAndDeletedAtIsNull(anyList())).thenReturn(List.of(voucher));
             when(voucherUsageRepo.existsByVoucherIdAndUserId(1L, 99L)).thenReturn(false);
 
-            service.recordUsage(99L, 1L, List.of("SALE10"));
+            service.recordUsage(99L, 1L, List.of("SALE10"), voucher.getDiscountValue());
 
             verify(voucherRepo).save(argThat(v -> v.getRemainingQuantity() == 4));
             verify(voucherUsageRepo).save(any(VoucherUsage.class));
@@ -237,7 +238,7 @@ public class PromotionCheckoutServiceTest {
         @Test
         @DisplayName("Empty voucher codes -> no-op")
         void emptyCodes_doesNothing() {
-            service.recordUsage(99L, 1L, List.of());
+            service.recordUsage(99L, 1L, List.of(), BigDecimal.ZERO);
             verifyNoInteractions(voucherRepo, voucherUsageRepo);
         }
     }

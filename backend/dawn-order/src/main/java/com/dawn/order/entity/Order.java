@@ -1,6 +1,7 @@
 package com.dawn.order.entity;
 
 import com.dawn.common.entity.AbstractMappedEntity;
+import com.dawn.order.entity.enums.CreatedByType;
 import com.dawn.order.entity.enums.PaymentStatus;
 import io.swagger.v3.oas.annotations.Hidden;
 import jakarta.persistence.*;
@@ -50,8 +51,9 @@ public class Order extends AbstractMappedEntity {
     private String idempotencyKey;
 
     @Column(name = "created_by_type", nullable = false, length = 20)
+    @Enumerated(EnumType.STRING)
     @Builder.Default
-    private String createdByType = "SELF";
+    private CreatedByType createdByType = CreatedByType.SELF;
 
     @Column(name = "assisted_by_staff_id")
     private Long assistedByStaffId;

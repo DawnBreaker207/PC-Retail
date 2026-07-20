@@ -24,7 +24,9 @@ import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -38,6 +40,7 @@ public class InventoryCommandService implements ReserveStockUseCase, ReleaseStoc
     @Override
     @Transactional
     public void reserve(List<StockDecrementCommandDto> items, Long orderId) {
+        Map<Long, Integer> snapshot = new HashMap<>();
         for (StockDecrementCommandDto item : items) {
             Inventory inv = inventoryRepository.findBySkuIdWithLock(item.skuId())
                     .orElseThrow(() -> new ResourceNotFoundException(Message.format(Message.Inventory.NOT_FOUND_FOR_SKU, item.skuId())));
@@ -57,7 +60,15 @@ public class InventoryCommandService implements ReserveStockUseCase, ReleaseStoc
                     .referenceType(ReferenceType.ORDER_ITEM)
                     .referenceId(orderId)
                     .build());
+
+            snapshot.put(item.skuId(), inv.getAvailableQuantity() - item.quantity());
         }
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                snapshot.forEach(cachePort::setStock);
+            }
+        });
     }
 
     // RELEASE
@@ -100,7 +111,11 @@ public class InventoryCommandService implements ReserveStockUseCase, ReleaseStoc
             Inventory inv = inventoryRepository.findBySkuIdWithLock(item.skuId())
                     .orElseThrow(() -> new ResourceNotFoundException(Message.format(Message.Inventory.NOT_FOUND_FOR_SKU, item.skuId())));
 
-            inv.setStockQuantity(inv.getStockQuantity() - item.quantity());
+            int newStock = inv.getStockQuantity() - item.quantity();
+            if (newStock < 0) {
+                throw new InvalidRequestException(Message.format(Message.Inventory.INSUFFICIENT_STOCK, item.skuId()));
+            }
+            inv.setStockQuantity(newStock);
             inv.setReservedQuantity(Math.max(0, inv.getReservedQuantity() - item.quantity()));
             inventoryRepository.save(inv);
 
@@ -128,7 +143,7 @@ public class InventoryCommandService implements ReserveStockUseCase, ReleaseStoc
     @Transactional
     @Loggable(action = LogConstant.Action.IMPORT_STOCK, entity = LogConstant.Entity.WAREHOUSE)
     public void restock(Long skuId, int quantity, BigDecimal unitCost, Long userId) {
-        Inventory inv = inventoryRepository.findBySkuId(skuId)
+        Inventory inv = inventoryRepository.findBySkuIdWithLock(skuId)
                 .orElseGet(() -> Inventory.builder()
                         .skuId(skuId)
                         .stockQuantity(0)

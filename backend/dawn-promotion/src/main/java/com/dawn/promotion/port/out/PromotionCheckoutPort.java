@@ -13,7 +13,7 @@ public interface PromotionCheckoutPort {
 
     void validateStack(List<Long> cartSkuIds, List<String> voucherCodes);
 
-    void recordUsage(Long userId, Long orderId, List<String> voucherCodes);
+    void recordUsage(Long userId, Long orderId, List<String> voucherCodes, BigDecimal orderTotal);
 
     VoucherValidationResult validate(String code, BigDecimal orderTotal);
 }

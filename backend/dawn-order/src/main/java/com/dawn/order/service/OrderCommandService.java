@@ -48,8 +48,6 @@ public class OrderCommandService {
             BigDecimal discountAmount,
             BigDecimal shippingFee,
             BigDecimal finalAmount) {
-        // Double-check inventory with pessimistic lock
-        inventoryClient.reserve(stockItems, -1L);
 
         // Create Order
         Order order = Order.builder()
@@ -97,11 +95,12 @@ public class OrderCommandService {
         inventoryClient.reserve(stockItems, order.getId());
 
         // Voucher usage
-        if (!req.voucherCode().isEmpty()) {
+        if (req.voucherCode() != null && !req.voucherCode().isEmpty()) {
             promotionClient.recordUsage(
                     userId,
                     order.getId(),
-                    List.of(req.voucherCode()));
+                    List.of(req.voucherCode()),
+                    order.getTotalAmount());
         }
 
         // Publish cart cleanup event

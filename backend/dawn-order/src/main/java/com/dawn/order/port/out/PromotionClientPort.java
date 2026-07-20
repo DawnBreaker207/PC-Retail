@@ -14,5 +14,5 @@ public interface PromotionClientPort {
 
     void rollBackPromotions(List<String> voucherCodes, List<Long> flashSaleSkuIds);
 
-    void recordUsage(Long userId, Long orderId, List<String> voucherCodes);
+    void recordUsage(Long userId, Long orderId, List<String> voucherCodes, BigDecimal orderTotal);
 }

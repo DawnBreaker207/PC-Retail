@@ -11,9 +11,7 @@ import java.util.List;
 public interface JpaOrderItemRepository extends JpaRepository<OrderItem, Long>, OrderItemRepository {
 
     @Override
-    default List<OrderItem> saveAll(List<OrderItem> items) {
-        return this.saveAllAndFlush(items);
-    }
+    List<OrderItem> saveAll(List<OrderItem> items);
 
     @Override
     boolean existsBySkuId(Long skuId);

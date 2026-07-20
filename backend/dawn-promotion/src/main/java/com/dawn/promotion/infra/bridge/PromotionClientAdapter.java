@@ -41,7 +41,7 @@ public class PromotionClientAdapter implements PromotionClientPort {
     }
 
     @Override
-    public void recordUsage(Long userId, Long orderId, List<String> voucherCodes) {
-        promotionCheckout.recordUsage(userId, orderId, voucherCodes);
+    public void recordUsage(Long userId, Long orderId, List<String> voucherCodes, BigDecimal orderTotal) {
+        promotionCheckout.recordUsage(userId, orderId, voucherCodes, orderTotal);
     }
 }

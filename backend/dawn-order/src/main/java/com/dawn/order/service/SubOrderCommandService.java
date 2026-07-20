@@ -4,6 +4,7 @@ import com.dawn.common.auditlog.LogConstant;
 import com.dawn.common.auditlog.Loggable;
 import com.dawn.common.exception.wrapper.ResourceNotFoundException;
 import com.dawn.common.message.Message;
+import com.dawn.common.redis.service.RedisService;
 import com.dawn.order.dto.StockDecrementCommand;
 import com.dawn.order.dto.SubOrderDto;
 import com.dawn.order.entity.OrderItem;
@@ -15,9 +16,11 @@ import com.dawn.order.port.out.OrderItemRepository;
 import com.dawn.order.port.out.SubOrderRepository;
 import com.dawn.order.statemachine.SubOrderStateMachine;
 import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +34,7 @@ public class SubOrderCommandService implements TransitionSubOrderUseCase {
     private final OrderItemRepository orderItemRepo;
     private final SubOrderStateMachine stateMachine;
     private final InventoryClientPort inventoryClient;
+    private final RedisService redisService;
 
     @Override
     @Transactional
@@ -77,6 +81,7 @@ public class SubOrderCommandService implements TransitionSubOrderUseCase {
     }
 
     @Override
+    @Scheduled(fixedDelay = 60_000)
     @Transactional
     public void expiredUnpaidOrders() {
         Instant threshold = Instant.now().minusSeconds(120 * 60);
@@ -92,6 +97,11 @@ public class SubOrderCommandService implements TransitionSubOrderUseCase {
                                 Collectors.toList())));
 
         for (SubOrder subOrder : expired) {
+            String lockKey = "lock:expire:so:" + subOrder.getId();
+            Boolean locked = redisService.setIfAbsent(lockKey, "1", Duration.ofSeconds(30));
+            if (Boolean.FALSE.equals(locked)) continue;
+
+
             List<StockDecrementCommand> items = itemsMap.getOrDefault(subOrder.getId(), List.of());
             inventoryClient.release(items, subOrder.getOrderId());
 

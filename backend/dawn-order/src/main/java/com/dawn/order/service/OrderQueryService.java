@@ -7,7 +7,10 @@ import com.dawn.order.dto.OrderDto;
 import com.dawn.order.dto.OrderItemDto;
 import com.dawn.order.dto.SubOrderDto;
 import com.dawn.order.entity.Order;
+import com.dawn.order.entity.OrderItem;
+import com.dawn.order.entity.SubOrder;
 import com.dawn.order.port.in.QueryOrderUseCase;
+import com.dawn.order.port.out.CatalogClientPort;
 import com.dawn.order.port.out.OrderItemRepository;
 import com.dawn.order.port.out.OrderRepository;
 import com.dawn.order.port.out.SubOrderRepository;
@@ -20,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -28,6 +32,7 @@ public class OrderQueryService implements QueryOrderUseCase {
     private final OrderRepository orderRepo;
     private final SubOrderRepository subOrderRepo;
     private final OrderItemRepository orderItemRepo;
+    private final CatalogClientPort catalogClient;
 
     @Override
     @Transactional(readOnly = true)
@@ -57,16 +62,29 @@ public class OrderQueryService implements QueryOrderUseCase {
 
     @Override
     public OrderDto toOrderDto(Order order) {
-        List<SubOrderDto> subOrders = subOrderRepo.findByOrderId(order.getId()).stream()
+        List<SubOrder> subOrders = subOrderRepo.findByOrderId(order.getId());
+
+        List<Long> allSkuIds = subOrders
+                .stream()
+                .flatMap(s -> orderItemRepo.findBySubOrderId(s.getId()).stream())
+                .map(OrderItem::getSkuId)
+                .distinct()
+                .toList();
+
+
+        Map<Long, String> nameMap = allSkuIds.isEmpty()
+                ? Map.of()
+                : catalogClient.getNames(allSkuIds);
+
+        List<SubOrderDto> subOrderDtos = subOrders.stream()
                 .map(s -> {
                     List<OrderItemDto> items = orderItemRepo.findBySubOrderId(s.getId()).stream()
-                            .map(i ->
-                                    new OrderItemDto(
-                                            i.getSkuId(),
-                                            null,
-                                            i.getQuantity(),
-                                            i.getUnitPrice(),
-                                            i.getUnitPrice().multiply(BigDecimal.valueOf(i.getQuantity()))))
+                            .map(i -> new OrderItemDto(
+                                    i.getSkuId(),
+                                    nameMap.getOrDefault(i.getSkuId(), null),
+                                    i.getQuantity(),
+                                    i.getUnitPrice(),
+                                    i.getUnitPrice().multiply(BigDecimal.valueOf(i.getQuantity()))))
                             .toList();
                     return new SubOrderDto(
                             s.getId(),
@@ -86,7 +104,7 @@ public class OrderQueryService implements QueryOrderUseCase {
                 order.getTotalAmount(),
                 order.getPaymentStatus(),
                 order.getReservedUntil(),
-                subOrders);
+                subOrderDtos);
     }
 
 

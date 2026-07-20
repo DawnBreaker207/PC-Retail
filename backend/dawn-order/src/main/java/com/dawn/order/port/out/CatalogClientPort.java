@@ -6,4 +6,6 @@ import java.util.Map;
 
 public interface CatalogClientPort {
     Map<Long, BigDecimal> getPrices(List<Long> skuIds);
+
+    Map<Long, String> getNames(List<Long> skuIds);
 }
