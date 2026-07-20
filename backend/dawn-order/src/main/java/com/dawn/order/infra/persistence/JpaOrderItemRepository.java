@@ -11,9 +11,6 @@ import java.util.List;
 public interface JpaOrderItemRepository extends JpaRepository<OrderItem, Long>, OrderItemRepository {
 
     @Override
-    List<OrderItem> saveAll(List<OrderItem> items);
-
-    @Override
     boolean existsBySkuId(Long skuId);
 
     @Override

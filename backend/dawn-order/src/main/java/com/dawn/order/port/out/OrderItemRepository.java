@@ -5,7 +5,11 @@ import com.dawn.order.entity.OrderItem;
 import java.util.List;
 
 public interface OrderItemRepository {
-    List<OrderItem> saveAll(List<OrderItem> items);
+    OrderItem save(OrderItem item);
+
+    default List<OrderItem> saveAll(List<OrderItem> items) {
+        return items.stream().map(this::save).toList();
+    }
 
     List<OrderItem> findBySubOrderId(Long subOrderId);
 

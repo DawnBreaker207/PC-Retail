@@ -12,7 +12,9 @@ import java.util.Optional;
 public interface SubOrderRepository {
     SubOrder save(SubOrder subOrder);
 
-    void saveAll(List<SubOrder> subOrders);
+    default void saveAll(List<SubOrder> subOrders) {
+        subOrders.forEach(this::save);
+    }
 
     Optional<SubOrder> findById(Long id);
 
@@ -23,5 +25,9 @@ public interface SubOrderRepository {
     List<SubOrder> findByStatusAndCreatedAtBefore(SubOrderStatus status, Instant threshold);
 
     List<SubOrder> findByStatusAndReservedUntilBefore(SubOrderStatus status, Instant threshold);
+
+    boolean existsByIdAndStatus(Long id, SubOrderStatus status);
+
+    boolean isDelivered(Long subOrderId);
 
 }

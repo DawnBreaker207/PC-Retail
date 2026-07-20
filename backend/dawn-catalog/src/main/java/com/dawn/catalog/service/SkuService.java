@@ -18,7 +18,7 @@ import com.dawn.common.exception.wrapper.InvalidRequestException;
 import com.dawn.common.exception.wrapper.ResourceNotFoundException;
 import com.dawn.common.message.Message;
 import com.dawn.common.response.ResponsePage;
-import com.dawn.order.port.out.OrderItemRepository;
+import com.dawn.order.dto.OrderQueryPort;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -44,7 +44,7 @@ public class SkuService {
     private final SkuRepository skuRepository;
     private final BrandRepository brandRepository;
     private final CategoryRepository categoryRepository;
-    private final OrderItemRepository orderItemRepository;
+    private final OrderQueryPort orderQueryPort;
 
     @Transactional(readOnly = true)
     public ResponsePage<SkuSummaryDto> search(
@@ -127,7 +127,7 @@ public class SkuService {
     public void softDelete(Long id) {
         Sku sku = skuRepository.findByIdAndDeletedAtIsNull(id)
                 .orElseThrow(() -> new ResourceNotFoundException(Message.format(Message.Catalog.SKU_NOT_FOUND, id)));
-        if (orderItemRepository.existsBySkuId(id)) {
+        if (orderQueryPort.existsOrderItemBySkuId(id)) {
             sku.setDeletedAt(Instant.now());
         } else {
             skuRepository.deleteById(id);

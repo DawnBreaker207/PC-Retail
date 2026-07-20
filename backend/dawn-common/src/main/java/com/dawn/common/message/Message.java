@@ -54,6 +54,7 @@ public class Message {
         public static final String IMAGE_UPLOAD_FAILED = "Image upload failed";
         public static final String EMAIL_SEND_FAILED = "Failed to send email, please contact support";
         public static final String METHOD_NOT_IMPLEMENTED = "This feature is not yet implemented";
+        public static final String SHA256_NOT_AVAILABLE = "SHA-256 not available";
     }
 
     // User
@@ -146,6 +147,10 @@ public class Message {
         public static final String GATEWAY_NOT_FOUND = "Payment gateway not found for: {0}";
         public static final String WEBHOOK_NOT_SUPPORTED = "Webhook is not supported for this payment method";
         public static final String CALLBACK_NOT_SUPPORTED = "Callback is not supported for this payment method";
+        public static final String VNPAY_WEBHOOK_INVALID_SIGNATURE = "Invalid VNPay webhook signature";
+        public static final String VNPAY_CALLBACK_INVALID_SIGNATURE = "Invalid VNPay callback signature";
+        public static final String CALLBACK_PROVIDER_UNSUPPORTED = "Unsupported callback provider: {0}";
+        public static final String CASH_NO_EXTERNAL_QUERY = "CASH has no external to query";
     }
 
     // Promotion
@@ -166,6 +171,16 @@ public class Message {
 
         // Flash Sale
         public static final String FLASH_SALE_VOUCHER_STACK = "Cannot apply voucher for product in Flash Sale";
+
+        // Redis
+        public static final String PROMOTION_OUT_OF_STOCK = "Promotion out of stock for keys: {0}";
     }
 
+    // Engagement
+    public static final class Engagement {
+        private Engagement() {
+        }
+
+        public static final String RATING_OUT_OF_RANGE = "Rating must be 1-5";
+    }
 }

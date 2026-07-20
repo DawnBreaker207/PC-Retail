@@ -32,5 +32,10 @@ public interface JpaSubOrderRepository extends JpaRepository<SubOrder, Long>, Su
             @Param("now") Instant threshold);
 
     @Override
-    void saveAll(List<SubOrder> subOrders);
+    boolean existsByIdAndStatus(Long id, SubOrderStatus status);
+
+    @Override
+    default boolean isDelivered(Long subOrderId) {
+        return existsByIdAndStatus(subOrderId, SubOrderStatus.DELIVERED);
+    }
 }
