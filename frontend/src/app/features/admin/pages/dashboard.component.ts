@@ -10,9 +10,13 @@ import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
+import { NzTabsModule } from 'ng-zorro-antd/tabs';
 import { CurrencyFormatPipe } from '@shared/pipes/currency-format.pipe';
 import { ApiEndpoints } from '@core/api/api.endpoints';
 import { ThemeService } from '@core/services/theme.service';
+import { AuthService } from '@core/auth/auth.service';
+import { AdminWorkQueueService } from '@core/services/admin-work-queue.service';
+import { AdminReturnRequest, Order } from '@core/models/common.model';
 import { NgxEchartsDirective, NGX_ECHARTS_CONFIG } from 'ngx-echarts';
 import { BarChart } from 'echarts/charts';
 import { GridComponent, TooltipComponent } from 'echarts/components';
@@ -41,7 +45,7 @@ interface LowStockItem { skuId: number; name: string; stock: number; imageUrl: s
   selector: 'app-dashboard',
   imports: [
     RouterLink, DatePipe, NzCardModule, NzStatisticModule, NzGridModule, NzIconModule,
-    NzTableModule, NzTagModule, NzSpinModule, CurrencyFormatPipe, NgxEchartsDirective,
+    NzTableModule, NzTagModule, NzSpinModule, NzTabsModule, CurrencyFormatPipe, NgxEchartsDirective,
   ],
   providers: [{
     provide: NGX_ECHARTS_CONFIG,
@@ -54,6 +58,8 @@ export class DashboardComponent {
   private http = inject(HttpClient);
   private destroyRef = inject(DestroyRef);
   private themeService = inject(ThemeService);
+  private authService = inject(AuthService);
+  private workQueue = inject(AdminWorkQueueService);
 
   summary: DashboardSummary | null = null;
   revenue7 = signal<RevenuePoint[]>([]);
@@ -62,6 +68,13 @@ export class DashboardComponent {
     PENDING: 'orange', CONFIRMED: 'blue', SHIPPING: 'cyan',
     COMPLETED: 'green', CANCELLED: 'red',
   };
+
+  isAdmin = this.authService.currentUser()?.systemRole === 'ADMIN';
+  defaultTabIndex = this.isAdmin ? 0 : 1;
+
+  pendingReturns = signal<AdminReturnRequest[]>([]);
+  pendingOrders = signal<Order[]>([]);
+  workQueueLoading = signal(false);
 
   chartOptions = computed<EChartsCoreOption>(() => {
     const data = this.revenue7();
@@ -113,6 +126,18 @@ export class DashboardComponent {
       this.summary = d;
       this.loadRevenue();
       this.loadLowStock();
+    });
+    this.loadWorkQueue();
+  }
+
+  private loadWorkQueue() {
+    this.workQueueLoading.set(true);
+    this.workQueue.getPendingReturns().pipe(takeUntilDestroyed(this.destroyRef)).subscribe((items) => {
+      this.pendingReturns.set(items);
+      this.workQueueLoading.set(false);
+    });
+    this.workQueue.getPendingPaymentOrders().pipe(takeUntilDestroyed(this.destroyRef)).subscribe((items) => {
+      this.pendingOrders.set(items);
     });
   }
 

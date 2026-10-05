@@ -19,7 +19,16 @@ public class EmbeddingController {
     @PostMapping("/generate")
     @PreAuthorize(AuthorizationConstants.ADMIN_ONLY)
     public ResponseObject<String> generateAll() {
-        new Thread(embeddingPort::generateBatch).start();
+        Thread t = new Thread(() -> {
+            try {
+                embeddingPort.generateBatch();
+            } catch (Exception e) {
+                org.slf4j.LoggerFactory.getLogger(EmbeddingController.class)
+                        .error("Embedding batch failed", e);
+            }
+        }, "embedding-batch");
+        t.setDaemon(true);
+        t.start();
         return ResponseObject.success("Batch embedding đã được khởi động. Kiểm tra log để theo dõi tiến trình.");
     }
 

@@ -1,0 +1,94 @@
+<form nz-form [formGroup]="form" (ngSubmit)="submit()">
+  <nz-form-item>
+    <nz-form-label nzFor="name" nzRequired>Tên sản phẩm</nz-form-label>
+    <nz-form-control nzErrorTip="Vui lòng nhập tên sản phẩm">
+      <input nz-input id="name" formControlName="name" placeholder="Tên sản phẩm" />
+    </nz-form-control>
+  </nz-form-item>
+
+  <div class="grid grid-cols-2 gap-4">
+    <nz-form-item>
+      <nz-form-label nzFor="brandName" nzRequired>Thương hiệu</nz-form-label>
+      <nz-form-control nzErrorTip="Vui lòng chọn thương hiệu">
+        <nz-select id="brandName" formControlName="brandName" nzPlaceHolder="Chọn thương hiệu">
+          @for (b of brands; track b.id) {
+            <nz-option [nzValue]="b.name" [nzLabel]="b.name" />
+          }
+        </nz-select>
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-label nzFor="categoryName" nzRequired>Danh mục</nz-form-label>
+      <nz-form-control nzErrorTip="Vui lòng chọn danh mục">
+        <nz-select id="categoryName" formControlName="categoryName" nzPlaceHolder="Chọn danh mục">
+          @for (c of categories; track c.slug) {
+            <nz-option [nzValue]="c.slug" [nzLabel]="c.name" />
+          }
+        </nz-select>
+      </nz-form-control>
+    </nz-form-item>
+  </div>
+
+  <div class="grid grid-cols-2 gap-4">
+    <nz-form-item>
+      <nz-form-label nzFor="price" nzRequired>Giá bán</nz-form-label>
+      <nz-form-control nzErrorTip="Giá bán phải lớn hơn 1.000đ">
+        <nz-input-number id="price" formControlName="price" [nzMin]="1000" [nzStep]="10000" style="width: 100%" />
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-label nzFor="originalPrice">Giá gốc (trước giảm)</nz-form-label>
+      <nz-form-control>
+        <nz-input-number id="originalPrice" formControlName="originalPrice" [nzMin]="0" [nzStep]="10000" style="width: 100%" />
+      </nz-form-control>
+    </nz-form-item>
+  </div>
+
+  <nz-form-item>
+    <nz-form-label nzFor="imageUrl" nzRequired>Ảnh sản phẩm (URL)</nz-form-label>
+    <nz-form-control nzErrorTip="Vui lòng nhập URL ảnh">
+      <input nz-input id="imageUrl" formControlName="imageUrl" placeholder="https://..." />
+    </nz-form-control>
+  </nz-form-item>
+
+  <nz-form-item>
+    <nz-form-label nzFor="description">Mô tả sản phẩm</nz-form-label>
+    <nz-form-control>
+      <textarea nz-input id="description" formControlName="description" rows="3" placeholder="Mô tả ngắn về sản phẩm..."></textarea>
+    </nz-form-control>
+  </nz-form-item>
+
+  <div class="grid grid-cols-2 gap-4">
+    <nz-form-item>
+      <nz-form-label nzFor="status" nzRequired>Trạng thái</nz-form-label>
+      <nz-form-control>
+        <nz-select id="status" formControlName="status">
+          <nz-option nzValue="ACTIVE" nzLabel="Đang bán" />
+          <nz-option nzValue="INACTIVE" nzLabel="Ngừng bán" />
+        </nz-select>
+      </nz-form-control>
+    </nz-form-item>
+
+    @if (!isEdit) {
+      <nz-form-item>
+        <nz-form-label nzFor="stockAvailable">Tồn kho ban đầu</nz-form-label>
+        <nz-form-control>
+          <nz-input-number id="stockAvailable" formControlName="stockAvailable" [nzMin]="0" style="width: 100%" />
+        </nz-form-control>
+      </nz-form-item>
+    }
+  </div>
+
+  @if (isEdit) {
+    <p class="text-xs text-muted dark:text-muted-dark -mt-2 mb-2">Tồn kho hiện chỉnh qua trang Kho hàng.</p>
+  }
+
+  <div class="flex justify-end gap-3 mt-6">
+    <button nz-button nzType="default" type="button" (click)="cancel()">Hủy</button>
+    <button nz-button nzType="primary" type="submit" [nzLoading]="submitting()" [disabled]="form.invalid">
+      {{ isEdit ? 'Lưu thay đổi' : 'Thêm sản phẩm' }}
+    </button>
+  </div>
+</form>

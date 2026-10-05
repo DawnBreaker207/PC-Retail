@@ -1,79 +1,56 @@
-import { Component, inject, signal } from '@angular/core';
-import { RouterOutlet, RouterLink } from '@angular/router';
-import { NzLayoutModule } from 'ng-zorro-antd/layout';
-import { NzIconModule } from 'ng-zorro-antd/icon';
-import { NzAvatarModule } from 'ng-zorro-antd/avatar';
-import { NzDropDownModule } from 'ng-zorro-antd/dropdown';
-import { NzButtonModule } from 'ng-zorro-antd/button';
-import { NzMenuDirective, NzMenuItemComponent, NzMenuDividerDirective } from 'ng-zorro-antd/menu';
-import { AuthService } from '@core/auth/auth.service';
-import { ThemeService } from '@core/services/theme.service';
-
-interface NavItem {
-  label: string;
-  icon: string;
-  route: string;
-}
+import { Component, ChangeDetectionStrategy, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import { ActivatedRoute, NavigationEnd, Router, RouterOutlet } from '@angular/router';
+import { filter } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { NzContentComponent, NzLayoutModule } from 'ng-zorro-antd/layout';
+import { AdminSidebarComponent } from './sidebar/admin-sidebar.component';
+import { AdminNavbarComponent } from './navbar/admin-navbar.component';
 
 @Component({
   selector: 'app-admin-layout',
-  imports: [
-    RouterOutlet, RouterLink,
-    NzLayoutModule, NzIconModule, NzAvatarModule, NzDropDownModule, NzButtonModule,
-    NzMenuDirective, NzMenuItemComponent, NzMenuDividerDirective,
-  ],
+  imports: [NzContentComponent, NzLayoutModule, RouterOutlet, AdminSidebarComponent, AdminNavbarComponent],
   templateUrl: './admin-layout.html',
   styleUrl: './admin-layout.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AdminLayout {
-  private authService = inject(AuthService);
-  private themeService = inject(ThemeService);
+export class AdminLayout implements OnInit {
+  private router = inject(Router);
+  private activatedRoute = inject(ActivatedRoute);
+  private destroyRef = inject(DestroyRef);
 
-  collapsed = signal(false);
-  isDark = this.themeService.isDark;
+  isCollapsed = false;
+  pageLabel = signal('Dashboard');
 
-  navItems: NavItem[] = [];
+  private static readonly LABELS: Record<string, string> = {
+    '': 'Dashboard',
+    account: 'Tài khoản của tôi',
+    orders: 'Đơn hàng',
+    returns: 'Trả hàng',
+    products: 'Sản phẩm',
+    inventory: 'Kho hàng',
+    categories: 'Danh mục',
+    vouchers: 'Khuyến mãi',
+    reviews: 'Đánh giá',
+    users: 'Người dùng',
+    'audit-log': 'Audit Log',
+  };
 
-  constructor() {
-    const role = this.authService.currentUser()?.systemRole;
-    if (role === 'STAFF') {
-      this.navItems = [
-        { label: 'Dashboard', icon: 'dashboard', route: '/admin' },
-        { label: 'Đơn hàng', icon: 'shopping-cart', route: '/admin/orders' },
-        { label: 'Trả hàng', icon: 'swap', route: '/admin/returns' },
-      ];
-    } else {
-      this.navItems = [
-        { label: 'Dashboard', icon: 'dashboard', route: '/admin' },
-        { label: 'Đơn hàng', icon: 'shopping-cart', route: '/admin/orders' },
-        { label: 'Sản phẩm', icon: 'appstore', route: '/admin/products' },
-        { label: 'Kho hàng', icon: 'inbox', route: '/admin/inventory' },
-        { label: 'Danh mục', icon: 'folder', route: '/admin/categories' },
-        { label: 'Khuyến mãi', icon: 'gift', route: '/admin/vouchers' },
-        { label: 'Người dùng', icon: 'team', route: '/admin/users' },
-      ];
-    }
+  ngOnInit() {
+    this.updatePageLabel();
+    this.router.events
+      .pipe(
+        filter((event) => event instanceof NavigationEnd),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe(() => this.updatePageLabel());
   }
 
-  get userInitials(): string {
-    const user = this.authService.currentUser();
-    if (!user?.fullName) return 'A';
-    return user.fullName.split(' ').map((s) => s[0]).join('').toUpperCase().slice(0, 2);
+  toggleCollapse(collapsed: boolean) {
+    this.isCollapsed = collapsed;
   }
 
-  get userName(): string {
-    return this.authService.currentUser()?.fullName || 'Admin';
-  }
-
-  toggleCollapsed() {
-    this.collapsed.update((v) => !v);
-  }
-
-  toggleTheme() {
-    this.themeService.toggle();
-  }
-
-  logout() {
-    this.authService.logout();
+  private updatePageLabel() {
+    const segment = this.activatedRoute.snapshot.firstChild?.url[0]?.path ?? '';
+    this.pageLabel.set(AdminLayout.LABELS[segment] ?? 'Dashboard');
   }
 }

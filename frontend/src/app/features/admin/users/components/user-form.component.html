@@ -1,0 +1,41 @@
+<form nz-form [formGroup]="form" (ngSubmit)="submit()">
+  <nz-form-item>
+    <nz-form-label nzFor="fullName" nzRequired>Họ và tên</nz-form-label>
+    <nz-form-control nzErrorTip="Vui lòng nhập họ tên">
+      <input nz-input id="fullName" formControlName="fullName" placeholder="Họ và tên" />
+    </nz-form-control>
+  </nz-form-item>
+
+  <nz-form-item>
+    <nz-form-label nzFor="email" nzRequired>Email</nz-form-label>
+    <nz-form-control nzErrorTip="Email không hợp lệ">
+      <input nz-input id="email" formControlName="email" placeholder="Email" />
+    </nz-form-control>
+  </nz-form-item>
+
+  <nz-form-item>
+    <nz-form-label nzFor="phone" nzRequired>Số điện thoại</nz-form-label>
+    <nz-form-control nzErrorTip="Vui lòng nhập số điện thoại">
+      <input nz-input id="phone" formControlName="phone" placeholder="Số điện thoại" />
+    </nz-form-control>
+  </nz-form-item>
+
+  <nz-form-item>
+    <nz-form-label nzFor="systemRole" nzRequired>Vai trò</nz-form-label>
+    <nz-form-control>
+      <nz-select id="systemRole" formControlName="systemRole">
+        <nz-option nzValue="CUSTOMER" nzLabel="Khách hàng" />
+        <nz-option nzValue="STAFF" nzLabel="Staff" />
+        <nz-option nzValue="ADMIN" nzLabel="Admin" />
+        <nz-option nzValue="SUPER_ADMIN" nzLabel="Super Admin" />
+      </nz-select>
+    </nz-form-control>
+  </nz-form-item>
+
+  <div class="flex justify-end gap-3 mt-6">
+    <button nz-button nzType="default" type="button" (click)="cancel()">Hủy</button>
+    <button nz-button nzType="primary" type="submit" [nzLoading]="submitting()" [disabled]="form.invalid">
+      {{ isEdit ? 'Lưu thay đổi' : 'Thêm người dùng' }}
+    </button>
+  </div>
+</form>

@@ -124,11 +124,10 @@ public class CartServiceTest {
         void itemNotExists_createsNew() {
             when(inventoryQueryPort.getAvailableQuantity(10L)).thenReturn(10);
             when(cartItemRepository.findByUserIdAndSkuId(1L, 10L)).thenReturn(Optional.empty());
-            when(cartItemRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
             cartService.addItem(1L, 10L, 2);
 
-            verify(cartItemRepository).save(argThat(i -> i.getQuantity() == 2 && i.getSkuId().equals(10L)));
+            verify(cartItemRepository).upsertMemberQuantity(1L, 10L, 2);
         }
 
         @Test
@@ -137,11 +136,10 @@ public class CartServiceTest {
             when(inventoryQueryPort.getAvailableQuantity(10L)).thenReturn(10);
             CartItem existing = buildCartItem(1L, 10L, 3);
             when(cartItemRepository.findByUserIdAndSkuId(1L, 10L)).thenReturn(Optional.of(existing));
-            when(cartItemRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
             cartService.addItem(1L, 10L, 2);
 
-            verify(cartItemRepository).save(argThat(i -> i.getQuantity() == 5));
+            verify(cartItemRepository).upsertMemberQuantity(1L, 10L, 5);
         }
 
         @Test
@@ -149,7 +147,6 @@ public class CartServiceTest {
         void afterSave_cacheEvicted() {
             when(inventoryQueryPort.getAvailableQuantity(anyLong())).thenReturn(10);
             when(cartItemRepository.findByUserIdAndSkuId(anyLong(), anyLong())).thenReturn(Optional.empty());
-            when(cartItemRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
             cartService.addItem(1L, 10L, 1);
         }
@@ -166,6 +163,7 @@ public class CartServiceTest {
             CartItem item = buildCartItem(1L, 10L, 3);
             when(cartItemRepository.findByUserIdAndSkuId(1L, 10L)).thenReturn(Optional.of(item));
             when(cartItemRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+            when(inventoryQueryPort.getAvailableQuantity(10L)).thenReturn(10);
 
             cartService.updateItem(1L, 10L, 5);
 
@@ -179,6 +177,26 @@ public class CartServiceTest {
 
             assertThatThrownBy(() -> cartService.updateItem(1L, 10L, 5))
                     .isInstanceOf(ResourceNotFoundException.class);
+        }
+
+        @Test
+        @DisplayName("Quantity <= 0 -> throw InvalidRequestException")
+        void nonPositiveQuantity_throws() {
+            assertThatThrownBy(() -> cartService.updateItem(1L, 10L, 0))
+                    .isInstanceOf(com.dawn.common.exception.wrapper.InvalidRequestException.class);
+            assertThatThrownBy(() -> cartService.addItem(1L, 10L, -2))
+                    .isInstanceOf(com.dawn.common.exception.wrapper.InvalidRequestException.class);
+        }
+
+        @Test
+        @DisplayName("Quantity vượt tồn -> throw ResourceInsufficientException")
+        void quantityOverStock_throws() {
+            CartItem item = buildCartItem(1L, 10L, 3);
+            when(cartItemRepository.findByUserIdAndSkuId(1L, 10L)).thenReturn(Optional.of(item));
+            when(inventoryQueryPort.getAvailableQuantity(10L)).thenReturn(4);
+
+            assertThatThrownBy(() -> cartService.updateItem(1L, 10L, 5))
+                    .isInstanceOf(com.dawn.common.exception.wrapper.ResourceInsufficientException.class);
         }
     }
 

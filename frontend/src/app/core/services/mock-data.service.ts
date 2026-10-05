@@ -100,19 +100,51 @@ export class MockDataService {
 
   getPromoCampaigns(): PromoBanner[] {
     return [
-      { id: 1, title: 'Thu cũ đổi mới', imageUrl: `${this.baseUrl}/280x180/1e293b/white?text=Thu+cu+doi+moi`, link: '#' },
-      { id: 2, title: 'Microsoft Office', subtitle: '365 giá tốt', imageUrl: `${this.baseUrl}/280x180/2563eb/white?text=Office+365`, link: '#' },
-      { id: 3, title: 'Màn hình máy tính Tháng 10', subtitle: 'Giảm sốc', imageUrl: `${this.baseUrl}/280x180/e53935/white?text=Man+hinh`, link: '#' },
-      { id: 4, title: 'Giảm lên đến 2 triệu đồng', subtitle: 'Khi mua PC', imageUrl: `${this.baseUrl}/280x180/d97706/white?text=Giam+2tr`, link: '#' },
+      { id: 1, title: 'Thu cũ đổi mới', imageUrl: `${this.baseUrl}/280x180/1e293b/white?text=Thu+cu+doi+moi`, link: '/khuyen-mai' },
+      { id: 2, title: 'Microsoft Office', subtitle: '365 giá tốt', imageUrl: `${this.baseUrl}/280x180/2563eb/white?text=Office+365`, link: '/products?category=phan-mem-mang' },
+      { id: 3, title: 'Màn hình máy tính Tháng 10', subtitle: 'Giảm sốc', imageUrl: `${this.baseUrl}/280x180/e53935/white?text=Man+hinh`, link: '/products?category=man-hinh' },
+      { id: 4, title: 'Giảm lên đến 2 triệu đồng', subtitle: 'Khi mua PC', imageUrl: `${this.baseUrl}/280x180/d97706/white?text=Giam+2tr`, link: '/products?category=pc' },
     ];
   }
 
   getBlogPosts(): BlogPost[] {
     return [
-      { id: 1, title: 'RTX 5060 vs RTX 4060: Có nên nâng cấp?', excerpt: 'So sánh hiệu năng RTX 5060 và RTX 4060 trong các tựa game phổ biến...', imageUrl: `${this.baseUrl}/280x180/1e293b/e53935?text=RTX+5060+vs+4060`, slug: 'rtx-5060-vs-4060', date: '28/06/2026', category: 'Đánh giá' },
-      { id: 2, title: 'Hướng dẫn build PC Gaming dưới 30 triệu', excerpt: 'Cấu hình PC Gaming tối ưu với ngân sách 30 triệu đồng...', imageUrl: `${this.baseUrl}/280x180/0f172a/2563eb?text=Build+PC+30tr`, slug: 'build-pc-duoi-30tr', date: '27/06/2026', category: 'Hướng dẫn' },
-      { id: 3, title: 'Top Laptop Gaming đáng mua nhất 2026', excerpt: 'Danh sách những mẫu laptop gaming tốt nhất ở từng phân khúc...', imageUrl: `${this.baseUrl}/280x180/1e293b/e53935?text=Top+Laptop+Gaming`, slug: 'top-laptop-gaming-2026', date: '25/06/2026', category: 'Danh sách' },
-      { id: 4, title: 'Intel Core Ultra 9 285K: Review hiệu năng', excerpt: 'Đánh giá chi tiết về CPU Intel thế hệ mới nhất với kiến trúc Arrow Lake...', imageUrl: `${this.baseUrl}/280x180/0f172a/ffffff?text=Ultra+9+285K`, slug: 'intel-ultra-9-285k-review', date: '22/06/2026', category: 'Đánh giá' },
+      {
+        id: 1, title: 'RTX 5060 vs RTX 4060: Có nên nâng cấp?',
+        excerpt: 'So sánh hiệu năng RTX 5060 và RTX 4060 trong các tựa game phổ biến...',
+        content: 'RTX 5060 mang lại mức tăng hiệu năng khoảng 15-20% so với RTX 4060 ở độ phân giải 1440p nhờ kiến trúc nhân mới và băng thông bộ nhớ được cải thiện.\n\nVới các tựa game AAA mới, RTX 5060 cho khung hình ổn định hơn đáng kể khi bật ray tracing, trong khi RTX 4060 vẫn là lựa chọn hợp lý cho người dùng chơi ở độ phân giải 1080p với ngân sách hạn chế.\n\nNếu bạn đang dùng RTX 3060 hoặc thấp hơn, RTX 5060 là lựa chọn đáng cân nhắc. Nếu đã có RTX 4060, mức chênh lệch hiệu năng chưa đủ hấp dẫn để nâng cấp ngay.',
+        imageUrl: `${this.baseUrl}/800x450/1e293b/e53935?text=RTX+5060+vs+4060`, slug: 'rtx-5060-vs-4060', date: '28/06/2026', category: 'Đánh giá',
+      },
+      {
+        id: 2, title: 'Hướng dẫn build PC Gaming dưới 30 triệu',
+        excerpt: 'Cấu hình PC Gaming tối ưu với ngân sách 30 triệu đồng...',
+        content: 'Với ngân sách 30 triệu, bạn hoàn toàn có thể sở hữu một dàn PC gaming chiến tốt hầu hết tựa game ở độ phân giải 1440p.\n\nGợi ý cấu hình: CPU Intel Core i5 hoặc AMD Ryzen 5 thế hệ mới, GPU RTX 4060/5060, 16-32GB RAM DDR5, SSD NVMe 512GB-1TB, nguồn 650W 80+ Bronze trở lên.\n\nƯu tiên phân bổ ngân sách nhiều hơn cho GPU nếu mục tiêu chính là chơi game, vì đây là linh kiện ảnh hưởng trực tiếp đến khung hình nhất.',
+        imageUrl: `${this.baseUrl}/800x450/0f172a/2563eb?text=Build+PC+30tr`, slug: 'build-pc-duoi-30tr', date: '27/06/2026', category: 'Hướng dẫn',
+      },
+      {
+        id: 3, title: 'Top Laptop Gaming đáng mua nhất 2026',
+        excerpt: 'Danh sách những mẫu laptop gaming tốt nhất ở từng phân khúc...',
+        content: 'Phân khúc phổ thông (dưới 25 triệu): các mẫu trang bị RTX 4050/5050 là lựa chọn cân bằng giữa hiệu năng và giá thành.\n\nPhân khúc tầm trung (25-40 triệu): RTX 4060/4070 cho trải nghiệm chơi game 1440p mượt mà, phù hợp đa số game thủ.\n\nPhân khúc cao cấp (trên 40 triệu): RTX 4080/4090 hoặc dòng RTX 50 series mới nhất, dành cho người dùng cần hiệu năng đỉnh cao và làm nội dung sáng tạo.',
+        imageUrl: `${this.baseUrl}/800x450/1e293b/e53935?text=Top+Laptop+Gaming`, slug: 'top-laptop-gaming-2026', date: '25/06/2026', category: 'Danh sách',
+      },
+      {
+        id: 4, title: 'Intel Core Ultra 9 285K: Review hiệu năng',
+        excerpt: 'Đánh giá chi tiết về CPU Intel thế hệ mới nhất với kiến trúc Arrow Lake...',
+        content: 'Intel Core Ultra 9 285K sử dụng kiến trúc Arrow Lake hoàn toàn mới, cải thiện đáng kể hiệu suất trên mỗi watt so với thế hệ Raptor Lake trước đó.\n\nTrong các bài test đa nhân, hiệu năng render và biên dịch của 285K vượt trội nhờ số nhân/luồng tăng và bộ nhớ đệm lớn hơn.\n\nVề chơi game, mức chênh lệch so với thế hệ trước không quá lớn, nhưng mức tiêu thụ điện năng và nhiệt độ được kiểm soát tốt hơn rõ rệt.',
+        imageUrl: `${this.baseUrl}/800x450/0f172a/ffffff?text=Ultra+9+285K`, slug: 'intel-ultra-9-285k-review', date: '22/06/2026', category: 'Đánh giá',
+      },
+      {
+        id: 5, title: 'SSD NVMe Gen5 có thực sự đáng nâng cấp?',
+        excerpt: 'Tốc độ đọc/ghi vượt trội nhưng liệu có tạo khác biệt trong thực tế?...',
+        content: 'SSD NVMe Gen5 đạt tốc độ đọc/ghi lên tới 10-14GB/s, gấp đôi so với Gen4, nhưng phần lớn tác vụ hàng ngày như chơi game hay mở ứng dụng không tận dụng hết băng thông này.\n\nGen5 phát huy tác dụng rõ nhất với các tác vụ dựng phim 8K, xử lý dữ liệu lớn hoặc làm việc với file game thế hệ mới có dung lượng cực lớn.\n\nVới đa số người dùng phổ thông, SSD NVMe Gen4 vẫn là lựa chọn cân bằng chi phí-hiệu năng tốt hơn ở thời điểm hiện tại.',
+        imageUrl: `${this.baseUrl}/800x450/1e293b/2563eb?text=SSD+Gen5`, slug: 'ssd-nvme-gen5-co-dang-nang-cap', date: '18/06/2026', category: 'Đánh giá',
+      },
+      {
+        id: 6, title: 'Cách chọn màn hình chơi game phù hợp',
+        excerpt: 'Tần số quét, độ phân giải hay tấm nền — nên ưu tiên thông số nào?...',
+        content: 'Với game thủ eSports (FPS, MOBA), tần số quét cao (165Hz-240Hz) và thời gian phản hồi thấp quan trọng hơn độ phân giải.\n\nVới game thủ ưa trải nghiệm đồ họa (AAA, nhập vai), độ phân giải 1440p/4K và tấm nền OLED/IPS cho màu sắc trung thực sẽ mang lại trải nghiệm tốt hơn.\n\nNgoài ra cần cân nhắc khả năng đáp ứng của GPU hiện có — màn hình tần số quét cao chỉ phát huy hiệu quả khi GPU đủ mạnh để đạt khung hình tương ứng.',
+        imageUrl: `${this.baseUrl}/800x450/0f172a/e53935?text=Chon+man+hinh+gaming`, slug: 'cach-chon-man-hinh-choi-game', date: '15/06/2026', category: 'Hướng dẫn',
+      },
     ];
   }
 
@@ -124,7 +156,7 @@ export class MockDataService {
     return of(this.brands).pipe(delay(100));
   }
 
-  getProducts(params?: Record<string, string>): Observable<ResponsePage<Sku>> {
+  getProducts(params?: Record<string, string>, specFilters?: Record<string, string[]>): Observable<ResponsePage<Sku>> {
     let filtered = this.generateProducts();
     if (params) {
       if (params['category']) filtered = filtered.filter(p => p.categoryName === params['category']);
@@ -132,6 +164,11 @@ export class MockDataService {
       if (params['q']) filtered = filtered.filter(p => p.name.toLowerCase().includes(params['q']!.toLowerCase()));
       if (params['minPrice']) filtered = filtered.filter(p => p.price >= Number(params['minPrice']));
       if (params['maxPrice']) filtered = filtered.filter(p => p.price <= Number(params['maxPrice']));
+      if (specFilters) {
+        for (const [label, values] of Object.entries(specFilters)) {
+          if (values.length > 0) filtered = filtered.filter(p => p.specs?.[label] && values.includes(p.specs[label]));
+        }
+      }
       if (params['sort']) {
         switch (params['sort']) {
           case 'price-asc': filtered.sort((a, b) => a.price - b.price); break;
@@ -175,24 +212,57 @@ export class MockDataService {
     return of(reviews).pipe(delay(100));
   }
 
+  getSpecFilterOptions(category?: string): { label: string; values: string[] }[] {
+    const products = this.generateProducts().filter(p => !category || p.categoryName === category);
+    const byLabel = new Map<string, Set<string>>();
+    for (const p of products) {
+      for (const [label, value] of Object.entries(p.specs || {})) {
+        if (!byLabel.has(label)) byLabel.set(label, new Set());
+        byLabel.get(label)!.add(value);
+      }
+    }
+    return Array.from(byLabel.entries())
+      .filter(([, values]) => values.size > 1)
+      .map(([label, values]) => ({ label, values: Array.from(values) }));
+  }
+
   getProductsByCategory(category: string, limit = 8): Sku[] {
     return this.generateProducts().filter(p => p.categoryName === category).slice(0, limit);
   }
 
   getSectionProducts(subNavSlug?: string, limit = 10): Sku[] {
     const all = this.generateProducts();
-    if (subNavSlug === 'pc-i3') return all.filter(p => p.name.toLowerCase().includes('i3')).slice(0, limit);
-    if (subNavSlug === 'pc-i5') return all.filter(p => p.name.toLowerCase().includes('i5')).slice(0, limit);
-    if (subNavSlug === 'pc-i7') return all.filter(p => p.name.toLowerCase().includes('i7')).slice(0, limit);
-    if (subNavSlug === 'pc-i9') return all.filter(p => p.name.toLowerCase().includes('i9')).slice(0, limit);
-    if (subNavSlug?.startsWith('pc-r')) return all.filter(p => p.name.toLowerCase().includes('r')).slice(0, limit);
-    if (subNavSlug?.includes('asus')) return all.filter(p => p.brandName === 'ASUS').slice(0, limit);
-    if (subNavSlug?.includes('acer')) return all.filter(p => p.brandName === 'ACER').slice(0, limit);
-    if (subNavSlug?.includes('msi')) return all.filter(p => p.brandName === 'MSI').slice(0, limit);
-    if (subNavSlug?.includes('lenovo')) return all.filter(p => p.brandName === 'LENOVO').slice(0, limit);
-    if (subNavSlug?.includes('gigabyte')) return all.filter(p => p.brandName === 'GIGABYTE').slice(0, limit);
-    if (subNavSlug?.includes('dell')) return all.filter(p => p.brandName === 'DELL').slice(0, limit);
-    return all.slice(0, limit);
+    if (!subNavSlug) return all.slice(0, limit);
+
+    const byCpuTier = (tier: string, category: string) =>
+      all.filter(p => p.categoryName === category && (p.specs?.['CPU']?.toLowerCase().includes(tier) ?? false)).slice(0, limit);
+
+    const byBrand = (brand: string, category: string) =>
+      all.filter(p => p.categoryName === category && p.brandName.toUpperCase() === brand.toUpperCase()).slice(0, limit);
+
+    switch (subNavSlug) {
+      case 'pc-i3': return byCpuTier('i3', 'pc');
+      case 'pc-i5': return byCpuTier('i5', 'pc');
+      case 'pc-i7': return byCpuTier('i7', 'pc');
+      case 'pc-i9': return byCpuTier('i9', 'pc');
+      case 'pc-r3': return byCpuTier('r3', 'pc');
+      case 'pc-r5': return byCpuTier('r5', 'pc');
+      case 'pc-r7': return byCpuTier('r7', 'pc');
+      case 'pc-r9': return byCpuTier('r9', 'pc');
+      case 'asus-rog': return byBrand('ASUS', 'laptop-gaming');
+      case 'acer-predator': return byBrand('ACER', 'laptop-gaming');
+      case 'msi-gaming': return byBrand('MSI', 'laptop-gaming');
+      case 'lenovo-legion': return byBrand('LENOVO', 'laptop-gaming');
+      case 'gigabyte': return byBrand('GIGABYTE', 'laptop-gaming');
+      case 'dell-gaming': return byBrand('DELL', 'laptop-gaming');
+      case 'laptop-asus': return byBrand('ASUS', 'laptop');
+      case 'laptop-acer': return byBrand('ACER', 'laptop');
+      case 'laptop-msi': return byBrand('MSI', 'laptop');
+      case 'laptop-dell': return byBrand('DELL', 'laptop');
+      case 'laptop-hp': return byBrand('HP', 'laptop');
+      case 'laptop-lenovo': return byBrand('LENOVO', 'laptop');
+      default: return all.slice(0, limit);
+    }
   }
 
   getOrders(): Observable<{ content: Order[] }> {

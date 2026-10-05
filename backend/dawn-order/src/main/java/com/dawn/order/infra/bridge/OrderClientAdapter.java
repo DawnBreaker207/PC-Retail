@@ -1,5 +1,8 @@
 package com.dawn.order.infra.bridge;
 
+import com.dawn.common.exception.wrapper.ConflictException;
+import com.dawn.common.exception.wrapper.ResourceNotFoundException;
+import com.dawn.common.message.Message;
 import com.dawn.order.dto.StockDecrementCommand;
 import com.dawn.order.entity.Order;
 import com.dawn.order.entity.OrderItem;
@@ -44,26 +47,32 @@ public class OrderClientAdapter implements OrderClientPort {
                 .map(Order::getReservedUntil)
                 .orElse(null);
     }
-
     @Transactional
     @Override
     public void markOrderPaid(Long orderId) {
-        Order order = orderRepository.findById(orderId).orElseThrow();
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException(Message.format(Message.Order.NOT_FOUND, orderId)));
         order.setPaymentStatus(PaymentStatus.PAID);
         orderRepository.save(order);
 
         List<SubOrder> subOrders = subOrderRepository.findByOrderId(orderId);
+
+
         for (SubOrder so : subOrders) {
             stateMachine.assertValidTransition(so.getStatus(), SubOrderStatus.PAID);
             String fromStatus = so.getStatus().name();
-            so.setStatus(SubOrderStatus.PAID);
-            so.getStatusHistory().add(Map.of(
+            // ponytail: CAS PENDING->PAID — cron expiry concurrently thì 1 bên thua, không hồi sinh EXPIRED
+            int claimed = subOrderRepository.transitionIfStatus(so.getId(), SubOrderStatus.PENDING_PAYMENT, SubOrderStatus.PAID);
+            if (claimed == 0) {
+                throw new ConflictException(Message.format(Message.Order.INVALID_TRANSITION, fromStatus, SubOrderStatus.PAID));
+            }
+            SubOrder fresh = subOrderRepository.findById(so.getId()).orElse(so);
+            fresh.getStatusHistory().add(Map.of(
                     "from", fromStatus,
                     "to", SubOrderStatus.PAID.name(),
                     "createdAt", Instant.now().toString()));
-            subOrderRepository.save(so);
+            subOrderRepository.save(fresh);
         }
-
         List<OrderItem> items = subOrders.stream()
                 .flatMap(so -> orderItemRepository.findBySubOrderId(so.getId()).stream())
                 .toList();
@@ -76,7 +85,8 @@ public class OrderClientAdapter implements OrderClientPort {
     @Transactional
     @Override
     public void markOrderPaymentFailed(Long orderId) {
-        Order order = orderRepository.findById(orderId).orElseThrow();
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException(Message.format(Message.Order.NOT_FOUND, orderId)));
         order.setPaymentStatus(PaymentStatus.FAILED);
         orderRepository.save(order);
 
@@ -87,13 +97,18 @@ public class OrderClientAdapter implements OrderClientPort {
         for (SubOrder so : subOrders) {
             stateMachine.assertValidTransition(so.getStatus(), SubOrderStatus.CANCELLED);
             String fromStatus = so.getStatus().name();
-            so.setStatus(SubOrderStatus.CANCELLED);
-            so.getStatusHistory().add(Map.of(
+            // ponytail: CAS — đơn đã đi tiếp (PAID/…) thì không kéo ngược về CANCELLED
+            int claimed = subOrderRepository.transitionIfStatus(so.getId(), SubOrderStatus.PENDING_PAYMENT, SubOrderStatus.CANCELLED);
+            if (claimed == 0) {
+                throw new ConflictException(Message.format(Message.Order.INVALID_TRANSITION, fromStatus, SubOrderStatus.CANCELLED));
+            }
+            SubOrder fresh = subOrderRepository.findById(so.getId()).orElse(so);
+            fresh.getStatusHistory().add(Map.of(
                     "from", fromStatus,
                     "to", SubOrderStatus.CANCELLED.name(),
                     "actorId", "SYSTEM",
                     "createdAt", Instant.now().toString()));
-            subOrderRepository.save(so);
+            subOrderRepository.save(fresh);
         }
         List<OrderItem> items = subOrders
                 .stream()

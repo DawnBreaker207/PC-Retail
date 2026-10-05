@@ -21,6 +21,8 @@ export interface User {
   email: string;
   phone?: string;
   systemRole: 'CUSTOMER' | 'STAFF' | 'ADMIN' | 'SUPER_ADMIN';
+  status?: 'ACTIVE' | 'INACTIVE';
+  createdAt?: string;
 }
 
 export interface LoginRequest {
@@ -59,6 +61,32 @@ export interface ShippingAddress {
   street: string;
   district: string;
   city: string;
+}
+
+export interface Address extends ShippingAddress {
+  id: number;
+  label?: string;
+  isDefault?: boolean;
+}
+
+export interface Voucher {
+  id: number;
+  code: string;
+  description: string;
+  discount: number;
+  type: 'FIXED' | 'PERCENT';
+  minOrder: number;
+  maxDiscount?: number;
+  expiry: string;
+}
+
+export interface VoucherValidationResult {
+  valid: boolean;
+  code?: string;
+  discount?: number;
+  type?: 'FIXED' | 'PERCENT';
+  minOrder?: number;
+  message?: string;
 }
 
 export type FulfillmentType = 'DELIVERY' | 'PICKUP';
@@ -139,6 +167,7 @@ export interface BlogPost {
   id: number;
   title: string;
   excerpt: string;
+  content: string;
   imageUrl: string;
   slug: string;
   date: string;
@@ -168,6 +197,50 @@ export interface Review {
   comment: string;
   images?: string[];
   createdAt: string;
+  productName?: string;
+  skuId?: number;
+  status?: 'PENDING' | 'APPROVED' | 'HIDDEN';
+}
+
+export interface Category {
+  id: number;
+  name: string;
+  slug: string;
+  parentId: number | null;
+  imageUrl?: string;
+  icon?: string;
+}
+
+export type ReturnRequestType = 'DOA' | 'WARRANTY';
+export type ReturnRequestStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
+
+export interface AdminReturnRequest {
+  id: number;
+  orderId: number;
+  subOrderId: number;
+  skuName: string;
+  requestType: ReturnRequestType;
+  reason: string;
+  status: ReturnRequestStatus;
+  createdByUserId: number;
+  createdByName: string;
+  createdAt: string;
+  approvedBy?: string;
+  approvedAt?: string;
+  rejectReason?: string;
+}
+
+export interface AuditLogEntry {
+  id: number;
+  action: string;
+  entityType: string;
+  entityId: number;
+  actorName: string;
+  actorRole: string;
+  outcome: 'SUCCESS' | 'FAILURE';
+  createdAt: string;
+  oldValue?: Record<string, unknown>;
+  newValue?: Record<string, unknown>;
 }
 
 export interface CreateReviewRequest {

@@ -14,6 +14,8 @@ public class EmailVerificationCacheAdapter implements EmailVerificationCachePort
 
     private static final String OTP_PREFIX = "otp:register:";
     private static final String COOLDOWN_PREFIX = "otp:cooldown:";
+    private static final String ATTEMPT_PREFIX = "otp:attempts:";
+    private static final long MAX_ATTEMPTS = 5;
 
     private final StringRedisTemplate redis;
 
@@ -34,6 +36,26 @@ public class EmailVerificationCacheAdapter implements EmailVerificationCachePort
         String otp = redis.opsForValue().get(key);
         if (otp != null) redis.delete(key);
         return otp;
+    }
+
+    @Override
+    public String peekOtp(String email) {
+        return redis.opsForValue().get(OTP_PREFIX + email);
+    }
+
+    @Override
+    public long recordFailedAttempt(String email) {
+        String key = ATTEMPT_PREFIX + email;
+        Long count = redis.opsForValue().increment(key);
+        if (count != null && count == 1) {
+            redis.expire(key, Duration.ofMinutes(ttlMinutes));
+        }
+        return count == null ? MAX_ATTEMPTS : count;
+    }
+
+    @Override
+    public void clearAttempts(String email) {
+        redis.delete(ATTEMPT_PREFIX + email);
     }
 
     @Override

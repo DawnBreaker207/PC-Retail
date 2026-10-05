@@ -20,6 +20,7 @@ public class CartCleanupListener {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     @Retryable(maxAttempts = 3, retryFor = OptimisticLockingFailureException.class)
     public void onOrderCreated(OrderCreatedEvent event) {
+        if (event.userId() == null) return; // guest: đã clear theo token ở checkout
         cartService.clearCart(event.userId());
     }
 }

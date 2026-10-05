@@ -95,6 +95,21 @@ export class OrderDetailComponent implements OnInit, OnDestroy {
     return status === 'PENDING_PAYMENT' || status === 'PAID';
   }
 
+  get isReturnable(): boolean {
+    return this.order()?.subOrders[0]?.status === 'DELIVERED';
+  }
+
+  requestReturn() {
+    const o = this.order();
+    const subId = o?.subOrders[0]?.id;
+    if (!o || !subId) return;
+    const reason = window.prompt('Return reason:');
+    if (!reason) return;
+    this.orderService.requestReturn(o.id, subId, reason).pipe(
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe(() => this.loadOrder(o.id));
+  }
+
   openReviewForm(item: OrderItem) {
     const modalRef = this.modal.create({
       nzTitle: 'Đánh giá sản phẩm',

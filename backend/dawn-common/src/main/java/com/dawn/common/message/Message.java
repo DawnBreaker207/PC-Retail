@@ -111,6 +111,7 @@ public class Message {
 
         public static final String NOT_FOUND_FOR_SKU = "Inventory not found for SKU: {0}";
         public static final String INSUFFICIENT_STOCK = "Insufficient stock for SKU: {0}";
+        public static final String INVALID_QUANTITY = "Quantity must be positive for SKU: {0}";
     }
 
     // Cart
@@ -120,6 +121,7 @@ public class Message {
 
         public static final String ITEM_NOT_FOUND = "Cart item not found: sku={0}";
         public static final String INSUFFICIENT_STOCK = "SKU #{0} only has {1} item(s) available but in cart have {2} item(s)";
+        public static final String INVALID_QUANTITY = "Quantity must be positive";
     }
 
     // Order
@@ -183,5 +185,7 @@ public class Message {
         }
 
         public static final String RATING_OUT_OF_RANGE = "Rating must be 1-5";
+        public static final String REVIEW_ALREADY_EXISTS = "Review already exists for this item";
+        public static final String REVIEW_ONLY_AFTER_DELIVERED = "Review is allowed only after delivery";
     }
 }

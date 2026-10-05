@@ -23,10 +23,14 @@ export class OrderService {
   }
 
   cancelOrder(id: number) {
-    return this.http.put(ApiEndpoints.orders.cancelSubOrder(id), {});
+    return this.http.post(ApiEndpoints.orders.cancelSubOrder(id), {});
   }
 
   createReview(data: CreateReviewRequest): Observable<Review> {
     return this.http.post<Review>(ApiEndpoints.reviews.create, data);
+  }
+
+  requestReturn(orderId: number, subOrderId: number, reason: string) {
+    return this.http.post(ApiEndpoints.returns.request(orderId), { subOrderId, reason, images: [] });
   }
 }

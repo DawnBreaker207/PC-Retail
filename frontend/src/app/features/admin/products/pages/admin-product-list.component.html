@@ -1,0 +1,93 @@
+<div class="mb-6 flex items-center justify-between">
+  <div>
+    <h1 class="text-2xl font-bold text-ink dark:text-ink-dark">Sản phẩm</h1>
+    <p class="text-muted dark:text-muted-dark text-sm">Quản lý danh sách sản phẩm (mock, chưa nối backend thật)</p>
+  </div>
+  <button nz-button nzType="primary" (click)="openCreateModal()">
+    <span nz-icon nzType="plus"></span>
+    Thêm sản phẩm
+  </button>
+</div>
+
+<div class="flex flex-wrap items-center gap-3 mb-4">
+  <input
+    nz-input
+    placeholder="Tìm theo tên sản phẩm"
+    [(ngModel)]="search"
+    (keydown.enter)="onSearch()"
+    class="max-w-xs"
+  />
+  <button nz-button nzType="default" (click)="onSearch()">
+    <span nz-icon nzType="search"></span>
+  </button>
+  <nz-select [ngModel]="categoryFilter()" (ngModelChange)="onCategoryChange($event)" nzPlaceHolder="Danh mục" nzAllowClear class="min-w-[160px]">
+    @for (c of categories; track c.slug) {
+      <nz-option [nzValue]="c.slug" [nzLabel]="c.name" />
+    }
+  </nz-select>
+  <nz-select [ngModel]="brandFilter()" (ngModelChange)="onBrandChange($event)" nzPlaceHolder="Thương hiệu" nzAllowClear class="min-w-[160px]">
+    @for (b of brands; track b.id) {
+      <nz-option [nzValue]="b.name" [nzLabel]="b.name" />
+    }
+  </nz-select>
+  <nz-select [ngModel]="statusFilter()" (ngModelChange)="onStatusChange($event)" nzPlaceHolder="Trạng thái" nzAllowClear class="min-w-[160px]">
+    <nz-option nzValue="ACTIVE" nzLabel="Đang bán" />
+    <nz-option nzValue="INACTIVE" nzLabel="Ngừng bán" />
+  </nz-select>
+</div>
+
+<nz-table
+  [nzData]="products()"
+  [nzLoading]="loading()"
+  [nzTotal]="total()"
+  [nzPageIndex]="page"
+  [nzPageSize]="size"
+  [nzPageSizeOptions]="pageSizeOptions"
+  [nzFrontPagination]="false"
+  (nzPageIndexChange)="onPageChange($event)"
+  (nzPageSizeChange)="onPageSizeChange($event)"
+>
+  <thead>
+    <tr>
+      <th>Sản phẩm</th>
+      <th>Thương hiệu</th>
+      <th>Danh mục</th>
+      <th class="text-right">Giá</th>
+      <th>Trạng thái</th>
+      <th class="text-right">Thao tác</th>
+    </tr>
+  </thead>
+  <tbody>
+    @for (p of products(); track p.id) {
+      <tr>
+        <td>
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-lg bg-bg dark:bg-bg-dark flex items-center justify-center overflow-hidden shrink-0">
+              <img [src]="p.imageUrls[0]" loading="lazy" appFallbackImage alt="{{ p.name }}" class="w-full h-full object-contain p-0.5" />
+            </div>
+            <span class="max-w-64 truncate text-sm font-medium">{{ p.name }}</span>
+          </div>
+        </td>
+        <td>{{ p.brandName }}</td>
+        <td>{{ p.categoryName }}</td>
+        <td class="text-right">{{ p.price | currencyFormat }}</td>
+        <td>
+          <nz-tag [nzColor]="p.status === 'ACTIVE' ? 'success' : 'default'">{{ p.status === 'ACTIVE' ? 'Đang bán' : 'Ngừng bán' }}</nz-tag>
+        </td>
+        <td class="text-right">
+          <button nz-button nzType="text" nzSize="small" (click)="openEditModal(p)" aria-label="Sửa">
+            <span nz-icon nzType="edit"></span>
+          </button>
+          <button
+            nz-button nzType="text" nzSize="small" nzDanger
+            nz-popconfirm nzPopconfirmTitle="Xóa sản phẩm này?"
+            (nzOnConfirm)="deleteProduct(p.id)"
+            aria-label="Xóa"
+          >
+            <span nz-icon nzType="delete"></span>
+          </button>
+        </td>
+      </tr>
+    }
+  </tbody>
+</nz-table>

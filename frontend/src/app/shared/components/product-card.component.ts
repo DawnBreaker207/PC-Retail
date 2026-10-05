@@ -1,9 +1,10 @@
-import { Component, input, output } from '@angular/core';
+import { Component, inject, input, output } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { CurrencyFormatPipe } from '@shared/pipes/currency-format.pipe';
 import { FallbackImageDirective } from '@shared/directives/fallback-image.directive';
 import { Sku } from '@core/models/common.model';
+import { WishlistStore } from '@features/wishlist/store/wishlist.store';
 
 @Component({
   selector: 'app-product-card',
@@ -12,6 +13,8 @@ import { Sku } from '@core/models/common.model';
   styleUrl: './product-card.component.css',
 })
 export class ProductCardComponent {
+  wishlist = inject(WishlistStore);
+
   product = input.required<Sku>();
   badge = input<'flash' | 'discount' | null>(null);
   isAdding = input(false);

@@ -3,6 +3,8 @@ package com.dawn.common.auditlog;
 import com.dawn.common.response.ResponsePage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -19,6 +21,11 @@ import java.time.ZoneOffset;
 @Slf4j
 public class AuditLogService {
     private final AuditLogRepository auditLogRepository;
+    private final tools.jackson.databind.ObjectMapper objectMapper;
+
+    @Autowired
+    @Lazy
+    private AuditLogService self;
 
     @Transactional(readOnly = true)
     public ResponsePage<AuditLog> searchLogs(
@@ -46,23 +53,57 @@ public class AuditLogService {
         log.info("Auto start clean Audit Log before: {}", threshold);
     }
 
-    @Async
+    /** Dispatcher: Tier 1 đồng bộ + tx riêng; Tier 2 bất đồng bộ best-effort. */
     public void log(String action, String entityType, Long entityId, String oldValue, String newValue, Long actorId, String actorRole, int tier) {
+        if (tier == 1) {
+            // Tier 1 (refund/dispute): đồng bộ, transaction riêng — sống sót cả khi tx chính rollback
+            self.writeTier1Log(action, entityType, entityId, oldValue, newValue, actorId, actorRole);
+        } else {
+            // Qua proxy để @Async có hiệu lực (self-call sẽ chạy đồng bộ)
+            self.writeTier2Log(action, entityType, entityId, oldValue, newValue, actorId, actorRole);
+        }
+    }
+
+    @Transactional(propagation = org.springframework.transaction.annotation.Propagation.REQUIRES_NEW)
+    public void writeTier1Log(String action, String entityType, Long entityId, String oldValue, String newValue, Long actorId, String actorRole) {
+        persist(action, entityType, entityId, oldValue, newValue, actorId, actorRole, 1, "SUCCESS", null);
+    }
+
+    @Async
+    public void writeTier2Log(String action, String entityType, Long entityId, String oldValue, String newValue, Long actorId, String actorRole) {
+        persist(action, entityType, entityId, oldValue, newValue, actorId, actorRole, 2, "SUCCESS", null);
+    }
+
+    private void persist(String action, String entityType, Long entityId, String oldValue, String newValue,
+                         Long actorId, String actorRole, int tier, String status, String errorMessage) {
         try {
-            AuditLog log = AuditLog.builder()
+            AuditLog auditLog = AuditLog.builder()
                     .action(action)
                     .entityType(entityType)
                     .entityId(entityId)
-                    .oldValue(oldValue != null ? oldValue : "{}")
-                    .newValue(newValue != null ? newValue : "{}")
+                    .oldValue(toJson(oldValue))
+                    .newValue(toJson(newValue))
                     .actorId(actorId)
                     .actorRole(actorRole)
                     .tier(tier)
-                    .status("SUCCESS")
+                    .status(status)
+                    .errorMessage(errorMessage)
                     .build();
-            auditLogRepository.save(log);
+            auditLogRepository.save(auditLog);
         } catch (Exception e) {
             log.warn("Audit log save failed (non-critical)", e);
+        }
+    }
+
+    /** jsonb chỉ nhận JSON hợp lệ — bọc String thường thành chuỗi JSON. */
+    private String toJson(String value) {
+        if (value == null) return null;
+        String trimmed = value.trim();
+        if (trimmed.startsWith("{") || trimmed.startsWith("[")) return value;
+        try {
+            return objectMapper.writeValueAsString(value);
+        } catch (Exception e) {
+            return "\"\"";
         }
     }
 }

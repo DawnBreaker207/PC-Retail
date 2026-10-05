@@ -21,6 +21,11 @@
     <span nz-icon [nzType]="lowStockOnly() ? 'check-square' : 'border'"></span>
     Chỉ hiện tồn kho thấp (&lt; 5)
   </button>
+  <nz-select [ngModel]="brandFilter()" (ngModelChange)="onBrandChange($event)" nzPlaceHolder="Thương hiệu" nzAllowClear class="min-w-[160px]">
+    @for (b of brands; track b) {
+      <nz-option [nzValue]="b" [nzLabel]="b" />
+    }
+  </nz-select>
 </div>
 
 <!-- Table -->
@@ -73,6 +78,9 @@
             <button nz-button nzSize="small" nzType="primary" (click)="openRestockModal(item)" class="!rounded-lg !text-xs !shadow-sm">
               <span nz-icon nzType="plus-circle"></span>
               Nhập thêm
+            </button>
+            <button nz-button nzSize="small" nzType="text" (click)="openHistoryModal(item)" class="!rounded-lg !text-xs" aria-label="Lịch sử giao dịch">
+              <span nz-icon nzType="history"></span>
             </button>
           </td>
         </tr>

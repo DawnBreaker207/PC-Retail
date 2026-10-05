@@ -24,6 +24,7 @@ public class CartController {
     private final AddCartItemUseCase addCartItemUseCase;
     private final UpdateCartItemUseCase updateCartItemUseCase;
     private final RemoveCartItemUseCase removeCartItemUseCase;
+    private final com.dawn.cart.service.CartService cartService;
 
     @GetMapping
     @PreAuthorize(AuthorizationConstants.CUSTOMER_ONLY)
@@ -60,5 +61,43 @@ public class CartController {
         Long userId = SecurityUtils.getCurrentUserId();
         removeCartItemUseCase.removeItem(userId, skuId);
         return ResponseObject.deleted();
+    }
+
+    // ---- Guest cart (không cần JWT, key bằng guest_token) ----
+
+    @GetMapping("/guest")
+    public ResponseObject<CartSummaryDto> getGuestCart(@RequestParam String token) {
+        var items = cartService.getGuestRawItems(token);
+        return ResponseObject.success(new CartSummaryDto(
+                items.stream().map(i -> new com.dawn.cart.dto.CartItemDto(
+                        i.getSkuId(), null, null, java.math.BigDecimal.ZERO,
+                        i.getQuantity(), java.math.BigDecimal.ZERO)).toList(),
+                items.size(), java.math.BigDecimal.ZERO));
+    }
+
+    @PostMapping("/guest/items")
+    public ResponseObject<CartItemDto> addGuestItem(
+            @RequestParam String token, @Valid @RequestBody CartItemRequest req) {
+        return ResponseObject.created(cartService.addGuestItem(token, req.skuId(), req.quantity()));
+    }
+
+    @DeleteMapping("/guest/items/{skuId}")
+    public ResponseObject<Void> removeGuestItem(
+            @RequestParam String token, @PathVariable Long skuId) {
+        cartService.removeGuestItem(token, skuId);
+        return ResponseObject.deleted();
+    }
+
+    @DeleteMapping("/guest")
+    public ResponseObject<Void> clearGuestCart(@RequestParam String token) {
+        cartService.clearGuestCart(token);
+        return ResponseObject.deleted();
+    }
+
+    @PostMapping("/merge")
+    @PreAuthorize(AuthorizationConstants.CUSTOMER_ONLY)
+    public ResponseObject<Void> mergeGuestCart(@RequestParam String token) {
+        cartService.mergeGuestCart(token, SecurityUtils.getCurrentUserId());
+        return ResponseObject.success(null);
     }
 }

@@ -1,0 +1,62 @@
+<div class="max-w-2xl mx-auto px-4 py-6 lg:py-8">
+  <nz-breadcrumb class="mb-4">
+    <nz-breadcrumb-item><a routerLink="/">Trang chủ</a></nz-breadcrumb-item>
+    <nz-breadcrumb-item>Tra cứu đơn hàng</nz-breadcrumb-item>
+  </nz-breadcrumb>
+
+  <h1 class="text-xl lg:text-2xl font-bold mb-2">Tra cứu đơn hàng</h1>
+  <p class="text-sm text-muted dark:text-muted-dark mb-6">Nhập mã đơn hàng và số điện thoại đã đặt để xem trạng thái đơn hàng.</p>
+
+  <form [formGroup]="form" (ngSubmit)="submit()" class="flex flex-col sm:flex-row gap-3 items-start mb-8">
+    <nz-form-item class="!mb-0 flex-1 w-full">
+      <nz-form-control>
+        <input nz-input formControlName="orderId" placeholder="Mã đơn hàng (VD: 2001)" />
+      </nz-form-control>
+    </nz-form-item>
+    <nz-form-item class="!mb-0 flex-1 w-full">
+      <nz-form-control>
+        <input nz-input formControlName="phone" placeholder="Số điện thoại đặt hàng" />
+      </nz-form-control>
+    </nz-form-item>
+    <button type="submit" nz-button nzType="primary" [nzLoading]="isLoading()" [disabled]="form.invalid" class="!rounded-lg !h-10 !px-6 shrink-0">
+      Tra cứu
+    </button>
+  </form>
+
+  @if (searched()) {
+    @if (order(); as o) {
+      <div class="bg-surface dark:bg-surface-dark rounded-card border border-border/80 dark:border-border-dark/80 shadow-sm p-5 lg:p-6">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="font-semibold text-sm">Đơn hàng #ORD-{{ o.id }}</h2>
+          <nz-tag [nzColor]="o.paymentStatus === 'PAID' ? 'success' : 'gold'" class="!rounded-full !border-0 !px-3 !font-medium">
+            {{ o.paymentStatus === 'PAID' ? 'Đã thanh toán' : 'Chưa thanh toán' }}
+          </nz-tag>
+        </div>
+
+        @for (sub of o.subOrders; track sub.id) {
+          <p class="text-xs text-muted dark:text-muted-dark mb-2">Trạng thái đơn: <span class="font-medium text-ink dark:text-ink-dark">{{ sub.status }}</span></p>
+          @for (item of sub.items; track item.skuId) {
+            <div class="flex items-center gap-3 py-3 border-b last:border-0 border-border/60 dark:border-border-dark/60">
+              <div class="w-12 h-12 rounded-lg bg-bg dark:bg-bg-dark flex items-center justify-center overflow-hidden shrink-0">
+                <img [src]="item.imageUrl" loading="lazy" appFallbackImage alt="{{ item.name }}" class="w-full h-full object-contain p-0.5" />
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="font-medium text-sm line-clamp-2">{{ item.name }}</p>
+                <p class="text-xs text-muted dark:text-muted-dark">x{{ item.quantity }}</p>
+              </div>
+              <span class="font-semibold text-primary text-sm">{{ item.unitPrice * item.quantity | currencyFormat }}</span>
+            </div>
+          }
+          <div class="flex justify-between items-baseline mt-3">
+            <span class="text-sm font-semibold">Tổng</span>
+            <span class="text-primary text-lg font-bold">{{ sub.finalAmount | currencyFormat }}</span>
+          </div>
+        }
+      </div>
+    } @else {
+      <div class="text-center py-10 text-muted dark:text-muted-dark text-sm">
+        Không tìm thấy đơn hàng khớp với mã đơn và số điện thoại đã nhập.
+      </div>
+    }
+  }
+</div>

@@ -56,4 +56,17 @@ public class PaymentController {
             @PathVariable Long id) {
         return queryPaymentStatusUseCase.queryAndSync(id);
     }
+
+    // Mock gateway: dựng kịch bản cho demo/black-box (SUCCESS/FAILED/TIMEOUT/PENDING)
+    @PostMapping("/mock/{id}/scenario")
+    @PreAuthorize(AuthorizationConstants.ADMIN_ONLY)
+    public Map<String, String> programMockScenario(
+            @PathVariable Long id,
+            @RequestBody Map<String, String> body) {
+        com.dawn.payment.infra.mock.MockGatewayAdapter mock =
+                (com.dawn.payment.infra.mock.MockGatewayAdapter) gatewayRegistry.get(
+                        com.dawn.payment.entity.enums.PaymentMethod.MOCK);
+        mock.programScenario(id, body.get("scenario"));
+        return Map.of("paymentId", String.valueOf(id), "scenario", mock.scenarioOf(id));
+    }
 }

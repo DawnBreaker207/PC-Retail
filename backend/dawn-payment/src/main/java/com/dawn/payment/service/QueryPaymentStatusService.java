@@ -68,6 +68,9 @@ public class QueryPaymentStatusService implements QueryPaymentStatusUseCase {
             payment.setStatus(PaymentResultStatus.UNKNOWN);
             paymentRepo.save(payment);
             log.warn("Payment {} status UNKNOWN after VNPay query", paymentId);
+        } else if ("PENDING".equals(result.responseCode())) {
+            // Mock PENDING: giữ nguyên, chờ lần sync sau
+            log.info("Payment {} still PENDING at gateway", paymentId);
         } else {
             payment.setStatus(PaymentResultStatus.FAILED);
             paymentRepo.save(payment);
@@ -80,6 +83,16 @@ public class QueryPaymentStatusService implements QueryPaymentStatusUseCase {
     @Override
     @Transactional
     public PaymentDto handleWebhook(String provider, Map<String, String> payload) {
+        if ("mock".equals(provider)) {
+            // Mock: dựng kịch bản từ params rồi đi chung luồng sync (idempotent như vnpay)
+            com.dawn.payment.infra.mock.MockGatewayAdapter mock =
+                    (com.dawn.payment.infra.mock.MockGatewayAdapter) gatewayRegistry.get(PaymentMethod.MOCK);
+            String rawId = payload.get("paymentId");
+            if (rawId == null) throw new InvalidRequestException("Mock webhook requires paymentId");
+            Long paymentId = Long.parseLong(rawId);
+            if (payload.get("result") != null) mock.programScenario(paymentId, payload.get("result"));
+            return queryAndSync(paymentId);
+        }
         if (!"vnpay".equals(provider)) {
             throw new UnsupportedOperationException(Message.Payment.WEBHOOK_NOT_SUPPORTED);
         }
@@ -93,6 +106,12 @@ public class QueryPaymentStatusService implements QueryPaymentStatusUseCase {
 
         Payment payment = paymentRepo.findById(paymentId)
                 .orElseThrow(() -> new ResourceNotFoundException(Message.format(Message.Payment.NOT_FOUND, paymentId)));
+
+        // Webhook duplicate/delayed: đã xử lý rồi thì trả về, không gọi markOrder* lần 2
+        if (payment.getStatus() == PaymentResultStatus.COMPLETED
+                || payment.getStatus() == PaymentResultStatus.FAILED) {
+            return toDto(payment);
+        }
 
         if ("00".equals(responseCode)) {
             payment.setStatus(PaymentResultStatus.COMPLETED);
@@ -119,8 +138,21 @@ public class QueryPaymentStatusService implements QueryPaymentStatusUseCase {
                 throw new InvalidRequestException(Message.Payment.VNPAY_CALLBACK_INVALID_SIGNATURE);
             }
             paymentId = Long.parseLong(params.get("vnp_TxnRef"));
+        } else if ("mock".equals(provider)) {
+            com.dawn.payment.infra.mock.MockGatewayAdapter mock =
+                    (com.dawn.payment.infra.mock.MockGatewayAdapter) gatewayRegistry.get(PaymentMethod.MOCK);
+            if (!mock.verifyCallback(params)) {
+                throw new InvalidRequestException("Mock callback requires paymentId");
+            }
+            paymentId = Long.parseLong(params.get("paymentId"));
+            if (params.get("result") != null) mock.programScenario(paymentId, params.get("result"));
         } else {
-            PaymentMethod method = PaymentMethod.valueOf(provider.toUpperCase());
+            PaymentMethod method;
+            try {
+                method = PaymentMethod.valueOf(provider.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                throw new InvalidRequestException(Message.format(Message.Payment.CALLBACK_PROVIDER_UNSUPPORTED, provider));
+            }
             PaymentGateway gateway = gatewayRegistry.get(method);
             PaymentDto result = gateway.processCallback(null, params);
             if (result == null) throw new InvalidRequestException(Message.format(Message.Payment.CALLBACK_PROVIDER_UNSUPPORTED, provider));
@@ -138,13 +170,21 @@ public class QueryPaymentStatusService implements QueryPaymentStatusUseCase {
     }
 
     private VnpayQueryResult queryWithTimeout(Payment payment) {
-        if (payment.getMethod() != PaymentMethod.VNPAY) {
+        if (payment.getMethod() != PaymentMethod.VNPAY && payment.getMethod() != PaymentMethod.MOCK) {
             return null;
         }
         try {
+            java.util.function.Supplier<VnpayQueryResult> query = () -> {
+                if (payment.getMethod() == PaymentMethod.MOCK) {
+                    com.dawn.payment.infra.mock.MockGatewayAdapter mock =
+                            (com.dawn.payment.infra.mock.MockGatewayAdapter) gatewayRegistry.get(PaymentMethod.MOCK);
+                    return mock.queryTransaction(payment.getTransactionRef(), payment.getId());
+                }
+                return ((VnpayGatewayAdapter) gatewayRegistry.get(payment.getMethod()))
+                        .queryTransaction(payment.getTransactionRef(), payment.getId());
+            };
             return CompletableFuture
-                    .supplyAsync(() -> ((VnpayGatewayAdapter) gatewayRegistry.get(payment.getMethod()))
-                            .queryTransaction(payment.getTransactionRef(), payment.getId()))
+                    .supplyAsync(query)
                     .orTimeout(VNPAY_TIMEOUT.toMillis(), java.util.concurrent.TimeUnit.MILLISECONDS)
                     .join();
         } catch (CancellationException | CompletionException e) {

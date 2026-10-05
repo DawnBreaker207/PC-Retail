@@ -68,6 +68,10 @@ public class MailtrapAdapter implements EmailPort {
             String subject,
             String templateName,
             Context ctx) {
+        if (fromAddress == null || fromAddress.isBlank()) {
+            log.warn("Mail from-address not configured, skip '{}' to {}", subject, to);
+            return;
+        }
         try {
             String html = templateEngine.process(templateName, ctx);
 
@@ -83,6 +87,9 @@ public class MailtrapAdapter implements EmailPort {
             log.debug("Email '{}' send to {}", subject, to);
         } catch (MessagingException ex) {
             log.warn("Failed to send email '{}' to {}: {}", subject, to, ex.getMessage());
+        } catch (org.springframework.mail.MailException ex) {
+            // SMTP down/timeout: nuốt lỗi, consumer quyết định retry/DLQ — không vỡ flow gọi
+            log.warn("Mail provider error for '{}' to {}: {}", subject, to, ex.getMessage());
         }
     }
 }

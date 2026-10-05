@@ -2,7 +2,7 @@
   <div class="max-w-screen-2xl mx-auto">
     <!-- Top promo bar -->
     <div class="hidden lg:flex items-center justify-between h-8 px-4 bg-primary-dark border-b border-white/10">
-      <a routerLink="/" class="flex items-center gap-1.5 text-xs !text-white/70 hover:!text-white transition-colors">
+      <a routerLink="/khuyen-mai" class="flex items-center gap-1.5 text-xs !text-white/70 hover:!text-white transition-colors">
         <span class="text-white font-medium">PC GVN Tháng 11</span>
       </a>
       <div class="flex items-center gap-4 text-xs text-white/70">
@@ -10,8 +10,8 @@
           <span nz-icon nzType="phone" class="text-xs"></span>
           <span>Hotline: <strong>1900 5301</strong></span>
         </a>
-        <a routerLink="/" class="!text-white/70 hover:!text-white transition-colors">hệ thống Showroom</a>
-        <a routerLink="/" class="!text-white/70 hover:!text-white transition-colors">Tra cứu đơn hàng</a>
+        <a routerLink="/he-thong-showroom" class="!text-white/70 hover:!text-white transition-colors">hệ thống Showroom</a>
+        <a routerLink="/tra-cuu-don-hang" class="!text-white/70 hover:!text-white transition-colors">Tra cứu đơn hàng</a>
       </div>
     </div>
 
@@ -52,6 +52,13 @@
           <span nz-icon nzType="search" class="text-lg text-white"></span>
         </button>
 
+        <!-- Wishlist -->
+        <button nz-button nzType="text" routerLink="/yeu-thich" aria-label="Sản phẩm yêu thích" class="hidden sm:!inline-flex !items-center !justify-center !w-9 !h-9 !min-w-[44px] !min-h-[44px] !rounded-full hover:!bg-white/10 !transition-colors relative">
+          <nz-badge [nzCount]="wishlistCount()" [nzShowZero]="false" class="[&_.ant-badge-count]:!shadow-sm [&_.ant-badge-count]:!text-[11px] [&_.ant-badge-count]:!font-bold">
+            <span nz-icon nzType="heart" class="text-xl !text-white"></span>
+          </nz-badge>
+        </button>
+
         <!-- Cart -->
         <button nz-button nzType="text" routerLink="/cart" aria-label="Giỏ hàng" class="!inline-flex !items-center !justify-center !w-9 !h-9 !min-w-[44px] !min-h-[44px] !rounded-full hover:!bg-white/10 !transition-colors relative">
           <nz-badge [nzCount]="cartCount()" [nzShowZero]="false" class="[&_.ant-badge-count]:!shadow-sm [&_.ant-badge-count]:!text-[11px] [&_.ant-badge-count]:!font-bold">
@@ -61,9 +68,7 @@
 
         <!-- Desktop utility links -->
           <div class="hidden lg:flex items-center gap-1">
-          <button type="button" nz-button nzType="text" nz-tooltip="Thông báo" aria-label="Thông báo" class="!inline-flex !items-center !justify-center !w-11 !h-11 !rounded-full hover:!bg-white/10">
-            <span nz-icon nzType="bell" class="text-lg text-white"></span>
-          </button>
+          <app-notification-bell></app-notification-bell>
 
           <button type="button" nz-button nzType="text" (click)="toggleTheme()" nz-tooltip="Giao diện" aria-label="Chuyển giao diện" class="!inline-flex !items-center !justify-center !w-11 !h-11 !rounded-full hover:!bg-white/10">
             @if (isDark()) {
@@ -77,13 +82,36 @@
         <!-- User -->
         @if (isLoggedIn()) {
           <div nz-dropdown [nzDropdownMenu]="userMenu" nzPlacement="bottomRight">
-            <nz-avatar nzIcon="user" aria-label="Tài khoản" class="cursor-pointer !bg-white/20 !text-white hover:!bg-white/30 !transition-colors !w-8 !h-8 !min-w-[44px] !min-h-[44px] lg:!w-9 lg:!h-9"></nz-avatar>
+            <nz-avatar [nzText]="userInitials" aria-label="Tài khoản" class="cursor-pointer !bg-white/20 !text-white hover:!bg-white/30 !transition-colors !w-8 !h-8 !min-w-[44px] !min-h-[44px] lg:!w-9 lg:!h-9"></nz-avatar>
           </div>
           <nz-dropdown-menu #userMenu="nzDropdownMenu">
-            <ul nz-menu class="!rounded-lg !shadow-lg !border !border-border dark:!border-border-dark !overflow-hidden !min-w-[180px] !bg-surface dark:!bg-surface-dark">
+            <ul nz-menu class="!rounded-lg !shadow-lg !border !border-border dark:!border-border-dark !overflow-hidden !min-w-[220px] !bg-surface dark:!bg-surface-dark">
+              <li class="!flex !items-center !gap-3 !py-3 !px-4 !cursor-default">
+                <nz-avatar [nzText]="userInitials" class="!bg-primary !text-white shrink-0"></nz-avatar>
+                <div class="min-w-0">
+                  <p class="text-sm font-semibold text-ink dark:text-ink-dark truncate">{{ userName }}</p>
+                  <p class="text-xs text-muted dark:text-muted-dark truncate">{{ userEmail }}</p>
+                </div>
+              </li>
+              <li nz-menu-divider class="!my-1"></li>
+              @if (isAdminOrStaff()) {
+                <li nz-menu-item routerLink="/admin" class="!flex !items-center !gap-2 !py-2.5 !text-primary hover:!bg-bg dark:hover:!bg-white/5">
+                  <span nz-icon nzType="dashboard"></span>
+                  Trang quản trị
+                </li>
+                <li nz-menu-divider class="!my-1"></li>
+              }
+              <li nz-menu-item routerLink="/account" class="!flex !items-center !gap-2 !py-2.5 !text-ink dark:!text-ink-dark hover:!bg-bg dark:hover:!bg-white/5">
+                <span nz-icon nzType="user"></span>
+                Tài khoản của tôi
+              </li>
               <li nz-menu-item routerLink="/orders" class="!flex !items-center !gap-2 !py-2.5 !text-ink dark:!text-ink-dark hover:!bg-bg dark:hover:!bg-white/5">
                 <span nz-icon nzType="file-text"></span>
                 Đơn hàng của tôi
+              </li>
+              <li nz-menu-item routerLink="/yeu-thich" class="!flex !items-center !gap-2 !py-2.5 !text-ink dark:!text-ink-dark hover:!bg-bg dark:hover:!bg-white/5 sm:!hidden">
+                <span nz-icon nzType="heart"></span>
+                Yêu thích
               </li>
               <li nz-menu-divider class="!my-1"></li>
               <li nz-menu-item (click)="logout()" (keyup.enter)="logout()" tabindex="0" class="!flex !items-center !gap-2 !py-2.5 !text-error hover:!bg-bg dark:hover:!bg-white/5">
@@ -125,7 +153,13 @@
             <span nz-icon nzType="close" class="text-lg"></span>
           </button>
         </div>
-        <div class="p-4 space-y-0.5">
+        <div class="p-4">
+          <a routerLink="/pc-builder" class="flex items-center gap-2 px-4 py-3 mb-2 text-sm font-semibold text-white bg-primary hover:bg-primary-dark rounded-lg transition-colors" (click)="showMobileMenu.set(false)">
+            <span nz-icon nzType="build" nzTheme="fill"></span>
+            Build PC theo yêu cầu
+          </a>
+        </div>
+        <div class="px-4 pb-4 space-y-0.5">
           @for (cat of categories; track cat.slug) {
             <a [routerLink]="['/products']" [queryParams]="{ category: cat.slug }" class="block px-4 py-3 text-sm text-muted dark:text-muted-dark hover:text-primary hover:bg-primary/5 dark:hover:bg-primary/10 rounded-lg transition-colors" (click)="showMobileMenu.set(false)">
               {{ cat.name }}
@@ -137,11 +171,11 @@
             <span nz-icon nzType="phone"></span>
             Hotline: <strong>1900 5301</strong>
           </a>
-          <a routerLink="/" class="flex items-center gap-2 hover:text-primary transition-colors">
+          <a routerLink="/he-thong-showroom" class="flex items-center gap-2 hover:text-primary transition-colors" (click)="showMobileMenu.set(false)">
             <span nz-icon nzType="environment"></span>
             Hệ thống Showroom
           </a>
-          <a routerLink="/" class="flex items-center gap-2 hover:text-primary transition-colors">
+          <a routerLink="/tra-cuu-don-hang" class="flex items-center gap-2 hover:text-primary transition-colors" (click)="showMobileMenu.set(false)">
             <span nz-icon nzType="search"></span>
             Tra cứu đơn hàng
           </a>

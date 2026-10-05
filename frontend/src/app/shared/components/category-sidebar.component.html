@@ -1,0 +1,20 @@
+<nav class="w-64 shrink-0 bg-surface dark:bg-surface-dark rounded-xl border border-border/80 dark:border-border-dark/80 shadow-sm overflow-hidden">
+  <div class="px-4 py-3 border-b border-border/60 dark:border-border-dark/60">
+    <h3 class="text-xs font-semibold uppercase tracking-wider text-muted dark:text-muted-dark">Danh mục</h3>
+  </div>
+  <ul class="py-1">
+    @for (cat of categories; track cat.slug) {
+      <li>
+        <a
+          [routerLink]="['/products']"
+          [queryParams]="{ category: cat.slug }"
+          class="flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors hover:bg-bg dark:hover:bg-bg-dark hover:text-primary"
+        >
+          <span nz-icon [nzType]="cat.icon" nzTheme="outline" class="text-base w-5 text-center shrink-0 text-primary"></span>
+          <span class="flex-1 truncate">{{ cat.name }}</span>
+          <span nz-icon nzType="right" nzTheme="outline" class="text-xs text-muted dark:text-muted-dark shrink-0"></span>
+        </a>
+      </li>
+    }
+  </ul>
+</nav>

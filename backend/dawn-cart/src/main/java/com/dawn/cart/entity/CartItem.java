@@ -21,8 +21,12 @@ import java.time.Instant;
 @ToString(callSuper = true)
 public class CartItem extends AbstractMappedEntity {
 
-    @Column(name = "user_id", nullable = false)
+    @Column(name = "user_id")
     private Long userId;
+
+    // Giỏ khách vãng lai: user_id null + guest_token (CHECK 1-trong-2 ở DB)
+    @Column(name = "guest_token", length = 100)
+    private String guestToken;
 
     @Column(name = "sku_id", nullable = false)
     private Long skuId;

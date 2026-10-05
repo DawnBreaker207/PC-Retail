@@ -1,7 +1,7 @@
 <div class="max-w-screen-2xl mx-auto px-4 mt-8 lg:mt-10">
   <div class="flex items-center justify-between mb-5">
     <h2 class="text-lg lg:text-xl font-bold tracking-tight">{{ section().title }}</h2>
-    <a [routerLink]="section().link" class="text-sm text-muted dark:text-muted-dark hover:text-primary font-medium transition-colors">
+    <a [routerLink]="linkPath()" [queryParams]="linkQueryParams()" class="text-sm text-muted dark:text-muted-dark hover:text-primary font-medium transition-colors">
       Xem tất cả →
     </a>
   </div>

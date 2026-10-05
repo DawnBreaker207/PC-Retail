@@ -1,1 +1,6 @@
 :host { display: block; }
+
+.category-sidebar-elevated {
+  position: relative;
+  z-index: 41;
+}

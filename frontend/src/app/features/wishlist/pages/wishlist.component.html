@@ -1,0 +1,23 @@
+<div class="max-w-screen-2xl mx-auto px-4 py-6 lg:py-8">
+  <nz-breadcrumb class="mb-4">
+    <nz-breadcrumb-item><a routerLink="/">Trang chủ</a></nz-breadcrumb-item>
+    <nz-breadcrumb-item>Sản phẩm yêu thích</nz-breadcrumb-item>
+  </nz-breadcrumb>
+
+  <h1 class="text-lg lg:text-xl font-bold mb-5">Sản phẩm yêu thích ({{ products().length }})</h1>
+
+  @if (products().length === 0) {
+    <app-empty-state
+      title="Bạn chưa thêm sản phẩm yêu thích nào"
+      description="Bấm vào biểu tượng trái tim trên sản phẩm để lưu lại tại đây."
+      actionLabel="Khám phá sản phẩm"
+      actionRoute="/products"
+    />
+  } @else {
+    <div class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-4">
+      @for (product of products(); track product.id) {
+        <app-product-card [product]="product" (addToCart)="addToCart(product.id)" />
+      }
+    </div>
+  }
+</div>

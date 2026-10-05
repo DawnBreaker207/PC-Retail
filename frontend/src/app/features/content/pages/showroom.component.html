@@ -1,0 +1,30 @@
+<div class="max-w-screen-2xl mx-auto px-4 py-6 lg:py-8">
+  <nz-breadcrumb class="mb-4">
+    <nz-breadcrumb-item><a routerLink="/">Trang chủ</a></nz-breadcrumb-item>
+    <nz-breadcrumb-item>Hệ thống showroom</nz-breadcrumb-item>
+  </nz-breadcrumb>
+
+  <h1 class="text-xl lg:text-2xl font-bold mb-6">Hệ thống showroom</h1>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    @for (s of showrooms; track s.name) {
+      <div class="rounded-xl border border-border/80 dark:border-border-dark/80 shadow-sm p-4">
+        <h2 class="text-base font-semibold mb-2">{{ s.name }}</h2>
+        <ul class="space-y-2 text-sm text-muted dark:text-muted-dark">
+          <li class="flex items-start gap-2">
+            <span nz-icon nzType="environment" class="mt-0.5 shrink-0 text-primary"></span>
+            <span>{{ s.address }}</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <span nz-icon nzType="phone" class="mt-0.5 shrink-0 text-primary"></span>
+            <span>{{ s.phone }}</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <span nz-icon nzType="clock-circle" class="mt-0.5 shrink-0 text-primary"></span>
+            <span>{{ s.hours }}</span>
+          </li>
+        </ul>
+      </div>
+    }
+  </div>
+</div>

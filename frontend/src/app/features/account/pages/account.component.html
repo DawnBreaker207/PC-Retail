@@ -1,0 +1,142 @@
+<div class="max-w-6xl mx-auto" [class.px-4]="!isStaffOrAdmin()" [class.py-8]="!isStaffOrAdmin()">
+  @if (!isStaffOrAdmin()) {
+    <nz-breadcrumb class="mb-4">
+      <nz-breadcrumb-item><a routerLink="/">Trang chủ</a></nz-breadcrumb-item>
+      <nz-breadcrumb-item>Tài khoản của tôi</nz-breadcrumb-item>
+    </nz-breadcrumb>
+  }
+
+  <div class="mb-6">
+    <h1 class="text-2xl font-bold text-ink dark:text-ink-dark">Tài khoản của tôi</h1>
+    <p class="text-muted dark:text-muted-dark text-sm mt-0.5">
+      {{ isStaffOrAdmin() ? 'Quản lý thông tin cá nhân và bảo mật tài khoản' : 'Quản lý thông tin cá nhân, địa chỉ và ưu đãi của bạn' }}
+    </p>
+  </div>
+
+  <div class="bg-surface dark:bg-surface-dark rounded-card shadow-sm border border-border/60 dark:border-border-dark/60 overflow-hidden min-h-[560px]">
+    <nz-tabset [nzTabPosition]="tabPosition()" class="account-tabs">
+      <nz-tab [nzTitle]="tabProfile">
+        <ng-template #tabProfile>
+          <span class="flex items-center gap-2 px-1 sm:px-2">
+            <span nz-icon nzType="idcard" class="tab-icon"></span>
+            @if (tabPosition() === 'left') { Thông tin cá nhân }
+          </span>
+        </ng-template>
+        <div class="p-6 md:p-8">
+          <p class="text-xs font-bold text-muted dark:text-muted-dark uppercase tracking-wider mb-5">Hồ sơ</p>
+          <div class="flex flex-col sm:flex-row items-center gap-6 mb-8">
+            <div class="relative shrink-0">
+              <div class="w-28 h-28 rounded-full flex items-center justify-center bg-primary text-white text-3xl font-bold border-4 border-surface dark:border-surface-dark shadow-lg ring-1 ring-border dark:ring-border-dark">
+                {{ userInitials }}
+              </div>
+              <nz-tag nzColor="geekblue" class="!absolute !-bottom-1 !right-2 !rounded-full !border-2 !border-surface dark:!border-surface-dark !shadow-sm !text-[11px]">
+                {{ userRoleLabel }}
+              </nz-tag>
+            </div>
+            <div class="text-center sm:text-left">
+              <p class="text-lg font-semibold text-ink dark:text-ink-dark">{{ profileForm.value.fullName || '—' }}</p>
+              <p class="text-sm text-muted dark:text-muted-dark">{{ profileForm.value.email }}</p>
+            </div>
+          </div>
+
+          <p class="text-xs font-bold text-muted dark:text-muted-dark uppercase tracking-wider mb-4">Thông tin cơ bản</p>
+          <form [formGroup]="profileForm" (ngSubmit)="saveProfile()" class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+            <nz-form-item class="!mb-0 !flex-col">
+              <label class="text-xs font-medium mb-1.5 leading-none">Họ và tên</label>
+              <nz-form-control>
+                <input nz-input formControlName="fullName" placeholder="Họ và tên" class="!h-11 !rounded-lg" />
+              </nz-form-control>
+            </nz-form-item>
+
+            <nz-form-item class="!mb-0 !flex-col">
+              <label class="text-xs font-medium mb-1.5 leading-none">Số điện thoại</label>
+              <nz-form-control>
+                <input nz-input formControlName="phone" placeholder="Số điện thoại" class="!h-11 !rounded-lg" />
+              </nz-form-control>
+            </nz-form-item>
+
+            <nz-form-item class="!mb-0 !flex-col md:!col-span-2">
+              <label class="text-xs font-medium mb-1.5 leading-none">Email</label>
+              <nz-form-control>
+                <div class="relative">
+                  <input nz-input formControlName="email" class="!h-11 !rounded-lg !bg-bg dark:!bg-bg-dark !text-muted dark:!text-muted-dark !cursor-not-allowed !pr-10" />
+                  <span nz-icon nzType="lock" nz-tooltip="Không thể thay đổi email" class="!absolute !right-3 !top-1/2 !-translate-y-1/2 text-muted dark:text-muted-dark text-sm"></span>
+                </div>
+              </nz-form-control>
+            </nz-form-item>
+
+            <div class="md:col-span-2 flex justify-end pt-4 border-t border-border/60 dark:border-border-dark/60">
+              <button type="submit" nz-button nzType="primary" nzSize="large" [nzLoading]="isSavingProfile()" [disabled]="profileForm.invalid" class="!rounded-lg !px-6 !shadow-lg !shadow-primary/20">
+                Lưu thay đổi
+              </button>
+            </div>
+          </form>
+        </div>
+      </nz-tab>
+
+      <nz-tab [nzTitle]="tabPassword">
+        <ng-template #tabPassword>
+          <span class="flex items-center gap-2 px-1 sm:px-2">
+            <span nz-icon nzType="lock" class="tab-icon"></span>
+            @if (tabPosition() === 'left') { Đổi mật khẩu }
+          </span>
+        </ng-template>
+        <div class="p-6 md:p-8">
+          <p class="text-xs font-bold text-muted dark:text-muted-dark uppercase tracking-wider mb-4">Bảo mật</p>
+          <form [formGroup]="passwordForm" (ngSubmit)="changePassword()" class="flex flex-col gap-4 max-w-sm">
+            <nz-form-item class="!mb-0 !flex-col">
+              <label class="text-xs font-medium mb-1.5 leading-none">Mật khẩu hiện tại</label>
+              <nz-form-control>
+                <input nz-input type="password" formControlName="currentPassword" placeholder="Mật khẩu hiện tại" class="!h-11 !rounded-lg" />
+              </nz-form-control>
+            </nz-form-item>
+
+            <nz-form-item class="!mb-0 !flex-col">
+              <label class="text-xs font-medium mb-1.5 leading-none">Mật khẩu mới</label>
+              <nz-form-control>
+                <input nz-input type="password" formControlName="newPassword" placeholder="Ít nhất 6 ký tự" class="!h-11 !rounded-lg" />
+              </nz-form-control>
+            </nz-form-item>
+
+            <div class="pt-4 border-t border-border/60 dark:border-border-dark/60">
+              <button type="submit" nz-button nzType="primary" nzSize="large" [nzLoading]="isSavingPassword()" [disabled]="passwordForm.invalid" class="!rounded-lg !px-6 !shadow-lg !shadow-primary/20">
+                Đổi mật khẩu
+              </button>
+            </div>
+          </form>
+        </div>
+      </nz-tab>
+
+      @if (!isStaffOrAdmin()) {
+        <nz-tab [nzTitle]="tabAddress">
+          <ng-template #tabAddress>
+            <span class="flex items-center gap-2 px-1 sm:px-2">
+              <span nz-icon nzType="environment" class="tab-icon"></span>
+              @if (tabPosition() === 'left') { Sổ địa chỉ }
+            </span>
+          </ng-template>
+          <div class="p-6 md:p-8">
+            <app-address-book />
+          </div>
+        </nz-tab>
+
+        <nz-tab [nzTitle]="tabVoucher">
+          <ng-template #tabVoucher>
+            <span class="flex items-center gap-2 px-1 sm:px-2">
+              <span nz-icon nzType="tags" class="tab-icon"></span>
+              @if (tabPosition() === 'left') { Voucher của tôi }
+            </span>
+          </ng-template>
+          <div class="p-6 md:p-8">
+            <app-my-vouchers />
+          </div>
+        </nz-tab>
+      }
+    </nz-tabset>
+  </div>
+
+  <button nz-button nzType="text" (click)="logout()" class="!mt-4 !text-error !px-0">
+    <span nz-icon nzType="logout"></span>
+    Đăng xuất
+  </button>
+</div>

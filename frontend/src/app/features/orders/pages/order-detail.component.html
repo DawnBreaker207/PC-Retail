@@ -7,6 +7,11 @@
         <a routerLink="/orders" class="text-sm text-muted dark:text-muted-dark hover:text-primary transition-colors duration-200">← Đơn hàng</a>
         <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold mt-1 tracking-tight">Đơn hàng #ORD-{{ o.id }}</h1>
       </div>
+      @if (isReturnable) {
+        <button nz-button nzSize="small" (click)="requestReturn()" class="shrink-0 !rounded-lg !shadow-sm">
+          Request return
+        </button>
+      }
       @if (isCancellable) {
         <button nz-button nzSize="small" nzDanger nz-popconfirm nzPopconfirmTitle="Hủy đơn hàng này?" (nzOnConfirm)="cancelOrder()" class="shrink-0 !rounded-lg !shadow-sm">
           Hủy đơn

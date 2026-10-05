@@ -61,14 +61,9 @@ public class InventoryCommandService implements ReserveStockUseCase, ReleaseStoc
                     .referenceId(orderId)
                     .build());
 
-            snapshot.put(item.skuId(), inv.getAvailableQuantity() - item.quantity());
+            snapshot.put(item.skuId(), inv.getAvailableQuantity());
         }
-        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-            @Override
-            public void afterCommit() {
-                snapshot.forEach(cachePort::setStock);
-            }
-        });
+        runAfterCommit(() -> snapshot.forEach(cachePort::setStock));
     }
 
     // RELEASE
@@ -94,12 +89,7 @@ public class InventoryCommandService implements ReserveStockUseCase, ReleaseStoc
         }
 
         // Update Redis after commit (AFTER_COMMIT)
-        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-            @Override
-            public void afterCommit() {
-                cachePort.incrementBatch(items);
-            }
-        });
+        runAfterCommit(() -> cachePort.incrementBatch(items));
 
     }
 
@@ -128,12 +118,9 @@ public class InventoryCommandService implements ReserveStockUseCase, ReleaseStoc
                     .referenceId(orderId)
                     .build());
 
-            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-                @Override
-                public void afterCommit() {
-                    cachePort.setStock(item.skuId(), inv.getAvailableQuantity());
-                }
-            });
+            final Long skuId = item.skuId();
+            final int available = inv.getAvailableQuantity();
+            runAfterCommit(() -> cachePort.setStock(skuId, available));
         }
     }
 
@@ -143,6 +130,9 @@ public class InventoryCommandService implements ReserveStockUseCase, ReleaseStoc
     @Transactional
     @Loggable(action = LogConstant.Action.IMPORT_STOCK, entity = LogConstant.Entity.WAREHOUSE)
     public void restock(Long skuId, int quantity, BigDecimal unitCost, Long userId) {
+        if (quantity <= 0) {
+            throw new InvalidRequestException(Message.format(Message.Inventory.INVALID_QUANTITY, skuId));
+        }
         Inventory inv = inventoryRepository.findBySkuIdWithLock(skuId)
                 .orElseGet(() -> Inventory.builder()
                         .skuId(skuId)
@@ -163,11 +153,20 @@ public class InventoryCommandService implements ReserveStockUseCase, ReleaseStoc
                 .build());
         // Sync Redis after commit
         int newAvailable = inv.getAvailableQuantity();
-        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-            @Override
-            public void afterCommit() {
-                cachePort.setStock(skuId, newAvailable);
-            }
-        });
+        runAfterCommit(() -> cachePort.setStock(skuId, newAvailable));
+    }
+
+    /** Chạy sau commit; không có transaction thì chạy ngay (robust khi gọi lẻ/test). */
+    private void runAfterCommit(Runnable task) {
+        if (TransactionSynchronizationManager.isSynchronizationActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    task.run();
+                }
+            });
+        } else {
+            task.run();
+        }
     }
 }

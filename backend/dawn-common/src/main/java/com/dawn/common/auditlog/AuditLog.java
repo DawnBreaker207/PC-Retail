@@ -27,8 +27,12 @@ public class AuditLog extends AbstractMappedEntity {
 
     private Long entityId;
 
+    @org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.JSON)
+    @Column(columnDefinition = "jsonb")
     private String oldValue;
 
+    @org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.JSON)
+    @Column(columnDefinition = "jsonb")
     private String newValue;
 
     private String ipAddress;

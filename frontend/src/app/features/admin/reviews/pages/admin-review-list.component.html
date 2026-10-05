@@ -1,0 +1,50 @@
+<div class="mb-6">
+  <h1 class="text-2xl font-bold text-ink dark:text-ink-dark">Đánh giá sản phẩm</h1>
+  <p class="text-muted dark:text-muted-dark text-sm">Duyệt/ẩn đánh giá của khách hàng (mock, chưa nối backend thật)</p>
+</div>
+
+<div class="mb-4">
+  <nz-select [ngModel]="statusFilter()" (ngModelChange)="onStatusChange($event)" class="min-w-[160px]">
+    @for (opt of STATUS_OPTIONS; track opt.value) {
+      <nz-option [nzValue]="opt.value" [nzLabel]="opt.label" />
+    }
+  </nz-select>
+</div>
+
+<nz-table [nzData]="reviews()" [nzLoading]="loading()" [nzFrontPagination]="false" [nzShowPagination]="false">
+  <thead>
+    <tr>
+      <th>Sản phẩm</th>
+      <th>Khách hàng</th>
+      <th>Đánh giá</th>
+      <th>Nội dung</th>
+      <th>Trạng thái</th>
+      <th>Ngày</th>
+      <th class="text-right">Thao tác</th>
+    </tr>
+  </thead>
+  <tbody>
+    @for (r of reviews(); track r.id) {
+      <tr>
+        <td class="max-w-40 truncate">{{ r.productName }}</td>
+        <td>{{ r.fullName }}</td>
+        <td><nz-rate [ngModel]="r.rating" nzDisabled class="!text-xs" /></td>
+        <td class="max-w-72 truncate">{{ r.comment }}</td>
+        <td><nz-tag [nzColor]="STATUS_COLOR[r.status || 'PENDING']">{{ getStatusLabel(r.status) }}</nz-tag></td>
+        <td>{{ r.createdAt | date:'dd/MM/yyyy' }}</td>
+        <td class="text-right">
+          @if (r.status !== 'APPROVED') {
+            <button nz-button nzType="text" nzSize="small" (click)="moderate(r, 'APPROVED')" aria-label="Duyệt">
+              <span nz-icon nzType="check" class="text-success"></span>
+            </button>
+          }
+          @if (r.status !== 'HIDDEN') {
+            <button nz-button nzType="text" nzSize="small" nzDanger (click)="moderate(r, 'HIDDEN')" aria-label="Ẩn">
+              <span nz-icon nzType="eye-invisible"></span>
+            </button>
+          }
+        </td>
+      </tr>
+    }
+  </tbody>
+</nz-table>

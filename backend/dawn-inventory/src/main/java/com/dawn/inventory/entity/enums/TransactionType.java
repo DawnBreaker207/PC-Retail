@@ -5,5 +5,9 @@ public enum TransactionType {
     RELEASE,
     DEDUCT,
     RESTOCK,
-    ADJUST
+    ADJUST,
+    // docs §13.6: tách ADJUST + thêm RETURN
+    ADJUSTMENT_IN,
+    ADJUSTMENT_OUT,
+    RETURN
 }

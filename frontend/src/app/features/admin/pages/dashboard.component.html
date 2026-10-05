@@ -3,6 +3,8 @@
   <p class="text-muted dark:text-muted-dark text-sm">Tổng quan cửa hàng PC Retail</p>
 </div>
 
+<nz-tabset [nzSelectedIndex]="defaultTabIndex">
+  <nz-tab nzTitle="Phân tích">
 @if (!summary) {
   <div class="flex justify-center py-20"><nz-spin nzSize="large"></nz-spin></div>
 } @else {
@@ -103,3 +105,73 @@
     </nz-table>
   </nz-card>
 }
+  </nz-tab>
+
+  <nz-tab nzTitle="Work Queue">
+    @if (workQueueLoading()) {
+      <div class="flex justify-center py-20"><nz-spin nzSize="large"></nz-spin></div>
+    } @else {
+      @if (isAdmin) {
+        <nz-card nzTitle="Việc cần tôi xử lý" class="rounded-card shadow-sm mb-6">
+          @if (pendingReturns().length === 0) {
+            <p class="text-muted dark:text-muted-dark text-sm py-6 text-center">Không có yêu cầu trả hàng nào chờ duyệt</p>
+          } @else {
+            <nz-table [nzData]="pendingReturns()" [nzFrontPagination]="false" [nzShowPagination]="false" nzSize="small">
+              <thead>
+                <tr>
+                  <th>Đơn hàng</th>
+                  <th>Sản phẩm</th>
+                  <th>Khách hàng</th>
+                  <th class="text-right">Thao tác</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (r of pendingReturns(); track r.id) {
+                  <tr>
+                    <td>#ORD-{{ r.orderId }}</td>
+                    <td class="max-w-56 truncate">{{ r.skuName }}</td>
+                    <td>{{ r.createdByName }}</td>
+                    <td class="text-right">
+                      <a [routerLink]="['/admin/returns', r.id]" class="text-primary text-sm font-medium hover:underline">Xử lý</a>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </nz-table>
+          }
+        </nz-card>
+      }
+
+      <nz-card nzTitle="Việc tôi đang theo dõi" class="rounded-card shadow-sm">
+        @if (pendingOrders().length === 0) {
+          <p class="text-muted dark:text-muted-dark text-sm py-6 text-center">Không có đơn nào chờ thanh toán</p>
+        } @else {
+          <nz-table [nzData]="pendingOrders()" [nzFrontPagination]="false" [nzShowPagination]="false" nzSize="small">
+            <thead>
+              <tr>
+                <th>Mã đơn</th>
+                <th>Khách hàng</th>
+                <th class="text-right">Tổng tiền</th>
+                <th>Ngày tạo</th>
+                <th class="text-right">Thao tác</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (o of pendingOrders(); track o.id) {
+                <tr>
+                  <td>#ORD-{{ o.id }}</td>
+                  <td>{{ o.shippingAddress?.fullName || '—' }}</td>
+                  <td class="text-right">{{ o.totalAmount | currencyFormat }}</td>
+                  <td>{{ o.createdAt | date:'dd/MM/yyyy' }}</td>
+                  <td class="text-right">
+                    <a [routerLink]="['/admin/orders', o.id]" class="text-primary text-sm font-medium hover:underline">Xem</a>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </nz-table>
+        }
+      </nz-card>
+    }
+  </nz-tab>
+</nz-tabset>

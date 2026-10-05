@@ -1,0 +1,78 @@
+<div class="mb-6">
+  <h1 class="text-2xl font-bold text-ink dark:text-ink-dark">Audit Log</h1>
+  <p class="text-muted dark:text-muted-dark text-sm">Lịch sử thao tác trong hệ thống (mock, chưa nối backend thật)</p>
+</div>
+
+<div class="flex flex-wrap items-center gap-3 mb-4">
+  <input
+    nz-input
+    placeholder="Tìm theo người thực hiện"
+    [(ngModel)]="actorSearch"
+    (ngModelChange)="onSearch()"
+    class="max-w-xs"
+  />
+  <nz-select [ngModel]="outcomeFilter()" (ngModelChange)="onOutcomeChange($event)" class="min-w-[160px]">
+    @for (opt of OUTCOME_OPTIONS; track opt.value) {
+      <nz-option [nzValue]="opt.value" [nzLabel]="opt.label" />
+    }
+  </nz-select>
+</div>
+
+<nz-table [nzData]="logs()" [nzLoading]="loading()" [nzFrontPagination]="false" [nzShowPagination]="false">
+  <thead>
+    <tr>
+      <th></th>
+      <th>Hành động</th>
+      <th>Đối tượng</th>
+      <th>Người thực hiện</th>
+      <th>Kết quả</th>
+      <th>Thời gian</th>
+    </tr>
+  </thead>
+  <tbody>
+    @for (log of logs(); track log.id) {
+      <tr class="cursor-pointer" (click)="toggleExpand(log.id)">
+        <td>
+          <span nz-icon [nzType]="expandedId() === log.id ? 'down' : 'right'" class="text-xs text-muted"></span>
+        </td>
+        <td>
+          <span class="font-medium" [class.text-error]="isRisky(log.action)">{{ log.action }}</span>
+        </td>
+        <td class="text-muted dark:text-muted-dark">{{ log.entityType }} #{{ log.entityId }}</td>
+        <td>{{ log.actorName }} <span class="text-xs text-muted dark:text-muted-dark">({{ log.actorRole }})</span></td>
+        <td>
+          <nz-tag [nzColor]="log.outcome === 'SUCCESS' ? 'success' : 'error'">{{ log.outcome === 'SUCCESS' ? 'Thành công' : 'Thất bại' }}</nz-tag>
+        </td>
+        <td>{{ log.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
+      </tr>
+      @if (expandedId() === log.id) {
+        <tr>
+          <td colspan="6" class="bg-bg dark:bg-bg-dark !p-4">
+            @if (getDiff(log).length > 0) {
+              <table class="w-full text-xs">
+                <thead>
+                  <tr class="text-muted dark:text-muted-dark">
+                    <th class="text-left font-medium pb-2">Trường</th>
+                    <th class="text-left font-medium pb-2">Giá trị cũ</th>
+                    <th class="text-left font-medium pb-2">Giá trị mới</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (field of getDiff(log); track field.key) {
+                    <tr class="border-t border-border/60 dark:border-border-dark/60">
+                      <td class="py-1.5 font-medium">{{ field.key }}</td>
+                      <td class="py-1.5 text-error line-through">{{ field.oldValue }}</td>
+                      <td class="py-1.5 text-success">{{ field.newValue }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            } @else {
+              <p class="text-xs text-muted dark:text-muted-dark">Không có dữ liệu thay đổi chi tiết.</p>
+            }
+          </td>
+        </tr>
+      }
+    }
+  </tbody>
+</nz-table>

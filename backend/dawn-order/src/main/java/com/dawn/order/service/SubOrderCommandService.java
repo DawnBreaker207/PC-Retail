@@ -2,6 +2,7 @@ package com.dawn.order.service;
 
 import com.dawn.common.auditlog.LogConstant;
 import com.dawn.common.auditlog.Loggable;
+import com.dawn.common.exception.wrapper.ConflictException;
 import com.dawn.common.exception.wrapper.ResourceNotFoundException;
 import com.dawn.common.message.Message;
 import com.dawn.common.redis.service.RedisService;
@@ -47,37 +48,45 @@ public class SubOrderCommandService implements TransitionSubOrderUseCase {
 
         stateMachine.assertValidTransition(subOrder.getStatus(), target);
 
-        if (target == SubOrderStatus.PAID) {
-            List<StockDecrementCommand> items = toStockCommands(subOrder.getId());
-            inventoryClient.deduct(items, subOrder.getOrderId());
-        }
-        if (target == SubOrderStatus.CANCELLED || target == SubOrderStatus.EXPIRED) {
-            List<StockDecrementCommand> items = toStockCommands(subOrder.getId());
-            inventoryClient.release(items, subOrder.getOrderId());
+        // ponytail: CAS gate trước inventory — thua race thì throw ngay, không gọi inventory 2 lần
+        int claimed = subOrderRepo.transitionIfStatus(subOrderId, subOrder.getStatus(), target);
+        if (claimed == 0) {
+            throw new ConflictException(Message.format(Message.Order.INVALID_TRANSITION, "STALE", target));
         }
 
-        appendHistory(subOrder, target, staffId);
-        subOrder.setStatus(target);
-        subOrderRepo.save(subOrder);
-        return toDto(subOrder);
+        try {
+            if (target == SubOrderStatus.PAID) {
+                List<StockDecrementCommand> items = toStockCommands(subOrder.getId());
+                inventoryClient.deduct(items, subOrder.getOrderId());
+            }
+            if (target == SubOrderStatus.CANCELLED || target == SubOrderStatus.EXPIRED) {
+                List<StockDecrementCommand> items = toStockCommands(subOrder.getId());
+                if (subOrder.getStatus() == SubOrderStatus.PENDING_PAYMENT) {
+                    // Chưa trừ kho → chỉ nhả reservation
+                    inventoryClient.release(items, subOrder.getOrderId());
+                } else {
+                    // Đã trừ kho (từ PAID/PROCESSING) → nhập kho bù
+                    inventoryClient.restock(items, staffId);
+                }
+            }
+        } catch (RuntimeException e) {
+            // Compensate: nhả claim CAS nếu inventory fail
+            subOrderRepo.transitionIfStatus(subOrderId, target, subOrder.getStatus());
+            throw e;
+        }
+
+        SubOrder fresh = subOrderRepo.findById(subOrderId).orElse(subOrder);
+        appendHistory(fresh, target, staffId);
+        fresh.setStatus(target);
+        subOrderRepo.save(fresh);
+        return toDto(fresh);
     }
 
     @Override
     @Transactional
     public SubOrderDto cancel(Long subOrderId, Long userId) {
-        SubOrder subOrder = subOrderRepo
-                .findById(subOrderId)
-                .orElseThrow(() -> new ResourceNotFoundException(Message.format(Message.Order.SUB_ORDER_NOT_FOUND, subOrderId)));
-        // User only can self cancel when in PENDING_PAYMENT
-        stateMachine.assertValidTransition(subOrder.getStatus(), SubOrderStatus.CANCELLED);
-
-        List<StockDecrementCommand> items = toStockCommands(subOrder.getId());
-        inventoryClient.release(items, subOrder.getOrderId());
-
-        appendHistory(subOrder, SubOrderStatus.CANCELLED, userId);
-        subOrder.setStatus(SubOrderStatus.CANCELLED);
-        subOrderRepo.save(subOrder);
-        return toDto(subOrder);
+        // ponytail: cancel = transition(CANCELLED), xóa logic duplicate
+        return transition(subOrderId, SubOrderStatus.CANCELLED, userId);
     }
 
     @Override
@@ -102,13 +111,19 @@ public class SubOrderCommandService implements TransitionSubOrderUseCase {
             if (Boolean.FALSE.equals(locked)) continue;
 
 
+            // ponytail: CAS PENDING_PAYMENT->EXPIRED, đơn đã PAID thì skip (tránh ghi đè)
+            int claimed = subOrderRepo.transitionIfStatus(
+                    subOrder.getId(), SubOrderStatus.PENDING_PAYMENT, SubOrderStatus.EXPIRED);
+            if (claimed == 0) continue;
+
             List<StockDecrementCommand> items = itemsMap.getOrDefault(subOrder.getId(), List.of());
             inventoryClient.release(items, subOrder.getOrderId());
 
-            appendHistory(subOrder, SubOrderStatus.EXPIRED, null);
-            subOrder.setStatus(SubOrderStatus.EXPIRED);
+            SubOrder fresh = subOrderRepo.findById(subOrder.getId()).orElse(subOrder);
+            appendHistory(fresh, SubOrderStatus.EXPIRED, null);
+            fresh.setStatus(SubOrderStatus.EXPIRED);
+            subOrderRepo.save(fresh);
         }
-        subOrderRepo.saveAll(expired);
     }
 
     private List<StockDecrementCommand> toStockCommands(Long subOrderId) {

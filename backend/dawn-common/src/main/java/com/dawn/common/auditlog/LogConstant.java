@@ -9,6 +9,8 @@ public final class LogConstant {
         public static final String DELETE = "DELETE";
         public static final String IMPORT_STOCK = "IMPORT_STOCK";
         public static final String TRANSITION_ORDER = "TRANSITION_ORDER";
+        public static final String APPROVE = "APPROVE";
+        public static final String REJECT = "REJECT";
     }
 
     public static class Entity {
@@ -19,6 +21,7 @@ public final class LogConstant {
         public static final String USER = "USER";
         public static final String ORDER = "ORDER";
         public static final String CATEGORY = "CATEGORY";
+        public static final String RETURN_REQUEST = "RETURN_REQUEST";
     }
 
     public static class Status {

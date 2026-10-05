@@ -31,7 +31,8 @@ interface AdminOrder {
 
 interface AdminOrderResponse {
   content: AdminOrder[];
-  totalElements: number;
+  totalElements?: number;
+  pagination?: { totalElements: number };
 }
 
 const STATUS_OPTIONS = [
@@ -99,8 +100,8 @@ export class AdminOrderListComponent {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res) => {
-          this.orders.set(res.content);
-          this.total.set(res.totalElements);
+          this.orders.set(res.content ?? []);
+          this.total.set(res.totalElements ?? res.pagination?.totalElements ?? 0);
           this.selectedIds.set(new Set());
           this.loading.set(false);
         },
@@ -153,7 +154,7 @@ export class AdminOrderListComponent {
     if (!ids.length) return;
     let completed = 0;
     ids.forEach((id) => {
-      this.http.put(ApiEndpoints.staffOrders.transition(id), { status: 'PROCESSING' })
+      this.http.post(ApiEndpoints.staffOrders.transition(id), { status: 'PROCESSING' })
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe({
           next: () => {
@@ -168,7 +169,7 @@ export class AdminOrderListComponent {
   }
 
   confirmOrder(id: number) {
-    this.http.put(ApiEndpoints.staffOrders.transition(id), { status: 'PROCESSING' })
+    this.http.post(ApiEndpoints.staffOrders.transition(id), { status: 'PROCESSING' })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {

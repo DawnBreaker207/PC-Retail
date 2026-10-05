@@ -1,6 +1,14 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { NzIconModule } from 'ng-zorro-antd/icon';
+import { MockDataService } from '@core/services/mock-data.service';
+
+const STRIP_SLUGS = [
+  { label: 'Laptop Gaming', icon: 'laptop', slug: 'laptop-gaming' },
+  { label: 'PC GVN', icon: 'desktop', slug: 'pc' },
+  { label: 'Linh Kiện', icon: 'tool', slug: 'linh-kien' },
+  { label: 'Màn Hình', icon: 'monitor', slug: 'man-hinh' },
+];
 
 @Component({
   selector: 'app-category-strip',
@@ -10,10 +18,13 @@ import { NzIconModule } from 'ng-zorro-antd/icon';
   styleUrl: './category-strip.component.css',
 })
 export class CategoryStripComponent {
-  categories = [
-    { label: 'Laptop Gaming', icon: 'laptop', count: '128', link: '/products?category=laptop-gaming' },
-    { label: 'PC Build Sẵn', icon: 'desktop', count: '64', link: '/products?category=pc' },
-    { label: 'Bàn Phím Cơ', icon: 'tool', count: '96', link: '/products?category=ban-phim' },
-    { label: 'Màn Hình', icon: 'monitor', count: '72', link: '/products?category=man-hinh' },
-  ];
+  private mock = inject(MockDataService);
+
+  categories = (() => {
+    const products = this.mock.generateProducts();
+    return STRIP_SLUGS.map((s) => ({
+      ...s,
+      count: products.filter((p) => p.categoryName === s.slug).length,
+    }));
+  })();
 }

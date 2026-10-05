@@ -58,7 +58,7 @@ export class AdminOrderDetailComponent {
 
   private loadOrder(id: number) {
     this.loading.set(true);
-    this.http.get<Order>(ApiEndpoints.orders.detail(id))
+    this.http.get<Order>(ApiEndpoints.staffOrders.detail(id))
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res) => {
@@ -82,7 +82,7 @@ export class AdminOrderDetailComponent {
     if (status === 'SHIPPED' && this.trackingCode()) {
       body['trackingCode'] = this.trackingCode();
     }
-    this.http.put(ApiEndpoints.staffOrders.transition(o.id), body)
+    this.http.post(ApiEndpoints.staffOrders.transition(o.id), body)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {

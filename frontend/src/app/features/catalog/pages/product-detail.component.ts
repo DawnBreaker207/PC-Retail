@@ -1,7 +1,7 @@
 import { Component, inject, signal, computed, DestroyRef } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzIconModule } from 'ng-zorro-antd/icon';
@@ -18,8 +18,12 @@ import { FallbackImageDirective } from '@shared/directives/fallback-image.direct
 import { ProductCardComponent } from '@shared/components/product-card.component';
 import { LoadingSpinnerComponent } from '@shared/components/loading-spinner.component';
 import { MockDataService } from '@core/services/mock-data.service';
+import { HttpClient } from '@angular/common/http';
+import { catchError } from 'rxjs';
+import { ApiEndpoints } from '@core/api/api.endpoints';
 import { Sku, Review } from '@core/models/common.model';
 import { CartStore } from '@features/cart/store/cart.store';
+import { WishlistStore } from '@features/wishlist/store/wishlist.store';
 
 @Component({
   selector: 'app-product-detail',
@@ -33,9 +37,12 @@ import { CartStore } from '@features/cart/store/cart.store';
 })
 export class ProductDetailComponent {
   private route = inject(ActivatedRoute);
+  private router = inject(Router);
   private mock = inject(MockDataService);
+  private http = inject(HttpClient);
   private destroyRef = inject(DestroyRef);
   cartStore = inject(CartStore);
+  wishlist = inject(WishlistStore);
 
   product = signal<Sku | null>(null);
   reviews: Review[] = [];
@@ -83,6 +90,18 @@ export class ProductDetailComponent {
   }
 
   private loadRelated(slug: string) {
+    const id = this.product()?.id;
+    if (id == null) {
+      this.loadRelatedMock(slug);
+      return;
+    }
+    // API thật trước, rớt về mock khi chưa có embedding/BE
+    this.http.get<Sku[]>(`${ApiEndpoints.aiSimilar}/${id}`).pipe(      catchError(() => this.mock.getRelatedProducts(slug)),
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe((r) => this.relatedProducts = Array.isArray(r) ? r : []);
+  }
+
+  private loadRelatedMock(slug: string) {
     this.mock.getRelatedProducts(slug).pipe(
       takeUntilDestroyed(this.destroyRef),
     ).subscribe((r) => this.relatedProducts = r);
@@ -105,6 +124,11 @@ export class ProductDetailComponent {
 
   addToCart(p: Sku) {
     this.cartStore.addItem(p.id, this.quantity);
+  }
+
+  buyNow(p: Sku) {
+    this.cartStore.addItem(p.id, this.quantity);
+    this.router.navigate(['/checkout']);
   }
 
   specEntries = computed<{ key: string; value: string }[]>(() => {

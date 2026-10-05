@@ -1,0 +1,19 @@
+:host {
+  display: contents;
+}
+
+::ng-deep .ant-menu-inline-collapsed li:not(.ant-menu-item):not(.sidebar-section) {
+  display: none;
+}
+
+/* Ant Design hides the menu label with an instant opacity:0 (no transition),
+   which looks jumpy against the sider's own 0.2s width animation. Ease it. */
+::ng-deep .ant-menu-item .anticon + span,
+::ng-deep .ant-menu-title-content {
+  transition: opacity 0.2s ease, color 0.2s ease;
+}
+
+::ng-deep .ant-menu-item-icon,
+::ng-deep .anticon {
+  transition: margin 0.2s ease;
+}

@@ -5,4 +5,6 @@ import com.dawn.engagement.port.out.ReviewRepository;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface JpaReviewRepository extends JpaRepository<Review, Long>, ReviewRepository {
+    @Override
+    boolean existsBySubOrderIdAndSkuId(Long subOrderId, Long skuId);
 }

@@ -58,6 +58,8 @@ services:
     ports:
       - '8888:8888'
     environment:
+      # Server
+      SERVER_PORT: ${SERVER_PORT}
       # Database
       DB_URL: ${DB_URL}
       DB_USER: ${DB_USER}
@@ -72,6 +74,8 @@ services:
       RABBITMQ_USER: ${RABBITMQ_USER}
       RABBITMQ_PASS: ${RABBITMQ_PASS}
       # JWT
+      JWT_COOKIE_NAME: ${JWT_COOKIE_NAME}
+      JWT_REFRESH_COOKIE_NAME: ${JWT_REFRESH_COOKIE_NAME}
       JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRATION_MS: ${JWT_EXPIRATION_MS}
       JWT_REFRESH_EXPIRATION_MS: ${JWT_REFRESH_EXPIRATION_MS}
@@ -85,12 +89,17 @@ services:
       VNPAY_COMMAND: ${VNPAY_COMMAND}
       VNPAY_ORDER_TYPE: ${VNPAY_ORDER_TYPE}
       # AI
+      AI_BASE_URL: ${AI_BASE_URL}
       AI_API_KEY: ${AI_API_KEY}
+      AI_CHAT_MODEL: ${AI_CHAT_MODEL}
+      AI_EMBEDDING_MODEL: ${AI_EMBEDDING_MODEL}
       # Mail
       MAIL_HOST: ${MAIL_HOST}
       MAIL_PORT: ${MAIL_PORT}
       MAIL_USER: ${MAIL_USER}
       MAIL_PASS: ${MAIL_PASS}
+      MAIL_FROM: ${MAIL_FROM}
+      FRONTEND_URL: ${FRONTEND_URL}
     depends_on:
       postgres:
         condition: service_healthy
@@ -98,6 +107,11 @@ services:
         condition: service_started
       rabbitmq:
         condition: service_healthy
+    healthcheck:
+      test: ['CMD-SHELL', 'bash -c "</dev/tcp/127.0.0.1/8888"']
+      interval: 15s
+      timeout: 5s
+      retries: 12
     networks:
       - network
 
@@ -109,6 +123,7 @@ services:
     ports:
       - '4200:80'
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
     networks:
       - network

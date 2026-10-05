@@ -15,7 +15,7 @@ import { LoadingSpinnerComponent } from '@shared/components/loading-spinner.comp
 import { MockDataService } from '@core/services/mock-data.service';
 import { Sku } from '@core/models/common.model';
 import { CartStore } from '@features/cart/store/cart.store';
-import { FilterSidebarComponent, FilterState } from '../components/filter-sidebar.component';
+import { FilterSidebarComponent, FilterState, SpecFilterOption } from '../components/filter-sidebar.component';
 
 const SORT_OPTIONS = [
   { value: 'sold', label: 'Bán chạy' },
@@ -26,9 +26,21 @@ const SORT_OPTIONS = [
 
 function defaultFilters(): FilterState {
   return {
-    q: '', category: '', brands: [], minPrice: 0, maxPrice: 500_000_000,
+    q: '', category: '', brands: [], minPrice: 0, maxPrice: 500_000_000, specs: {},
     sort: 'sold', page: 1, size: 20,
   };
+}
+
+function parseSpecParam(raw: string | string[] | undefined): Record<string, string[]> {
+  if (!raw) return {};
+  const entries = Array.isArray(raw) ? raw : [raw];
+  const specs: Record<string, string[]> = {};
+  for (const entry of entries) {
+    const [label, value] = entry.split('::');
+    if (!label || !value) continue;
+    (specs[label] ??= []).push(value);
+  }
+  return specs;
 }
 
 @Component({
@@ -58,9 +70,16 @@ export class ProductListComponent {
   drawerOpen = signal(false);
 
   headerTitle = computed(() => {
-    const cat = this.filters().category;
-    if (!cat) return 'Sản phẩm';
-    return this.categories.find(c => c.slug === cat)?.name || 'Sản phẩm';
+    const f = this.filters();
+    if (f.q) return `Kết quả tìm kiếm cho "${f.q}"`;
+    if (!f.category) return 'Sản phẩm';
+    return this.categories.find(c => c.slug === f.category)?.name || 'Sản phẩm';
+  });
+
+  activeCategory = computed(() => {
+    const slug = this.filters().category;
+    if (!slug) return null;
+    return this.categories.find(c => c.slug === slug) ?? null;
   });
 
   categories = this.mock.categories;
@@ -68,6 +87,8 @@ export class ProductListComponent {
   sortOptions = SORT_OPTIONS;
 
   filters = signal<FilterState>(defaultFilters());
+
+  specOptions = computed<SpecFilterOption[]>(() => this.mock.getSpecFilterOptions(this.filters().category || undefined));
 
   constructor() {
     this.route.queryParams.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
@@ -78,6 +99,7 @@ export class ProductListComponent {
         brands: params['brand'] ? (Array.isArray(params['brand']) ? params['brand'] : [params['brand']]) : f.brands,
         minPrice: params['minPrice'] ? Number(params['minPrice']) : f.minPrice,
         maxPrice: params['maxPrice'] ? Number(params['maxPrice']) : f.maxPrice,
+        specs: params['spec'] ? parseSpecParam(params['spec']) : f.specs,
         sort: params['sort'] || f.sort,
         page: params['page'] ? Number(params['page']) : 1,
         size: f.size,
@@ -99,7 +121,7 @@ export class ProductListComponent {
     params['page'] = String(f.page - 1);
     params['size'] = String(f.size);
 
-    this.mock.getProducts(params).pipe(
+    this.mock.getProducts(params, f.specs).pipe(
       takeUntilDestroyed(this.destroyRef),
     ).subscribe({
       next: (res) => {
@@ -124,6 +146,8 @@ export class ProductListComponent {
     if (f.brands.length > 0) qp['brand'] = f.brands;
     if (f.minPrice > 0) qp['minPrice'] = f.minPrice;
     if (f.maxPrice < 500_000_000) qp['maxPrice'] = f.maxPrice;
+    const specParams = Object.entries(f.specs).flatMap(([label, values]) => values.map(v => `${label}::${v}`));
+    if (specParams.length > 0) qp['spec'] = specParams;
     if (f.sort && f.sort !== 'sold') qp['sort'] = f.sort;
     if (f.page > 1) qp['page'] = f.page;
     this.router.navigate([], { queryParams: qp, replaceUrl: true });

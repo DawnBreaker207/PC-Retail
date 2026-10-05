@@ -41,10 +41,32 @@ public class OrderQueryService implements QueryOrderUseCase {
         return ResponsePage.of(orderRepo.findByUserId(userId, pageable).map(this::toOrderDto));
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public ResponsePage<OrderDto> getAllForStaff(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
+        return ResponsePage.of(orderRepo.findAll(pageable).map(this::toOrderDto));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public OrderDto getByIdForStaff(Long orderId) {
+        Order order = orderRepo.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException(Message.format(Message.Order.NOT_FOUND, orderId)));
+        return toOrderDto(order);
+    }
+
     @Transactional(readOnly = true)
     @Override
     public Optional<OrderDto> findByIdempotencyKey(String key) {
         return orderRepo.findByIdempotencyKey(key)
+                .map(this::toOrderDto);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public Optional<OrderDto> findByUserIdAndIdempotencyKey(Long userId, String key) {
+        return orderRepo.findByUserIdAndIdempotencyKey(userId, key)
                 .map(this::toOrderDto);
     }
 

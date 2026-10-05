@@ -14,6 +14,8 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
         router.navigate(['/error/500']);
       } else if (error.status === 403) {
         router.navigate(['/error/403']);
+      } else if (error.status === 401) {
+        // auth.interceptor lo silent refresh; không toast để tránh báo lỗi oan
       } else if (error.error?.message) {
         msg.error(error.error.message);
       }

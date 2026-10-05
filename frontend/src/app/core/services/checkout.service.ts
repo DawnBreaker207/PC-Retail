@@ -12,6 +12,16 @@ export class CheckoutService {
     return this.http.post<CheckoutResponse>(ApiEndpoints.orders.checkout, data, { headers });
   }
 
+  guestCheckout(data: {
+    idempotencyKey: string;
+    fulfillmentType: string;
+    shippingAddress: unknown;
+    guestToken: string;
+    guestPhone?: string;
+  }) {
+    return this.http.post<CheckoutResponse>(ApiEndpoints.orders.guestCheckout, data);
+  }
+
   initiatePayment(orderId: number) {
     return this.http.post<VnpayInitResponse>(ApiEndpoints.payment.create, { orderId });
   }

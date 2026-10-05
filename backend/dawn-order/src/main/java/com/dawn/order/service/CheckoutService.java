@@ -38,10 +38,12 @@ public class CheckoutService implements CheckoutUseCase {
     private final PromotionClientPort promotionClient;
     private final CatalogClientPort catalogClient;
     private final ThreadPoolTaskExecutor checkoutExecutor;
+    private final ShippingService shippingService;
 
     @Override
     public OrderDto checkout(CheckoutRequest req, Long userId) {
-        var existing = orderQueryService.findByIdempotencyKey(req.idempotencyKey());
+        // docs §13.11.2: scope theo owner, chống lộ order khi đoán key
+        var existing = orderQueryService.findByUserIdAndIdempotencyKey(userId, req.idempotencyKey());
         if (existing.isPresent()) return existing.get();
 
         List<CartItemSnapshot> cartItems = cartClient.getItems(userId);
@@ -87,8 +89,8 @@ public class CheckoutService implements CheckoutUseCase {
             }, checkoutExecutor);
         });
 
-        Map<Long, BigDecimal> priceMap = pricesFuture.join();
-        BigDecimal discountAmount = discountFuture.join();
+        Map<Long, BigDecimal> priceMap = joinUnchecked(pricesFuture);
+        BigDecimal discountAmount = joinUnchecked(discountFuture);
         BigDecimal subTotal = cartItems.stream()
                 .map(item -> priceMap
                         .getOrDefault(item.skuId(), BigDecimal.ZERO)
@@ -107,8 +109,8 @@ public class CheckoutService implements CheckoutUseCase {
         if (!voucherCodes.isEmpty())
             promotionClient.reservePromotions(voucherCodes, List.of());
 
-        // Phase 2: DB Transaction
-        BigDecimal shippingFee = req.fulfillmentType() == FulfillmentType.DELIVERY ? DELIVERY_FEE : BigDecimal.ZERO;
+        // Phase 2: DB Transaction — BE tự tính ship, ghi đè số FE
+        BigDecimal shippingFee = shippingService.resolveFee(req.fulfillmentType(), req.shippingAddress());
         BigDecimal finalAmount = subTotal.subtract(discountAmount).add(shippingFee);
         try {
             return orderCommandService.createOrder(
@@ -126,7 +128,7 @@ public class CheckoutService implements CheckoutUseCase {
             log.warn("Duplicate checkout DB constraint, key={}", req.idempotencyKey());
             compensate(stockItems, voucherCodes);
             return orderQueryService
-                    .findByIdempotencyKey(req.idempotencyKey())
+                    .findByUserIdAndIdempotencyKey(userId, req.idempotencyKey())
                     .orElseThrow(() -> dup);
         } catch (Exception e) {
             log.error("Checkout DB transaction failed, compensating Redis", e);
@@ -142,6 +144,16 @@ public class CheckoutService implements CheckoutUseCase {
                 promotionClient.rollBackPromotions(voucherCodes, List.of());
         } catch (Exception e) {
             log.error("Compensate failed, reconciliation job will fix", e);
+        }
+    }
+
+    /** join() bọc lỗi thành CompletionException → gỡ ra để giữ mã lỗi gốc (400/409 thay vì 500). */
+    private static <T> T joinUnchecked(CompletableFuture<T> future) {
+        try {
+            return future.join();
+        } catch (java.util.concurrent.CompletionException e) {
+            if (e.getCause() instanceof RuntimeException re) throw re;
+            throw e;
         }
     }
 }

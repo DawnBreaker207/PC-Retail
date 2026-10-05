@@ -30,4 +30,10 @@ public interface SubOrderRepository {
 
     boolean isDelivered(Long subOrderId);
 
+    /**
+     * ponytail: CAS gate — atomic compare-and-set status, chống TOCTOU
+     * khi 2 request transition cùng subOrder. Trả về số row (0 = thua race).
+     */
+    int transitionIfStatus(Long id, SubOrderStatus expected, SubOrderStatus target);
+
 }

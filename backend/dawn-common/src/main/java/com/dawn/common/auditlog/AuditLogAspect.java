@@ -27,12 +27,11 @@ public class AuditLogAspect {
         }
 
         try {
-            long id = entityId != null && !entityId.isEmpty() ? Long.parseLong(entityId) : 0L;
             Object result = joinPoint.proceed();
             auditLogService.log(
                     loggable.action(),
                     loggable.entity(),
-                    entityId != null ? Long.parseLong(entityId) : null,
+                    parseEntityId(entityId),
                     null,
                     result != null ? result.toString() : null,
                     actorId,
@@ -43,13 +42,22 @@ public class AuditLogAspect {
             auditLogService.log(
                     loggable.action(),
                     loggable.entity(),
-                    entityId != null ? Long.parseLong(entityId) : null,
+                    parseEntityId(entityId),
                     null,
                     null,
                     actorId,
                     actorRole,
                     loggable.tier());
             throw t;
+        }
+    }
+
+    private static Long parseEntityId(String entityId) {
+        if (entityId == null || entityId.isBlank()) return null;
+        try {
+            return Long.parseLong(entityId.trim());
+        } catch (NumberFormatException e) {
+            return null;
         }
     }
 }

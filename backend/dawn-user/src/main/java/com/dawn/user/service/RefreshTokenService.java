@@ -9,6 +9,7 @@ import com.dawn.user.entity.RefreshToken;
 import com.dawn.user.entity.User;
 import com.dawn.user.infra.persistence.RefreshTokenRepository;
 import com.dawn.user.infra.persistence.JpaUserRepository;
+import com.dawn.user.entity.enums.UserStatus;
 import com.dawn.user.util.TokenUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -60,6 +61,12 @@ public class RefreshTokenService {
 
         User user = userRepository.findByIdAndDeletedAtIsNull(storedToken.getUserId())
                 .orElseThrow(() -> new UnauthorizedException(Message.format(Message.User.NOT_FOUND, storedToken.getUserId())));
+
+        // docs §13.4: re-check status khi verify refresh token
+        if (user.getStatus() != UserStatus.ACTIVE) {
+            revokeAllForUser(user.getId());
+            throw new UnauthorizedException(Message.User.USER_INACTIVE);
+        }
 
         String newRefreshToken = createRefreshToken(user);
         return buildAuthResponse(user, newRefreshToken);

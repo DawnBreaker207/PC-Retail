@@ -8,4 +8,8 @@ public interface CartClientPort {
     List<CartItemSnapshot> getItems(Long userId);
 
     void clearCart(Long userId);
+
+    List<CartItemSnapshot> getGuestItems(String guestToken);
+
+    void clearGuestCart(String guestToken);
 }

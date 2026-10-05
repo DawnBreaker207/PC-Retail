@@ -27,12 +27,40 @@ export const routes: Routes = [
         loadChildren: () => import('./features/orders/orders.routes').then((r) => r.ORDER_ROUTES),
       },
       {
+        path: 'tra-cuu-don-hang',
+        loadComponent: () => import('./features/orders/pages/order-lookup.component').then((m) => m.OrderLookupComponent),
+      },
+      {
+        path: 'danh-muc',
+        loadComponent: () => import('./features/catalog/pages/category-grid.component').then((m) => m.CategoryGridComponent),
+      },
+      {
         path: 'pc-builder',
         loadChildren: () => import('./features/builder/builder.routes').then((r) => r.BUILDER_ROUTES),
       },
       {
         path: 'products',
         loadChildren: () => import('./features/catalog/catalog.routes').then((r) => r.CATALOG_ROUTES),
+      },
+      {
+        path: 'yeu-thich',
+        loadChildren: () => import('./features/wishlist/wishlist.routes').then((r) => r.WISHLIST_ROUTES),
+      },
+      {
+        path: 'khuyen-mai',
+        loadChildren: () => import('./features/promotions/promotions.routes').then((r) => r.PROMOTIONS_ROUTES),
+      },
+      {
+        path: 'account',
+        loadChildren: () => import('./features/account/account.routes').then((r) => r.ACCOUNT_ROUTES),
+      },
+      {
+        path: 'tin-tuc',
+        loadChildren: () => import('./features/blog/blog.routes').then((r) => r.BLOG_ROUTES),
+      },
+      {
+        path: '',
+        loadChildren: () => import('./features/content/content.routes').then((r) => r.CONTENT_ROUTES),
       },
       {
         path: 'error',

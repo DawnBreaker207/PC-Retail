@@ -1,5 +1,6 @@
-import { Component, input } from '@angular/core';
+import { Component, computed, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { splitLinkQuery } from '@shared/utils/link-query.util';
 
 @Component({
   selector: 'app-promo-card',
@@ -15,4 +16,6 @@ export class PromoCardComponent {
   bgColor = input('');
   badgeText = input('');
   priceText = input('');
+
+  dest = computed(() => splitLinkQuery(this.link()));
 }

@@ -1,4 +1,4 @@
-import { Component, inject, signal, DestroyRef, OnInit, OnDestroy } from '@angular/core';
+import { Component, inject, signal, DestroyRef, OnDestroy } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { NzStepsModule } from 'ng-zorro-antd/steps';
@@ -8,6 +8,8 @@ import { FallbackImageDirective } from '@shared/directives/fallback-image.direct
 import { ShippingFormComponent } from '../components/shipping-form.component';
 import { OrderReviewComponent } from '../components/order-review.component';
 import { CheckoutService } from '@core/services/checkout.service';
+import { AuthService } from '@core/auth/auth.service';
+import { getGuestToken } from '@core/utils/guest-token';
 import { CartStore } from '@features/cart/store/cart.store';
 import { CheckoutRequest, ShippingAddress } from '@core/models/common.model';
 import { switchMap, finalize } from 'rxjs';
@@ -25,6 +27,7 @@ import { switchMap, finalize } from 'rxjs';
 })
 export class CheckoutComponent implements OnDestroy {
   private checkoutService = inject(CheckoutService);
+  private auth = inject(AuthService);
   private store = inject(CartStore);
   private router = inject(Router);
   private destroyRef = inject(DestroyRef);
@@ -66,9 +69,13 @@ export class CheckoutComponent implements OnDestroy {
 
   placeOrder() {
     const addr = this.shippingData();
-    if (!addr) return;
+    if (!addr || this.isPlacing()) return;
 
     this.isPlacing.set(true);
+    if (!this.auth.isAuthenticated()) {
+      this.placeGuestOrder(addr);
+      return;
+    }
     const req: CheckoutRequest = {
       idempotencyKey: crypto.randomUUID(),
       fulfillmentType: 'DELIVERY',
@@ -93,6 +100,32 @@ export class CheckoutComponent implements OnDestroy {
         },
         error: (err) => {
           console.error('Checkout/initiate failed:', err);
+          window.alert('Lỗi: không thể tạo đơn hàng. Vui lòng thử lại.');
+        },
+      });
+  }
+
+  private placeGuestOrder(addr: ShippingAddress) {
+    this.checkoutService
+      .guestCheckout({
+        idempotencyKey: crypto.randomUUID(),
+        fulfillmentType: 'DELIVERY',
+        shippingAddress: addr,
+        guestToken: getGuestToken(),
+        guestPhone: addr.phone,
+      })
+      .pipe(
+        finalize(() => this.isPlacing.set(false)),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe({
+        next: (res) => {
+          this.store.clearCart();
+          this.router?.navigate(['/checkout/result'], {
+            queryParams: { orderId: res.id, guest: 1 },
+          });
+        },
+        error: () => {
           window.alert('Lỗi: không thể tạo đơn hàng. Vui lòng thử lại.');
         },
       });

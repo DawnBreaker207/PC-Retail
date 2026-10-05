@@ -39,7 +39,22 @@
         <!--  Spring Boot Test Pack -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-data-jpa-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-jdbc-test</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -125,6 +140,21 @@
                 <artifactId>dawn-ai</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.dawn.backend</groupId>
+                <artifactId>dawn-return</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.dawn.backend</groupId>
+                <artifactId>dawn-builder</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.dawn.backend</groupId>
+                <artifactId>dawn-reporting</artifactId>
+                <version>${project.version}</version>
+            </dependency>
 
             <!--  Spring Boot ML & Tools Pack   -->
             <dependency>
@@ -182,6 +212,9 @@
         <module>dawn-engagement</module>
         <module>dawn-payment</module>
         <module>dawn-ai</module>
+        <module>dawn-return</module>
+        <module>dawn-builder</module>
+        <module>dawn-reporting</module>
     </modules>
 
     <build>
@@ -192,11 +225,33 @@
                     <artifactId>maven-surefire-plugin</artifactId>
                     <configuration>
                         <argLine>-Duser.timezone=UTC</argLine>
+                        <!-- *IT = integration (cần Docker), failsafe chạy, surefire bỏ qua -->
+                        <excludes>
+                            <exclude>**/*IT.java</exclude>
+                        </excludes>
                     </configuration>
                 </plugin>
             </plugins>
         </pluginManagement>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <configuration>
+                    <argLine>-Duser.timezone=UTC</argLine>
+                    <includes>
+                        <include>**/*IT.java</include>
+                    </includes>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>

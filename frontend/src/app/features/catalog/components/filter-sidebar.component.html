@@ -38,6 +38,21 @@
     }
   </nz-select>
 
+  <!-- Thông số kỹ thuật theo danh mục -->
+  @for (spec of specOptions(); track spec.label) {
+    <nz-select
+      nzMode="multiple"
+      [nzPlaceHolder]="spec.label"
+      class="min-w-[140px]"
+      [ngModel]="filters().specs[spec.label] || []"
+      (ngModelChange)="selectSpec(spec.label, $event)"
+    >
+      @for (value of spec.values; track value) {
+        <nz-option [nzValue]="value" [nzLabel]="value" />
+      }
+    </nz-select>
+  }
+
   <!-- Active filters -->
   @if (hasActive()) {
     <div class="flex flex-wrap items-center gap-1">

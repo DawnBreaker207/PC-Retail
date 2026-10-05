@@ -23,10 +23,10 @@ public class JWTUtils {
     private String jwtSecret;
 
     @Value("${app.jwtExpirationsMs}")
-    private int jwtExpirations;
+    private long jwtExpirations;
 
     @Value("${app.jwtRefreshExpirationsMs}")
-    private int refreshTokenExpirations;
+    private long refreshTokenExpirations;
 
     @Value("${app.jwtCookieName}")
     private String jwtCookie;
@@ -115,7 +115,7 @@ public class JWTUtils {
     private Cookie generateCookie(String name, String value, String path) {
         Cookie cookie = new Cookie(name, value);
         cookie.setPath(path);
-        cookie.setMaxAge(refreshTokenExpirations / 1000);
+        cookie.setMaxAge((int) Math.min(refreshTokenExpirations / 1000, Integer.MAX_VALUE));
         cookie.setHttpOnly(true);
         cookie.setSecure(true);
         return cookie;

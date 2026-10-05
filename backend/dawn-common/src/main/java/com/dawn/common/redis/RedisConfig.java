@@ -9,6 +9,8 @@ import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.cache.RedisCacheWriter;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
+import org.springframework.data.redis.connection.lettuce.LettuceClientConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
@@ -39,10 +41,22 @@ public class RedisConfig {
 
     private final ObjectMapper mapper;
 
-    // Connect to Redis server
+    // Connect to Redis server — timeout ngắn: Redis stall thì fail-fast trong ~2s
+    // (không treo thread), service fallback DB / trả 503 thay vì treo hàng chục giây
     @Bean
     public RedisConnectionFactory redisConnectionFactory() {
-        return new LettuceConnectionFactory(redisHost, redisPort);
+        io.lettuce.core.SocketOptions socketOptions = io.lettuce.core.SocketOptions.builder()
+                .connectTimeout(Duration.ofSeconds(2))
+                .build();
+        io.lettuce.core.ClientOptions clientOptions = io.lettuce.core.ClientOptions.builder()
+                .socketOptions(socketOptions)
+                .build();
+        LettuceClientConfiguration clientConfig = LettuceClientConfiguration.builder()
+                .clientOptions(clientOptions)
+                .commandTimeout(Duration.ofSeconds(2))
+                .shutdownTimeout(Duration.ofSeconds(2))
+                .build();
+        return new LettuceConnectionFactory(new RedisStandaloneConfiguration(redisHost, redisPort), clientConfig);
     }
 
     // Config to manipulation with Redis

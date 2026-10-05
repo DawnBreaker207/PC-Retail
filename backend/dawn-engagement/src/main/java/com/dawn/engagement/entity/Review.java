@@ -7,6 +7,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.util.List;
 
@@ -36,6 +38,14 @@ public class Review extends AuditableEntity {
     @Column(columnDefinition = "TEXT")
     private String comment;
 
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
     private List<String> images;
+
+    // docs §2.9: shop trả lời review
+    @Column(name = "shop_reply", columnDefinition = "TEXT")
+    private String shopReply;
+
+    @Column(name = "shop_reply_at")
+    private java.time.Instant shopReplyAt;
 }

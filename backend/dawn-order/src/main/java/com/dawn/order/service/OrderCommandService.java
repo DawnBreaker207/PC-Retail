@@ -48,10 +48,28 @@ public class OrderCommandService {
             BigDecimal discountAmount,
             BigDecimal shippingFee,
             BigDecimal finalAmount) {
+        return createOrder(req, userId, null, null, cartItems, stockItems,
+                priceMap, subTotal, discountAmount, shippingFee, finalAmount);
+    }
+
+    public OrderDto createOrder(
+            CheckoutRequest req,
+            Long userId,
+            String guestEmail,
+            String guestPhone,
+            List<CartItemSnapshot> cartItems,
+            List<StockDecrementCommand> stockItems,
+            Map<Long, BigDecimal> priceMap,
+            BigDecimal subTotal,
+            BigDecimal discountAmount,
+            BigDecimal shippingFee,
+            BigDecimal finalAmount) {
 
         // Create Order
         Order order = Order.builder()
                 .userId(userId)
+                .guestEmail(guestEmail)
+                .guestPhone(guestPhone)
                 .shippingAddress(req.shippingAddress() != null
                         ? req.shippingAddress() : Map.of())
                 .totalAmount(finalAmount)
@@ -80,14 +98,22 @@ public class OrderCommandService {
                 .build();
         subOrderRepository.save(subOrder);
 
-        // Create OrderItems
+        // Create OrderItems (fail-fast nếu thiếu giá — chống đơn 0đ khi SKU bị xóa)
         List<OrderItem> orderItems = cartItems.stream()
-                .map(item -> OrderItem.builder()
-                        .subOrderId(subOrder.getId())
-                        .skuId(item.skuId())
-                        .quantity(item.quantity())
-                        .unitPrice(priceMap.getOrDefault(item.skuId(), BigDecimal.ZERO))
-                        .build())
+                .map(item -> {
+                    BigDecimal price = priceMap.get(item.skuId());
+                    if (price == null) {
+                        throw new com.dawn.common.exception.wrapper.InvalidRequestException(
+                                com.dawn.common.message.Message.format(
+                                        com.dawn.common.message.Message.Catalog.SKU_NOT_FOUND, item.skuId()));
+                    }
+                    return OrderItem.builder()
+                            .subOrderId(subOrder.getId())
+                            .skuId(item.skuId())
+                            .quantity(item.quantity())
+                            .unitPrice(price)
+                            .build();
+                })
                 .collect(Collectors.toList());
         orderItemRepository.saveAll(orderItems);
 

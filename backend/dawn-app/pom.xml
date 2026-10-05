@@ -53,6 +53,18 @@
             <groupId>com.dawn.backend</groupId>
             <artifactId>dawn-ai</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.dawn.backend</groupId>
+            <artifactId>dawn-return</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.dawn.backend</groupId>
+            <artifactId>dawn-builder</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.dawn.backend</groupId>
+            <artifactId>dawn-reporting</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

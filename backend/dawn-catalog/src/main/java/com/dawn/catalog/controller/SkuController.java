@@ -66,7 +66,7 @@ public class SkuController {
 
     @GetMapping("/compare")
     public ResponseObject<List<SkuCompareResponse>> compare(
-            @RequestParam("ids") @NotEmpty @Size(min = 2) List<Long> ids) {
+            @RequestParam("ids") @NotEmpty @Size(min = 2, max = 4) List<Long> ids) {
         return ResponseObject.success(skuService.getSkusForCompare(ids));
     }
 }

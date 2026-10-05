@@ -1,0 +1,46 @@
+<div class="max-w-screen-2xl mx-auto px-4 pt-6 lg:pt-8">
+  <nz-breadcrumb class="mb-4">
+    <nz-breadcrumb-item><a routerLink="/">Trang chủ</a></nz-breadcrumb-item>
+    <nz-breadcrumb-item>Khuyến mãi</nz-breadcrumb-item>
+  </nz-breadcrumb>
+  <h1 class="text-lg lg:text-xl font-bold">Khuyến mãi</h1>
+</div>
+
+<div class="max-w-screen-2xl mx-auto px-4 mt-4 lg:mt-6">
+  <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+    @for (banner of promoBanners; track banner.id) {
+      <a [routerLink]="banner.link" class="rounded-xl overflow-hidden border border-border/80 dark:border-border-dark/80 shadow-sm group block">
+        <div class="relative">
+          <img [src]="banner.imageUrl" loading="lazy" appFallbackImage alt="{{ banner.title }}" class="w-full aspect-[7/5] object-cover group-hover:scale-105 transition-transform duration-500" />
+          <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-3">
+            <p class="text-white font-bold text-xs sm:text-sm">{{ banner.title }}</p>
+            @if (banner.subtitle) {
+              <p class="text-primary text-xs font-medium">{{ banner.subtitle }}</p>
+            }
+          </div>
+        </div>
+      </a>
+    }
+  </div>
+</div>
+
+<app-flash-sale-section />
+
+<div class="max-w-screen-2xl mx-auto px-4 mt-8 lg:mt-10 mb-10 lg:mb-14">
+  <h2 class="text-lg lg:text-xl font-bold tracking-tight mb-5">Chương trình khuyến mãi khác</h2>
+  <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+    @for (campaign of promoCampaigns; track campaign.id) {
+      <div class="rounded-xl overflow-hidden border border-border/80 dark:border-border-dark/80 shadow-sm group">
+        <div class="relative">
+          <img [src]="campaign.imageUrl" loading="lazy" appFallbackImage alt="{{ campaign.title }}" class="w-full aspect-[7/5] object-cover group-hover:scale-105 transition-transform duration-500" />
+          <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-3">
+            <p class="text-white font-bold text-xs sm:text-sm">{{ campaign.title }}</p>
+            @if (campaign.subtitle) {
+              <p class="text-primary text-xs font-medium">{{ campaign.subtitle }}</p>
+            }
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+</div>

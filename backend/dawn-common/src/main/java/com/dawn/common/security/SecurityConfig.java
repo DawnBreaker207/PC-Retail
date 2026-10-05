@@ -40,7 +40,15 @@ public class SecurityConfig {
             "/api/v1/brands",
             "/api/v1/categories",
             "/api/v1/skus",
-            "/api/v1/skus/**"
+            "/api/v1/skus/**",
+            "/api/v1/builder/**",
+            "/api/v1/articles/**",
+            "/api/v1/articles",
+            "/api/v1/promotion/**",
+            "/api/v1/cart/guest/**",
+            "/api/v1/orders/guest-checkout",
+            "/api/v1/payments/callback/**",
+            "/api/v1/payments/webhook/**"
     };
 
     private final AuthEntryPointJwt unauthorizedHandler;

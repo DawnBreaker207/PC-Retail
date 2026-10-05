@@ -1,0 +1,44 @@
+@if (post(); as p) {
+  <div class="max-w-3xl mx-auto px-4 py-6 lg:py-8">
+    <nz-breadcrumb class="mb-4">
+      <nz-breadcrumb-item><a routerLink="/">Trang chủ</a></nz-breadcrumb-item>
+      <nz-breadcrumb-item><a routerLink="/tin-tuc">Tin công nghệ</a></nz-breadcrumb-item>
+      <nz-breadcrumb-item>{{ p.title }}</nz-breadcrumb-item>
+    </nz-breadcrumb>
+
+    <p class="text-xs text-primary font-medium mb-2">{{ p.category }} · {{ p.date }}</p>
+    <h1 class="text-xl lg:text-2xl font-bold mb-5 leading-tight">{{ p.title }}</h1>
+
+    <div class="aspect-video rounded-xl overflow-hidden bg-bg dark:bg-bg-dark mb-6">
+      <img [src]="p.imageUrl" loading="lazy" appFallbackImage alt="{{ p.title }}" class="w-full h-full object-cover" />
+    </div>
+
+    <div class="flex flex-col gap-4 text-sm text-muted dark:text-muted-dark leading-relaxed">
+      @for (paragraph of paragraphs(); track $index) {
+        <p>{{ paragraph }}</p>
+      }
+    </div>
+
+    @if (relatedPosts().length > 0) {
+      <div class="mt-10">
+        <h2 class="text-base font-bold mb-4">Bài viết liên quan</h2>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          @for (rp of relatedPosts(); track rp.id) {
+            <a [routerLink]="['/tin-tuc', rp.slug]" class="group rounded-xl border border-border/80 dark:border-border-dark/80 overflow-hidden shadow-sm hover:shadow-md transition-shadow bg-surface dark:bg-surface-dark">
+              <div class="aspect-video bg-bg dark:bg-bg-dark overflow-hidden">
+                <img [src]="rp.imageUrl" loading="lazy" appFallbackImage alt="{{ rp.title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+              </div>
+              <div class="p-3">
+                <h3 class="text-xs font-semibold line-clamp-2 group-hover:text-primary transition-colors leading-snug">{{ rp.title }}</h3>
+              </div>
+            </a>
+          }
+        </div>
+      </div>
+    }
+  </div>
+} @else {
+  <div class="max-w-3xl mx-auto px-4 py-16 text-center text-muted dark:text-muted-dark">
+    Không tìm thấy bài viết.
+  </div>
+}

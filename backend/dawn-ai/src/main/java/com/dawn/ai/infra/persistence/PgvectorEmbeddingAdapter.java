@@ -45,12 +45,33 @@ public class PgvectorEmbeddingAdapter implements EmbeddingPort {
 
     @Override
     public void generateBatch() {
-
+        List<Long> skuIds = jdbcTemplate.queryForList(
+                "SELECT id FROM sku WHERE deleted_at IS NULL", Long.class);
+        for (Long skuId : skuIds) {
+            try {
+                generateAndSave(skuId);
+            } catch (Exception e) {
+                log.warn("Embedding batch skipped SKU {}", skuId, e);
+            }
+        }
     }
 
     @Override
     public List<EmbeddingSearchResult> searchSimilar(String query, int limit) {
-        return List.of();
+        float[] vector = generateEmbedding(query);
+        String vec = toPostgresVectorString(vector);
+        int safeLimit = Math.min(Math.max(limit, 1), 10);
+        // cosine distance (<=>) trên HNSW index; similarity = 1 - distance
+        String sql = """
+                SELECT sku_id, 1 - (embedding <=> ?::vector) AS similarity
+                FROM product_embedding
+                ORDER BY embedding <=> ?::vector
+                LIMIT ?
+                """;
+        return jdbcTemplate.query(sql,
+                (rs, rowNum) -> new EmbeddingSearchResult(
+                        rs.getLong("sku_id"), rs.getDouble("similarity")),
+                vec, vec, safeLimit);
     }
 
     private float[] generateEmbedding(String text) {

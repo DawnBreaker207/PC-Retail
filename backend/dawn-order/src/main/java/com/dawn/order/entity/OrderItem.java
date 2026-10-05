@@ -35,4 +35,11 @@ public class OrderItem extends BaseEntity {
     @Column(name = "discount_allocated", nullable = false, precision = 14, scale = 2)
     @Builder.Default
     private BigDecimal discountAllocated = BigDecimal.ZERO;
+
+    // docs §13.11.2: snapshot chống giá 0đ khi SKU soft-delete
+    @Column(name = "product_name")
+    private String productName;
+
+    @Column(name = "sku_code", length = 100)
+    private String skuCode;
 }

@@ -1,6 +1,7 @@
 package com.dawn.engagement.service;
 
 import com.dawn.common.exception.wrapper.InvalidRequestException;
+import com.dawn.common.exception.wrapper.ConflictException;
 import com.dawn.common.exception.wrapper.ResourceNotFoundException;
 import com.dawn.common.message.Message;
 import com.dawn.common.utils.SecurityUtils;
@@ -26,11 +27,15 @@ public class ReviewService implements CreateReviewUseCase {
         Long userId = SecurityUtils.getCurrentUserId();
 
         if (!orderQueryPort.isSubOrderDelivered(req.subOrderId())) {
-            throw new ResourceNotFoundException(Message.format(Message.Order.SUB_ORDER_NOT_FOUND, req.subOrderId()));
+            throw new InvalidRequestException(Message.Engagement.REVIEW_ONLY_AFTER_DELIVERED);
         }
 
         if (req.rating() < 1 || req.rating() > 5) {
             throw new InvalidRequestException(Message.Engagement.RATING_OUT_OF_RANGE);
+        }
+
+        if (reviewRepository.existsBySubOrderIdAndSkuId(req.subOrderId(), req.skuId())) {
+            throw new ConflictException(Message.Engagement.REVIEW_ALREADY_EXISTS);
         }
 
         Review review = Review.builder()

@@ -5,81 +5,93 @@
     <nz-breadcrumb-item>{{ headerTitle() }}</nz-breadcrumb-item>
   </nz-breadcrumb>
 
+  @if (activeCategory(); as cat) {
+    <div class="flex items-center gap-4 mb-5 p-5 rounded-card bg-primary-light dark:bg-primary/10 border border-primary/20">
+      <div class="w-12 h-12 shrink-0 rounded-full flex items-center justify-center bg-primary text-white">
+        <span nz-icon [nzType]="cat.icon" nzTheme="outline" class="text-xl"></span>
+      </div>
+      <div class="min-w-0">
+        <h2 class="text-lg font-bold text-ink dark:text-ink-dark">{{ cat.name }}</h2>
+        <p class="text-sm text-muted dark:text-muted-dark mt-0.5">
+          Khám phá {{ totalElements }} sản phẩm {{ cat.name }} chính hãng, giá tốt nhất tại DAWN
+        </p>
+      </div>
+    </div>
+  }
+
   <!-- Horizontal filter bar -->
   <div class="mb-5">
     <app-filter-sidebar
       [(filters)]="filters"
       [categories]="categories"
       [brands]="brands"
+      [specOptions]="specOptions()"
       (filterChange)="onFiltersChanged()"
       (clear)="onClearFilters()"
     />
   </div>
 
-  <!-- Main content -->
-  <div class="flex-1 min-w-0">
-    <!-- Header row -->
-    <div class="flex flex-wrap items-center gap-3 mb-5">
-      <span class="text-sm text-muted dark:text-muted-dark font-medium">{{ totalElements }} sản phẩm</span>
+  <!-- Header row -->
+  <div class="flex flex-wrap items-center gap-3 mb-5">
+    <span class="text-sm text-muted dark:text-muted-dark font-medium">{{ totalElements }} sản phẩm</span>
 
-      <nz-select
-        [ngModel]="filters().sort"
-        (ngModelChange)="setSort($event)"
-        nzPlaceHolder="Sắp xếp"
-        aria-label="Sắp xếp sản phẩm"
-        class="min-w-[160px] ml-auto"
-      >
-        @for (opt of sortOptions; track opt.value) {
-          <nz-option [nzValue]="opt.value" [nzLabel]="opt.label" />
-        }
-      </nz-select>
+    <nz-select
+      [ngModel]="filters().sort"
+      (ngModelChange)="setSort($event)"
+      nzPlaceHolder="Sắp xếp"
+      aria-label="Sắp xếp sản phẩm"
+      class="min-w-[160px] ml-auto"
+    >
+      @for (opt of sortOptions; track opt.value) {
+        <nz-option [nzValue]="opt.value" [nzLabel]="opt.label" />
+      }
+    </nz-select>
 
-      <button
-        nz-button
-        nzType="default"
-        class="lg:!hidden"
-        (click)="drawerOpen.set(true)"
-      >
-        <span nz-icon nzType="filter" nzTheme="outline"></span>
-        Bộ lọc
-      </button>
+    <button
+      nz-button
+      nzType="default"
+      class="lg:!hidden"
+      (click)="drawerOpen.set(true)"
+    >
+      <span nz-icon nzType="filter" nzTheme="outline"></span>
+      Bộ lọc
+    </button>
+  </div>
+
+  <!-- Product grid -->
+  @if (isLoading) {
+    <app-loading-spinner />
+  } @else if (products.length === 0) {
+    <div class="flex flex-col items-center justify-center py-20 text-center">
+      <span nz-icon nzType="frown" nzTheme="outline" class="text-5xl text-muted/30 dark:text-muted-dark/30 mb-4"></span>
+      <h2 class="text-lg font-semibold text-muted dark:text-muted-dark mb-1">Không tìm thấy sản phẩm</h2>
+      <p class="text-sm text-muted/60 dark:text-muted-dark/60">Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm</p>
+    </div>
+  } @else {
+    <div class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-4">
+      @for (product of products; track product.id) {
+        <app-product-card
+          [product]="product"
+          [badge]="getBadge(product)"
+          (addToCart)="addToCart(product)"
+        />
+      }
     </div>
 
-    <!-- Product grid -->
-    @if (isLoading) {
-      <app-loading-spinner />
-    } @else if (products.length === 0) {
-      <div class="flex flex-col items-center justify-center py-20 text-center">
-        <span nz-icon nzType="search-off" nzTheme="outline" class="text-5xl text-muted/30 dark:text-muted-dark/30 mb-4"></span>
-        <h2 class="text-lg font-semibold text-muted dark:text-muted-dark mb-1">Không tìm thấy sản phẩm</h2>
-        <p class="text-sm text-muted/60 dark:text-muted-dark/60">Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm</p>
+    @if (totalPages > 1) {
+      <div class="flex justify-center mt-8">
+        <nz-pagination
+          [nzPageIndex]="filters().page"
+          [nzTotal]="totalElements"
+          [nzPageSize]="filters().size"
+          [nzShowSizeChanger]="false"
+          nzAriaPrevious="Trang trước"
+          nzAriaNext="Trang kế"
+          (nzPageIndexChange)="onPageChange($event)"
+        />
       </div>
-    } @else {
-      <div class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-4">
-        @for (product of products; track product.id) {
-          <app-product-card
-            [product]="product"
-            [badge]="getBadge(product)"
-            (addToCart)="addToCart(product)"
-          />
-        }
-      </div>
-
-      @if (totalPages > 1) {
-        <div class="flex justify-center mt-8">
-          <nz-pagination
-            [nzPageIndex]="filters().page"
-            [nzTotal]="totalElements"
-            [nzPageSize]="filters().size"
-            [nzShowSizeChanger]="false"
-            nzAriaPrevious="Trang trước"
-            nzAriaNext="Trang kế"
-            (nzPageIndexChange)="onPageChange($event)"
-          />
-        </div>
-      }
     }
-  </div>
+  }
 
   <!-- Mobile drawer -->
   <nz-drawer
@@ -93,6 +105,7 @@
       [(filters)]="filters"
       [categories]="categories"
       [brands]="brands"
+      [specOptions]="specOptions()"
       (filterChange)="onFiltersChanged()"
       (clear)="onClearFilters()"
     />

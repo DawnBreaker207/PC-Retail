@@ -3,9 +3,10 @@ package com.dawn.order.infra.persistence;
 import com.dawn.order.entity.SubOrder;
 import com.dawn.order.entity.enums.SubOrderStatus;
 import com.dawn.order.port.out.SubOrderRepository;
-import io.lettuce.core.dynamic.annotation.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.Instant;
@@ -38,4 +39,12 @@ public interface JpaSubOrderRepository extends JpaRepository<SubOrder, Long>, Su
     default boolean isDelivered(Long subOrderId) {
         return existsByIdAndStatus(subOrderId, SubOrderStatus.DELIVERED);
     }
+
+    @Override
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("UPDATE SubOrder s SET s.status = :target WHERE s.id = :id AND s.status = :expected")
+    int transitionIfStatus(
+            @Param("id") Long id,
+            @Param("expected") SubOrderStatus expected,
+            @Param("target") SubOrderStatus target);
 }

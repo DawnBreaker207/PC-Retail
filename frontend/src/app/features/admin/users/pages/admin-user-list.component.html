@@ -1,0 +1,88 @@
+<div class="mb-6 flex items-center justify-between">
+  <div>
+    <h1 class="text-2xl font-bold text-ink dark:text-ink-dark">Người dùng</h1>
+    <p class="text-muted dark:text-muted-dark text-sm">Quản lý tài khoản (mock, chưa nối backend thật)</p>
+  </div>
+  <button nz-button nzType="primary" (click)="openCreateModal()">
+    <span nz-icon nzType="plus"></span>
+    Thêm người dùng
+  </button>
+</div>
+
+<div class="flex flex-wrap items-center gap-3 mb-4">
+  <input
+    nz-input
+    placeholder="Tìm theo tên hoặc email"
+    [(ngModel)]="search"
+    (ngModelChange)="onSearch()"
+    class="max-w-xs"
+  />
+  <nz-select [ngModel]="roleFilter()" (ngModelChange)="onRoleChange($event)" class="min-w-[160px]">
+    @for (opt of ROLE_OPTIONS; track opt.value) {
+      <nz-option [nzValue]="opt.value" [nzLabel]="opt.label" />
+    }
+  </nz-select>
+</div>
+
+<nz-table
+  [nzData]="users()"
+  [nzLoading]="loading()"
+  [nzTotal]="total()"
+  [nzPageIndex]="page"
+  [nzPageSize]="size"
+  [nzPageSizeOptions]="pageSizeOptions"
+  [nzFrontPagination]="false"
+  (nzPageIndexChange)="onPageChange($event)"
+  (nzPageSizeChange)="onPageSizeChange($event)"
+>
+  <thead>
+    <tr>
+      <th>Họ tên</th>
+      <th>Email</th>
+      <th>SĐT</th>
+      <th>Vai trò</th>
+      <th>Trạng thái</th>
+      <th>Ngày tạo</th>
+      <th class="text-right">Thao tác</th>
+    </tr>
+  </thead>
+  <tbody>
+    @for (u of users(); track u.id) {
+      <tr>
+        <td class="font-medium">{{ u.fullName }}</td>
+        <td>{{ u.email }}</td>
+        <td>{{ u.phone || '—' }}</td>
+        <td><nz-tag>{{ u.systemRole }}</nz-tag></td>
+        <td>
+          <nz-tag [nzColor]="u.status === 'ACTIVE' ? 'success' : 'default'">
+            {{ u.status === 'ACTIVE' ? 'Đang hoạt động' : 'Đã khóa' }}
+          </nz-tag>
+        </td>
+        <td>{{ u.createdAt ? (u.createdAt | date:'dd/MM/yyyy') : '—' }}</td>
+        <td class="text-right">
+          <button nz-button nzType="text" nzSize="small" (click)="openEditModal(u)" aria-label="Sửa">
+            <span nz-icon nzType="edit"></span>
+          </button>
+          <button
+            nz-button nzType="text" nzSize="small"
+            nz-popconfirm
+            nzPopconfirmTitle="Đặt lại mật khẩu cho người dùng này?"
+            (nzOnConfirm)="resetPassword(u)"
+            aria-label="Đặt lại mật khẩu"
+          >
+            <span nz-icon nzType="key"></span>
+          </button>
+          <button
+            nz-button nzType="text" nzSize="small"
+            nz-popconfirm
+            [nzPopconfirmTitle]="u.status === 'ACTIVE' ? 'Khóa tài khoản này?' : 'Kích hoạt lại tài khoản này?'"
+            (nzOnConfirm)="toggleStatus(u)"
+          >
+            <span nz-icon [nzType]="u.status === 'ACTIVE' ? 'lock' : 'unlock'"></span>
+            {{ u.status === 'ACTIVE' ? 'Khóa' : 'Kích hoạt' }}
+          </button>
+        </td>
+      </tr>
+    }
+  </tbody>
+</nz-table>

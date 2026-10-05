@@ -1,6 +1,6 @@
 <div class="grid grid-cols-2 md:grid-cols-4 auto-rows-fr gap-4">
   @for (cat of categories; track cat.label) {
-    <a [routerLink]="cat.link"
+    <a [routerLink]="['/products']" [queryParams]="{ category: cat.slug }"
        class="flex flex-col items-center justify-center gap-3 bg-surface dark:bg-surface-dark rounded-xl border border-border/80 dark:border-border-dark/80 shadow-sm p-6 hover:shadow-md hover:border-primary/30 transition-shadow group min-h-[240px]">
       <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary/20 transition-colors">
         <span nz-icon [nzType]="cat.icon" nzTheme="outline" class="text-primary text-xl"></span>

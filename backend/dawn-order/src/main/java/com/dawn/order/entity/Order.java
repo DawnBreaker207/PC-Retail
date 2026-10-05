@@ -15,7 +15,10 @@ import java.time.Instant;
 import java.util.Map;
 
 @Entity
-@Table(name = "orders")
+@Table(name = "orders", uniqueConstraints = {
+        // docs §13.11.2: chống lộ order khi đoán key + cho phép trùng key khác user
+        @UniqueConstraint(name = "uq_orders_user_idempotency", columnNames = {"user_id", "idempotency_key"})
+})
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -25,8 +28,15 @@ import java.util.Map;
 @ToString(callSuper = true)
 public class Order extends AbstractMappedEntity {
 
-    @Column(name = "user_id", nullable = false)
+    @Column(name = "user_id")
     private Long userId;
+
+    // Guest checkout (docs 13.5 lite): user_id null + liên hệ khách
+    @Column(name = "guest_email", length = 255)
+    private String guestEmail;
+
+    @Column(name = "guest_phone", length = 20)
+    private String guestPhone;
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "shipping_address", nullable = false, columnDefinition = "jsonb")
@@ -47,7 +57,7 @@ public class Order extends AbstractMappedEntity {
     @Column(name = "reserved_until")
     private Instant reservedUntil;
 
-    @Column(name = "idempotency_key", nullable = false, unique = true, length = 100)
+    @Column(name = "idempotency_key", nullable = false, length = 100)
     private String idempotencyKey;
 
     @Column(name = "created_by_type", nullable = false, length = 20)

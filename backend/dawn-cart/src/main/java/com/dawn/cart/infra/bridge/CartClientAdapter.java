@@ -32,4 +32,17 @@ public class CartClientAdapter implements CartClientPort {
         cartItemRepository.deleteByUserId(userId);
         cartCache.evict(userId);
     }
+
+    @Override
+    public List<CartItemSnapshot> getGuestItems(String guestToken) {
+        return cartItemRepository.findByGuestToken(guestToken)
+                .stream()
+                .map(item -> new CartItemSnapshot(item.getSkuId(), item.getQuantity()))
+                .toList();
+    }
+
+    @Override
+    public void clearGuestCart(String guestToken) {
+        cartItemRepository.deleteByGuestToken(guestToken);
+    }
 }

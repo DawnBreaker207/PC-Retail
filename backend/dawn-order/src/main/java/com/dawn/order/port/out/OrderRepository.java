@@ -13,5 +13,9 @@ public interface OrderRepository {
 
     Optional<Order> findByIdempotencyKey(String idempotencyKey);
 
+    Optional<Order> findByUserIdAndIdempotencyKey(Long userId, String idempotencyKey);
+
     Page<Order> findByUserId(Long userId, Pageable pageable);
+
+    Page<Order> findAll(Pageable pageable);
 }

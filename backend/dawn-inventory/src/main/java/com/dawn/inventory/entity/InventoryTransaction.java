@@ -42,4 +42,8 @@ public class InventoryTransaction extends AbstractMappedEntity {
 
     @Column(name = "created_by")
     private Long createdBy;
+
+    // docs §13.6: reason cho ADJUSTMENT_* / RETURN
+    @Column(name = "reason", columnDefinition = "TEXT")
+    private String reason;
 }

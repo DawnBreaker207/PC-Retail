@@ -6,6 +6,7 @@ import com.dawn.inventory.port.in.DeductStockUseCase;
 import com.dawn.inventory.port.in.QueryInventoryUseCase;
 import com.dawn.inventory.port.in.ReleaseStockUseCase;
 import com.dawn.inventory.port.in.ReserveStockUseCase;
+import com.dawn.inventory.port.in.RestockUseCase;
 import com.dawn.inventory.port.out.InventoryCachePort;
 import com.dawn.order.dto.StockDecrementCommand;
 import com.dawn.order.port.out.InventoryClientPort;
@@ -22,6 +23,7 @@ public class InventoryClientAdapter implements InventoryClientPort, InventoryQue
     private final ReserveStockUseCase reserveStockUseCase;
     private final ReleaseStockUseCase releaseStockUseCase;
     private final DeductStockUseCase deductStockUseCase;
+    private final RestockUseCase restockUseCase;
     private final QueryInventoryUseCase queryInventoryUseCase;
 
     @Override
@@ -47,6 +49,14 @@ public class InventoryClientAdapter implements InventoryClientPort, InventoryQue
     @Override
     public void deduct(List<StockDecrementCommand> items, Long orderId) {
         deductStockUseCase.deduct(toInventoryCommands(items), orderId);
+    }
+
+    @Override
+    public void restock(List<StockDecrementCommand> items, Long actorId) {
+        for (StockDecrementCommandDto cmd : toInventoryCommands(items)) {
+            // actorId nullable: system restock khi actor null; chi tiết ở SubOrder.statusHistory
+            restockUseCase.restock(cmd.skuId(), cmd.quantity(), null, actorId);
+        }
     }
 
     @Override

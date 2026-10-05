@@ -32,11 +32,14 @@
     }
     <button
       type="button"
-      aria-label="Yêu thích"
-       class="absolute top-2 right-2 w-11 h-11 rounded-full bg-white/80 dark:bg-surface-card-dark/80 shadow-sm opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center focus-visible:outline-2 focus-visible:outline-primary/60"
-      (click)="$event.stopPropagation()"
+      [attr.aria-label]="wishlist.has(product().id) ? 'Bỏ yêu thích' : 'Yêu thích'"
+      [attr.aria-pressed]="wishlist.has(product().id)"
+      class="absolute top-2 right-2 w-11 h-11 rounded-full bg-white/80 dark:bg-surface-card-dark/80 shadow-sm transition-opacity duration-200 flex items-center justify-center focus-visible:outline-2 focus-visible:outline-primary/60"
+      [class.opacity-0]="!wishlist.has(product().id)"
+      [class.group-hover:opacity-100]="!wishlist.has(product().id)"
+      (click)="$event.stopPropagation(); wishlist.toggle(product().id)"
     >
-      <span nz-icon nzType="heart" nzTheme="outline" class="text-muted dark:text-muted-dark text-sm"></span>
+      <span nz-icon [nzType]="wishlist.has(product().id) ? 'heart' : 'heart'" [nzTheme]="wishlist.has(product().id) ? 'fill' : 'outline'" class="text-sm" [class.text-primary]="wishlist.has(product().id)" [class.text-muted]="!wishlist.has(product().id)" [class.dark:text-muted-dark]="!wishlist.has(product().id)"></span>
     </button>
   </a>
 

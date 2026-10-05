@@ -6,7 +6,10 @@ import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { AuthService } from '@core/auth/auth.service';
-import { finalize } from 'rxjs';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { ApiEndpoints } from '@core/api/api.endpoints';
+import { clearGuestToken } from '@core/utils/guest-token';
+import { catchError, finalize, of, switchMap } from 'rxjs';
 
 @Component({
   selector: 'app-login-form',
@@ -14,6 +17,7 @@ import { finalize } from 'rxjs';
   templateUrl: './login-form.component.html',
 })
 export class LoginFormComponent {
+  private http = inject(HttpClient);
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
 
@@ -31,7 +35,26 @@ export class LoginFormComponent {
     this.isLoading.set(true);
     this.authService
       .login(this.form.getRawValue())
-      .pipe(finalize(() => this.isLoading.set(false)))
-      .subscribe(() => this.loginSuccess.emit());
+      .pipe(
+        // Gộp giỏ guest vào user sau login (best-effort, lỗi thì bỏ qua)
+        switchMap(() => {
+          let token: string | null = null;
+          try {
+            token = localStorage.getItem('pc-guest-token');
+          } catch {
+            token = null;
+          }
+          if (!token) return of(null);
+          const params = new HttpParams().set('token', token);
+          return this.http.post(ApiEndpoints.cart.merge, {}, { params }).pipe(
+            catchError(() => of(null)),
+          );
+        }),
+        finalize(() => this.isLoading.set(false)),
+      )
+      .subscribe(() => {
+        clearGuestToken();
+        this.loginSuccess.emit();
+      });
   }
 }

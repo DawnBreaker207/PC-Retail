@@ -30,19 +30,21 @@ public class CreatePaymentService implements CreatePaymentUseCase {
     @Override
     @Transactional
     public CreatePaymentResult create(Long orderId, PaymentMethod method, Long userId) {
+        // FE cũ không gửi method → mặc định VNPAY để không vỡ flow
+        PaymentMethod effectiveMethod = method == null ? PaymentMethod.VNPAY : method;
         Instant reservedUntil = orderClient.getOrderReservedUntil(orderId);
         if (reservedUntil != null && reservedUntil.isBefore(Instant.now())) {
             throw new ConflictException(Message.Order.EXPIRED);
         }
 
-        List<Payment> existing = paymentRepo.findByOrderIdAndMethod(orderId, method);
+        List<Payment> existing = paymentRepo.findByOrderIdAndMethod(orderId, effectiveMethod);
         Payment pending = existing.stream()
                 .filter(p -> p.getStatus() == PaymentResultStatus.PENDING)
                 .findFirst()
                 .orElse(null);
 
         if (pending != null) {
-            return gatewayRegistry.get(method).createPayment(pending);
+            return gatewayRegistry.get(effectiveMethod).createPayment(pending);
         }
 
         BigDecimal amount = orderClient.getOrderTotalAmount(orderId);
@@ -52,13 +54,13 @@ public class CreatePaymentService implements CreatePaymentUseCase {
 
         Payment payment = Payment.builder()
                 .orderId(orderId)
-                .method(method)
+                .method(effectiveMethod)
                 .amount(amount)
                 .status(PaymentResultStatus.PENDING)
                 .userId(userId)
                 .build();
         paymentRepo.save(payment);
 
-        return gatewayRegistry.get(method).createPayment(payment);
+        return gatewayRegistry.get(effectiveMethod).createPayment(payment);
     }
 }

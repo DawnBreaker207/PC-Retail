@@ -17,6 +17,11 @@ public class PasswordResetCacheAdapter implements PasswordResetPort {
     @Value("${app.passwordResetExpirationMinutes:15}")
     private long expirationMinutes;
 
+    @Value("${app.passwordResetCooldownSeconds:60}")
+    private long cooldownSeconds;
+
+    private static final String COOLDOWN_PREFIX = "pwd_reset:cooldown:";
+
     private String key(String tokenHash) {
         return "pwd_reset:" + tokenHash;
     }
@@ -37,5 +42,17 @@ public class PasswordResetCacheAdapter implements PasswordResetPort {
         if (userId == null) return null;
         redisTemplate.delete(k);
         return Long.parseLong(userId);
+    }
+
+    @Override
+    public boolean isOnCooldown(String email) {
+        return Boolean.TRUE.equals(redisTemplate.hasKey(COOLDOWN_PREFIX + email.toLowerCase()));
+    }
+
+    @Override
+    public void storeCooldown(String email) {
+        redisTemplate.opsForValue().set(
+                COOLDOWN_PREFIX + email.toLowerCase(), "1",
+                cooldownSeconds, TimeUnit.SECONDS);
     }
 }

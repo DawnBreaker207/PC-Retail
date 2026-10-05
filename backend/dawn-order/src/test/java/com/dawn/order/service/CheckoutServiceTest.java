@@ -56,6 +56,9 @@ public class CheckoutServiceTest {
     CatalogClientPort catalogClient;
 
     @Mock
+    ShippingService shippingService;
+
+    @Mock
     ApplicationEventPublisher eventPublisher;
 
     @Spy
@@ -67,12 +70,13 @@ public class CheckoutServiceTest {
     void setUp() {
         checkoutExecutor.setCorePoolSize(2);
         checkoutExecutor.initialize();
+        lenient().when(shippingService.resolveFee(any(), any())).thenReturn(java.math.BigDecimal.ZERO);
         var orderCommandSvc = new OrderCommandService(
                 orderRepository, subOrderRepository, orderItemRepository,
                 orderQueryService, inventoryClient, promotionClient, eventPublisher);
         checkoutService = new CheckoutService(
                 orderCommandSvc, orderQueryService, cartClient,
-                inventoryClient, promotionClient, catalogClient, checkoutExecutor);
+                inventoryClient, promotionClient, catalogClient, checkoutExecutor, shippingService);
     }
 
 
@@ -89,7 +93,7 @@ public class CheckoutServiceTest {
             Order existing = new Order();
             OrderDto existingDto = mock(OrderDto.class);
 
-            when(orderQueryService.findByIdempotencyKey(key)).thenReturn(Optional.of(existingDto));
+            when(orderQueryService.findByUserIdAndIdempotencyKey(1L, key)).thenReturn(Optional.of(existingDto));
 
             OrderDto result = checkoutService.checkout(buildRequest(key, FulfillmentType.PICKUP), 1L);
 
@@ -106,7 +110,7 @@ public class CheckoutServiceTest {
         @Test
         @DisplayName("Empty cart -> throw InvalidRequestException")
         void emptyCart_throws() {
-            when(orderQueryService.findByIdempotencyKey(any())).thenReturn(Optional.empty());
+            when(orderQueryService.findByUserIdAndIdempotencyKey(eq(1L), any())).thenReturn(Optional.empty());
             when(cartClient.getItems(1L)).thenReturn(List.of());
 
             assertThatThrownBy(() ->
@@ -117,7 +121,7 @@ public class CheckoutServiceTest {
         @Test
         @DisplayName("DELIVERY fulfillment without shipping address -> throw InvalidRequestException")
         void deliveryWithoutAddress_throws() {
-            when(orderQueryService.findByIdempotencyKey(any())).thenReturn(Optional.empty());
+            when(orderQueryService.findByUserIdAndIdempotencyKey(eq(1L), any())).thenReturn(Optional.empty());
             when(cartClient.getItems(1L)).thenReturn(List.of(new CartItemSnapshot(10L, 2)));
 
             CheckoutRequest req = new CheckoutRequest(
@@ -133,9 +137,31 @@ public class CheckoutServiceTest {
         }
 
         @Test
+        @DisplayName("Voucher sai: lỗi gốc 400, không bị bọc thành 500")
+        void invalidVoucher_unwrapped400() {
+            when(orderQueryService.findByUserIdAndIdempotencyKey(eq(1L), any())).thenReturn(Optional.empty());
+            when(cartClient.getItems(1L)).thenReturn(List.of(new CartItemSnapshot(10L, 2)));
+            when(catalogClient.getPrices(anyList())).thenReturn(Map.of(10L, BigDecimal.valueOf(500_000)));
+            when(promotionClient.validate(anyString(), any()))
+                    .thenReturn(VoucherApplyResult.fail("Voucher code not existed: NOPE"));
+
+            CheckoutRequest req = new CheckoutRequest(
+                    UUID.randomUUID().toString(),
+                    FulfillmentType.PICKUP,
+                    null,
+                    "NOPE",
+                    null);
+
+            assertThatThrownBy(() -> checkoutService.checkout(req, 1L))
+                    .isInstanceOf(InvalidRequestException.class)
+                    .hasMessageContaining("NOPE");
+            verify(inventoryClient, never()).decrementBatch(anyList());
+        }
+
+        @Test
         @DisplayName("PICKUP fulfillment without address -> passes address validation")
         void pickupWithoutAddress_passesValidation() {
-            when(orderQueryService.findByIdempotencyKey(any())).thenReturn(Optional.empty());
+            when(orderQueryService.findByUserIdAndIdempotencyKey(eq(1L), any())).thenReturn(Optional.empty());
             when(cartClient.getItems(1L)).thenReturn(List.of(new CartItemSnapshot(10L, 2)));
             when(catalogClient.getPrices(anyList())).thenReturn(Map.of(10L, BigDecimal.valueOf(500_000)));
             when(inventoryClient.decrementBatch(anyList())).thenReturn(List.of());
@@ -161,7 +187,7 @@ public class CheckoutServiceTest {
             String key = UUID.randomUUID().toString();
             List<CartItemSnapshot> items = List.of(new CartItemSnapshot(10L, 2));
 
-            when(orderQueryService.findByIdempotencyKey(key)).thenReturn(Optional.empty());
+            when(orderQueryService.findByUserIdAndIdempotencyKey(1L, key)).thenReturn(Optional.empty());
             when(cartClient.getItems(1L)).thenReturn(items);
             when(catalogClient.getPrices(anyList())).thenReturn(Map.of(10L, BigDecimal.valueOf(500_000)));
             when(inventoryClient.decrementBatch(anyList())).thenReturn(List.of());
@@ -180,7 +206,7 @@ public class CheckoutServiceTest {
             String key = UUID.randomUUID().toString();
             List<CartItemSnapshot> items = List.of(new CartItemSnapshot(10L, 1));
 
-            when(orderQueryService.findByIdempotencyKey(key)).thenReturn(Optional.empty());
+            when(orderQueryService.findByUserIdAndIdempotencyKey(1L, key)).thenReturn(Optional.empty());
             when(cartClient.getItems(1L)).thenReturn(items);
             when(catalogClient.getPrices(anyList())).thenReturn(Map.of(10L, BigDecimal.valueOf(500_000)));
             when(promotionClient.validate(anyString(), any()))
@@ -209,7 +235,7 @@ public class CheckoutServiceTest {
             String key = UUID.randomUUID().toString();
             List<CartItemSnapshot> items = List.of(new CartItemSnapshot(10L, 2));
 
-            when(orderQueryService.findByIdempotencyKey(key)).thenReturn(Optional.empty());
+            when(orderQueryService.findByUserIdAndIdempotencyKey(1L, key)).thenReturn(Optional.empty());
             when(cartClient.getItems(1L)).thenReturn(items);
             when(catalogClient.getPrices(anyList())).thenReturn(Map.of(10L, BigDecimal.valueOf(500_000)));
             when(inventoryClient.decrementBatch(anyList())).thenReturn(List.of(10L)); // SKU 10 failed

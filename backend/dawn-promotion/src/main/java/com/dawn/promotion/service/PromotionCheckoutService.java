@@ -30,6 +30,15 @@ public class PromotionCheckoutService implements ValidatePromotionUseCase, Promo
 
     @Override
     public void reservePromotions(List<String> voucherCodes, List<Long> flashSaleSkuIds) {
+        // Tự nạp key Redis còn thiếu từ DB (key hết TTL/mất sau flush) trước khi trừ
+        if (voucherCodes != null) {
+            List<Voucher> vouchers = voucherRepo.findByCodeInAndDeletedAtIsNull(voucherCodes);
+            for (Voucher v : vouchers) {
+                if (cachePort.getVoucherRemaining(v.getCode()) == null) {
+                    cachePort.setVoucherRemaining(v.getCode(), v.getRemainingQuantity());
+                }
+            }
+        }
         cachePort.decrementPromotions(voucherCodes, flashSaleSkuIds);
     }
 
@@ -68,12 +77,17 @@ public class PromotionCheckoutService implements ValidatePromotionUseCase, Promo
         }
 
         for (Voucher voucher : vouchers) {
-            voucherUsageRepo.save(VoucherUsage.builder()
-                    .voucherId(voucher.getId())
-                    .userId(userId)
-                    .orderId(orderId)
-                    .discountAmount(calculateDiscount(voucher, orderTotal))
-                    .build());
+            try {
+                voucherUsageRepo.save(VoucherUsage.builder()
+                        .voucherId(voucher.getId())
+                        .userId(userId)
+                        .orderId(orderId)
+                        .discountAmount(calculateDiscount(voucher, orderTotal))
+                        .build());
+            } catch (org.springframework.dao.DataIntegrityViolationException dup) {
+                // Lưới an toàn UNIQUE(voucher_id, user_id) khi 2 checkout đua qua exists-check
+                throw new InvalidRequestException(Message.format(Message.Promotion.VOUCHER_ALREADY_USED, voucher.getCode()));
+            }
             voucher.setRemainingQuantity(voucher.getRemainingQuantity() - 1);
             voucherRepo.save(voucher);
         }

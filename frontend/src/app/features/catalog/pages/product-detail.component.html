@@ -93,13 +93,24 @@
           </div>
         </div>
 
-        <div class="flex flex-col sm:flex-row gap-3 mb-6">
+        <div class="flex flex-col sm:flex-row gap-3 mb-3">
           <button
             type="button"
             nz-button
             nzType="primary"
             nzSize="large"
-            class="!rounded-lg !px-8 !h-12 !text-base !font-bold flex-1 sm:flex-none !shadow-sm hover:!shadow-md !transition-shadow"
+            class="!rounded-lg !px-8 !h-12 !text-base !font-bold flex-1 sm:flex-[2] !shadow-sm hover:!shadow-md !transition-shadow"
+            [disabled]="p.stockAvailable === 0"
+            (click)="buyNow(p)"
+          >
+            Mua ngay
+          </button>
+          <button
+            type="button"
+            nz-button
+            nzType="default"
+            nzSize="large"
+            class="!rounded-lg !px-8 !h-12 !text-base !font-bold flex-1 !border-primary !text-primary hover:!bg-primary/5 !transition-colors"
             [disabled]="p.stockAvailable === 0"
             (click)="addToCart(p)"
           >
@@ -109,15 +120,35 @@
           <button
             type="button"
             nz-button
+            nzType="default"
             nzSize="large"
-            class="!rounded-lg !px-8 !h-12 !text-base !font-bold flex-1 sm:flex-none !bg-primary !border-primary !text-white hover:!bg-primary-dark !shadow-sm hover:!shadow-md !transition-[shadow,background-color,border-color]"
-            [disabled]="p.stockAvailable === 0"
+            class="!rounded-lg !w-12 !h-12"
+            [class.!border-primary]="wishlist.has(p.id)"
+            [attr.aria-label]="wishlist.has(p.id) ? 'Bỏ yêu thích' : 'Yêu thích'"
+            [attr.aria-pressed]="wishlist.has(p.id)"
+            (click)="wishlist.toggle(p.id)"
           >
-            Mua ngay
+            <span nz-icon nzType="heart" [nzTheme]="wishlist.has(p.id) ? 'fill' : 'outline'" [class.text-primary]="wishlist.has(p.id)"></span>
           </button>
-          <button type="button" nz-button nzType="default" nzSize="large" class="!rounded-lg !w-12 !h-12" aria-label="Yêu thích">
-            <span nz-icon nzType="heart" nzTheme="outline"></span>
-          </button>
+        </div>
+
+        <div class="flex flex-col sm:flex-row gap-3 mb-6">
+          <a
+            href="tel:19001234"
+            class="flex-1 flex items-center justify-center gap-2 !rounded-lg !h-11 !text-sm !font-semibold border border-border dark:border-border-dark hover:border-primary hover:text-primary transition-colors"
+          >
+            <span nz-icon nzType="phone" nzTheme="fill" class="text-primary"></span>
+            Tư vấn ngay
+          </a>
+          <a
+            href="https://zalo.me/0900000000"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="flex-1 flex items-center justify-center gap-2 !rounded-lg !h-11 !text-sm !font-semibold border border-border dark:border-border-dark hover:border-primary hover:text-primary transition-colors"
+          >
+            <span nz-icon nzType="message" nzTheme="fill" class="text-primary"></span>
+            Chat Zalo
+          </a>
         </div>
 
         <!-- Trust signals -->

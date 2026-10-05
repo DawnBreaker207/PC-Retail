@@ -11,14 +11,20 @@ export interface FilterState {
   brands: string[];
   minPrice: number;
   maxPrice: number;
+  specs: Record<string, string[]>;
   sort: string;
   page: number;
   size: number;
 }
 
+export interface SpecFilterOption {
+  label: string;
+  values: string[];
+}
+
 export interface ActiveFilter {
   label: string;
-  type: 'q' | 'category' | 'brand' | 'price';
+  type: 'q' | 'category' | 'brand' | 'price' | 'spec';
   value: string;
 }
 
@@ -41,6 +47,7 @@ export class FilterSidebarComponent {
   filters = model.required<FilterState>();
   categories = input<{ slug: string; name: string }[]>([]);
   brands = input<string[]>([]);
+  specOptions = input<SpecFilterOption[]>([]);
 
   filterChange = output<void>();
   clear = output<void>();
@@ -66,6 +73,9 @@ export class FilterSidebarComponent {
       const matched = PRICE_RANGES.find(r => r.min === f.minPrice && r.max === f.maxPrice);
       tags.push({ label: matched?.label || `${(f.minPrice / 1000000).toFixed(0)}tr - ${(f.maxPrice / 1000000).toFixed(0)}tr`, type: 'price', value: '' });
     }
+    for (const [key, values] of Object.entries(f.specs)) {
+      for (const v of values) tags.push({ label: `${key}: ${v}`, type: 'spec', value: `${key}::${v}` });
+    }
     return tags;
   }
 
@@ -76,6 +86,13 @@ export class FilterSidebarComponent {
         case 'category': return { ...f, category: '' };
         case 'brand': return { ...f, brands: f.brands.filter(b => b !== af.value) };
         case 'price': return { ...f, minPrice: 0, maxPrice: 500_000_000 };
+        case 'spec': {
+          const [key, value] = af.value.split('::');
+          const remaining = (f.specs[key] || []).filter(v => v !== value);
+          const specs = { ...f.specs };
+          if (remaining.length > 0) specs[key] = remaining; else delete specs[key];
+          return { ...f, specs };
+        }
         default: return f;
       }
     });
@@ -103,8 +120,18 @@ export class FilterSidebarComponent {
     this.filters.update(f => ({
       ...f,
       category: slug ?? '',
+      specs: {},
       page: 1,
     }));
+    this.filterChange.emit();
+  }
+
+  selectSpec(label: string, values: string[]) {
+    this.filters.update(f => {
+      const specs = { ...f.specs };
+      if (values.length > 0) specs[label] = values; else delete specs[label];
+      return { ...f, specs, page: 1 };
+    });
     this.filterChange.emit();
   }
 
@@ -114,6 +141,7 @@ export class FilterSidebarComponent {
 
   hasActive(): boolean {
     const f = this.filters();
-    return !!(f.q || f.category || f.brands.length > 0 || f.minPrice > 0 || f.maxPrice < 500_000_000);
+    return !!(f.q || f.category || f.brands.length > 0 || f.minPrice > 0 || f.maxPrice < 500_000_000
+      || Object.values(f.specs).some(v => v.length > 0));
   }
 }

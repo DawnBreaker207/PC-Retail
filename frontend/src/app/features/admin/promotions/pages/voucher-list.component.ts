@@ -7,7 +7,7 @@ import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzTagModule } from 'ng-zorro-antd/tag';
-import { NzModalService } from 'ng-zorro-antd/modal';
+import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
 import { ApiEndpoints } from '@core/api/api.endpoints';
@@ -48,7 +48,7 @@ const DISCOUNT_LABEL: Record<string, string> = {
   selector: 'app-voucher-list',
   imports: [
     DatePipe,
-    NzTableModule, NzButtonModule, NzIconModule, NzSpinModule, NzTagModule, NzPopconfirmModule,
+    NzTableModule, NzButtonModule, NzIconModule, NzSpinModule, NzTagModule, NzPopconfirmModule, NzModalModule,
   ],
   templateUrl: './voucher-list.component.html',
 })

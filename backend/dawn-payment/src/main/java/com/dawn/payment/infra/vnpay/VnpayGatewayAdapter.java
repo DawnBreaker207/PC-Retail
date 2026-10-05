@@ -8,7 +8,6 @@ import com.dawn.payment.entity.Payment;
 import com.dawn.payment.entity.enums.PaymentMethod;
 import com.dawn.payment.entity.enums.PaymentResultStatus;
 import com.dawn.payment.infra.gateway.PaymentGateway;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -88,9 +87,15 @@ public class VnpayGatewayAdapter implements PaymentGateway {
 
     @Override
     public boolean verifyCallback(Map<String, String> params) {
-        String receivedHash = params.remove("vnp_SecureHash");
+        String receivedHash = params.get("vnp_SecureHash");
         if (receivedHash == null) return false;
-        String hashData = buildHashData(params);
+        // VNPay spec: hash mọi field vnp_*, trừ vnp_SecureHash/vnp_SecureHashType.
+        // Không mutate map đầu vào.
+        Map<String, String> data = new HashMap<>(params);
+        data.remove("vnp_SecureHash");
+        data.remove("vnp_SecureHashType");
+        data.entrySet().removeIf(e -> !e.getKey().startsWith("vnp_"));
+        String hashData = buildHashData(data);
         String computedHash = hmacSHA512(vnp_SecretKey, hashData);
         return receivedHash.equalsIgnoreCase(computedHash);
     }
@@ -98,14 +103,17 @@ public class VnpayGatewayAdapter implements PaymentGateway {
     @Override
     public PaymentDto queryStatus(Long paymentId, String transactionRef) {
         VnpayQueryResult result = queryTransaction(transactionRef, paymentId);
+        PaymentResultStatus status = result.success()
+                ? PaymentResultStatus.COMPLETED
+                : ("UNKNOWN".equals(result.responseCode()) || "NO_RESPONSE".equals(result.responseCode())
+                        ? PaymentResultStatus.UNKNOWN
+                        : PaymentResultStatus.FAILED);
         return new PaymentDto(
                 paymentId,
                 null,
                 PaymentMethod.VNPAY,
                 null,
-                result.success()
-                        ? PaymentResultStatus.COMPLETED
-                        : PaymentResultStatus.FAILED,
+                status,
                 result.transactionNo(),
                 null);
     }
@@ -202,25 +210,6 @@ public class VnpayGatewayAdapter implements PaymentGateway {
         } catch (Exception ex) {
             return "";
         }
-    }
-
-    public static String getIpAddress(HttpServletRequest request) {
-        try {
-            String ip = request.getHeader("X-FORWARDED-FOR");
-            return ip != null ? ip : request.getRemoteAddr();
-        } catch (Exception e) {
-            return "127.0.0.1";
-        }
-    }
-
-    public static String getRandomNumber(int len) {
-        Random rnd = new Random();
-        String chars = "0123456789";
-        StringBuilder sb = new StringBuilder(len);
-        for (int i = 0; i < len; i++) {
-            sb.append(chars.charAt(rnd.nextInt(chars.length())));
-        }
-        return sb.toString();
     }
 
     public static String getPaymentURL(Map<String, String> paramsMap, boolean encodeKey) {

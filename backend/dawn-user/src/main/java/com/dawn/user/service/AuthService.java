@@ -53,7 +53,12 @@ public class AuthService implements RegisterUseCase, LoginUseCase, TokenRefreshU
                 .status(UserStatus.PENDING_VERIFICATION)
                 .build();
 
-        userRepository.save(user);
+        try {
+            userRepository.save(user);
+        } catch (org.springframework.dao.DataIntegrityViolationException dup) {
+            // Đua concurrent: check-then-insert thua → 409 thay vì 500
+            throw new ConflictException(Message.User.EMAIL_ALREADY_USED);
+        }
 
 
         sendOtp(user.getEmail(), user.getFullName());
@@ -62,16 +67,23 @@ public class AuthService implements RegisterUseCase, LoginUseCase, TokenRefreshU
         return new RegisterInitResponse(user.getId(), user.getEmail(), "Vui lòng kiểm tra email để lấy mã xác thực");
     }
 
-    // Verify OTP
+    // Verify OTP — peek trước, chỉ consume khi đúng; sai 5 lần thì đốt mã
     @Override
     @Transactional
     public AuthResponse verify(VerifyOtpRequest request) {
         String email = request.email().toLowerCase();
 
-        String storeOtp = emailVerificationCachePort.consumeOtp(email);
-        if (storeOtp == null || !storeOtp.equals(request.otpCode())) {
+        String storedOtp = emailVerificationCachePort.peekOtp(email);
+        if (storedOtp == null || !storedOtp.equals(request.otpCode())) {
+            long fails = emailVerificationCachePort.recordFailedAttempt(email);
+            if (fails >= 5) {
+                emailVerificationCachePort.consumeOtp(email);
+                emailVerificationCachePort.clearAttempts(email);
+            }
             throw new InvalidRequestException(Message.Auth.TOKEN_INVALID_OR_EXPIRED);
         }
+        emailVerificationCachePort.consumeOtp(email);
+        emailVerificationCachePort.clearAttempts(email);
         User user = userRepository
                 .findByEmailAndDeletedAtIsNull(email)
                 .orElseThrow(() -> new ResourceNotFoundException(Message.format(Message.User.USERNAME_NOT_FOUND, email)));
@@ -145,17 +157,22 @@ public class AuthService implements RegisterUseCase, LoginUseCase, TokenRefreshU
         refreshTokenService.revokeRefreshToken(refreshToken);
     }
 
-    // FORGOT PASSWORD
+    // FORGOT PASSWORD — không lộ email tồn tại; rate limit 1 req/60s
     @Override
     @Transactional
     public void forgotPassword(ForgotPasswordRequest request) {
-        userRepository.findByEmailAndDeletedAtIsNull(request.email().toLowerCase())
-                .ifPresent(user -> {
-                    String rawToken = TokenUtils.generateResetToken();
-                    passwordResetPort.storeResetToken(TokenUtils.hashToken(rawToken), user.getId());
-                    emailPublisherPort.publish(EmailMessage.passwordReset(
-                            user.getEmail(), user.getFullName(), rawToken));
-                });
+        String email = request.email().toLowerCase();
+        var userOpt = userRepository.findByEmailAndDeletedAtIsNull(email);
+        if (userOpt.isEmpty()) return;
+        if (passwordResetPort.isOnCooldown(email)) {
+            throw new InvalidRequestException(Message.Auth.OTP_RESEND_COOLDOWN);
+        }
+        var user = userOpt.get();
+        String rawToken = TokenUtils.generateResetToken();
+        passwordResetPort.storeResetToken(TokenUtils.hashToken(rawToken), user.getId());
+        passwordResetPort.storeCooldown(email);
+        emailPublisherPort.publish(EmailMessage.passwordReset(
+                user.getEmail(), user.getFullName(), rawToken));
     }
 
     // RESET PASSWORD

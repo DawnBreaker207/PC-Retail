@@ -1,0 +1,29 @@
+<div class="max-w-screen-2xl mx-auto px-4 py-6">
+  <nz-breadcrumb class="mb-4">
+    <nz-breadcrumb-item><a routerLink="/">Trang chủ</a></nz-breadcrumb-item>
+    <nz-breadcrumb-item>Danh mục sản phẩm</nz-breadcrumb-item>
+  </nz-breadcrumb>
+
+  <div class="mb-6">
+    <h1 class="text-2xl font-bold text-ink dark:text-ink-dark">Tất cả danh mục sản phẩm</h1>
+    <p class="text-muted dark:text-muted-dark text-sm mt-0.5">Chọn danh mục để xem toàn bộ sản phẩm phù hợp</p>
+  </div>
+
+  <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+    @for (cat of categories(); track cat.slug) {
+      <a
+        [routerLink]="['/products']"
+        [queryParams]="{ category: cat.slug }"
+        class="group flex flex-col items-center text-center gap-3 p-5 bg-surface dark:bg-surface-dark rounded-card border border-border/80 dark:border-border-dark/80 shadow-sm hover:shadow-md hover:border-primary/50 dark:hover:border-primary/50 transition-all duration-200"
+      >
+        <div class="w-16 h-16 rounded-full flex items-center justify-center bg-primary-light dark:bg-primary/15 text-primary group-hover:bg-primary group-hover:text-white transition-colors duration-200">
+          <span nz-icon [nzType]="cat.icon" nzTheme="outline" class="text-2xl"></span>
+        </div>
+        <div>
+          <p class="text-sm font-semibold text-ink dark:text-ink-dark group-hover:text-primary transition-colors">{{ cat.name }}</p>
+          <p class="text-xs text-muted dark:text-muted-dark mt-0.5">{{ cat.productCount }} sản phẩm</p>
+        </div>
+      </a>
+    }
+  </div>
+</div>

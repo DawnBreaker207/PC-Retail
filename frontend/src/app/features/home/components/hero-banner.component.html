@@ -1,6 +1,14 @@
 <div class="bg-bg dark:bg-bg-dark">
-  <div class="max-w-screen-2xl mx-auto">
-    <div class="flex">
+  <div class="max-w-screen-2xl mx-auto px-4 py-4 lg:py-6">
+    <div class="flex gap-4 lg:gap-6">
+
+      <aside #categorySidebar class="hidden lg:block scroll-mt-37.5" [class.category-sidebar-elevated]="menu.isOpen()">
+        <app-category-sidebar />
+      </aside>
+
+      <div class="flex-1 min-w-0 flex flex-col gap-4">
+
+      <div class="flex gap-4">
 
       <div class="flex-1 min-w-0 overflow-hidden shadow-sm relative"
            role="region" aria-roledescription="carousel" aria-label="Hero banner carousel"
@@ -17,12 +25,12 @@
                  [style.transform]="'translateX(' + ((i - activeIndex()) * 100) + '%)'"
                  [attr.aria-hidden]="i !== activeIndex()">
               <img [src]="slide.image" loading="lazy" appFallbackImage alt="{{ slide.title }}" class="w-full h-full object-cover" />
-              <div class="absolute inset-0 bg-gradient-to-r from-black/70 via-black/30 to-transparent"></div>
+              <div class="absolute inset-0 bg-gradient-to-r from-black/85 via-black/50 to-black/10"></div>
               <div class="absolute left-0 top-0 bottom-0 flex flex-col justify-center p-8 xl:p-12 max-w-lg">
-                <p class="text-[#ef5350] font-semibold text-xs tracking-[0.15em] uppercase mb-2">{{ slide.tag }}</p>
-                <h2 class="text-white text-xl xl:text-2xl font-bold leading-tight mb-2">{{ slide.title }}</h2>
-                <p class="text-white/70 text-sm mb-4 line-clamp-2">{{ slide.subtitle }}</p>
-                 <a [routerLink]="slide.ctaLink" class="inline-flex items-center gap-1.5 bg-[#ef5350] hover:bg-[#b71c1c] text-white rounded-lg px-5 text-sm font-semibold shadow-sm hover:shadow-md transition-shadow w-fit min-h-[44px] leading-none">
+                <p class="text-[#ef5350] font-semibold text-xs tracking-[0.15em] uppercase mb-2 [text-shadow:0_1px_8px_rgba(0,0,0,0.9)]">{{ slide.tag }}</p>
+                <h2 class="text-white text-xl xl:text-2xl font-bold leading-tight mb-2 [text-shadow:0_2px_12px_rgba(0,0,0,0.9)]">{{ slide.title }}</h2>
+                <p class="text-white/85 text-sm mb-4 line-clamp-2 [text-shadow:0_1px_8px_rgba(0,0,0,0.9)]">{{ slide.subtitle }}</p>
+                 <a [routerLink]="slide.cta.path" [queryParams]="slide.cta.queryParams" class="inline-flex items-center gap-1.5 bg-[#ef5350] hover:bg-[#b71c1c] text-white rounded-lg px-5 text-sm font-semibold shadow-sm hover:shadow-md transition-shadow w-fit min-h-[44px] leading-none">
                   {{ slide.ctaLabel }}
                   <span nz-icon nzType="right" nzTheme="outline"></span>
                 </a>
@@ -50,10 +58,10 @@
         </div>
       </div>
 
-      <div class="hidden lg:flex flex-col gap-4 w-[280px] shrink-0 pl-4">
+      <div class="hidden lg:flex flex-col gap-4 w-[280px] shrink-0">
         @for (banner of sideBanners; track banner.id) {
-          <a [routerLink]="banner.link"
-             class="relative block h-[195px] rounded-xl overflow-hidden border border-border/80 dark:border-border-dark/80 shadow-sm hover:shadow-md transition-shadow group">
+          <a [routerLink]="banner.dest.path" [queryParams]="banner.dest.queryParams"
+             class="relative block h-[182px] rounded-xl overflow-hidden border border-border/80 dark:border-border-dark/80 shadow-sm hover:shadow-md transition-shadow group">
             <img [src]="banner.imageUrl" loading="lazy" appFallbackImage alt="" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
             <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
             <div class="absolute bottom-0 left-0 right-0 p-4">
@@ -66,6 +74,22 @@
         }
       </div>
 
+      </div>
+
+      <app-promo-banner-grid />
+
+      </div>
+
+    </div>
+
+    <div class="mt-6 lg:mt-8 space-y-6 lg:space-y-8">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <app-promo-card title="Build PC Cao Cấp" image="https://dummyimage.com/400x300/7c3aed/white?text=Build+PC+i9" link="/products?category=pc" bgColor="linear-gradient(135deg, var(--color-purple), var(--gradient-purple-deep))" badgeText="INTEL" priceText="Intel Core Ultra 9" class="h-[220px]" />
+        <app-promo-card title="Bàn Phím Cơ Gaming" image="https://dummyimage.com/400x300/0891b2/white?text=Ban+Phim+Co" link="/products?category=ban-phim" bgColor="linear-gradient(135deg, var(--color-cyan), var(--gradient-cyan-deep))" badgeText="CƠ" priceText="Giảm đến 35%" class="h-[220px]" />
+        <app-promo-card title="Chuột Không Dây" image="https://dummyimage.com/400x300/d97706/white?text=Chuot+Game" link="/products?category=chuot" bgColor="linear-gradient(135deg, var(--color-warning), var(--gradient-warning-deep))" badgeText="LOGITECH" priceText="Giảm đến 25%" class="h-[220px]" />
+      </div>
+
+      <app-category-strip />
     </div>
   </div>
 </div>

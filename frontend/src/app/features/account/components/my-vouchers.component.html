@@ -1,0 +1,34 @@
+<div class="py-4">
+  <div class="flex gap-2 mb-5">
+    <input
+      nz-input
+      placeholder="Nhập mã giảm giá để kiểm tra"
+      [(ngModel)]="code"
+      name="voucherCode"
+      class="max-w-xs"
+    />
+    <button nz-button nzType="primary" [nzLoading]="checking()" [disabled]="!code.trim()" (click)="checkCode()">
+      Kiểm tra mã
+    </button>
+  </div>
+
+  @if (loading()) {
+    <div class="flex justify-center py-10"><nz-spin nzSize="large"></nz-spin></div>
+  } @else if (vouchers().length === 0) {
+    <app-empty-state title="Chưa có voucher nào" description="Theo dõi các chương trình khuyến mãi để nhận voucher mới." />
+  } @else {
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      @for (v of vouchers(); track v.id) {
+        <div class="rounded-xl border border-dashed border-primary/40 bg-primary/5 p-4 flex flex-col gap-1">
+          <div class="flex items-center justify-between">
+            <span class="font-mono font-bold text-primary text-sm">{{ v.code }}</span>
+            <span nz-icon nzType="gift" class="text-primary"></span>
+          </div>
+          <p class="text-sm font-medium">Giảm {{ formatDiscount(v) }}</p>
+          <p class="text-xs text-muted dark:text-muted-dark">{{ v.description }}</p>
+          <p class="text-xs text-muted dark:text-muted-dark">Đơn tối thiểu {{ v.minOrder | currencyFormat }} · HSD {{ v.expiry }}</p>
+        </div>
+      }
+    </div>
+  }
+</div>

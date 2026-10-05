@@ -1,0 +1,48 @@
+<div class="mb-6 flex items-center justify-between">
+  <div>
+    <h1 class="text-2xl font-bold text-ink dark:text-ink-dark">Danh mục</h1>
+    <p class="text-muted dark:text-muted-dark text-sm">Quản lý danh mục sản phẩm (mock, chưa nối backend thật)</p>
+  </div>
+  <button nz-button nzType="primary" (click)="openCreateModal()">
+    <span nz-icon nzType="plus"></span>
+    Thêm danh mục
+  </button>
+</div>
+
+<nz-table [nzData]="treeRows()" [nzLoading]="loading()" [nzFrontPagination]="false" [nzShowPagination]="false">
+  <thead>
+    <tr>
+      <th>Tên danh mục</th>
+      <th>Slug</th>
+      <th>Icon</th>
+      <th class="text-right">Thao tác</th>
+    </tr>
+  </thead>
+  <tbody>
+    @for (row of treeRows(); track row.category.id) {
+      <tr>
+        <td class="font-medium" [style.paddingLeft.px]="16 + row.depth * 24">
+          @if (row.depth > 0) {
+            <span class="text-muted dark:text-muted-dark mr-1">└</span>
+          }
+          {{ row.category.name }}
+        </td>
+        <td class="text-muted dark:text-muted-dark">{{ row.category.slug }}</td>
+        <td><span nz-icon [nzType]="row.category.icon || 'appstore'"></span></td>
+        <td class="text-right">
+          <button nz-button nzType="text" nzSize="small" (click)="openEditModal(row.category)" aria-label="Sửa">
+            <span nz-icon nzType="edit"></span>
+          </button>
+          <button
+            nz-button nzType="text" nzSize="small" nzDanger
+            nz-popconfirm nzPopconfirmTitle="Xóa danh mục này?"
+            (nzOnConfirm)="deleteCategory(row.category.id)"
+            aria-label="Xóa"
+          >
+            <span nz-icon nzType="delete"></span>
+          </button>
+        </td>
+      </tr>
+    }
+  </tbody>
+</nz-table>

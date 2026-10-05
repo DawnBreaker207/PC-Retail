@@ -2,12 +2,17 @@ import { HttpRequest, HttpInterceptorFn, HttpResponse } from '@angular/common/ht
 import { of, delay } from 'rxjs';
 import { PRODUCT_TEMPLATES } from '@core/mocks/product-template.mock';
 import { MOCK_CATEGORIES, MOCK_BRANDS } from '@core/mocks/category.mock';
-import { MOCK_REVIEWS } from '@core/mocks/review.mock';
 import { MOCK_ORDERS } from '@core/mocks/order.mock';
-import { MOCK_FLASH_SALE_CAMPAIGN } from '@core/mocks/flash-sale.mock';
 import { MOCK_DASHBOARD_SUMMARY, MOCK_REVENUE_7_DAYS, MOCK_LOW_STOCK_ITEMS } from '@core/mocks/dashboard.mock';
 import { MOCK_VOUCHERS } from '@core/mocks/voucher.mock';
 import { MOCK_BUILDER_SLOTS, MOCK_BUILDER_TEMPLATES } from '@core/mocks/builder.mock';
+import { MOCK_ADMIN_USERS } from '@core/mocks/admin-user.mock';
+import { MOCK_RETURN_REQUESTS } from '@core/mocks/return-request.mock';
+import { MOCK_AUDIT_LOGS } from '@core/mocks/audit-log.mock';
+import { MOCK_ADMIN_REVIEWS } from '@core/mocks/admin-review.mock';
+import { Address, Category, Sku, User } from '@core/models/common.model';
+import { inject } from '@angular/core';
+import { AuthService } from '@core/auth/auth.service';
 
 interface CartAddBody { skuId: number; quantity: number; }
 interface CartUpdateBody { skuId: number; quantity: number; }
@@ -23,7 +28,34 @@ const baseUrl = 'https://dummyimage.com';
 // ponytail: mutable local copy so imports aren't mutated across requests
 let cartItems: CartItem[] = [];
 const localOrders = [...MOCK_ORDERS];
-let nextOrderId = 2000;
+
+
+let userAddresses: Address[] = [];
+let adminUsers: User[] = [...MOCK_ADMIN_USERS];
+let adminCategories: Category[] = [...MOCK_CATEGORIES];
+const returnRequests = [...MOCK_RETURN_REQUESTS];
+const reviewQueue = [...MOCK_ADMIN_REVIEWS];
+let nextAdminId = 1000;
+
+function generateAdminProducts(): Sku[] {
+  return PRODUCT_TEMPLATES.map((t, i) => ({
+    id: i + 1,
+    name: t.name,
+    slug: t.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '').substring(0, 120),
+    price: t.price,
+    originalPrice: t.origPrice || undefined,
+    imageUrls: [`${baseUrl}/400x400/1e293b/white?text=${encodeURIComponent(t.name.substring(0, 20))}`],
+    brandName: t.brand,
+    status: 'ACTIVE',
+    soldCount: t.sold,
+    rating: t.rating,
+    reviewCount: t.reviews,
+    specChips: t.specChips,
+    categoryName: t.cat,
+  })) as Sku[];
+}
+
+let adminProducts: Sku[] = generateAdminProducts();
 
 function ok(body: unknown, status = 200) {
   return of(new HttpResponse({ status, body })).pipe(delay(80 + Math.random() * 120));
@@ -71,6 +103,7 @@ function generateProducts() {
 }
 
 export const mockInterceptor: HttpInterceptorFn = (req, next) => {
+  const authService = inject(AuthService);
   const { method, url, body } = req;
 
   // ── AUTH ──
@@ -102,22 +135,31 @@ export const mockInterceptor: HttpInterceptorFn = (req, next) => {
 
   // ── USER ──
   if (url.match(/\/api\/v1\/users\/me\/addresses\/(\d+)/) && method === 'PUT') {
-    return ok({ id: Number(url.match(/\/api\/v1\/users\/me\/addresses\/(\d+)/)![1]), ...(body as any) });
+    const id = Number(url.match(/\/api\/v1\/users\/me\/addresses\/(\d+)/)![1]);
+    const idx = userAddresses.findIndex(a => a.id === id);
+    if (idx >= 0) userAddresses[idx] = { ...userAddresses[idx], ...(body as Partial<Address>), id };
+    return idx >= 0 ? ok(userAddresses[idx]) : err(404, 'Not found');
   }
   if (url.match(/\/api\/v1\/users\/me\/addresses\/(\d+)/) && method === 'DELETE') {
+    const id = Number(url.match(/\/api\/v1\/users\/me\/addresses\/(\d+)/)![1]);
+    userAddresses = userAddresses.filter(a => a.id !== id);
     return ok(null);
   }
   if (url.includes('/api/v1/users/me/addresses') && method === 'GET') {
-    return ok([]);
+    return ok(userAddresses);
   }
   if (url.includes('/api/v1/users/me/addresses') && method === 'POST') {
-    return ok({ id: Date.now(), ...(body as any) });
+    const created: Address = { id: ++nextAdminId, ...(body as Omit<Address, 'id'>) };
+    userAddresses = [...userAddresses, created];
+    return ok(created);
   }
   if (url.includes('/api/v1/users/me') && method === 'GET') {
-    return ok({ id: 1, fullName: 'User', email: 'user@dawn.vn', phone: '0912345678', systemRole: 'CUSTOMER' });
+    const current = authService.currentUser();
+    return ok(current ?? { id: 1, fullName: 'User', email: 'user@dawn.vn', phone: '0912345678', systemRole: 'CUSTOMER' });
   }
   if (url.includes('/api/v1/users/me') && method === 'PUT') {
-    return ok({ id: 1, fullName: 'User', email: 'user@dawn.vn', phone: '0912345678', systemRole: 'CUSTOMER' });
+    const current = authService.currentUser();
+    return ok({ ...(current ?? { id: 1, email: 'user@dawn.vn', systemRole: 'CUSTOMER' }), ...(body as Record<string, unknown>) });
   }
 
   // ── CATALOG ──
@@ -300,10 +342,16 @@ export const mockInterceptor: HttpInterceptorFn = (req, next) => {
 
   // ── INVENTORY ──
   if (url.match(/\/api\/v1\/inventory\/(\d+)\/transactions/) && method === 'GET') {
-    return ok({ content: [], page: 0, size: 20, totalElements: 0, totalPages: 0 });
+    const id = Number(url.match(/\/api\/v1\/inventory\/(\d+)\/transactions/)![1]);
+    const content = [
+      { id: id * 10 + 1, type: 'IN', quantity: 20, note: 'Nhập hàng đầu kỳ', createdAt: new Date(Date.now() - 86400000 * 20).toISOString(), actorName: 'Admin DAWN' },
+      { id: id * 10 + 2, type: 'OUT', quantity: -3, note: 'Xuất theo đơn hàng', createdAt: new Date(Date.now() - 86400000 * 10).toISOString(), actorName: 'Hệ thống' },
+      { id: id * 10 + 3, type: 'IN', quantity: 10, note: 'Nhập bổ sung', createdAt: new Date(Date.now() - 86400000 * 3).toISOString(), actorName: 'Nguyễn Văn Staff' },
+    ];
+    return ok({ content, page: 0, size: 20, totalElements: content.length, totalPages: 1 });
   }
 
-  if (url.match(/\/api\/v1\/inventory\/(\d+)\/restock/) && method === 'POST') {
+  if (url.match(/\/api\/v1\/inventory\/(\d+)\/restock/) && (method === 'POST' || method === 'PUT')) {
     return ok({ success: true });
   }
 
@@ -312,18 +360,28 @@ export const mockInterceptor: HttpInterceptorFn = (req, next) => {
     return ok(products[0] ? { skuId: Number(url.match(/\/api\/v1\/inventory\/(\d+)/)![1]), stock: 50 } : null);
   }
 
+  if (url.includes('/api/v1/inventory/low-stock') && method === 'GET') {
+    return ok(MOCK_LOW_STOCK_ITEMS);
+  }
+
   if (url.includes('/api/v1/inventory') && method === 'GET') {
     const products = generateProducts();
     const params = parseParams(req);
     let filtered = [...products];
+    if (params['q']) filtered = filtered.filter(p => p.name.toLowerCase().includes(params['q']!.toLowerCase()));
+    if (params['brand']) filtered = filtered.filter(p => p.brandName.toLowerCase() === params['brand']!.toLowerCase());
     if (params['lowStock'] === 'true') filtered = filtered.filter(() => Math.random() > 0.7);
     const page = params['page'] ? Number(params['page']) : 0;
     const size = params['size'] ? Number(params['size']) : 20;
     const start = page * size;
-    const paged = filtered.slice(start, start + size).map(p => ({
-      skuId: p.id, name: p.name, slug: p.slug, stock: p.stockAvailable || Math.floor(Math.random() * 100) + 5,
-      price: p.price, imageUrl: p.imageUrls[0], brandName: p.brandName,
-    }));
+    const paged = filtered.slice(start, start + size).map(p => {
+      const stockQuantity = p.stockAvailable || Math.floor(Math.random() * 100) + 5;
+      const reservedQuantity = Math.floor(Math.random() * 6);
+      return {
+        skuId: p.id, skuName: p.name, imageUrl: p.imageUrls[0], brandName: p.brandName, price: p.price,
+        stockQuantity, reservedQuantity, availableQuantity: stockQuantity - reservedQuantity,
+      };
+    });
     return ok({ content: paged, page, size, totalElements: filtered.length, totalPages: Math.ceil(filtered.length / size) });
   }
 
@@ -334,8 +392,166 @@ export const mockInterceptor: HttpInterceptorFn = (req, next) => {
   if (url.includes('/api/v1/admin/dashboard/revenue') && method === 'GET') {
     return ok(MOCK_REVENUE_7_DAYS);
   }
-  if (url.includes('/api/v1/inventory/low-stock') && method === 'GET') {
-    return ok(MOCK_LOW_STOCK_ITEMS);
+
+  // ── ADMIN PRODUCTS (mock-only, no BE equivalent) ──
+  if (url.match(/\/api\/v1\/admin\/products\/(\d+)/) && method === 'PUT') {
+    const id = Number(url.match(/\/api\/v1\/admin\/products\/(\d+)/)![1]);
+    const idx = adminProducts.findIndex(p => p.id === id);
+    if (idx >= 0) adminProducts[idx] = { ...adminProducts[idx], ...(body as Partial<Sku>) };
+    return idx >= 0 ? ok(adminProducts[idx]) : err(404, 'Not found');
+  }
+  if (url.match(/\/api\/v1\/admin\/products\/(\d+)/) && method === 'DELETE') {
+    const id = Number(url.match(/\/api\/v1\/admin\/products\/(\d+)/)![1]);
+    adminProducts = adminProducts.filter(p => p.id !== id);
+    return ok(null);
+  }
+  if (url.includes('/api/v1/admin/products') && method === 'POST') {
+    const d = body as Partial<Sku>;
+    const created: Sku = {
+      id: ++nextAdminId, name: d.name || '', slug: (d.name || '').toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+      price: d.price || 0, originalPrice: d.originalPrice || undefined,
+      imageUrls: d.imageUrls?.length ? d.imageUrls : [`${baseUrl}/400x400/1e293b/white?text=New`],
+      description: d.description || undefined,
+      brandName: d.brandName || '', status: d.status || 'ACTIVE', soldCount: 0, categoryName: d.categoryName,
+      stockAvailable: d.stockAvailable ?? 0,
+    };
+    adminProducts = [created, ...adminProducts];
+    return ok(created);
+  }
+  if (url.includes('/api/v1/admin/products') && method === 'GET') {
+    const params = parseParams(req);
+    let filtered = adminProducts;
+    if (params['q']) filtered = filtered.filter(p => p.name.toLowerCase().includes(params['q']!.toLowerCase()));
+    if (params['category']) filtered = filtered.filter(p => p.categoryName === params['category']);
+    if (params['brand']) filtered = filtered.filter(p => p.brandName === params['brand']);
+    if (params['status']) filtered = filtered.filter(p => p.status === params['status']);
+    const page = params['page'] ? Number(params['page']) : 0;
+    const size = params['size'] ? Number(params['size']) : 20;
+    const start = page * size;
+    const paged = filtered.slice(start, start + size);
+    return ok({ content: paged, page, size, totalElements: filtered.length, totalPages: Math.ceil(filtered.length / size) });
+  }
+
+  // ── ADMIN CATEGORIES (mock-only, no BE equivalent) ──
+  if (url.match(/\/api\/v1\/admin\/categories\/(\d+)/) && method === 'PUT') {
+    const id = Number(url.match(/\/api\/v1\/admin\/categories\/(\d+)/)![1]);
+    const idx = adminCategories.findIndex(c => c.id === id);
+    if (idx >= 0) adminCategories[idx] = { ...adminCategories[idx], ...(body as Partial<Category>) };
+    return idx >= 0 ? ok(adminCategories[idx]) : err(404, 'Not found');
+  }
+  if (url.match(/\/api\/v1\/admin\/categories\/(\d+)/) && method === 'DELETE') {
+    const id = Number(url.match(/\/api\/v1\/admin\/categories\/(\d+)/)![1]);
+    adminCategories = adminCategories.filter(c => c.id !== id);
+    return ok(null);
+  }
+  if (url.includes('/api/v1/admin/categories') && method === 'POST') {
+    const d = body as Partial<Category>;
+    const created: Category = {
+      id: ++nextAdminId, name: d.name || '', slug: (d.name || '').toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+      parentId: d.parentId ?? null, imageUrl: d.imageUrl, icon: d.icon || 'appstore',
+    };
+    adminCategories = [created, ...adminCategories];
+    return ok(created);
+  }
+  if (url.includes('/api/v1/admin/categories') && method === 'GET') {
+    return ok({ content: adminCategories, page: 0, size: adminCategories.length, totalElements: adminCategories.length, totalPages: 1 });
+  }
+
+  // ── ADMIN USERS (mock-only, no BE equivalent) ──
+  if (url.match(/\/api\/v1\/admin\/users\/(\d+)\/status/) && method === 'PUT') {
+    const id = Number(url.match(/\/api\/v1\/admin\/users\/(\d+)\/status/)![1]);
+    const idx = adminUsers.findIndex(u => u.id === id);
+    if (idx >= 0) adminUsers[idx] = { ...adminUsers[idx], status: (body as { status: 'ACTIVE' | 'INACTIVE' }).status };
+    return idx >= 0 ? ok(adminUsers[idx]) : err(404, 'Not found');
+  }
+  if (url.match(/\/api\/v1\/admin\/users\/(\d+)\/reset-password/) && method === 'POST') {
+    const tempPassword = Math.random().toString(36).slice(-8);
+    return ok({ tempPassword });
+  }
+  if (url.match(/\/api\/v1\/admin\/users\/(\d+)/) && method === 'PUT') {
+    const id = Number(url.match(/\/api\/v1\/admin\/users\/(\d+)/)![1]);
+    const idx = adminUsers.findIndex(u => u.id === id);
+    if (idx >= 0) adminUsers[idx] = { ...adminUsers[idx], ...(body as Partial<User>) };
+    return idx >= 0 ? ok(adminUsers[idx]) : err(404, 'Not found');
+  }
+  if (url.includes('/api/v1/admin/users') && method === 'POST') {
+    const d = body as Partial<User>;
+    const created: User = {
+      id: ++nextAdminId, fullName: d.fullName || '', email: d.email || '', phone: d.phone,
+      systemRole: d.systemRole || 'CUSTOMER', status: 'ACTIVE', createdAt: new Date().toISOString(),
+    };
+    adminUsers = [created, ...adminUsers];
+    return ok(created);
+  }
+  if (url.includes('/api/v1/admin/users') && method === 'GET') {
+    const params = parseParams(req);
+    let filtered = adminUsers;
+    if (params['role']) filtered = filtered.filter(u => u.systemRole === params['role']);
+    if (params['search']) filtered = filtered.filter(u => u.fullName.toLowerCase().includes(params['search'].toLowerCase()) || u.email.toLowerCase().includes(params['search'].toLowerCase()));
+    const page = params['page'] ? Number(params['page']) : 0;
+    const size = params['size'] ? Number(params['size']) : 20;
+    const start = page * size;
+    const paged = filtered.slice(start, start + size);
+    return ok({ content: paged, page, size, totalElements: filtered.length, totalPages: Math.ceil(filtered.length / size) });
+  }
+
+  // ── ADMIN RETURNS (mock-only, no BE equivalent) ──
+  if (url.match(/\/api\/v1\/admin\/returns\/(\d+)\/approve/) && method === 'POST') {
+    const id = Number(url.match(/\/api\/v1\/admin\/returns\/(\d+)\/approve/)![1]);
+    const idx = returnRequests.findIndex(r => r.id === id);
+    if (idx >= 0) {
+      returnRequests[idx] = {
+        ...returnRequests[idx], status: 'APPROVED',
+        approvedBy: authService.currentUser()?.fullName || 'Admin', approvedAt: new Date().toISOString(),
+      };
+    }
+    return idx >= 0 ? ok(returnRequests[idx]) : err(404, 'Not found');
+  }
+  if (url.match(/\/api\/v1\/admin\/returns\/(\d+)\/reject/) && method === 'POST') {
+    const id = Number(url.match(/\/api\/v1\/admin\/returns\/(\d+)\/reject/)![1]);
+    const idx = returnRequests.findIndex(r => r.id === id);
+    if (idx >= 0) {
+      returnRequests[idx] = {
+        ...returnRequests[idx], status: 'REJECTED', rejectReason: (body as { reason: string }).reason,
+        approvedBy: authService.currentUser()?.fullName || 'Admin', approvedAt: new Date().toISOString(),
+      };
+    }
+    return idx >= 0 ? ok(returnRequests[idx]) : err(404, 'Not found');
+  }
+  if (url.match(/\/api\/v1\/admin\/returns\/(\d+)/) && method === 'GET') {
+    const id = Number(url.match(/\/api\/v1\/admin\/returns\/(\d+)/)![1]);
+    const found = returnRequests.find(r => r.id === id) || null;
+    return found ? ok(found) : err(404, 'Not found');
+  }
+  if (url.includes('/api/v1/admin/returns') && method === 'GET') {
+    const params = parseParams(req);
+    let filtered = returnRequests;
+    if (params['status']) filtered = filtered.filter(r => r.status === params['status']);
+    return ok({ content: filtered, page: 0, size: filtered.length, totalElements: filtered.length, totalPages: 1 });
+  }
+
+  // ── ADMIN REVIEWS (mock-only, no BE equivalent) ──
+  if (url.match(/\/api\/v1\/admin\/reviews\/(\d+)\/moderate/) && method === 'POST') {
+    const id = Number(url.match(/\/api\/v1\/admin\/reviews\/(\d+)\/moderate/)![1]);
+    const idx = reviewQueue.findIndex(r => r.id === id);
+    if (idx >= 0) reviewQueue[idx] = { ...reviewQueue[idx], status: (body as { status: 'APPROVED' | 'HIDDEN' }).status };
+    return idx >= 0 ? ok(reviewQueue[idx]) : err(404, 'Not found');
+  }
+  if (url.includes('/api/v1/admin/reviews') && method === 'GET') {
+    const params = parseParams(req);
+    let filtered = reviewQueue;
+    if (params['status']) filtered = filtered.filter(r => r.status === params['status']);
+    return ok({ content: filtered, page: 0, size: filtered.length, totalElements: filtered.length, totalPages: 1 });
+  }
+
+  // ── ADMIN AUDIT LOGS (mock-only, no BE equivalent) ──
+  if (url.includes('/api/v1/admin/audit-logs') && method === 'GET') {
+    const params = parseParams(req);
+    let filtered = MOCK_AUDIT_LOGS;
+    if (params['action']) filtered = filtered.filter(a => a.action.toLowerCase().includes(params['action'].toLowerCase()));
+    if (params['entityType']) filtered = filtered.filter(a => a.entityType === params['entityType']);
+    if (params['outcome']) filtered = filtered.filter(a => a.outcome === params['outcome']);
+    return ok({ content: filtered, page: 0, size: filtered.length, totalElements: filtered.length, totalPages: 1 });
   }
 
   // ── BUILDER (mock-only, no BE equivalent) ──
@@ -353,5 +569,55 @@ export const mockInterceptor: HttpInterceptorFn = (req, next) => {
   }
 
   // ── PASS THROUGH ──
+  
+  if (url.includes('/api/v1/wishlist') && method === 'GET') {
+    return ok([]);
+  }
+  if (url.includes('/api/v1/wishlist') && (method === 'POST' || method === 'DELETE')) {
+    return ok(null);
+  }
+  if (url.includes('/api/v1/notifications') && method === 'GET') {
+    return ok([]);
+  }
+  if (url.includes('/api/v1/notifications') && method === 'PUT') {
+    return ok(null);
+  }
+  if (url.includes('/api/v1/promotion/flash-sales/active') && method === 'GET') {
+    return ok([]);
+  }
+  if (url.includes('/api/v1/articles') && method === 'GET') {
+    return ok([]);
+  }
+  if (url.includes('/api/v1/admin/reports/revenue') && method === 'GET') {
+    return ok(MOCK_REVENUE_7_DAYS);
+  }
+  if (url.includes('/api/v1/admin/reports/top-products') && method === 'GET') {
+    return ok([]);
+  }
+  if (url.includes('return-requests') && method === 'POST') {
+    return ok({ id: Date.now(), status: 'REQUESTED' });
+  }
+  
+  if (url.includes('/api/v1/admin/purchasing/suppliers') && method === 'GET') {
+    return ok([]);
+  }
+  if (url.includes('/api/v1/admin/purchasing/suppliers') && method === 'POST') {
+    return ok({ id: Date.now(), ...(body as any) });
+  }
+  if (url.includes('/api/v1/admin/purchasing/orders') && method === 'GET') {
+    return ok([]);
+  }
+  if (url.includes('/api/v1/admin/purchasing/orders') && method === 'POST') {
+    return ok({ id: Date.now(), status: 'DRAFT', ...(body as any) });
+  }
+  if (url.includes('/api/v1/admin/stock-takes') && method === 'POST') {
+    return ok({ id: Date.now(), status: 'IN_PROGRESS' });
+  }
+  if (url.includes('/api/v1/admin/stock-takes') && method === 'GET') {
+    return ok([]);
+  }
+  if (url.includes('/api/v1/admin/reports/export') && method === 'GET') {
+    return ok('day,revenue');
+  }
   return next(req);
 };

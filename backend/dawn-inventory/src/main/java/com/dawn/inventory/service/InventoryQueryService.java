@@ -13,6 +13,7 @@ import com.dawn.inventory.port.in.QueryInventoryUseCase;
 import com.dawn.inventory.port.out.InventoryCachePort;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -25,6 +26,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class InventoryQueryService implements QueryInventoryUseCase {
 
     private static final int LOW_STOCK_THRESHOLD = 5;
@@ -74,9 +76,13 @@ public class InventoryQueryService implements QueryInventoryUseCase {
 
     @Override
     public Integer getAvailableQuantity(Long skuId) {
-        // Redis first
-        Integer cached = cachePort.getAvailable(skuId);
-        if (cached != null) return cached;
+        // Redis first — chết thì rớt xuống DB (graceful degradation, log 1 dòng)
+        try {
+            Integer cached = cachePort.getAvailable(skuId);
+            if (cached != null) return cached;
+        } catch (RuntimeException e) {
+            log.warn("Redis unavailable, fallback DB for sku {}", skuId);
+        }
 
         // Fallback DB
         return inventoryRepository.findBySkuId(skuId)

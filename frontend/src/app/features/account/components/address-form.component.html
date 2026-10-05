@@ -1,0 +1,50 @@
+<form nz-form [formGroup]="form" (ngSubmit)="submit()">
+  <nz-form-item>
+    <nz-form-label nzFor="label" nzRequired>Tên gợi nhớ</nz-form-label>
+    <nz-form-control nzErrorTip="Vui lòng nhập tên gợi nhớ">
+      <input nz-input id="label" formControlName="label" placeholder="VD: Nhà riêng, Công ty..." />
+    </nz-form-control>
+  </nz-form-item>
+
+  <nz-form-item>
+    <nz-form-label nzFor="fullName" nzRequired>Người nhận</nz-form-label>
+    <nz-form-control nzErrorTip="Vui lòng nhập tên người nhận">
+      <input nz-input id="fullName" formControlName="fullName" placeholder="Họ và tên" />
+    </nz-form-control>
+  </nz-form-item>
+
+  <nz-form-item>
+    <nz-form-label nzFor="phone" nzRequired>Số điện thoại</nz-form-label>
+    <nz-form-control nzErrorTip="Vui lòng nhập số điện thoại">
+      <input nz-input id="phone" formControlName="phone" placeholder="Số điện thoại" />
+    </nz-form-control>
+  </nz-form-item>
+
+  <nz-form-item>
+    <nz-form-label nzFor="street" nzRequired>Địa chỉ cụ thể</nz-form-label>
+    <nz-form-control nzErrorTip="Vui lòng nhập địa chỉ">
+      <input nz-input id="street" formControlName="street" placeholder="Số nhà, tên đường" />
+    </nz-form-control>
+  </nz-form-item>
+
+  <nz-form-item>
+    <nz-form-label nzFor="district" nzRequired>Quận/Huyện</nz-form-label>
+    <nz-form-control nzErrorTip="Vui lòng nhập quận/huyện">
+      <input nz-input id="district" formControlName="district" placeholder="Quận/Huyện" />
+    </nz-form-control>
+  </nz-form-item>
+
+  <nz-form-item>
+    <nz-form-label nzFor="city" nzRequired>Tỉnh/Thành phố</nz-form-label>
+    <nz-form-control nzErrorTip="Vui lòng nhập tỉnh/thành phố">
+      <input nz-input id="city" formControlName="city" placeholder="Tỉnh/Thành phố" />
+    </nz-form-control>
+  </nz-form-item>
+
+  <div class="flex justify-end gap-3 mt-6">
+    <button nz-button nzType="default" type="button" (click)="cancel()">Hủy</button>
+    <button nz-button nzType="primary" type="submit" [nzLoading]="submitting()" [disabled]="form.invalid">
+      {{ isEdit ? 'Lưu thay đổi' : 'Thêm địa chỉ' }}
+    </button>
+  </div>
+</form>

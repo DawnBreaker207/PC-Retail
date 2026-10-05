@@ -1,0 +1,16 @@
+<div class="max-w-3xl mx-auto px-4 py-6 lg:py-8">
+  <nz-breadcrumb class="mb-4">
+    <nz-breadcrumb-item><a routerLink="/">Trang chủ</a></nz-breadcrumb-item>
+    <nz-breadcrumb-item>Câu hỏi thường gặp</nz-breadcrumb-item>
+  </nz-breadcrumb>
+
+  <h1 class="text-xl lg:text-2xl font-bold mb-6">Câu hỏi thường gặp</h1>
+
+  <nz-collapse>
+    @for (item of faqs; track item.q) {
+      <nz-collapse-panel [nzHeader]="item.q">
+        <p class="text-sm text-muted dark:text-muted-dark leading-relaxed">{{ item.a }}</p>
+      </nz-collapse-panel>
+    }
+  </nz-collapse>
+</div>
