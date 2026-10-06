@@ -216,7 +216,9 @@ export const mockInterceptor: HttpInterceptorFn = (req, next) => {
     return ok(cartItems.reduce((s, i) => s + i.quantity, 0));
   }
 
-  if (url.includes('/api/v1/cart') && method === 'GET') {
+  // Mock chỉ ôm giỏ member (demo offline). Giỏ guest đi API thật nên LOẠI /guest ra,
+  // không thì ghi thật (POST lọt xuống BE) mà đọc mock (rỗng) -> thêm vào giỏ mà badge/cart không bao giờ hiện
+  if (url.includes('/api/v1/cart') && !url.includes('/guest') && method === 'GET') {
     return ok({ items: cartItems, version: 1 });
   }
 

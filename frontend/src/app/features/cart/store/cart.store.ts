@@ -36,16 +36,28 @@ export const CartStore = signalStore(
   withMethods((store, http = inject(HttpClient), auth = inject(AuthService)) => {
     const isGuest = () => !auth.isAuthenticated();
     const guestParams = () => new HttpParams().set('token', getGuestToken());
-    const toItems = (res: { items: CartItem[]; version?: number }) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const toItems = (res: { items: any[]; version?: number }) => {
       patchState(store, {
-        items: res.items.map((i) => ({ ...i, selected: true })),
+        // API thật trả {skuId, skuName, primaryImageUrl, unitPrice}; mock trả {name, imageUrl, price} — chuẩn hoá 1 chỗ
+        items: (res.items ?? []).map((i) => ({
+          skuId: i['skuId'],
+          name: (i['name'] ?? i['skuName'] ?? '') as string,
+          slug: (i['slug'] ?? '') as string,
+          imageUrl: (i['imageUrl'] ?? i['primaryImageUrl'] ?? '') as string,
+          price: Number(i['price'] ?? i['unitPrice'] ?? 0),
+          quantity: i['quantity'],
+          stock: i['stock'],
+          brandName: (i['brandName'] ?? '') as string,
+          selected: true,
+        })) as CartItem[],
         version: res.version ?? null,
         isLoading: false,
       });
     };
     const fail = (err: unknown) => {
-      const msg = (err as { error?: { message?: string } })?.error?.message || (err as Error)?.message || 'Có lỗi xảy ra';
-      patchState(store, { isLoading: false, error: msg });
+      const message = (err as { error?: { message?: string } })?.error?.message || (err as Error)?.message || 'Có lỗi xảy ra';
+      patchState(store, { isLoading: false, error: message });
       return of({ items: [], version: undefined });
     };
     const loadGuest = () => {

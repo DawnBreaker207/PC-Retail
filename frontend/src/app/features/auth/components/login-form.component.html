@@ -64,7 +64,7 @@
   </div>
 
   <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-    <button type="button" class="w-full h-10 min-h-[44px] inline-flex items-center justify-center gap-2 rounded-lg border border-border/60 dark:border-border-dark/60 bg-surface dark:bg-surface-dark text-ink dark:text-ink-dark hover:bg-bg dark:hover:bg-bg-dark transition-colors cursor-pointer text-sm font-medium">
+    <button type="button" (click)="socialLogin('Google')" class="w-full h-10 min-h-[44px] inline-flex items-center justify-center gap-2 rounded-lg border border-border/60 dark:border-border-dark/60 bg-surface dark:bg-surface-dark text-ink dark:text-ink-dark hover:bg-bg dark:hover:bg-bg-dark transition-colors cursor-pointer text-sm font-medium">
       <span class="inline-flex items-center justify-center shrink-0">
         <svg width="20" height="20" viewBox="0 0 48 48" aria-hidden="true">
           <path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.65-.389-3.917"/>
@@ -75,7 +75,7 @@
       </span>
       <span class="min-w-[68px] text-center">Google</span>
     </button>
-    <button type="button" class="w-full h-10 min-h-[44px] inline-flex items-center justify-center gap-2 rounded-lg border border-border/60 dark:border-border-dark/60 bg-surface dark:bg-surface-dark text-ink dark:text-ink-dark hover:bg-bg dark:hover:bg-bg-dark transition-colors cursor-pointer text-sm font-medium" aria-label="Đăng nhập bằng Facebook">
+    <button type="button" (click)="socialLogin('Facebook')" class="w-full h-10 min-h-[44px] inline-flex items-center justify-center gap-2 rounded-lg border border-border/60 dark:border-border-dark/60 bg-surface dark:bg-surface-dark text-ink dark:text-ink-dark hover:bg-bg dark:hover:bg-bg-dark transition-colors cursor-pointer text-sm font-medium" aria-label="Đăng nhập bằng Facebook">
       <span class="inline-flex items-center justify-center shrink-0">
         <svg width="20" height="20" viewBox="0 0 48 48" aria-hidden="true">
           <path fill="#1877F2" d="M24 5C13.5 5 5 13.5 5 24c0 9.5 6.9 17.4 16 18.9V30h-4.8v-6H21v-4.6c0-4.8 2.9-7.5 7.2-7.5 2.1 0 4.3.4 4.3.4v4.7h-2.4c-2.4 0-3.1 1.5-3.1 3V24h5.3l-.8 6H27v12.9c9.1-1.5 16-9.4 16-18.9 0-10.5-8.5-19-19-19"/>

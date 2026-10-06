@@ -5,6 +5,7 @@ import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzIconModule } from 'ng-zorro-antd/icon';
+import { NzMessageService } from 'ng-zorro-antd/message';
 import { AuthService } from '@core/auth/auth.service';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { ApiEndpoints } from '@core/api/api.endpoints';
@@ -20,6 +21,7 @@ export class LoginFormComponent {
   private http = inject(HttpClient);
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
+  private msg = inject(NzMessageService);
 
   loginSuccess = output();
   isLoading = signal(false);
@@ -29,6 +31,11 @@ export class LoginFormComponent {
     email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required, Validators.minLength(6)]],
   });
+
+  // OAuth chưa có BE: báo rõ thay vì nút chết
+  socialLogin(provider: string) {
+    this.msg.info(`Đăng nhập ${provider} đang phát triển, bạn đăng nhập bằng email nhé`);
+  }
 
   submit() {
     if (this.form.invalid) return;

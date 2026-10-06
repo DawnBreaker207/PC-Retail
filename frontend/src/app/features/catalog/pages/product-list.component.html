@@ -19,8 +19,8 @@
     </div>
   }
 
-  <!-- Horizontal filter bar -->
-  <div class="mb-5">
+  <!-- Horizontal filter bar (desktop) — mobile dùng nút "Bộ lọc" mở drawer -->
+  <div class="mb-5 hidden lg:block">
     <app-filter-sidebar
       [(filters)]="filters"
       [categories]="categories"

@@ -1,4 +1,5 @@
-import { Component, inject, signal, DestroyRef, OnDestroy } from '@angular/core';
+import { Component, effect, inject, signal, DestroyRef,
+  OnDestroy } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { NzStepsModule } from 'ng-zorro-antd/steps';
@@ -44,9 +45,14 @@ export class CheckoutComponent implements OnDestroy {
       this.windowWidth.set(window.innerWidth);
       window.addEventListener('resize', this.onResize);
     }
-    if (this.selectedItems().length === 0) {
-      this.router?.navigate(['/cart']);
-    }
+    // Nạp lại giỏ rồi mới kết luận trống: vào thẳng /checkout (F5 giữa chừng)
+    // mà check đồng bộ sẽ đá oan về /cart dù server vẫn còn hàng
+    this.store.loadCart();
+    effect(() => {
+      if (!this.store.isLoading() && this.selectedItems().length === 0) {
+        this.router?.navigate(['/cart']);
+      }
+    });
   }
 
   ngOnDestroy() {

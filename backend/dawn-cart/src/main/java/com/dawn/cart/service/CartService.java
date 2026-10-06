@@ -46,37 +46,52 @@ public class CartService implements GetCartUseCase, AddCartItemUseCase, UpdateCa
     public CartSummaryDto getCart(Long userId) {
         return cartCachePort.getCart(userId).orElseGet(() -> {
             List<CartItem> items = cartItemRepository.findByUserId(userId);
-            if (items.isEmpty()) {
-                return new CartSummaryDto(List.of(), 0, BigDecimal.ZERO);
+            CartSummaryDto summary = toEnrichedSummary(items);
+            // Giỏ rỗng đổi liên tục theo từng write (đã evict sau commit) — không cache cho đỡ rác
+            if (!summary.items().isEmpty()) {
+                cartCachePort.putCart(userId, summary);
             }
-            List<Long> skuIds = items.stream().map(CartItem::getSkuId).toList();
-            Map<Long, SkuPriceInfo> skuInfoMap = catalogQueryPort.getSkuDetailsMap(skuIds);
-
-            List<CartItemDto> dtos = items.stream().map(item -> {
-                SkuPriceInfo skuInfo = skuInfoMap.get(item.getSkuId());
-                BigDecimal unitPrice = (skuInfo != null) ? skuInfo.unitPrice() : BigDecimal.ZERO;
-                String productName = (skuInfo != null) ? skuInfo.productName() : "";
-                String imageUrl = (skuInfo != null) ? skuInfo.primaryImageUrl() : "";
-
-                BigDecimal subTotal = unitPrice.multiply(BigDecimal.valueOf(item.getQuantity()));
-
-                return new CartItemDto(
-                        item.getSkuId(),
-                        productName,
-                        imageUrl,
-                        unitPrice,
-                        item.getQuantity(),
-                        subTotal);
-            }).toList();
-
-            BigDecimal totalAmount = dtos.stream()
-                    .map(CartItemDto::subtotal)
-                    .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-            CartSummaryDto summary = new CartSummaryDto(dtos, dtos.size(), totalAmount);
-            cartCachePort.putCart(userId, summary);
             return summary;
         });
+    }
+
+    // Giỏ guest enrich giống member (tên/giá/ảnh từ catalog) — không thì UI render dòng trống
+    public CartSummaryDto getGuestCart(String guestToken) {
+        if (guestToken == null || guestToken.isBlank()) {
+            throw new InvalidRequestException("guestToken is required");
+        }
+        return toEnrichedSummary(cartItemRepository.findByGuestToken(guestToken));
+    }
+
+    private CartSummaryDto toEnrichedSummary(List<CartItem> items) {
+        if (items.isEmpty()) {
+            return new CartSummaryDto(List.of(), 0, BigDecimal.ZERO);
+        }
+        List<Long> skuIds = items.stream().map(CartItem::getSkuId).toList();
+        Map<Long, SkuPriceInfo> skuInfoMap = catalogQueryPort.getSkuDetailsMap(skuIds);
+
+        List<CartItemDto> dtos = items.stream().map(item -> {
+            SkuPriceInfo skuInfo = skuInfoMap.get(item.getSkuId());
+            BigDecimal unitPrice = (skuInfo != null) ? skuInfo.unitPrice() : BigDecimal.ZERO;
+            String productName = (skuInfo != null) ? skuInfo.productName() : "";
+            String imageUrl = (skuInfo != null) ? skuInfo.primaryImageUrl() : "";
+
+            BigDecimal subTotal = unitPrice.multiply(BigDecimal.valueOf(item.getQuantity()));
+
+            return new CartItemDto(
+                    item.getSkuId(),
+                    productName,
+                    imageUrl,
+                    unitPrice,
+                    item.getQuantity(),
+                    subTotal);
+        }).toList();
+
+        BigDecimal totalAmount = dtos.stream()
+                .map(CartItemDto::subtotal)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        return new CartSummaryDto(dtos, dtos.size(), totalAmount);
     }
 
     public int getItemCount(Long userId) {

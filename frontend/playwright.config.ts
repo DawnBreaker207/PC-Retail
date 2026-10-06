@@ -17,9 +17,11 @@ export default defineConfig({
     navigationTimeout: 30_000,
     screenshot: 'only-on-failure',
     trace: 'on-first-retry',
-    // Chạy headed xem thao tác: npx playwright test --headed
-    // Chậm lại để nhìn rõ: PW_SLOWMO=400 (ms)
-    launchOptions: { slowMo: Number(process.env.PW_SLOWMO ?? 0) },
+    // Chạy headed xem thao tác: npx playwright test --headed (tự chậm 500ms mỗi bước)
+    // Chậm hơn: PW_SLOWMO=1000. Tắt hẳn: PW_SLOWMO=0
+    launchOptions: {
+      slowMo: Number(process.env.PW_SLOWMO ?? (process.argv.includes('--headed') ? 500 : 0)),
+    },
   },
   retries: 1,
 });

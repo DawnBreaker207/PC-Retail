@@ -67,12 +67,7 @@ public class CartController {
 
     @GetMapping("/guest")
     public ResponseObject<CartSummaryDto> getGuestCart(@RequestParam String token) {
-        var items = cartService.getGuestRawItems(token);
-        return ResponseObject.success(new CartSummaryDto(
-                items.stream().map(i -> new com.dawn.cart.dto.CartItemDto(
-                        i.getSkuId(), null, null, java.math.BigDecimal.ZERO,
-                        i.getQuantity(), java.math.BigDecimal.ZERO)).toList(),
-                items.size(), java.math.BigDecimal.ZERO));
+        return ResponseObject.success(cartService.getGuestCart(token));
     }
 
     @PostMapping("/guest/items")

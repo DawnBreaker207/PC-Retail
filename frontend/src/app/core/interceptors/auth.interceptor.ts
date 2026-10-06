@@ -13,7 +13,9 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(req).pipe(
     catchError((error) => {
-      if (error.status === 401 && !req.url.includes('/auth/')) {
+      // Chỉ refresh/logout khi request CÓ gắn token (session hết hạn).
+      // Khách vãng lai dính 401 ở API optional (vd. AI gợi ý) không được văng về login.
+      if (error.status === 401 && !req.url.includes('/auth/') && token) {
         return authService.refresh().pipe(
           switchMap((res) => {
             const cloned = req.clone({
