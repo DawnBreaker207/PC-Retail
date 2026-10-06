@@ -1,5 +1,7 @@
-import { Component, inject, output, signal } from '@angular/core';
+import { Component, DestroyRef, inject, output, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzInputModule } from 'ng-zorro-antd/input';
@@ -28,6 +30,7 @@ export class ShippingFormComponent {
   private auth = inject(AuthService);
   private checkoutService = inject(CheckoutService);
   private msg = inject(NzMessageService);
+  private destroyRef = inject(DestroyRef);
   shippingComplete = output<ShippingAddress>();
 
   // OTP SĐT bắt buộc cho guest (docs 13.5) — member bỏ qua
@@ -36,7 +39,9 @@ export class ShippingFormComponent {
   otpVerified = signal(false);
   otpBusy = signal(false);
   challengeQ = signal('');
+  cooldownLeft = signal(0);
   private challengeId = '';
+  private cooldownTimer: ReturnType<typeof setInterval> | null = null;
 
   cities = ['Hà Nội', 'Hồ Chí Minh', 'Đà Nẵng', 'Hải Phòng', 'Cần Thơ'];
 
@@ -51,6 +56,40 @@ export class ShippingFormComponent {
     otpCode: [''],
   });
 
+  constructor() {
+    // Đổi SĐT thì xác minh cũ vô nghĩa — reset hết, nạp đề captcha mới khi số hợp lệ
+    this.form.controls.phone.valueChanges
+      .pipe(debounceTime(600), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
+      .subscribe((phone) => {
+        this.resetOtpState();
+        if (phone && !this.form.controls.phone.invalid && this.isGuest()) {
+          this.loadChallenge();
+        }
+      });
+  }
+
+  private resetOtpState() {
+    this.otpSent.set(false);
+    this.otpVerified.set(false);
+    this.challengeQ.set('');
+    this.challengeId = '';
+    this.cooldownLeft.set(0);
+    if (this.cooldownTimer) {
+      clearInterval(this.cooldownTimer);
+      this.cooldownTimer = null;
+    }
+  }
+
+  private async loadChallenge() {
+    try {
+      const c = await firstValueFrom(this.checkoutService.otpChallenge());
+      this.challengeId = c.challengeId;
+      this.challengeQ.set(c.question);
+    } catch {
+      // rớt mạng/lỗi thì user bấm Gửi mã sẽ thử lại
+    }
+  }
+
   async sendOtp() {
     const phone = this.form.controls.phone.value;
     const answer = this.form.controls.challengeAnswer.value;
@@ -58,31 +97,40 @@ export class ShippingFormComponent {
       this.msg.warning('Nhập số điện thoại hợp lệ trước');
       return;
     }
+    if (!answer) {
+      this.msg.warning('Nhập kết quả phép tính chống bot trước');
+      await this.loadChallenge();
+      return;
+    }
     try {
       this.otpBusy.set(true);
-      if (!this.challengeId) {
-        // Lần 1: lấy đề captcha cho user giải
-        const c = await firstValueFrom(this.checkoutService.otpChallenge());
-        this.challengeId = c.challengeId;
-        this.challengeQ.set(c.question);
-        return;
-      }
-      if (!answer) {
-        this.msg.warning('Nhập kết quả phép tính chống bot trước');
-        return;
-      }
       await firstValueFrom(this.checkoutService.requestPhoneOtp(phone, this.challengeId, answer));
       this.challengeId = '';
       this.otpSent.set(true);
+      this.startCooldown(60);
       this.msg.success('Đã gửi mã OTP về số điện thoại');
     } catch {
-      // lỗi đã toast bởi interceptor; captcha dùng 1 lần nên lấy đề mới cho lần sau
+      // lỗi đã toast bởi interceptor; captcha dùng 1 lần nên lấy đề mới
       this.challengeId = '';
       this.challengeQ.set('');
       this.form.controls.challengeAnswer.setValue('');
+      await this.loadChallenge();
     } finally {
       this.otpBusy.set(false);
     }
+  }
+
+  private startCooldown(seconds: number) {
+    this.cooldownLeft.set(seconds);
+    if (this.cooldownTimer) clearInterval(this.cooldownTimer);
+    this.cooldownTimer = setInterval(() => {
+      const left = this.cooldownLeft() - 1;
+      this.cooldownLeft.set(left);
+      if (left <= 0 && this.cooldownTimer) {
+        clearInterval(this.cooldownTimer);
+        this.cooldownTimer = null;
+      }
+    }, 1000);
   }
 
   verifyOtp() {

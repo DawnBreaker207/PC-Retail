@@ -32,8 +32,12 @@
             @if (challengeQ()) {
               <input nz-input id="challengeAnswer" formControlName="challengeAnswer" placeholder="Kết quả phép tính" class="!rounded-lg !py-2.5 sm:max-w-[180px]" />
             }
-            <button type="button" nz-button (click)="sendOtp()" [nzLoading]="otpBusy()" class="!rounded-lg">
-              {{ otpSent() ? 'Gửi lại mã' : 'Gửi mã OTP' }}
+            <button type="button" nz-button (click)="sendOtp()" [nzLoading]="otpBusy()" [disabled]="cooldownLeft() > 0" class="!rounded-lg">
+              @if (cooldownLeft() > 0) {
+                Gửi lại sau {{ cooldownLeft() }}s
+              } @else {
+                {{ otpSent() ? 'Gửi lại mã' : 'Gửi mã OTP' }}
+              }
             </button>
           </div>
           @if (otpSent()) {
