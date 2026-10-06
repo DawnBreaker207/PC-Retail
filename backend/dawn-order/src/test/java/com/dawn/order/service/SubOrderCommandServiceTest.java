@@ -5,8 +5,10 @@ import com.dawn.common.redis.service.RedisService;
 import com.dawn.order.entity.SubOrder;
 import com.dawn.order.entity.enums.FulfillmentType;
 import com.dawn.order.entity.enums.SubOrderStatus;
+import com.dawn.order.port.out.GuestRiskPort;
 import com.dawn.order.port.out.InventoryClientPort;
 import com.dawn.order.port.out.OrderItemRepository;
+import com.dawn.order.port.out.OrderRepository;
 import com.dawn.order.port.out.SubOrderRepository;
 import com.dawn.order.statemachine.SubOrderStateMachine;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,9 +33,13 @@ class SubOrderCommandServiceTest {
     @Mock
     SubOrderRepository subOrderRepo;
     @Mock
+    OrderRepository orderRepo;
+    @Mock
     OrderItemRepository orderItemRepo;
     @Mock
     InventoryClientPort inventoryClient;
+    @Mock
+    GuestRiskPort guestRiskPort;
     @Mock
     RedisService redisService;
 
@@ -41,8 +47,8 @@ class SubOrderCommandServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new SubOrderCommandService(subOrderRepo, orderItemRepo,
-                new SubOrderStateMachine(), inventoryClient, redisService);
+        service = new SubOrderCommandService(subOrderRepo, orderRepo, orderItemRepo,
+                new SubOrderStateMachine(), inventoryClient, guestRiskPort, redisService);
     }
 
     private SubOrder subOrder(SubOrderStatus status) {

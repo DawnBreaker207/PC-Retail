@@ -12,8 +12,11 @@ import com.dawn.order.dto.StockDecrementCommand;
 import com.dawn.order.entity.enums.FulfillmentType;
 import com.dawn.order.port.out.CartClientPort;
 import com.dawn.order.port.out.CatalogClientPort;
+import com.dawn.order.port.out.GuestRiskPort;
 import com.dawn.order.port.out.InventoryClientPort;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -27,7 +30,7 @@ import java.util.Map;
 /**
  * Guest checkout (docs 13.5 lite): không login, giỏ theo guest_token,
  * đơn user_id null + liên hệ khách. Không voucher (cần user để chống dùng lại).
- * Risk-gate lite: tối đa 5 checkout/giờ mỗi guest_token.
+ * Risk-gate: rate limit theo guest_token + OTP SĐT bắt buộc + ngưỡng giá trị + lịch sử SĐT.
  */
 @Service
 @RequiredArgsConstructor
@@ -43,6 +46,13 @@ public class GuestCheckoutService {
     private final CatalogClientPort catalogClient;
     private final RedisService redisService;
     private final ApplicationEventPublisher eventPublisher;
+    private final GuestRiskPort guestRiskPort;
+
+    @Value("${app.risk.guest-max-order-total:30000000}")
+    private long guestMaxOrderTotal;
+
+    @Value("${app.risk.phone-abuse-threshold:3}")
+    private long phoneAbuseThreshold;
 
     @Transactional
     public OrderDto checkout(GuestCheckoutRequest req) {
@@ -54,6 +64,16 @@ public class GuestCheckoutService {
         }
         if (count != null && count > MAX_GUEST_CHECKOUT_PER_HOUR) {
             throw new ConflictException("Too many guest checkouts, please try again later");
+        }
+
+        // Risk-gate docs 13.5: SĐT phải verify OTP trước khi hoàn tất
+        String phone = req.guestPhone();
+        if (!guestRiskPort.isPhoneVerified(phone)) {
+            throw new InvalidRequestException(Message.Order.PHONE_NOT_VERIFIED);
+        }
+        // Risk-gate docs 13.5: SĐT bùng nhiều lần thì ép login + online payment
+        if (guestRiskPort.phoneAbuseCount(phone) >= phoneAbuseThreshold) {
+            throw new InvalidRequestException(Message.Order.PHONE_ABUSE_BLOCKED);
         }
 
         var existing = orderQueryService.findByIdempotencyKey(req.idempotencyKey());
@@ -76,6 +96,11 @@ public class GuestCheckoutService {
                         .multiply(BigDecimal.valueOf(item.quantity())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
+        // Risk-gate docs 13.5: vượt ngưỡng thì bắt buộc online payment (guest chưa có) → chặn
+        if (subTotal.compareTo(BigDecimal.valueOf(guestMaxOrderTotal)) > 0) {
+            throw new InvalidRequestException(Message.Order.ORDER_OVER_THRESHOLD);
+        }
+
         List<StockDecrementCommand> stockItems = cartItems.stream()
                 .map(item -> new StockDecrementCommand(item.skuId(), item.quantity()))
                 .toList();
@@ -96,6 +121,8 @@ public class GuestCheckoutService {
                     req.guestEmail(), req.guestPhone(),
                     cartItems, stockItems, priceMap, subTotal, BigDecimal.ZERO, shippingFee, finalAmount);
             cartClient.clearGuestCart(req.guestToken());
+            // OTP dùng 1 lần: đơn tạo xong mới đốt (fail thì giữ để retry)
+            guestRiskPort.consumePhoneVerification(phone);
             return dto;
         } catch (Exception e) {
             log.error("Guest checkout failed, compensating Redis", e);

@@ -8,7 +8,9 @@ import com.dawn.order.dto.CartItemSnapshot;
 import com.dawn.order.entity.enums.FulfillmentType;
 import com.dawn.order.port.out.CartClientPort;
 import com.dawn.order.port.out.CatalogClientPort;
+import com.dawn.order.port.out.GuestRiskPort;
 import com.dawn.order.port.out.InventoryClientPort;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -43,10 +45,19 @@ class GuestCheckoutServiceTest {
     @Mock
     RedisService redisService;
     @Mock
+    GuestRiskPort guestRiskPort;
+    @Mock
     ApplicationEventPublisher eventPublisher;
 
     @InjectMocks
     GuestCheckoutService service;
+
+    @BeforeEach
+    void setUp() {
+        // @Value defaults chỉ có khi chạy Spring — set tay cho unit test
+        org.springframework.test.util.ReflectionTestUtils.setField(service, "guestMaxOrderTotal", 30_000_000L);
+        org.springframework.test.util.ReflectionTestUtils.setField(service, "phoneAbuseThreshold", 3L);
+    }
 
     private GuestCheckoutRequest req(String token) {
         return new GuestCheckoutRequest(UUID.randomUUID().toString(), FulfillmentType.PICKUP,
@@ -68,6 +79,8 @@ class GuestCheckoutServiceTest {
     @DisplayName("Giỏ guest rỗng: 400")
     void emptyCart_badRequest() {
         when(redisService.increment(anyString(), eq(1L))).thenReturn(1L);
+        when(guestRiskPort.isPhoneVerified("0901")).thenReturn(true);
+        when(guestRiskPort.phoneAbuseCount("0901")).thenReturn(0L);
         when(orderQueryService.findByIdempotencyKey(anyString())).thenReturn(Optional.empty());
         when(cartClient.getGuestItems("tok")).thenReturn(List.of());
 
@@ -82,6 +95,8 @@ class GuestCheckoutServiceTest {
     void duplicateKey_returnsExisting() {
         var existing = mock(com.dawn.order.dto.OrderDto.class);
         when(redisService.increment(anyString(), eq(1L))).thenReturn(1L);
+        when(guestRiskPort.isPhoneVerified("0901")).thenReturn(true);
+        when(guestRiskPort.phoneAbuseCount("0901")).thenReturn(0L);
         when(orderQueryService.findByIdempotencyKey(anyString())).thenReturn(Optional.of(existing));
 
         assertThat(service.checkout(req("tok"))).isSameAs(existing);
@@ -90,9 +105,11 @@ class GuestCheckoutServiceTest {
     }
 
     @Test
-    @DisplayName("Happy path guest: đơn user null + clear giỏ guest")
+    @DisplayName("Happy path guest: đơn user null + clear giỏ guest + đốt OTP")
     void happyPath_createsGuestOrder() {
         when(redisService.increment(anyString(), eq(1L))).thenReturn(1L);
+        when(guestRiskPort.isPhoneVerified("0901")).thenReturn(true);
+        when(guestRiskPort.phoneAbuseCount("0901")).thenReturn(0L);
         when(orderQueryService.findByIdempotencyKey(anyString())).thenReturn(Optional.empty());
         when(cartClient.getGuestItems("tok")).thenReturn(List.of(new CartItemSnapshot(10L, 2)));
         when(catalogClient.getPrices(List.of(10L))).thenReturn(Map.of(10L, BigDecimal.valueOf(500_000)));
@@ -104,5 +121,48 @@ class GuestCheckoutServiceTest {
         assertThat(service.checkout(req("tok"))).isSameAs(dto);
 
         verify(cartClient).clearGuestCart("tok");
+        verify(guestRiskPort).consumePhoneVerification("0901");
+    }
+
+    @Test
+    @DisplayName("SĐT chưa verify OTP: 400, không chạm kho")
+    void unverifiedPhone_badRequest() {
+        when(redisService.increment(anyString(), eq(1L))).thenReturn(1L);
+        when(guestRiskPort.isPhoneVerified("0901")).thenReturn(false);
+
+        assertThatThrownBy(() -> service.checkout(req("tok")))
+                .isInstanceOf(InvalidRequestException.class)
+                .hasMessageContaining("verify");
+
+        verify(inventoryClient, never()).decrementBatch(anyList());
+    }
+
+    @Test
+    @DisplayName("SĐT bùng 3 lần: chặn, ép login + online")
+    void abusedPhone_blocked() {
+        when(redisService.increment(anyString(), eq(1L))).thenReturn(1L);
+        when(guestRiskPort.isPhoneVerified("0901")).thenReturn(true);
+        when(guestRiskPort.phoneAbuseCount("0901")).thenReturn(3L);
+
+        assertThatThrownBy(() -> service.checkout(req("tok")))
+                .isInstanceOf(InvalidRequestException.class);
+
+        verify(inventoryClient, never()).decrementBatch(anyList());
+    }
+
+    @Test
+    @DisplayName("Vượt ngưỡng 30M: chặn, không trừ kho")
+    void overThreshold_blocked() {
+        when(redisService.increment(anyString(), eq(1L))).thenReturn(1L);
+        when(guestRiskPort.isPhoneVerified("0901")).thenReturn(true);
+        when(guestRiskPort.phoneAbuseCount("0901")).thenReturn(0L);
+        when(orderQueryService.findByIdempotencyKey(anyString())).thenReturn(Optional.empty());
+        when(cartClient.getGuestItems("tok")).thenReturn(List.of(new CartItemSnapshot(10L, 2)));
+        when(catalogClient.getPrices(List.of(10L))).thenReturn(Map.of(10L, BigDecimal.valueOf(20_000_000)));
+
+        assertThatThrownBy(() -> service.checkout(req("tok")))
+                .isInstanceOf(InvalidRequestException.class);
+
+        verify(inventoryClient, never()).decrementBatch(anyList());
     }
 }

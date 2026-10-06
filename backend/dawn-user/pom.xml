@@ -18,6 +18,10 @@
             <groupId>com.dawn.backend</groupId>
             <artifactId>dawn-common</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.dawn.backend</groupId>
+            <artifactId>dawn-order</artifactId>
+        </dependency>
         <!--  Spring Boot ML & Tools Pack   -->
         <dependency>
             <groupId>org.projectlombok</groupId>

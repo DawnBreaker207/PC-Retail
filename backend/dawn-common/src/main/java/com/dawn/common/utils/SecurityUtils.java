@@ -35,4 +35,17 @@ public class SecurityUtils {
         }
         return userId;
     }
+
+    /** IP client sau nginx (X-Forwarded-For) — dùng cho rate limit, không tin tuyệt đối. */
+    public static String getCurrentClientIp(jakarta.servlet.http.HttpServletRequest req) {
+        if (req == null) return "unknown";
+        String forwarded = req.getHeader("X-Forwarded-For");
+        if (forwarded != null && !forwarded.isBlank()) {
+            return forwarded.split(",")[0].trim();
+        }
+        String realIp = req.getHeader("X-Real-IP");
+        if (realIp != null && !realIp.isBlank()) return realIp.trim();
+        String remote = req.getRemoteAddr();
+        return remote != null ? remote : "unknown";
+    }
 }

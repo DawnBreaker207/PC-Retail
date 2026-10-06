@@ -7,6 +7,7 @@ import com.dawn.order.entity.SubOrder;
 import com.dawn.order.entity.enums.FulfillmentType;
 import com.dawn.order.entity.enums.PaymentStatus;
 import com.dawn.order.entity.enums.SubOrderStatus;
+import com.dawn.order.port.out.GuestRiskPort;
 import com.dawn.order.port.out.InventoryClientPort;
 import com.dawn.order.port.out.OrderItemRepository;
 import com.dawn.order.port.out.OrderRepository;
@@ -39,12 +40,14 @@ class OrderClientAdapterTest {
     InventoryClientPort inventoryClient;
     @Mock
     OrderItemRepository orderItemRepository;
+    @Mock
+    GuestRiskPort guestRiskPort;
 
     SubOrderStateMachine stateMachine = new SubOrderStateMachine();
 
     OrderClientAdapter adapter() {
         return new OrderClientAdapter(orderRepository, subOrderRepository,
-                stateMachine, inventoryClient, orderItemRepository);
+                stateMachine, inventoryClient, orderItemRepository, guestRiskPort);
     }
 
     private Order order() {

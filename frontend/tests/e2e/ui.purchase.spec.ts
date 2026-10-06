@@ -1,9 +1,9 @@
 import { test, expect } from '@playwright/test';
-import { ensureStock } from '../e2e/auth.helper';
+import { ensureStock, guestPhone } from '../e2e/auth.helper';
 
 // Full guest purchase trong browser thật (đã validate tay): browse -> detail ->
-// thêm giỏ -> cart -> checkout form -> review -> đặt hàng -> result.
-// Chạy trong suite vì đã ổn định; tốn ~20s.
+// thêm giỏ -> cart -> checkout form (+OTP SĐT docs 13.5) -> review -> đặt hàng -> result.
+// Chạy trong suite vì đã ổn định; tốn ~25s.
 const UI = process.env.E2E_UI_URL || 'http://localhost:4200';
 
 test('UI full guest purchase: browse, add, checkout, pay, result', async ({
@@ -11,7 +11,7 @@ test('UI full guest purchase: browse, add, checkout, pay, result', async ({
   request,
 }) => {
   await ensureStock(request, 1, 15);
-  page.on('dialog', (d) => d.accept());
+  const phone = guestPhone();
   await page.goto(`${UI}/`);
   await page.waitForTimeout(1500);
 
@@ -37,12 +37,31 @@ test('UI full guest purchase: browse, add, checkout, pay, result', async ({
   await page.goto(`${UI}/checkout`);
   await page.waitForTimeout(1500);
   await page.locator('#fullName').fill('Khach Demo');
-  await page.locator('#phone').fill('0912345678');
+  await page.locator('#phone').fill(phone);
   await page.locator('#city').click();
   await page.waitForTimeout(500);
   await page.locator('.ant-select-item-option').first().click();
   await page.locator('#district').fill('Hai Ba Trung');
   await page.locator('#street').fill('123 Duong Demo');
+
+  // OTP docs 13.5: bấm Gửi mã (lấy đề captcha) -> giải -> bấm Gửi mã (gửi OTP)
+  // -> lấy debugCode -> điền -> Xác minh
+  await page.getByRole('button', { name: /gửi mã otp/i }).click();
+  await page.waitForTimeout(800);
+  const q = (await page.locator('text=/\\d+ \\+ \\d+/').first().textContent()) ?? '';
+  const m = q.match(/(\d+)\s*\+\s*(\d+)/);
+  expect(m).toBeTruthy();
+  await page.locator('#challengeAnswer').fill(String(Number(m![1]) + Number(m![2])));
+  await page.getByRole('button', { name: /gửi mã otp/i }).click();
+  await page.waitForTimeout(800);
+  const dbg = await request.get(`auth/otp/debug/${phone}`);
+  expect(dbg.status()).toBe(200);
+  const code = (await dbg.json()).data.code as string;
+  await page.locator('#otpCode').fill(code);
+  await page.getByRole('button', { name: /xác minh/i }).click();
+  await page.waitForTimeout(800);
+  await expect(page.locator('text=Đã xác minh')).toBeVisible({ timeout: 8000 });
+
   await page.getByRole('button', { name: /tiếp tục/i }).click();
   await page.waitForTimeout(2000);
 

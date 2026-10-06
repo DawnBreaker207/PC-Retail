@@ -43,6 +43,32 @@ export const auth = (token: string) => ({ Authorization: `Bearer ${token}` });
 export const uuid = () =>
   'xxxxxxxx-xxxx-4xxx'.replace(/x/g, () => Math.floor(Math.random() * 16).toString(16));
 
+// SĐT duy nhất mỗi lần gọi (tránh rate limit / lịch sử bùng lẫn nhau giữa các test)
+export const guestPhone = () =>
+  `09${String(10000000 + Math.floor(Math.random() * 89999999))}`;
+
+// Điệu nhảy OTP guest đầy đủ: challenge -> request (lấy debugCode) -> verify
+export async function guestOtpDance(
+  request: import('@playwright/test').APIRequestContext,
+  phone: string,
+): Promise<void> {
+  const ch = await request.get('auth/otp/challenge');
+  if (ch.status() !== 200) throw new Error(`challenge failed: ${ch.status()}`);
+  const { challengeId, question } = await ch.json().then((b: { data: { challengeId: string; question: string } }) => b.data);
+  const m = question.match(/(\d+)\s*\+\s*(\d+)/);
+  if (!m) throw new Error(`cannot parse challenge: ${question}`);
+  const answer = String(Number(m[1]) + Number(m[2]));
+  const req = await request.post('auth/otp/request', {
+    data: { phone, challengeId, challengeAnswer: answer },
+  });
+  if (req.status() !== 200) throw new Error(`otp request failed: ${req.status()} ${await req.text()}`);
+  const body = await req.json();
+  const code = body?.data?.debugCode as string | undefined;
+  if (!code) throw new Error('OTP_DEBUG off? no debugCode (xem docker logs SMS)');
+  const ver = await request.post('auth/otp/verify', { data: { phone, code } });
+  if (ver.status() !== 200) throw new Error(`otp verify failed: ${ver.status()}`);
+}
+
 // Suite bào tồn vĩnh viễn (checkout deduct) — tự bù khi thấp để không flake 422
 export async function ensureStock(
   request: import('@playwright/test').APIRequestContext,

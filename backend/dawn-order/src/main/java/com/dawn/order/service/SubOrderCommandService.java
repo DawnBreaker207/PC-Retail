@@ -13,10 +13,13 @@ import com.dawn.order.entity.SubOrder;
 import com.dawn.order.entity.enums.SubOrderStatus;
 import com.dawn.order.port.in.TransitionSubOrderUseCase;
 import com.dawn.order.port.out.InventoryClientPort;
+import com.dawn.order.port.out.GuestRiskPort;
 import com.dawn.order.port.out.OrderItemRepository;
+import com.dawn.order.port.out.OrderRepository;
 import com.dawn.order.port.out.SubOrderRepository;
 import com.dawn.order.statemachine.SubOrderStateMachine;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,12 +32,15 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class SubOrderCommandService implements TransitionSubOrderUseCase {
 
     private final SubOrderRepository subOrderRepo;
+    private final OrderRepository orderRepo;
     private final OrderItemRepository orderItemRepo;
     private final SubOrderStateMachine stateMachine;
     private final InventoryClientPort inventoryClient;
+    private final GuestRiskPort guestRiskPort;
     private final RedisService redisService;
 
     @Override
@@ -79,6 +85,9 @@ public class SubOrderCommandService implements TransitionSubOrderUseCase {
         appendHistory(fresh, target, staffId);
         fresh.setStatus(target);
         subOrderRepo.save(fresh);
+        if (target == SubOrderStatus.CANCELLED || target == SubOrderStatus.EXPIRED) {
+            recordGuestAbuse(subOrder.getOrderId());
+        }
         return toDto(fresh);
     }
 
@@ -118,6 +127,7 @@ public class SubOrderCommandService implements TransitionSubOrderUseCase {
 
             List<StockDecrementCommand> items = itemsMap.getOrDefault(subOrder.getId(), List.of());
             inventoryClient.release(items, subOrder.getOrderId());
+            recordGuestAbuse(subOrder.getOrderId());
 
             SubOrder fresh = subOrderRepo.findById(subOrder.getId()).orElse(subOrder);
             appendHistory(fresh, SubOrderStatus.EXPIRED, null);
@@ -133,8 +143,21 @@ public class SubOrderCommandService implements TransitionSubOrderUseCase {
                 .toList();
     }
 
-    private void appendHistory(SubOrder subOrder, SubOrderStatus to, Long actorId) {
-        subOrder.getStatusHistory().add(Map.of(
+    // Risk-gate docs 13.5: đơn guest bị hủy/hết hạn/thanh toán fail thì cộng lịch sử SĐT
+    private void recordGuestAbuse(Long orderId) {
+        try {
+            orderRepo.findById(orderId).ifPresent(o -> {
+                if (o.getUserId() == null && o.getGuestPhone() != null) {
+                    guestRiskPort.recordPhoneAbuse(o.getGuestPhone());
+                }
+            });
+        } catch (RuntimeException e) {
+            // Ghi lịch sử không được làm hỏng flow chính
+            log.warn("Record phone abuse failed for order {}", orderId);
+        }
+    }
+
+    private void appendHistory(SubOrder subOrder, SubOrderStatus to, Long actorId) {        subOrder.getStatusHistory().add(Map.of(
                 "from", subOrder.getStatus().name(),
                 "to", to.name(),
                 "actorId", actorId == null ? "SYSTEM" : actorId.toString(),

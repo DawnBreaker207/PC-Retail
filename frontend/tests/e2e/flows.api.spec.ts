@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { ADMIN, CUSTOMER, STAFF, auth, ensureStock, uuid } from './auth.helper';
+import { ADMIN, CUSTOMER, STAFF, auth, ensureStock, guestOtpDance, guestPhone, uuid } from './auth.helper';
 
 async function clearCart(request: any, headers: any) {
   const cart = await request.get('cart', { headers });
@@ -15,6 +15,10 @@ test('guest checkout -> mock payment SUCCESS -> order PAID, stock deducted', asy
   await ensureStock(request, 2);
   await request.post(`cart/guest/items?token=${token}`, { data: { skuId: 2, quantity: 1 } });
 
+  // Risk-gate docs 13.5: SĐT verify OTP trước checkout (mỗi test 1 số riêng)
+  const phone = guestPhone();
+  await guestOtpDance(request, phone);
+
   const co = await request.post('orders/guest-checkout', {
     data: {
       idempotencyKey: uuid(),
@@ -22,6 +26,7 @@ test('guest checkout -> mock payment SUCCESS -> order PAID, stock deducted', asy
       shippingAddress: {},
       guestToken: token,
       guestEmail: 'e2e@t.vn',
+      guestPhone: phone,
     },
   });
   expect(co.status()).toBe(200);

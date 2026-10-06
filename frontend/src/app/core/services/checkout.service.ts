@@ -25,4 +25,24 @@ export class CheckoutService {
   initiatePayment(orderId: number) {
     return this.http.post<VnpayInitResponse>(ApiEndpoints.payment.create, { orderId });
   }
+
+  otpChallenge() {
+    return this.http.get<{ challengeId: string; question: string }>(
+      ApiEndpoints.auth.otpChallenge,
+    );
+  }
+
+  requestPhoneOtp(phone: string, challengeId: string, challengeAnswer: string) {
+    return this.http.post<{ sent: boolean; debugCode?: string }>(
+      ApiEndpoints.auth.phoneOtpRequest,
+      { phone, challengeId, challengeAnswer },
+    );
+  }
+
+  verifyPhoneOtp(phone: string, code: string) {
+    return this.http.post<{ verified: boolean }>(ApiEndpoints.auth.phoneOtpVerify, {
+      phone,
+      code,
+    });
+  }
 }

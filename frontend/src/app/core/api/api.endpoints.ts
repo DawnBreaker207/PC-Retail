@@ -12,6 +12,9 @@ export const ApiEndpoints = {
     resetPassword: `${API}/api/v1/auth/reset-password`,
     verifyOtp: `${API}/api/v1/auth/verify-otp`,
     resendOtp: `${API}/api/v1/auth/resend-otp`,
+    otpChallenge: `${API}/api/v1/auth/otp/challenge`,
+    phoneOtpRequest: `${API}/api/v1/auth/otp/request`,
+    phoneOtpVerify: `${API}/api/v1/auth/otp/verify`,
   },
   user: {
     me: `${API}/api/v1/users/me`,

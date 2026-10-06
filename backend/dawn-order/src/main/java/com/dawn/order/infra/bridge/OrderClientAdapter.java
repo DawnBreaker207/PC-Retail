@@ -10,6 +10,7 @@ import com.dawn.order.entity.SubOrder;
 import com.dawn.order.entity.enums.PaymentStatus;
 import com.dawn.order.entity.enums.SubOrderStatus;
 import com.dawn.order.port.out.InventoryClientPort;
+import com.dawn.order.port.out.GuestRiskPort;
 import com.dawn.order.port.out.OrderItemRepository;
 import com.dawn.order.port.out.OrderRepository;
 import com.dawn.order.port.out.SubOrderRepository;
@@ -33,6 +34,7 @@ public class OrderClientAdapter implements OrderClientPort {
     private final SubOrderStateMachine stateMachine;
     private final InventoryClientPort inventoryClient;
     private final OrderItemRepository orderItemRepository;
+    private final GuestRiskPort guestRiskPort;
 
     @Override
     public BigDecimal getOrderTotalAmount(Long orderId) {
@@ -89,6 +91,10 @@ public class OrderClientAdapter implements OrderClientPort {
                 .orElseThrow(() -> new ResourceNotFoundException(Message.format(Message.Order.NOT_FOUND, orderId)));
         order.setPaymentStatus(PaymentStatus.FAILED);
         orderRepository.save(order);
+        // Risk-gate docs 13.5: đơn guest fail thì cộng lịch sử SĐT
+        if (order.getUserId() == null && order.getGuestPhone() != null) {
+            guestRiskPort.recordPhoneAbuse(order.getGuestPhone());
+        }
 
 
         List<SubOrder> subOrders = subOrderRepository.findByOrderId(orderId);

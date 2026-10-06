@@ -33,6 +33,8 @@ public class Message {
 
         // OTP / Resend
         public static final String OTP_RESEND_COOLDOWN = "Please wait 60 seconds before requesting a new code";
+        public static final String OTP_RATE_LIMITED = "Too many OTP requests, please try again later";
+        public static final String CAPTCHA_INVALID = "Invalid or expired captcha, please try again";
 
         // Password reset
         public static final String RESET_TOKEN_INVALID = "Invalid or expired reset token";
@@ -136,6 +138,10 @@ public class Message {
         public static final String INSUFFICIENT_STOCK_SKUS = "Not enough stock for SKU: {0}";
         public static final String EXPIRED = "Order expired, please checkout again";
         public static final String INVALID_TRANSITION = "Invalid transition from {0} -> {1}";
+        // Guest risk-gate (docs 13.5)
+        public static final String PHONE_NOT_VERIFIED = "Phone number is not verified, please verify OTP first";
+        public static final String ORDER_OVER_THRESHOLD = "Guest order over the limit must pay online, please login";
+        public static final String PHONE_ABUSE_BLOCKED = "This phone has too many cancelled orders, please login and pay online";
         // SubOrder
         public static final String SUB_ORDER_NOT_FOUND = "SubOrder not found: {0}";
     }

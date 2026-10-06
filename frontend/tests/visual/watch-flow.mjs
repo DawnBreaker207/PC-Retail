@@ -80,15 +80,29 @@ await narrate(page, 'Bước 4/7: Giỏ hàng — kiểm món, số lượng');
 // 4. Checkout: form giao hàng
 await page.goto(`${UI}/checkout`);
 await page.waitForTimeout(2000);
-await narrate(page, 'Bước 5/7: Đặt hàng — điền thông tin giao hàng (guest, không cần login)');
+await narrate(page, 'Bước 5/7: Đặt hàng — điền thông tin + xác minh SĐT bằng OTP');
+const watchPhone = `09${Math.floor(10000000 + Math.random() * 89999999)}`;
 await page.locator('#fullName').fill('Khach Demo');
-await page.locator('#phone').fill('0912345678');
+await page.locator('#phone').fill(watchPhone);
 await page.locator('#city').click();
 await page.waitForTimeout(600);
 await page.locator('.ant-select-item-option').first().click();
 await page.locator('#district').fill('Hai Ba Trung');
 await page.locator('#street').fill('123 Duong Demo');
-await narrate(page, 'Đã điền xong — bấm Tiếp tục');
+await page.getByRole('button', { name: /gửi mã otp/i }).click();
+await page.waitForTimeout(800);
+const qText = (await page.locator('text=/\\d+ \\+ \\d+/').first().textContent()) ?? '';
+const qm = qText.match(/(\d+)\s*\+\s*(\d+)/);
+await page.locator('#challengeAnswer').fill(String(Number(qm[1]) + Number(qm[2])));
+await narrate(page, 'Giải captcha chống bot rồi bấm Gửi mã');
+await page.getByRole('button', { name: /gửi mã otp/i }).click();
+await page.waitForTimeout(800);
+const dbgCode = await fetch(`http://localhost:8888/api/v1/auth/otp/debug/${watchPhone}`)
+  .then((r) => r.json()).then((b) => b.data.code);
+await page.locator('#otpCode').fill(dbgCode);
+await page.getByRole('button', { name: /xác minh/i }).click();
+await page.waitForTimeout(800);
+await narrate(page, 'SĐT đã xác minh — bấm Tiếp tục');
 await page.getByRole('button', { name: /tiếp tục/i }).click();
 await page.waitForTimeout(2000);
 

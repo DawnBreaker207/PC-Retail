@@ -100,6 +100,8 @@ services:
       MAIL_PASS: ${MAIL_PASS}
       MAIL_FROM: ${MAIL_FROM}
       FRONTEND_URL: ${FRONTEND_URL}
+      # Risk-gate OTP debug: trả mã về response cho E2E/demo. PROD đặt false.
+      APP_OTP_DEBUG: ${APP_OTP_DEBUG:-false}
     depends_on:
       postgres:
         condition: service_healthy

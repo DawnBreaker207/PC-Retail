@@ -16,6 +16,38 @@
       </nz-form-control>
     </nz-form-item>
 
+    @if (isGuest()) {
+      <div class="sm:col-span-2 rounded-lg border border-border/60 p-4 bg-bg/50">
+        <p class="text-sm font-medium mb-2">
+          Xác minh số điện thoại
+          @if (otpVerified()) {
+            <span class="ml-2 text-xs text-green-600 font-semibold">Đã xác minh ✓</span>
+          }
+        </p>
+        @if (!otpVerified()) {
+          @if (challengeQ()) {
+            <p class="text-sm text-muted mb-2">Chống bot: {{ challengeQ() }}</p>
+          }
+          <div class="flex flex-col sm:flex-row gap-2">
+            @if (challengeQ()) {
+              <input nz-input id="challengeAnswer" formControlName="challengeAnswer" placeholder="Kết quả phép tính" class="!rounded-lg !py-2.5 sm:max-w-[180px]" />
+            }
+            <button type="button" nz-button (click)="sendOtp()" [nzLoading]="otpBusy()" class="!rounded-lg">
+              {{ otpSent() ? 'Gửi lại mã' : 'Gửi mã OTP' }}
+            </button>
+          </div>
+          @if (otpSent()) {
+            <div class="flex flex-col sm:flex-row gap-2 mt-2">
+              <input nz-input id="otpCode" formControlName="otpCode" placeholder="Mã OTP 6 số" maxlength="6" class="!rounded-lg !py-2.5 sm:max-w-[180px]" />
+              <button type="button" nz-button nzType="primary" (click)="verifyOtp()" [nzLoading]="otpBusy()" class="!rounded-lg">
+                Xác minh
+              </button>
+            </div>
+          }
+        }
+      </div>
+    }
+
     <nz-form-item>
       <nz-form-label nzFor="city" nzRequired class="!pb-1.5 !text-sm !font-medium">Tỉnh/Thành phố</nz-form-label>
       <nz-form-control [nzErrorTip]="'Vui lòng chọn tỉnh/thành phố'">
