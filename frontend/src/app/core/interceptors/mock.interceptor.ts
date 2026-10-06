@@ -106,6 +106,14 @@ export const mockInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
   const { method, url, body } = req;
 
+  // Token JWT thật (eyJ...) thì đi thẳng BE, không mock — tránh thế giới lai
+  // nửa mock nửa thật: token mock + API thật = 401 -> refresh loop -> logout oan
+  // ngay sau login. Mock chỉ phục vụ token mock-* và khách vãng lai.
+  const authz = req.headers.get('Authorization') ?? '';
+  if (/^Bearer eyJ/.test(authz)) {
+    return next(req);
+  }
+
   // ── AUTH ──
   if (url.includes('/api/v1/auth/refresh') && method === 'POST') {
     return ok(mockUserSession('user@dawn.vn', 'User', 'CUSTOMER'));

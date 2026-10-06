@@ -32,6 +32,8 @@ export class HeroBannerComponent implements OnDestroy {
   private readonly AUTO_PLAY_MS = 5000;
 
   constructor() {
+    // SSR: document/setInterval không tồn tại phía server — chỉ chạy trên browser
+    if (typeof document === 'undefined' || typeof window === 'undefined') return;
     this.startInterval();
     this.visibilityHandler = () => {
       if (document.hidden) {

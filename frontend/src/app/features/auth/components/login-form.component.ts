@@ -7,7 +7,8 @@ import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { AuthService } from '@core/auth/auth.service';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpContext, HttpParams } from '@angular/common/http';
+import { SKIP_AUTH_LOGOUT } from '@core/interceptors/auth.interceptor';
 import { ApiEndpoints } from '@core/api/api.endpoints';
 import { clearGuestToken } from '@core/utils/guest-token';
 import { catchError, finalize, of, switchMap } from 'rxjs';
@@ -53,9 +54,14 @@ export class LoginFormComponent {
           }
           if (!token) return of(null);
           const params = new HttpParams().set('token', token);
-          return this.http.post(ApiEndpoints.cart.merge, {}, { params }).pipe(
-            catchError(() => of(null)),
-          );
+          return this.http
+            .post(ApiEndpoints.cart.merge, {}, {
+              params,
+              context: new HttpContext().set(SKIP_AUTH_LOGOUT, true),
+            })
+            .pipe(
+              catchError(() => of(null)),
+            );
         }),
         finalize(() => this.isLoading.set(false)),
       )

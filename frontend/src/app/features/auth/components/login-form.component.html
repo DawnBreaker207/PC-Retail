@@ -49,7 +49,7 @@
   </div>
 
   <button type="submit" nz-button nzType="primary" nzBlock nzSize="large"
-    [nzLoading]="isLoading()" [disabled]="form.invalid"
+    [nzLoading]="isLoading()" [disabled]="form.invalid || isLoading()"
     class="!rounded-lg !h-11">
     Đăng nhập
   </button>
