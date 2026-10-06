@@ -54,7 +54,8 @@
       (click)="drawerOpen.set(true)"
     >
       <span nz-icon nzType="filter" nzTheme="outline"></span>
-      Bộ lọc
+      <!-- Pre-wrapped: nz-button wraps bare text in ngAfterViewInit, which breaks SSR hydration. -->
+      <span>Bộ lọc</span>
     </button>
   </div>
 
@@ -93,21 +94,26 @@
     }
   }
 
-  <!-- Mobile drawer -->
-  <nz-drawer
-    [nzVisible]="drawerOpen()"
-    nzPlacement="left"
-    nzWidth="300px"
-    nzTitle="Bộ lọc"
-    (nzOnClose)="drawerOpen.set(false)"
-  >
-    <app-filter-sidebar
-      [(filters)]="filters"
-      [categories]="categories"
-      [brands]="brands"
-      [specOptions]="specOptions()"
-      (filterChange)="onFiltersChanged()"
-      (clear)="onClearFilters()"
-    />
-  </nz-drawer>
+  <!-- Mobile filter panel (plain fixed overlay: nz-drawer breaks SSR hydration) -->
+  @if (drawerOpen()) {
+    <div class="fixed inset-0 z-[1000] lg:hidden" role="dialog" aria-modal="true" aria-label="Bộ lọc">
+      <div class="absolute inset-0 bg-black/45" (click)="drawerOpen.set(false)"></div>
+      <aside class="absolute left-0 top-0 h-full w-[300px] max-w-[85vw] overflow-y-auto bg-surface dark:bg-surface-dark p-4 shadow-xl">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-base font-semibold text-ink dark:text-ink-dark">Bộ lọc</h2>
+          <button nz-button nzType="text" aria-label="Đóng bộ lọc" (click)="drawerOpen.set(false)">
+            <span nz-icon nzType="close" nzTheme="outline"></span>
+          </button>
+        </div>
+        <app-filter-sidebar
+          [(filters)]="filters"
+          [categories]="categories"
+          [brands]="brands"
+          [specOptions]="specOptions()"
+          (filterChange)="onFiltersChanged()"
+          (clear)="onClearFilters()"
+        />
+      </aside>
+    </div>
+  }
 </div>

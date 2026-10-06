@@ -1,5 +1,6 @@
-import { Component, effect, inject, signal, DestroyRef,
+import { Component, effect, inject, signal, DestroyRef, PLATFORM_ID,
   OnDestroy } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { NzStepsModule } from 'ng-zorro-antd/steps';
@@ -32,6 +33,7 @@ export class CheckoutComponent implements OnDestroy {
   private store = inject(CartStore);
   private router = inject(Router);
   private destroyRef = inject(DestroyRef);
+  private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
 
   currentStep = signal(0);
   shippingData = signal<ShippingAddress | null>(null);
@@ -45,10 +47,11 @@ export class CheckoutComponent implements OnDestroy {
       this.windowWidth.set(window.innerWidth);
       window.addEventListener('resize', this.onResize);
     }
-    // Nạp lại giỏ rồi mới kết luận trống: vào thẳng /checkout (F5 giữa chừng)
-    // mà check đồng bộ sẽ đá oan về /cart dù server vẫn còn hàng
+    // Reload first: landing mid-flow on /checkout must not bounce to /cart on stale state.
     this.store.loadCart();
     effect(() => {
+      // Browser-only: the server has no session, so its cart is always empty.
+      if (!this.isBrowser) return;
       if (!this.store.isLoading() && this.selectedItems().length === 0) {
         this.router?.navigate(['/cart']);
       }

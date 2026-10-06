@@ -9,7 +9,6 @@ import { NzPaginationModule } from 'ng-zorro-antd/pagination';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzEmptyModule } from 'ng-zorro-antd/empty';
 import { NzBreadCrumbModule } from 'ng-zorro-antd/breadcrumb';
-import { NzDrawerModule } from 'ng-zorro-antd/drawer';
 import { ProductCardComponent } from '@shared/components/product-card.component';
 import { LoadingSpinnerComponent } from '@shared/components/loading-spinner.component';
 import { MockDataService } from '@core/services/mock-data.service';
@@ -49,7 +48,7 @@ function parseSpecParam(raw: string | string[] | undefined): Record<string, stri
     RouterLink, FormsModule,
     NzButtonModule, NzSelectModule, NzIconModule,
     NzPaginationModule, NzSpinModule, NzEmptyModule,
-    NzBreadCrumbModule, NzDrawerModule,
+    NzBreadCrumbModule,
     ProductCardComponent, LoadingSpinnerComponent,
     FilterSidebarComponent,
   ],

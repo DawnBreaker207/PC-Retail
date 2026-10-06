@@ -17,10 +17,12 @@ export const routes: Routes = [
       {
         path: 'cart',
         loadChildren: () => import('./features/cart/cart.routes').then((r) => r.CART_ROUTES),
+        data: { title: 'Giỏ hàng' },
       },
       {
         path: 'checkout',
         loadChildren: () => import('./features/checkout/checkout.routes').then((r) => r.CHECKOUT_ROUTES),
+        data: { title: 'Thanh toán' },
       },
       {
         path: 'orders',
@@ -37,10 +39,18 @@ export const routes: Routes = [
       {
         path: 'pc-builder',
         loadChildren: () => import('./features/builder/builder.routes').then((r) => r.BUILDER_ROUTES),
+        data: {
+          title: 'Build PC',
+          description: 'Tự build PC theo nhu cầu, kiểm tra tương thích linh kiện tự động.',
+        },
       },
       {
         path: 'products',
         loadChildren: () => import('./features/catalog/catalog.routes').then((r) => r.CATALOG_ROUTES),
+        data: {
+          title: 'Sản phẩm',
+          description: 'Laptop, PC, linh kiện chính hãng giá tốt tại DAWN PC Retail.',
+        },
       },
       {
         path: 'yeu-thich',

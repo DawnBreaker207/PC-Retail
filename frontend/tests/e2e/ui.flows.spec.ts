@@ -96,8 +96,12 @@ test('UI guest cart: qty up then remove', async ({ page, request }) => {
   await page.waitForTimeout(2000);
   const qty = page.locator('nz-input-number input');
   await expect(qty.first()).toBeVisible({ timeout: 10000 });
+  // Wait for the guest reload round-trip (DELETE+POST+GET) before clicking,
+  // otherwise a slow headed run clicks while the list re-renders and misses.
+  const reloaded = page.waitForResponse(/\/api\/v1\/cart\/guest\?/, { timeout: 15000 });
   await qty.first().fill('2');
-  await page.waitForTimeout(1200);
+  await qty.first().press('Enter');
+  await reloaded;
 
   const remove = page.getByRole('button', { name: /xóa/i }).first();
   await remove.click();

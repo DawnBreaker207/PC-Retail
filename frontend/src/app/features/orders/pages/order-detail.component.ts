@@ -47,7 +47,7 @@ export class OrderDetailComponent implements OnInit, OnDestroy {
 
   order = signal<Order | null>(null);
   isLoading = signal(false);
-  windowWidth = signal(window.innerWidth);
+  windowWidth = signal(typeof window !== 'undefined' ? window.innerWidth : 1280);
   private onResize = () => this.windowWidth.set(window.innerWidth);
 
   constructor() {

@@ -1,26 +1,30 @@
 import { defineConfig } from '@playwright/test';
 
+// Headed by default so runs are watchable; set PW_HEADLESS=1 for headless (CI).
+const headed = process.env.PW_HEADLESS !== '1' || process.argv.includes('--headed');
+
 export default defineConfig({
   testDir: process.env.PW_DIR || './tests/e2e',
   timeout: 60_000,
   expect: { timeout: 10_000 },
-  // DB black-box dùng chung, tồn kho biến động theo từng test: chạy tuần tự để
-  // assertion tuyệt đối (before/after) là xác định; concurrency vẫn được phủ
-  // bởi test race bên trong (Promise.all) chứ không phải bằng worker song song
+  // Shared black-box DB with per-test stock changes: run serially for
+  // deterministic before/after assertions; concurrency is covered by
+  // in-test races (Promise.all), not parallel workers.
   workers: 1,
-  // Xem lại bằng mắt: HTML report + trace/screenshot khi fail
+  // Review visually: HTML report + trace/screenshot on failure
   //   npx playwright test --reporter=html && npx playwright show-report
   reporter: [['list'], ['html', { open: 'never', outputFolder: 'playwright-report' }]],
   use: {
     baseURL: (process.env.E2E_BASE_URL || 'http://localhost:8888/api/v1') + '/',
+    headless: !headed,
     actionTimeout: 15_000,
     navigationTimeout: 30_000,
     screenshot: 'only-on-failure',
     trace: 'on-first-retry',
-    // Chạy headed xem thao tác: npx playwright test --headed (tự chậm 500ms mỗi bước)
-    // Chậm hơn: PW_SLOWMO=1000. Tắt hẳn: PW_SLOWMO=0
+    // Watch the run: default headed with 500ms slow-mo.
+    // Slower: PW_SLOWMO=1000. Off: PW_SLOWMO=0. Headless: PW_HEADLESS=1
     launchOptions: {
-      slowMo: Number(process.env.PW_SLOWMO ?? (process.argv.includes('--headed') ? 500 : 0)),
+      slowMo: Number(process.env.PW_SLOWMO ?? (headed ? 500 : 0)),
     },
   },
   retries: 1,

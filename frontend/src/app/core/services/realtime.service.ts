@@ -15,6 +15,7 @@ export class RealtimeService implements OnDestroy {
 
   connect() {
     if (this.client?.active) return;
+    if (typeof window === 'undefined') return; // No sockets during SSR.
     const user = this.auth.currentUser();
     if (!user) return;
     const base = environment.apiUrl || window.location.origin;

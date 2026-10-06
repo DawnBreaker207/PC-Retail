@@ -19,7 +19,8 @@ describe('CurrencyFormatPipe', () => {
 
   it('should format VND currency', () => {
     const result = pipe.transform(1500000);
-    expect(result).toContain('1,500,000');
+    expect(result).toContain('1.500.000');
+    expect(result).toContain('₫');
   });
 
   it('should handle zero', () => {
@@ -29,6 +30,7 @@ describe('CurrencyFormatPipe', () => {
 
   it('should handle large numbers', () => {
     const result = pipe.transform(100000000);
-    expect(result).toContain('100,000,000');
+    expect(result).toContain('100.000.000');
+    expect(result).toContain('₫');
   });
 });

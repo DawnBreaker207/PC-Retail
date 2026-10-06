@@ -2,6 +2,7 @@ import { ApplicationConfig, LOCALE_ID, provideZoneChangeDetection } from '@angul
 import { provideRouter } from '@angular/router';
 import { registerLocaleData } from '@angular/common';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import { provideClientHydration, withHttpTransferCacheOptions } from '@angular/platform-browser';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideNzI18n, vi_VN } from 'ng-zorro-antd/i18n';
 import { provideNzConfig } from 'ng-zorro-antd/core/config';
@@ -18,6 +19,8 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
+    // Reuse SSR HTML + cache GET responses (no refetch after hydration).
+    provideClientHydration(withHttpTransferCacheOptions({})),
     provideHttpClient(withInterceptors([authInterceptor, errorInterceptor, mockInterceptor, apiResInterceptor])),
     provideAnimations(),
     provideNzI18n(vi_VN),

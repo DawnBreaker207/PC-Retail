@@ -14,8 +14,15 @@
           "builder": "@angular/build:application",
           "options": {
             "browser": "src/main.ts",
-            "polyfills": ["zone.js", "src/polyfills.ts"],
+            "server": "src/main.server.ts",
+            "polyfills": [
+              "zone.js",
+              "src/polyfills.ts"
+            ],
             "tsConfig": "tsconfig.app.json",
+            "ssr": {
+              "entry": "src/server.ts"
+            },
             "assets": [
               {
                 "glob": "**/*",
@@ -29,7 +36,11 @@
             ],
             "styles": [
               "src/styles.css"
-            ]
+            ],
+            "security": {
+              "allowedHosts": ["localhost", "127.0.0.1", "frontend"]
+            },
+            "outputMode": "server"
           },
           "configurations": {
             "production": {
@@ -76,15 +87,21 @@
         "extract-i18n": {
           "builder": "@angular/build:extract-i18n"
         },
-        "test": {
+          "test": {
           "builder": "@angular/build:karma",
           "options": {
-            "polyfills": ["zone.js", "zone.js/testing"],
+            "karmaConfig": "karma.conf.js",
+            "polyfills": ["zone.js", "zone.js/testing", "src/test-polyfills.ts"],
             "tsConfig": "tsconfig.spec.json",
             "assets": [
               {
                 "glob": "**/*",
                 "input": "public"
+              },
+              {
+                "glob": "**/*",
+                "input": "./node_modules/@ant-design/icons-angular/src/inline-svg/",
+                "output": "/assets/"
               }
             ],
             "styles": ["src/styles.css"]
