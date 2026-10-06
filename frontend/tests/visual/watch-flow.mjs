@@ -99,7 +99,9 @@ await page.getByRole('button', { name: /gửi mã otp/i }).click();
 await page.waitForTimeout(800);
 const dbgCode = await fetch(`http://localhost:8888/api/v1/auth/otp/debug/${watchPhone}`)
   .then((r) => r.json()).then((b) => b.data.code);
-await page.locator('#otpCode').fill(dbgCode);
+const otpBoxes = page.locator('nz-input-otp input');
+await otpBoxes.first().click();
+await otpBoxes.first().pressSequentially(dbgCode, { delay: 120 });
 await page.getByRole('button', { name: /xác minh/i }).click();
 await page.waitForTimeout(800);
 await narrate(page, 'SĐT đã xác minh — bấm Tiếp tục');

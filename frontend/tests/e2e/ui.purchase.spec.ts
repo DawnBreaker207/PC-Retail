@@ -57,7 +57,10 @@ test('UI full guest purchase: browse, add, checkout, pay, result', async ({
   const dbg = await request.get(`auth/otp/debug/${phone}`);
   expect(dbg.status()).toBe(200);
   const code = (await dbg.json()).data.code as string;
-  await page.locator('#otpCode').fill(code);
+  const otpBoxes = page.locator('nz-input-otp input');
+  await expect(otpBoxes).toHaveCount(6, { timeout: 8000 });
+  await otpBoxes.first().click();
+  await otpBoxes.first().pressSequentially(code, { delay: 60 });
   await page.getByRole('button', { name: /xác minh/i }).click();
   await page.waitForTimeout(800);
   await expect(page.locator('text=Đã xác minh')).toBeVisible({ timeout: 8000 });

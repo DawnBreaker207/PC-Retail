@@ -41,8 +41,8 @@
             </button>
           </div>
           @if (otpSent()) {
-            <div class="flex flex-col sm:flex-row gap-2 mt-2">
-              <input nz-input id="otpCode" formControlName="otpCode" placeholder="Mã OTP 6 số" maxlength="6" class="!rounded-lg !py-2.5 sm:max-w-[180px]" />
+            <div class="flex flex-col sm:flex-row gap-2 mt-2 sm:items-center">
+              <nz-input-otp formControlName="otpCode" [nzLength]="6" />
               <button type="button" nz-button nzType="primary" (click)="verifyOtp()" [nzLoading]="otpBusy()" class="!rounded-lg">
                 Xác minh
               </button>
