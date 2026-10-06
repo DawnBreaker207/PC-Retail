@@ -17,10 +17,12 @@ export class RealtimeService implements OnDestroy {
     if (this.client?.active) return;
     if (typeof window === 'undefined') return; // No sockets during SSR.
     const user = this.auth.currentUser();
-    if (!user) return;
+    const token = this.auth.getToken();
+    if (!user || !token) return;
     const base = environment.apiUrl || window.location.origin;
     this.client = new Client({
       webSocketFactory: () => new SockJS(`${base}/ws`) as WebSocket,
+      connectHeaders: { Authorization: `Bearer ${token}` },
       reconnectDelay: 10000,
       onConnect: () => {
         this.connected.set(true);

@@ -48,7 +48,10 @@ public class SecurityConfig {
             "/api/v1/cart/guest/**",
             "/api/v1/orders/guest-checkout",
             "/api/v1/payments/callback/**",
-            "/api/v1/payments/webhook/**"
+            "/api/v1/payments/webhook/**",
+            // STOMP handshake must be reachable; authentication happens on
+            // the CONNECT frame (see StompAuthChannelInterceptor).
+            "/ws/**"
     };
 
     private final AuthEntryPointJwt unauthorizedHandler;

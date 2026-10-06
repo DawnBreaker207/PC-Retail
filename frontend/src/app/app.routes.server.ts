@@ -7,6 +7,11 @@ export const serverRoutes: ServerRoute[] = [
   { path: 'products/:slug', renderMode: RenderMode.Server },
   { path: 'tin-tuc/:slug', renderMode: RenderMode.Server },
   { path: 'chinh-sach/:slug', renderMode: RenderMode.Server },
+  // Fully static content: bake at build time (no data to go stale).
+  { path: 'gioi-thieu', renderMode: RenderMode.Prerender },
+  { path: 'lien-he', renderMode: RenderMode.Prerender },
+  { path: 'faq', renderMode: RenderMode.Prerender },
+  { path: 'he-thong-showroom', renderMode: RenderMode.Prerender },
   { path: 'cart', renderMode: RenderMode.Client },
   { path: 'checkout', renderMode: RenderMode.Client },
   { path: 'checkout/**', renderMode: RenderMode.Client },

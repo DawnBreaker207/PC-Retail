@@ -45,4 +45,17 @@ export class SeoService {
       this.meta.updateTag({ name: 'description', content: data.description });
     }
   }
+
+  // Per-product tags, called after the PDP loads (runs after the route
+  // fallback above, so it wins until the next navigation).
+  setProduct(p: { name: string; description?: string; imageUrls?: string[]; price?: number }) {
+    this.title.setTitle(`${p.name} | ${this.site}`);
+    const desc = p.description || `${p.name} chính hãng tại ${this.site}.`;
+    this.meta.updateTag({ name: 'description', content: desc });
+    this.meta.updateTag({ property: 'og:title', content: p.name });
+    this.meta.updateTag({ property: 'og:description', content: desc });
+    if (p.imageUrls?.length) {
+      this.meta.updateTag({ property: 'og:image', content: p.imageUrls[0] });
+    }
+  }
 }

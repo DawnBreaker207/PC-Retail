@@ -18,6 +18,7 @@ import { FallbackImageDirective } from '@shared/directives/fallback-image.direct
 import { ProductCardComponent } from '@shared/components/product-card.component';
 import { LoadingSpinnerComponent } from '@shared/components/loading-spinner.component';
 import { MockDataService } from '@core/services/mock-data.service';
+import { SeoService } from '@core/services/seo.service';
 import { HttpClient } from '@angular/common/http';
 import { catchError } from 'rxjs';
 import { ApiEndpoints } from '@core/api/api.endpoints';
@@ -39,6 +40,7 @@ export class ProductDetailComponent {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private mock = inject(MockDataService);
+  private seo = inject(SeoService);
   private http = inject(HttpClient);
   private destroyRef = inject(DestroyRef);
   cartStore = inject(CartStore);
@@ -74,6 +76,7 @@ export class ProductDetailComponent {
         if (p) {
           this.product.set(p);
           this.selectedImage.set(p.imageUrls[0] || '');
+          this.seo.setProduct(p);
           this.loadReviews();
           this.loadRelated(slug);
         }
