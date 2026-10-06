@@ -9,6 +9,17 @@
       <button type="button" nz-button routerLink="/" class="!rounded-lg">Tiếp tục mua sắm</button>
     </div>
   </nz-result>
+} @else if (isPlaced()) {
+  <nz-result
+    nzStatus="info"
+    nzTitle="Đã nhận đơn hàng!"
+    [nzSubTitle]="'Mã đơn hàng: #ORD-' + orderId() + ' — đang chờ thanh toán. Bạn có thể tra cứu trạng thái bất cứ lúc nào.'"
+  >
+    <div nz-result-extra>
+      <button nz-button nzType="primary" routerLink="/tra-cuu-don-hang" class="!rounded-lg">Tra cứu đơn hàng</button>
+      <button type="button" nz-button routerLink="/" class="!rounded-lg">Tiếp tục mua sắm</button>
+    </div>
+  </nz-result>
 } @else {
   <nz-result
     nzStatus="error"

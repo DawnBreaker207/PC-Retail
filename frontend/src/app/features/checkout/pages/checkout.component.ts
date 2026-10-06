@@ -112,6 +112,7 @@ export class CheckoutComponent implements OnDestroy {
   }
 
   private placeGuestOrder(addr: ShippingAddress) {
+    this.isPlacing.set(true);
     this.checkoutService
       .guestCheckout({
         idempotencyKey: crypto.randomUUID(),

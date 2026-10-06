@@ -20,6 +20,15 @@ export class PaymentResultComponent {
     { initialValue: false },
   );
 
+  // Guest đặt xong chưa trả tiền (không có vnp_ResponseCode): đơn đã tạo, chờ thanh toán —
+  // KHÔNG được hiện "thất bại" (trước đây nhánh else nuốt luôn case này)
+  isPlaced = toSignal(
+    this.route.queryParams.pipe(
+      map((params) => params['guest'] === '1' && params['vnp_ResponseCode'] == null),
+    ),
+    { initialValue: false },
+  );
+
   orderId = toSignal(
     this.route.queryParams.pipe(map((params) => params['orderId'])),
     { initialValue: '' },

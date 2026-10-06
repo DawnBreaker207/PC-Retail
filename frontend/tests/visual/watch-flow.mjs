@@ -48,7 +48,6 @@ try {
 
 const ctx = browser.contexts()[0] ?? (await browser.newContext());
 const page = await ctx.newPage();
-page.on('dialog', (d) => d.accept()); // mock VNPay: OK = thành công
 
 // 1. Home
 await page.goto(`${UI}/`);
@@ -71,7 +70,7 @@ await narrate(page, 'Bước 3/7: Chi tiết sản phẩm — giá, tồn kho, �
 await page.screenshot({ path: 'test-results/watch-detail.png' });
 await page.locator('button', { hasText: 'Thêm vào giỏ' }).first().click();
 await page.waitForTimeout(1500);
-await narrate(page, added ? 'Đã thêm 1 món vào giỏ (badge tăng)' : 'Món đầu hết hàng (toast báo) — thử món khác cũng vậy, đi tiếp');
+await narrate(page, 'Đã bấm thêm vào giỏ — badge giỏ hàng tăng');
 
 // 3. Cart
 await page.goto(`${UI}/cart`);
@@ -81,7 +80,7 @@ await narrate(page, 'Bước 4/7: Giỏ hàng — kiểm món, số lượng');
 // 4. Checkout: form giao hàng
 await page.goto(`${UI}/checkout`);
 await page.waitForTimeout(2000);
-await narrate(page, 'Bước 4/7: Đặt hàng — điền thông tin giao hàng (guest, không cần login)');
+await narrate(page, 'Bước 5/7: Đặt hàng — điền thông tin giao hàng (guest, không cần login)');
 await page.locator('#fullName').fill('Khach Demo');
 await page.locator('#phone').fill('0912345678');
 await page.locator('#city').click();
@@ -99,10 +98,10 @@ await page.screenshot({ path: 'test-results/watch-review.png' });
 await page.getByRole('button', { name: /đặt hàng/i }).click();
 await page.waitForTimeout(3000);
 
-// 6. Kết quả thanh toán (mock VNPay đã auto-OK)
-await narrate(page, 'Bước 6/7: Thanh toán mock VNPay — vừa bấm OK');
+// 6. Kết quả: guest dừng ở "Đã nhận đơn, chờ thanh toán" (đúng docs: guest không trả online)
+await narrate(page, 'Bước 6/7: Đã nhận đơn, chờ thanh toán (guest trả khi nhận hàng)');
 await page.screenshot({ path: 'test-results/watch-result.png' });
-await narrate(page, 'Xong full luồng guest: xem hàng → thêm giỏ → đặt → trả tiền. Tab giữ nguyên cho bạn xem.');
+await narrate(page, 'Xong full luồng guest: xem hàng → thêm giỏ → đặt đơn. Tab giữ nguyên cho bạn xem.');
 console.log('DONE. Tab vẫn mở trong Chrome của bạn.');
 // Không đóng browser/page — để bạn tự xem.
 process.exit(0);
