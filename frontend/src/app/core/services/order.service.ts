@@ -33,4 +33,12 @@ export class OrderService {
   requestReturn(orderId: number, subOrderId: number, reason: string) {
     return this.http.post(ApiEndpoints.returns.request(orderId), { subOrderId, reason, images: [] });
   }
+
+  getReturnBySubOrder(subOrderId: number) {
+    return this.http.get(ApiEndpoints.returns.bySubOrder(subOrderId));
+  }
+
+  disputeReturn(requestId: number, note: string) {
+    return this.http.post(ApiEndpoints.returns.dispute(requestId), { note });
+  }
 }

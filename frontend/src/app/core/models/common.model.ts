@@ -212,7 +212,7 @@ export interface Category {
 }
 
 export type ReturnRequestType = 'DOA' | 'WARRANTY';
-export type ReturnRequestStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
+export type ReturnRequestStatus = 'PENDING' | 'REQUESTED' | 'APPROVED' | 'REJECTED' | 'REFUNDED' | 'DISPUTED';
 
 export interface AdminReturnRequest {
   id: number;
@@ -228,6 +228,7 @@ export interface AdminReturnRequest {
   approvedBy?: string;
   approvedAt?: string;
   rejectReason?: string;
+  disputeNote?: string;
 }
 
 export interface AuditLogEntry {

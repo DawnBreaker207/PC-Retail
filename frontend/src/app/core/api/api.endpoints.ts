@@ -90,6 +90,8 @@ export const ApiEndpoints = {
   returns: {
     request: (orderId: number) => `${API}/api/v1/orders/${orderId}/return-requests`,
     detail: (requestId: number) => `${API}/api/v1/return-requests/${requestId}`,
+    bySubOrder: (subOrderId: number) => `${API}/api/v1/return-requests/sub-order/${subOrderId}`,
+    dispute: (requestId: number) => `${API}/api/v1/return-requests/${requestId}/dispute`,
   },
   reports: {
     revenue: `${API}/api/v1/admin/reports/revenue`,

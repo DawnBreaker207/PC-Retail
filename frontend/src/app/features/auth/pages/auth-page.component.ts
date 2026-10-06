@@ -19,7 +19,9 @@ export class AuthPageComponent implements OnInit {
 
   ngOnInit() {
     if (this.authService.isAuthenticated()) {
-      this.router.navigate(['/']);
+      // Already logged in (e.g. bounced here by SSR): keep returnUrl instead of dropping it.
+      const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
+      this.router.navigateByUrl(returnUrl);
     }
   }
 

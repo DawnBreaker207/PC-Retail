@@ -58,6 +58,14 @@ public class ReturnService {
     }
 
     @Transactional(readOnly = true)
+    public ReturnRequest getBySubOrder(Long subOrderId, Long userId) {
+        return returnRepo.findBySubOrderId(subOrderId).stream()
+                .filter(r -> r.getRequestedBy().equals(userId))
+                .max(java.util.Comparator.comparing(ReturnRequest::getId))
+                .orElseThrow(() -> new ResourceNotFoundException("No return request for sub-order " + subOrderId));
+    }
+
+    @Transactional(readOnly = true)
     public List<ReturnRequest> staffList(String status) {
         List<ReturnRequest> all = returnRepo.findAll();
         if (status == null || status.isBlank()) return all;

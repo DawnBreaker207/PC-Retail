@@ -1,5 +1,6 @@
 import { Component, inject, OnInit, OnDestroy, signal, ViewContainerRef, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { catchError, of } from 'rxjs';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { NzStepsModule } from 'ng-zorro-antd/steps';
 import { NzTableModule } from 'ng-zorro-antd/table';
@@ -12,7 +13,7 @@ import { CurrencyFormatPipe } from '@shared/pipes/currency-format.pipe';
 import { FallbackImageDirective } from '@shared/directives/fallback-image.directive';
 import { DateHelper } from '@shared/utils/date.helper';
 import { OrderService } from '@core/services/order.service';
-import { Order, OrderItem } from '@core/models/common.model';
+import { Order, OrderItem, AdminReturnRequest } from '@core/models/common.model';
 import { ReviewFormComponent } from '../components/review-form.component';
 
 const STATUS_STEP_MAP: Record<string, number> = {
@@ -47,6 +48,14 @@ export class OrderDetailComponent implements OnInit, OnDestroy {
 
   order = signal<Order | null>(null);
   isLoading = signal(false);
+  returnInfo = signal<AdminReturnRequest | null>(null);
+
+  protected readonly RETURN_LABEL: Record<string, string> = {
+    REQUESTED: 'Chờ duyệt', APPROVED: 'Đã duyệt', REJECTED: 'Đã từ chối', DISPUTED: 'Đang khiếu nại',
+  };
+  protected readonly RETURN_COLOR: Record<string, string> = {
+    REQUESTED: 'gold', APPROVED: 'success', REJECTED: 'error', DISPUTED: 'processing',
+  };
   windowWidth = signal(typeof window !== 'undefined' ? window.innerWidth : 1280);
   private onResize = () => this.windowWidth.set(window.innerWidth);
 
@@ -74,7 +83,27 @@ export class OrderDetailComponent implements OnInit, OnDestroy {
     ).subscribe((res) => {
       this.order.set(res);
       this.isLoading.set(false);
+      const subId = res?.subOrders[0]?.id;
+      if (subId) this.loadReturn(subId);
     });
+  }
+
+  private loadReturn(subOrderId: number) {
+    this.orderService.getReturnBySubOrder(subOrderId).pipe(
+      takeUntilDestroyed(this.destroyRef),
+      catchError(() => of(null)),
+    ).subscribe((res) => this.returnInfo.set(res as AdminReturnRequest | null));
+  }
+
+  disputeReturn() {
+    const r = this.returnInfo();
+    const subId = this.order()?.subOrders[0]?.id;
+    if (!r || !subId) return;
+    const note = window.prompt('Dispute note:');
+    if (!note) return;
+    this.orderService.disputeReturn(r.id, note).pipe(
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe(() => this.loadReturn(subId));
   }
 
   cancelOrder() {
@@ -107,7 +136,10 @@ export class OrderDetailComponent implements OnInit, OnDestroy {
     if (!reason) return;
     this.orderService.requestReturn(o.id, subId, reason).pipe(
       takeUntilDestroyed(this.destroyRef),
-    ).subscribe(() => this.loadOrder(o.id));
+    ).subscribe(() => {
+      this.loadOrder(o.id);
+      this.loadReturn(subId);
+    });
   }
 
   openReviewForm(item: OrderItem) {

@@ -1,14 +1,23 @@
 import { RenderMode, ServerRoute } from '@angular/ssr';
 
-// Param routes can't prerender without getPrerenderParams; '**' keeps everything else on runtime SSR.
+// Pages that depend on the session are client-rendered: the server never
+// has a session, so SSR would serve the wrong (guest) state and break
+// hydration. Public content stays on runtime SSR for SEO.
 export const serverRoutes: ServerRoute[] = [
   { path: 'products/:slug', renderMode: RenderMode.Server },
   { path: 'tin-tuc/:slug', renderMode: RenderMode.Server },
   { path: 'chinh-sach/:slug', renderMode: RenderMode.Server },
-  { path: 'orders/:id', renderMode: RenderMode.Server },
-  { path: 'pc-builder/templates/:id', renderMode: RenderMode.Server },
-  { path: 'admin/orders/:id', renderMode: RenderMode.Server },
-  { path: 'admin/returns/:id', renderMode: RenderMode.Server },
-  // Catch-all: everything else renders per request, so the build never breaks on new routes.
+  { path: 'cart', renderMode: RenderMode.Client },
+  { path: 'checkout', renderMode: RenderMode.Client },
+  { path: 'checkout/**', renderMode: RenderMode.Client },
+  { path: 'orders', renderMode: RenderMode.Client },
+  { path: 'orders/**', renderMode: RenderMode.Client },
+  { path: 'account', renderMode: RenderMode.Client },
+  { path: 'account/**', renderMode: RenderMode.Client },
+  { path: 'yeu-thich', renderMode: RenderMode.Client },
+  { path: 'admin', renderMode: RenderMode.Client },
+  { path: 'admin/**', renderMode: RenderMode.Client },
+  // Catch-all: everything else renders per request; new public routes keep
+  // working without touching this file.
   { path: '**', renderMode: RenderMode.Server },
 ];

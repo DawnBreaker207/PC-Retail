@@ -70,6 +70,25 @@
       }
     </div>
 
+    @if (returnInfo(); as ret) {
+      <div class="bg-surface dark:bg-surface-dark rounded-card border border-border/80 dark:border-border-dark/80 shadow-sm p-5 lg:p-6 mb-6 animate-fade-in-up">
+        <h2 class="font-semibold mb-4 tracking-tight text-sm">Đổi trả / bảo hành</h2>
+        <div class="flex justify-between items-center">
+          <span class="text-muted dark:text-muted-dark text-sm">Trạng thái yêu cầu</span>
+          <nz-tag [nzColor]="RETURN_COLOR[ret.status]">{{ RETURN_LABEL[ret.status] ?? ret.status }}</nz-tag>
+        </div>
+        @if (ret.status === 'REJECTED') {
+          <p class="text-sm mt-2"><span class="text-muted dark:text-muted-dark">Lý do từ chối:</span> {{ ret.rejectReason }}</p>
+          <button nz-button nzSize="small" nzType="link" (click)="disputeReturn()" class="mt-2 !px-0">
+            Khiếu nại quyết định này
+          </button>
+        }
+        @if (ret.status === 'DISPUTED') {
+          <p class="text-sm mt-2 text-muted dark:text-muted-dark">Shop đang xem xét khiếu nại của bạn.</p>
+        }
+      </div>
+    }
+
     <div class="bg-surface dark:bg-surface-dark rounded-card border border-border/80 dark:border-border-dark/80 shadow-sm p-5 lg:p-6 animate-fade-in-up">
       <h2 class="font-semibold mb-4 tracking-tight text-sm">Thanh toán</h2>
       <div class="space-y-2.5 text-sm">

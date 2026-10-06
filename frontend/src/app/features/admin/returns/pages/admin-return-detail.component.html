@@ -6,7 +6,7 @@
   <div class="flex flex-wrap items-center justify-between gap-3 mt-1 mb-6">
     <h1 class="text-xl sm:text-2xl font-bold tracking-tight">Yêu cầu #{{ r.id }} — Đơn #ORD-{{ r.orderId }}</h1>
     <nz-tag [nzColor]="STATUS_COLOR[r.status]" class="!text-sm !px-3">
-      {{ r.status === 'PENDING' ? 'Chờ duyệt' : r.status === 'APPROVED' ? 'Đã duyệt' : 'Đã từ chối' }}
+      {{ r.status === 'PENDING' || r.status === 'REQUESTED' ? 'Chờ duyệt' : r.status === 'APPROVED' ? 'Đã duyệt' : r.status === 'DISPUTED' ? 'Đang khiếu nại' : 'Đã từ chối' }}
     </nz-tag>
   </div>
 
@@ -35,7 +35,7 @@
     </div>
   </div>
 
-  @if (r.status === 'PENDING') {
+  @if (r.status === 'PENDING' || r.status === 'REQUESTED') {
     <div class="flex items-center gap-3">
       @if (isSelfCreated) {
         <span nz-tooltip nzTooltipTitle="Bạn không thể tự duyệt yêu cầu mình tạo">
@@ -61,6 +61,19 @@
       <p class="mt-1"><span class="text-muted dark:text-muted-dark">Thời gian:</span> {{ r.approvedAt | date:'dd/MM/yyyy HH:mm' }}</p>
       @if (r.rejectReason) {
         <p class="mt-1"><span class="text-muted dark:text-muted-dark">Lý do từ chối:</span> {{ r.rejectReason }}</p>
+      }
+      @if (r.status === 'DISPUTED') {
+        @if (r.disputeNote) {
+          <p class="mt-1"><span class="text-muted dark:text-muted-dark">Khách khiếu nại:</span> {{ r.disputeNote }}</p>
+        }
+        <div class="flex flex-wrap gap-3 mt-3">
+          <button nz-button nzType="primary" [nzLoading]="processing()" (click)="resolveDispute(true)">
+            Chấp nhận khiếu nại
+          </button>
+          <button nz-button nzType="default" nzDanger [nzLoading]="processing()" (click)="resolveDispute(false)">
+            Giữ nguyên từ chối
+          </button>
+        </div>
       }
     </div>
   }

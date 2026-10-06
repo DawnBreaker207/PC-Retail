@@ -16,7 +16,7 @@ import { AuthService } from '@core/auth/auth.service';
 import { RejectReasonModalComponent } from '../components/reject-reason-modal.component';
 
 const STATUS_COLOR: Record<string, string> = {
-  PENDING: 'gold', APPROVED: 'success', REJECTED: 'error',
+  PENDING: 'gold', REQUESTED: 'gold', APPROVED: 'success', REJECTED: 'error', DISPUTED: 'processing',
 };
 
 const TYPE_LABEL: Record<string, string> = {
@@ -113,6 +113,25 @@ export class AdminReturnDetailComponent {
         error: () => {
           this.processing.set(false);
           this.message.error('Từ chối yêu cầu thất bại');
+        },
+      });
+  }
+
+  resolveDispute(overturn: boolean) {
+    const r = this.request();
+    if (!r) return;
+    this.processing.set(true);
+    this.http.put<AdminReturnRequest>(ApiEndpoints.admin.returnResolve(r.id), { overturn, note: '' })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (updated) => {
+          this.request.set(updated);
+          this.processing.set(false);
+          this.message.success(overturn ? 'Đã chấp nhận khiếu nại' : 'Đã giữ nguyên quyết định');
+        },
+        error: () => {
+          this.processing.set(false);
+          this.message.error('Xử lý khiếu nại thất bại');
         },
       });
   }

@@ -66,13 +66,8 @@ export const CartStore = signalStore(
         catchError(fail),
       ).subscribe((res) => toItems({ items: res.items ?? [], version: undefined }));
     };
-
-    return {
-    loadCart(): void {
-      if (isGuest()) {
-        loadGuest();
-        return;
-      }
+    // POST returns a single item, not the cart — always reload after writing.
+    const loadMember = () => {
       patchState(store, { isLoading: true, error: null });
       http.get<{ items: CartItem[]; version?: number }>(ApiEndpoints.cart.base).pipe(
         catchError((err) => {
@@ -82,11 +77,20 @@ export const CartStore = signalStore(
         }),
       ).subscribe((res) => {
         patchState(store, {
-          items: res.items.map((i) => ({ ...i, selected: true })),
+          items: (res.items ?? []).map((i) => ({ ...i, selected: true })),
           version: res.version ?? null,
           isLoading: false,
         });
       });
+    };
+
+    return {
+    loadCart(): void {
+      if (isGuest()) {
+        loadGuest();
+        return;
+      }
+      loadMember();
     },
 
     addItem(skuId: number, quantity: number): void {
@@ -97,18 +101,14 @@ export const CartStore = signalStore(
         ).subscribe(() => loadGuest());
         return;
       }
-      http.post<{ items: CartItem[]; version?: number }>(ApiEndpoints.cart.items, { skuId, quantity }).pipe(
+      http.post(ApiEndpoints.cart.items, { skuId, quantity }).pipe(
         catchError((err) => {
           const msg = (err as { error?: { message?: string } })?.error?.message || (err as Error)?.message || 'Có lỗi xảy ra';
           patchState(store, { isLoading: false, error: msg });
-          return of({ items: [], version: undefined });
+          return of(null);
         }),
       ).subscribe((res) => {
-        patchState(store, {
-          items: res.items.map((i) => ({ ...i, selected: true })),
-          version: res.version ?? null,
-          isLoading: false,
-        });
+        if (res) loadMember();
       });
     },
 
@@ -125,22 +125,15 @@ export const CartStore = signalStore(
         });
         return;
       }
-      const ver = store.version();
-      const body: Record<string, unknown> = { quantity };
-      if (ver !== null) body['version'] = ver;
       patchState(store, { isLoading: true, error: null });
-      http.put<{ items: CartItem[]; version?: number }>(ApiEndpoints.cart.item(skuId), body).pipe(
+      http.put(ApiEndpoints.cart.items, { skuId, quantity }).pipe(
         catchError((err) => {
           const msg = (err as { error?: { message?: string } })?.error?.message || (err as Error)?.message || 'Có lỗi xảy ra';
           patchState(store, { isLoading: false, error: msg });
-          return of({ items: [], version: undefined });
+          return of(null);
         }),
       ).subscribe((res) => {
-        patchState(store, {
-          items: res.items.map((i) => ({ ...i, selected: true })),
-          version: res.version ?? null,
-          isLoading: false,
-        });
+        if (res) loadMember();
       });
     },
 
@@ -153,18 +146,14 @@ export const CartStore = signalStore(
         return;
       }
       patchState(store, { isLoading: true, error: null });
-      http.delete<{ items: CartItem[]; version?: number }>(ApiEndpoints.cart.item(skuId)).pipe(
+      http.delete(ApiEndpoints.cart.item(skuId)).pipe(
         catchError((err) => {
           const msg = (err as { error?: { message?: string } })?.error?.message || (err as Error)?.message || 'Có lỗi xảy ra';
           patchState(store, { isLoading: false, error: msg });
-          return of({ items: [], version: undefined });
+          return of(null);
         }),
       ).subscribe((res) => {
-        patchState(store, {
-          items: res.items.map((i) => ({ ...i, selected: true })),
-          version: res.version ?? null,
-          isLoading: false,
-        });
+        if (res !== undefined) loadMember();
       });
     },
 

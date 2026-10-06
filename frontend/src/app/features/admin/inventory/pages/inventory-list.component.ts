@@ -126,6 +126,9 @@ export class InventoryListComponent {
         return instance.submit();
       },
     });
+    const instance = modalRef.getContentComponent() as RestockModalComponent;
+    // The modal has its own submit button (no footer), so wire close explicitly.
+    instance.close = () => modalRef.destroy(true);
 
     modalRef.afterClose.subscribe((success) => {
       if (success) {

@@ -37,6 +37,12 @@ public class ReturnController {
         return returnService.request(subOrderId, userId, reason, images);
     }
 
+    @GetMapping("/return-requests/sub-order/{subOrderId}")
+    @PreAuthorize(AuthorizationConstants.CUSTOMER_ONLY)
+    public ReturnRequest getBySubOrder(@PathVariable Long subOrderId) {
+        return returnService.getBySubOrder(subOrderId, SecurityUtils.getCurrentUserId());
+    }
+
     @GetMapping("/return-requests/{requestId}")
     @PreAuthorize(AuthorizationConstants.CUSTOMER_ONLY)
     public ReturnRequest get(@PathVariable Long requestId) {

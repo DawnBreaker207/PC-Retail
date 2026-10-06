@@ -505,7 +505,34 @@ export const mockInterceptor: HttpInterceptorFn = (req, next) => {
     return ok({ content: paged, page, size, totalElements: filtered.length, totalPages: Math.ceil(filtered.length / size) });
   }
 
-  // ── ADMIN RETURNS (mock-only, no BE equivalent) ──
+  // ── ADMIN RETURNS (mirror the real dawn-return contract) ──
+  if (url.match(/\/api\/v1\/return-requests\/(\d+)/) && method === 'GET') {
+    const id = Number(url.match(/\/api\/v1\/return-requests\/(\d+)/)![1]);
+    const found = returnRequests.find(r => r.id === id) || null;
+    return found ? ok(found) : err(404, 'Not found');
+  }
+  if (url.match(/\/api\/v1\/admin\/return-requests\/(\d+)\/approve/) && method === 'PUT') {
+    const id = Number(url.match(/\/api\/v1\/admin\/return-requests\/(\d+)\/approve/)![1]);
+    const idx = returnRequests.findIndex(r => r.id === id);
+    if (idx >= 0) {
+      returnRequests[idx] = {
+        ...returnRequests[idx], status: 'APPROVED',
+        approvedBy: authService.currentUser()?.fullName || 'Admin', approvedAt: new Date().toISOString(),
+      };
+    }
+    return idx >= 0 ? ok(returnRequests[idx]) : err(404, 'Not found');
+  }
+  if (url.match(/\/api\/v1\/admin\/return-requests\/(\d+)\/reject/) && method === 'PUT') {
+    const id = Number(url.match(/\/api\/v1\/admin\/return-requests\/(\d+)\/reject/)![1]);
+    const idx = returnRequests.findIndex(r => r.id === id);
+    if (idx >= 0) {
+      returnRequests[idx] = {
+        ...returnRequests[idx], status: 'REJECTED', rejectReason: (body as { reason: string }).reason,
+        approvedBy: authService.currentUser()?.fullName || 'Admin', approvedAt: new Date().toISOString(),
+      };
+    }
+    return idx >= 0 ? ok(returnRequests[idx]) : err(404, 'Not found');
+  }
   if (url.match(/\/api\/v1\/admin\/returns\/(\d+)\/approve/) && method === 'POST') {
     const id = Number(url.match(/\/api\/v1\/admin\/returns\/(\d+)\/approve/)![1]);
     const idx = returnRequests.findIndex(r => r.id === id);
@@ -534,6 +561,14 @@ export const mockInterceptor: HttpInterceptorFn = (req, next) => {
     return found ? ok(found) : err(404, 'Not found');
   }
   if (url.includes('/api/v1/admin/returns') && method === 'GET') {
+    const params = parseParams(req);
+    let filtered = returnRequests;
+    if (params['status']) filtered = filtered.filter(r => r.status === params['status']);
+    return ok({ content: filtered, page: 0, size: filtered.length, totalElements: filtered.length, totalPages: 1 });
+  }
+
+  // Staff work-queue badge uses the staff URL (same data as admin returns).
+  if (url.includes('/api/v1/staff/return-requests') && method === 'GET') {
     const params = parseParams(req);
     let filtered = returnRequests;
     if (params['status']) filtered = filtered.filter(r => r.status === params['status']);
