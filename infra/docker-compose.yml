@@ -6,6 +6,9 @@ networks:
 
 volumes:
   postgres:
+  kafka:
+  loki:
+  grafana:
 
 services:
   postgres:
@@ -50,6 +53,97 @@ services:
       timeout: 5s
       retries: 5
 
+  kafka:
+    container_name: kafka
+    image: apache/kafka:4.4.0
+    ports:
+      # host clients (IDE): localhost:29092 — in-network clients: kafka:9092
+      - '29092:29092'
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093,EXTERNAL://:29092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,EXTERNAL://localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      # topic tự tạo: order-events, payment-events, inventory-events, pc-clickstream, app-logs
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
+    volumes:
+      - kafka:/var/lib/kafka/data
+    healthcheck:
+      test: ['CMD-SHELL', '/opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server localhost:9092 >/dev/null 2>&1']
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+    networks:
+      - network
+
+  kafka-init:
+    container_name: kafka-init
+    image: apache/kafka:4.4.0
+    depends_on:
+      kafka:
+        condition: service_healthy
+    entrypoint: ['/bin/sh', '-c']
+    command:
+      - |
+        for topic in order-events payment-events inventory-events pc-clickstream app-logs; do
+          /opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:9092 \
+            --create --if-not-exists --topic "$$topic" --partitions 1 --replication-factor 1
+        done
+    restart: 'no'
+    networks:
+      - network
+
+  loki:
+    container_name: loki
+    image: grafana/loki:3.7.9
+    ports:
+      - '3100:3100'
+    command: ['-config.file=/etc/loki/local-config.yaml']
+    volumes:
+      - ./loki/loki-config.yml:/etc/loki/local-config.yaml:ro
+      - loki:/loki
+    networks:
+      - network
+
+  grafana:
+    container_name: grafana
+    image: grafana/grafana:13.2.5
+    ports:
+      - '3000:3000'
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_USERS_ALLOW_SIGN_UP: 'false'
+    volumes:
+      - grafana:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+    depends_on:
+      - loki
+    networks:
+      - network
+
+  vector:
+    container_name: vector
+    image: timberio/vector:0.60.0-alpine
+    volumes:
+      - ./vector/vector.toml:/etc/vector/vector.toml:ro
+    depends_on:
+      kafka:
+        condition: service_healthy
+      loki:
+        condition: service_started
+    networks:
+      - network
+
   backend:
     build:
       context: ../backend
@@ -73,6 +167,10 @@ services:
       RABBITMQ_PORT: ${RABBITMQ_PORT}
       RABBITMQ_USER: ${RABBITMQ_USER}
       RABBITMQ_PASS: ${RABBITMQ_PASS}
+      # Kafka (log appender)
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      KAFKA_LOG_TOPIC: app-logs
+      SERVICE_NAME: dawn-app
       # JWT
       JWT_COOKIE_NAME: ${JWT_COOKIE_NAME}
       JWT_REFRESH_COOKIE_NAME: ${JWT_REFRESH_COOKIE_NAME}
