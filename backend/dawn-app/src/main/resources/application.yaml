@@ -103,9 +103,13 @@ app:
   # Config JWT
   jwtCookieName: ${JWT_COOKIE_NAME}
   jwtRefreshCookieName: ${JWT_REFRESH_COOKIE_NAME}
-  jwtSecret: ${JWT_SECRET}
   jwtExpirationsMs: ${JWT_EXPIRATION_MS}
   jwtRefreshExpirationsMs: ${JWT_REFRESH_EXPIRATION_MS}
+  jwt:
+    issuer: ${JWT_ISSUER:pc-retail}
+    key-id: ${JWT_KEY_ID:pc-retail}
+    public-key: ${JWT_PUBLIC_KEY}
+    private-key: ${JWT_PRIVATE_KEY}
 ai:
   base-url: ${AI_BASE_URL}
   api-key: ${AI_API_KEY}

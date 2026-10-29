@@ -1,0 +1,39 @@
+server:
+  port: ${SERVER_PORT:8080}
+  shutdown: graceful
+
+spring:
+  lifecycle:
+    timeout-per-shutdown-phase: 30s
+  application:
+    name: gateway
+  cloud:
+    gateway:
+      server:
+        webflux:
+          routes:
+            - id: auth-service
+              uri: ${AUTH_SERVICE_URL:http://localhost:8085}
+              predicates:
+                - Path=/api/v1/auth/**,/api/v1/users/**
+            - id: order-service
+              uri: ${ORDER_SERVICE_URL:http://localhost:8081}
+              predicates:
+                - Path=/api/v1/orders/**,/api/v1/cart/**,/api/v1/promotion/**
+            - id: inventory-service
+              uri: ${INVENTORY_SERVICE_URL:http://localhost:8082}
+              predicates:
+                - Path=/api/v1/inventory/**
+            - id: payment-service
+              uri: ${PAYMENT_SERVICE_URL:http://localhost:8083}
+              predicates:
+                - Path=/api/v1/payments/**
+            - id: catalog-service
+              uri: ${CATALOG_SERVICE_URL:http://localhost:8084}
+              predicates:
+                - Path=/**
+
+app:
+  jwt:
+    issuer: ${JWT_ISSUER:pc-retail}
+    public-key: ${JWT_PUBLIC_KEY}

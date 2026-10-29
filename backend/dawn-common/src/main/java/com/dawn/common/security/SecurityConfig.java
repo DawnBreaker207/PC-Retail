@@ -44,6 +44,8 @@ public class SecurityConfig {
             "/api/v1/builder/**",
             "/api/v1/articles/**",
             "/api/v1/articles",
+            // gợi ý cấu hình theo sở thích/ngân sách (chỉ đọc build_template)
+            "/api/v1/ai/build-suggestions",
             "/api/v1/promotion/**",
             "/api/v1/cart/guest/**",
             "/api/v1/orders/guest-checkout",

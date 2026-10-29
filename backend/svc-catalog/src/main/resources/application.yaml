@@ -33,30 +33,12 @@ spring:
     redis:
       host: ${REDIS_HOST}
       port: ${REDIS_PORT}
-  rabbitmq:
-    host: ${RABBITMQ_HOST}
-    port: ${RABBITMQ_PORT}
-    username: ${RABBITMQ_USER}
-    password: ${RABBITMQ_PASS}
-  mail:
-    host: ${MAIL_HOST}
-    port: ${MAIL_PORT}
-    username: ${MAIL_USER}
-    password: ${MAIL_PASS}
-    properties:
-      mail:
-        smtp:
-          auth: true
-          starttls:
-            enable: true
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:29092}
 
 app:
   frontend:
     url: ${FRONTEND_URL:http://localhost:4200}
-  mail:
-    from: ${MAIL_FROM}
   outbox:
     relay:
       enabled: ${OUTBOX_RELAY_ENABLED:true}
@@ -76,6 +58,9 @@ app:
   passwordResetExpirationMinutes: 15
   jwtCookieName: ${JWT_COOKIE_NAME}
   jwtRefreshCookieName: ${JWT_REFRESH_COOKIE_NAME}
-  jwtSecret: ${JWT_SECRET}
   jwtExpirationsMs: ${JWT_EXPIRATION_MS}
   jwtRefreshExpirationsMs: ${JWT_REFRESH_EXPIRATION_MS}
+  jwt:
+    issuer: ${JWT_ISSUER:pc-retail}
+    key-id: ${JWT_KEY_ID:pc-retail}
+    public-key: ${JWT_PUBLIC_KEY}

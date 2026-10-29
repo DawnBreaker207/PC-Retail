@@ -10,14 +10,14 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
-/** catalog-service: dawn-catalog + dawn-builder + dawn-user. */
+/** catalog-service: dawn-catalog + dawn-builder. */
 @SpringBootApplication(scanBasePackages = "com.dawn.svc.catalog")
 @ComponentScan(
-        basePackages = {"com.dawn.common", "com.dawn.catalog", "com.dawn.builder", "com.dawn.user"},
+        basePackages = {"com.dawn.common", "com.dawn.catalog", "com.dawn.builder"},
         excludeFilters = @ComponentScan.Filter(
                 type = FilterType.ANNOTATION, classes = SpringBootApplication.class))
-@EntityScan(basePackages = {"com.dawn.common", "com.dawn.catalog", "com.dawn.builder", "com.dawn.user"})
-@EnableJpaRepositories(basePackages = {"com.dawn.common", "com.dawn.catalog", "com.dawn.builder", "com.dawn.user"})
+@EntityScan(basePackages = {"com.dawn.common", "com.dawn.catalog", "com.dawn.builder"})
+@EnableJpaRepositories(basePackages = {"com.dawn.common", "com.dawn.catalog", "com.dawn.builder"})
 @EnableJpaAuditing
 @EnableScheduling
 @EnableAsync

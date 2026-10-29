@@ -34,6 +34,7 @@
         <springdoc.version>2.8.9</springdoc.version>
         <jwt.version>0.12.6</jwt.version>
         <langchain.version>1.13.0-beta23</langchain.version>
+        <spring-cloud.version>2025.1.4</spring-cloud.version>
     </properties>
     <dependencies>
         <!--  Spring Boot Test Pack -->
@@ -89,6 +90,13 @@
     </dependencies>
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring-cloud.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
             <!-- Internal modules -->
             <dependency>
                 <groupId>com.dawn.backend</groupId>
@@ -219,6 +227,8 @@
         <module>svc-inventory</module>
         <module>svc-payment</module>
         <module>svc-catalog</module>
+        <module>svc-auth</module>
+        <module>svc-gateway</module>
     </modules>
 
     <build>

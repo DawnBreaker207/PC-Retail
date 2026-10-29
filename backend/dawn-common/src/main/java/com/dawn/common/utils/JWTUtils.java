@@ -1,26 +1,25 @@
 package com.dawn.common.utils;
 
+import com.dawn.common.security.JwtKeyProvider;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.io.Decoders;
-import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import javax.crypto.SecretKey;
 import java.util.Date;
 
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class JWTUtils {
 
-    @Value("${app.jwtSecret}")
-    private String jwtSecret;
+    private final JwtKeyProvider keyProvider;
 
     @Value("${app.jwtExpirationsMs}")
     private long jwtExpirations;
@@ -65,7 +64,9 @@ public class JWTUtils {
     private Claims getClaims(String token) {
         return Jwts
                 .parser()
-                .verifyWith(key())
+                .verifyWith(keyProvider.publicKey())
+                .requireIssuer(keyProvider.issuer())
+                .clockSkewSeconds(60)
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
@@ -74,6 +75,8 @@ public class JWTUtils {
     public String generateToken(Long id, String username, String email, String role) {
         return Jwts
                 .builder()
+                .header().keyId(keyProvider.keyId()).and()
+                .issuer(keyProvider.issuer())
                 .subject(username)
                 .issuedAt(new Date())
                 .claim("id", id)
@@ -81,30 +84,32 @@ public class JWTUtils {
                 .claim("email", email)
                 .claim("role", role)
                 .expiration(new Date(new Date().getTime() + jwtExpirations))
-                .signWith(key())
+                .signWith(privateKey(), Jwts.SIG.RS256)
                 .compact();
     }
 
     public String generateToken(String username) {
         return Jwts
                 .builder()
+                .header().keyId(keyProvider.keyId()).and()
+                .issuer(keyProvider.issuer())
                 .subject(username)
                 .issuedAt(new Date())
                 .expiration(new Date(new Date().getTime() + jwtExpirations))
-                .signWith(key())
+                .signWith(privateKey(), Jwts.SIG.RS256)
                 .compact();
     }
 
-    public SecretKey key() {
-        return Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtSecret));
+    private java.security.PrivateKey privateKey() {
+        if (keyProvider.privateKey() == null) {
+            throw new IllegalStateException("This service has no JWT private key; token signing is auth-service only");
+        }
+        return keyProvider.privateKey();
     }
 
     public boolean validateToken(String authToken) {
         try {
-            Jwts.parser()
-                    .verifyWith(key())
-                    .build()
-                    .parseSignedClaims(authToken);
+            getClaims(authToken);
             return true;
         } catch (JwtException | IllegalArgumentException e) {
             log.error("Token validation failed: {}", e.getMessage());
@@ -119,18 +124,5 @@ public class JWTUtils {
         cookie.setHttpOnly(true);
         cookie.setSecure(true);
         return cookie;
-    }
-
-    private String getCookieByName(HttpServletRequest req, String name) {
-        Cookie[] cookies = req.getCookies();
-        if (cookies != null) {
-            for (Cookie cookie : cookies) {
-                if (cookie.getName().equals(name)) {
-                    return cookie.getValue();
-
-                }
-            }
-        }
-        return null;
     }
 }

@@ -46,6 +46,9 @@ app:
     token: ${INTERNAL_TOKEN:}
   jwtCookieName: ${JWT_COOKIE_NAME}
   jwtRefreshCookieName: ${JWT_REFRESH_COOKIE_NAME}
-  jwtSecret: ${JWT_SECRET}
   jwtExpirationsMs: ${JWT_EXPIRATION_MS}
   jwtRefreshExpirationsMs: ${JWT_REFRESH_EXPIRATION_MS}
+  jwt:
+    issuer: ${JWT_ISSUER:pc-retail}
+    key-id: ${JWT_KEY_ID:pc-retail}
+    public-key: ${JWT_PUBLIC_KEY}

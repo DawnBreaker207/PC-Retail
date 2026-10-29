@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.cache.RedisCacheWriter;
@@ -44,6 +45,7 @@ public class RedisConfig {
     // Connect to Redis server — timeout ngắn: Redis stall thì fail-fast trong ~2s
     // (không treo thread), service fallback DB / trả 503 thay vì treo hàng chục giây
     @Bean
+    @Primary
     public RedisConnectionFactory redisConnectionFactory() {
         io.lettuce.core.SocketOptions socketOptions = io.lettuce.core.SocketOptions.builder()
                 .connectTimeout(Duration.ofSeconds(2))
