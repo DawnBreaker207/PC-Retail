@@ -20,7 +20,7 @@ import { LoadingSpinnerComponent } from '@shared/components/loading-spinner.comp
 import { MockDataService } from '@core/services/mock-data.service';
 import { SeoService } from '@core/services/seo.service';
 import { HttpClient } from '@angular/common/http';
-import { catchError } from 'rxjs';
+import { catchError, of } from 'rxjs';
 import { ApiEndpoints } from '@core/api/api.endpoints';
 import { Sku, Review } from '@core/models/common.model';
 import { CartStore } from '@features/cart/store/cart.store';
@@ -77,6 +77,7 @@ export class ProductDetailComponent {
           this.product.set(p);
           this.selectedImage.set(p.imageUrls[0] || '');
           this.seo.setProduct(p);
+          this.trackView(p);
           this.loadReviews();
           this.loadRelated(slug);
         }
@@ -90,6 +91,17 @@ export class ProductDetailComponent {
     this.mock.getReviews().pipe(
       takeUntilDestroyed(this.destroyRef),
     ).subscribe((r) => this.reviews = r);
+  }
+
+  private trackView(p: Sku) {
+    this.http.post(ApiEndpoints.catalog.skuView(p.id), {
+      componentCategory: p.categoryName ?? '',
+      price: p.price,
+      specs: p.specs ?? {},
+    }).pipe(
+      catchError(() => of(null)),
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe();
   }
 
   private loadRelated(slug: string) {

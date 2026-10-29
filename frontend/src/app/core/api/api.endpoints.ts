@@ -25,6 +25,7 @@ export const ApiEndpoints = {
   catalog: {
     skus: `${API}/api/v1/skus`,
     skuDetail: (id: number) => `${API}/api/v1/skus/${id}`,
+    skuView: (id: number) => `${API}/api/v1/skus/${id}/view`,
     compare: `${API}/api/v1/skus/compare`,
     brands: `${API}/api/v1/brands`,
     categories: `${API}/api/v1/categories`,

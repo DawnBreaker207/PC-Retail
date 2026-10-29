@@ -21,6 +21,10 @@ x-service-env: &service-env
   KAFKA_BOOTSTRAP_SERVERS: kafka:9092
   KAFKA_LOG_TOPIC: app-logs
   OUTBOX_RELAY_ENABLED: 'true'
+  # Custom Redis (infra/redis-custom) chỉ dùng cho cache SKU; cache lỗi thì fallback DB
+  CUSTOM_REDIS_ENABLED: 'true'
+  CUSTOM_REDIS_HOST: redis-custom
+  CUSTOM_REDIS_PORT: 8888
   INTERNAL_TOKEN: ${INTERNAL_TOKEN:-dev-internal-token}
   JWT_COOKIE_NAME: ${JWT_COOKIE_NAME}
   JWT_REFRESH_COOKIE_NAME: ${JWT_REFRESH_COOKIE_NAME}
@@ -57,6 +61,16 @@ services:
     networks:
       - network
     command: ['redis-server', '--notify-keyspace-events', 'Ex']
+
+  # Redis tự build (RESP, SET/GET/PX) — cache SKU, chạy song song redis chính.
+  redis-custom:
+    build:
+      context: ./redis-custom
+    container_name: redis-custom
+    ports:
+      - '6380:8888'
+    networks:
+      - network
 
   rabbitmq:
     container_name: rabbitmq
@@ -181,6 +195,10 @@ services:
       # Redis
       REDIS_HOST: ${REDIS_HOST}
       REDIS_PORT: ${REDIS_PORT}
+      # Custom Redis (cache SKU)
+      CUSTOM_REDIS_ENABLED: 'true'
+      CUSTOM_REDIS_HOST: redis-custom
+      CUSTOM_REDIS_PORT: 8888
       # RabbitMQ
       RABBITMQ_HOST: ${RABBITMQ_HOST}
       RABBITMQ_PORT: ${RABBITMQ_PORT}
@@ -223,6 +241,8 @@ services:
       postgres:
         condition: service_healthy
       redis:
+        condition: service_started
+      redis-custom:
         condition: service_started
       rabbitmq:
         condition: service_healthy
@@ -344,6 +364,8 @@ services:
       postgres:
         condition: service_healthy
       redis:
+        condition: service_started
+      redis-custom:
         condition: service_started
       rabbitmq:
         condition: service_healthy

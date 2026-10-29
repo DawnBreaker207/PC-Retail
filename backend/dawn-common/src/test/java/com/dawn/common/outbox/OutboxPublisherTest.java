@@ -1,10 +1,10 @@
 package com.dawn.common.outbox;
 
 import com.dawn.common.event.OrderCreatedEvent;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import tools.jackson.databind.json.JsonMapper;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -16,7 +16,7 @@ class OutboxPublisherTest {
     @DisplayName("publish: lưu payload JSON + đúng topic/aggregate")
     void publish_savesSerializedEvent() {
         OutboxRepository repository = mock(OutboxRepository.class);
-        OutboxPublisher publisher = new OutboxPublisher(repository, new ObjectMapper());
+        OutboxPublisher publisher = new OutboxPublisher(repository, JsonMapper.builder().build());
 
         publisher.publish("order-events", "ORDER", 42L, new OrderCreatedEvent(42L, 7L));
 

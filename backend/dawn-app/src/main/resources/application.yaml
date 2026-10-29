@@ -85,6 +85,15 @@ app:
   outbox:
     relay:
       enabled: ${OUTBOX_RELAY_ENABLED:true}
+  cache:
+    custom-redis:
+      enabled: ${CUSTOM_REDIS_ENABLED:false}
+      host: ${CUSTOM_REDIS_HOST:localhost}
+      port: ${CUSTOM_REDIS_PORT:6380}
+  clickstream:
+    topic: ${CLICKSTREAM_TOPIC:pc-clickstream}
+    consumer:
+      enabled: ${CLICKSTREAM_CONSUMER_ENABLED:true}
   frontend:
     url: ${FRONTEND_URL}
   opt:

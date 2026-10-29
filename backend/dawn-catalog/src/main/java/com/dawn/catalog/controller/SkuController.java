@@ -6,9 +6,12 @@ import com.dawn.catalog.dto.SkuCompareResponse;
 import com.dawn.catalog.dto.SkuDetailDto;
 import com.dawn.catalog.dto.SkuSummaryDto;
 import com.dawn.catalog.service.SkuService;
+import com.dawn.common.event.ClickstreamEvent;
+import com.dawn.common.event.ClickstreamPublisher;
 import com.dawn.common.response.ResponseObject;
 import com.dawn.common.response.ResponsePage;
 import com.dawn.common.security.AuthorizationConstants;
+import com.dawn.common.utils.SecurityUtils;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
@@ -18,12 +21,14 @@ import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/skus")
 @RequiredArgsConstructor
 public class SkuController {
     private final SkuService skuService;
+    private final ClickstreamPublisher clickstreamPublisher;
 
     @GetMapping("")
     public ResponseObject<ResponsePage<SkuSummaryDto>> search(
@@ -41,6 +46,18 @@ public class SkuController {
     @GetMapping("/{id}")
     public ResponseObject<SkuDetailDto> getDetail(@PathVariable Long id) {
         return ResponseObject.success(skuService.getDetail(id));
+    }
+
+    @PostMapping("/{id}/view")
+    public void view(@PathVariable Long id,
+                     @RequestBody(required = false) Map<String, Object> body) {
+        Map<String, Object> safe = body == null ? Map.of() : body;
+        clickstreamPublisher.publish(new ClickstreamEvent(
+                SecurityUtils.getCurrentUserId(),
+                id,
+                (String) safe.get("componentCategory"),
+                safe.get("price") == null ? null : new BigDecimal(safe.get("price").toString()),
+                safe.get("specs") instanceof Map<?, ?> specs ? (Map<String, Object>) specs : Map.of()));
     }
 
     @PostMapping("")

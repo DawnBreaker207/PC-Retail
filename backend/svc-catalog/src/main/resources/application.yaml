@@ -60,6 +60,11 @@ app:
   outbox:
     relay:
       enabled: ${OUTBOX_RELAY_ENABLED:true}
+  cache:
+    custom-redis:
+      enabled: ${CUSTOM_REDIS_ENABLED:false}
+      host: ${CUSTOM_REDIS_HOST:localhost}
+      port: ${CUSTOM_REDIS_PORT:6380}
   internal:
     token: ${INTERNAL_TOKEN:}
   services:
