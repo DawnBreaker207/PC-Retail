@@ -1,6 +1,7 @@
 package com.dawn.payment.service;
 
 import com.dawn.common.exception.wrapper.InvalidRequestException;
+import com.dawn.common.outbox.OutboxPublisher;
 import com.dawn.payment.dto.PaymentDto;
 import com.dawn.payment.entity.Payment;
 import com.dawn.payment.entity.enums.PaymentMethod;
@@ -36,12 +37,14 @@ class QueryPaymentStatusServiceTest {
     OrderClientPort orderClient;
     @Mock
     VnpayGatewayAdapter vnpay;
+    @Mock
+    OutboxPublisher outboxPublisher;
 
     QueryPaymentStatusService service;
 
     @BeforeEach
     void setUp() {
-        service = new QueryPaymentStatusService(paymentRepo, gatewayRegistry, orderClient);
+        service = new QueryPaymentStatusService(paymentRepo, gatewayRegistry, orderClient, outboxPublisher);
     }
 
     private Payment payment(PaymentResultStatus status) {

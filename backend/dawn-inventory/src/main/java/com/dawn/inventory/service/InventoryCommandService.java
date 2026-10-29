@@ -5,6 +5,11 @@ import com.dawn.common.exception.wrapper.ResourceNotFoundException;
 import com.dawn.common.message.Message;
 import com.dawn.common.auditlog.LogConstant;
 import com.dawn.common.auditlog.Loggable;
+import com.dawn.common.event.InventoryDeductedEvent;
+import com.dawn.common.event.InventoryLine;
+import com.dawn.common.event.InventoryReleasedEvent;
+import com.dawn.common.event.InventoryReservedEvent;
+import com.dawn.common.outbox.OutboxPublisher;
 import com.dawn.inventory.dto.StockDecrementCommandDto;
 import com.dawn.inventory.entity.Inventory;
 import com.dawn.inventory.entity.InventoryTransaction;
@@ -35,6 +40,7 @@ public class InventoryCommandService implements ReserveStockUseCase, ReleaseStoc
     private final InventoryRepository inventoryRepository;
     private final InventoryTransactionRepository transactionRepository;
     private final InventoryCachePort cachePort;
+    private final OutboxPublisher outboxPublisher;
 
     // RESERVE
     @Override
@@ -63,6 +69,8 @@ public class InventoryCommandService implements ReserveStockUseCase, ReleaseStoc
 
             snapshot.put(item.skuId(), inv.getAvailableQuantity());
         }
+        outboxPublisher.publish("inventory-events", "ORDER", orderId,
+                new InventoryReservedEvent(orderId, toLines(items)));
         runAfterCommit(() -> snapshot.forEach(cachePort::setStock));
     }
 
@@ -89,6 +97,8 @@ public class InventoryCommandService implements ReserveStockUseCase, ReleaseStoc
         }
 
         // Update Redis after commit (AFTER_COMMIT)
+        outboxPublisher.publish("inventory-events", "ORDER", orderId,
+                new InventoryReleasedEvent(orderId, toLines(items)));
         runAfterCommit(() -> cachePort.incrementBatch(items));
 
     }
@@ -122,6 +132,8 @@ public class InventoryCommandService implements ReserveStockUseCase, ReleaseStoc
             final int available = inv.getAvailableQuantity();
             runAfterCommit(() -> cachePort.setStock(skuId, available));
         }
+        outboxPublisher.publish("inventory-events", "ORDER", orderId,
+                new InventoryDeductedEvent(orderId, toLines(items)));
     }
 
 
@@ -156,9 +168,14 @@ public class InventoryCommandService implements ReserveStockUseCase, ReleaseStoc
         runAfterCommit(() -> cachePort.setStock(skuId, newAvailable));
     }
 
+    private List<InventoryLine> toLines(List<StockDecrementCommandDto> items) {
+        return items.stream()
+                .map(item -> new InventoryLine(item.skuId(), item.quantity()))
+                .toList();
+    }
+
     /** Chạy sau commit; không có transaction thì chạy ngay (robust khi gọi lẻ/test). */
-    private void runAfterCommit(Runnable task) {
-        if (TransactionSynchronizationManager.isSynchronizationActive()) {
+    private void runAfterCommit(Runnable task) {        if (TransactionSynchronizationManager.isSynchronizationActive()) {
             TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
                 @Override
                 public void afterCommit() {

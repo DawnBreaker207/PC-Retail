@@ -57,6 +57,9 @@ spring:
     port: ${RABBITMQ_PORT}
     username: ${RABBITMQ_USER}
     password: ${RABBITMQ_PASS}
+  # Kafka (outbox relay; log appender đọc env trực tiếp)
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:29092}
   # Config Mail
   mail:
     host: ${MAIL_HOST}
@@ -79,6 +82,9 @@ spring:
 app:
   mail:
     from: ${MAIL_FROM}
+  outbox:
+    relay:
+      enabled: ${OUTBOX_RELAY_ENABLED:true}
   frontend:
     url: ${FRONTEND_URL}
   opt:

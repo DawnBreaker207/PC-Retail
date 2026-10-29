@@ -1,6 +1,7 @@
 package com.dawn.order.service;
 
 import com.dawn.common.event.OrderCreatedEvent;
+import com.dawn.common.outbox.OutboxPublisher;
 import com.dawn.order.controller.request.CheckoutRequest;
 import com.dawn.order.dto.CartItemSnapshot;
 import com.dawn.order.dto.OrderDto;
@@ -37,6 +38,7 @@ public class OrderCommandService {
     private final PromotionClientPort promotionClient;
 
     private final ApplicationEventPublisher eventPublisher;
+    private final OutboxPublisher outboxPublisher;
 
     public OrderDto createOrder(
             CheckoutRequest req,
@@ -131,6 +133,13 @@ public class OrderCommandService {
 
         // Publish cart cleanup event
         eventPublisher.publishEvent(new OrderCreatedEvent(order.getId(), userId));
+
+        // Transactional Outbox: cùng transaction với order, relay đẩy Kafka sau
+        outboxPublisher.publish(
+                "order-events",
+                "ORDER",
+                order.getId(),
+                new OrderCreatedEvent(order.getId(), userId));
 
         return orderQueryService.toOrderDto(order);
     }

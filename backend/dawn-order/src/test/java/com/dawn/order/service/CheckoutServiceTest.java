@@ -1,6 +1,7 @@
 package com.dawn.order.service;
 
 import com.dawn.common.exception.wrapper.InvalidRequestException;
+import com.dawn.common.outbox.OutboxPublisher;
 import com.dawn.order.controller.request.CheckoutRequest;
 import com.dawn.order.dto.CartItemSnapshot;
 import com.dawn.order.dto.OrderDto;
@@ -61,6 +62,9 @@ public class CheckoutServiceTest {
     @Mock
     ApplicationEventPublisher eventPublisher;
 
+    @Mock
+    OutboxPublisher outboxPublisher;
+
     @Spy
     ThreadPoolTaskExecutor checkoutExecutor = new ThreadPoolTaskExecutor();
 
@@ -73,7 +77,7 @@ public class CheckoutServiceTest {
         lenient().when(shippingService.resolveFee(any(), any())).thenReturn(java.math.BigDecimal.ZERO);
         var orderCommandSvc = new OrderCommandService(
                 orderRepository, subOrderRepository, orderItemRepository,
-                orderQueryService, inventoryClient, promotionClient, eventPublisher);
+                orderQueryService, inventoryClient, promotionClient, eventPublisher, outboxPublisher);
         checkoutService = new CheckoutService(
                 orderCommandSvc, orderQueryService, cartClient,
                 inventoryClient, promotionClient, catalogClient, checkoutExecutor, shippingService);

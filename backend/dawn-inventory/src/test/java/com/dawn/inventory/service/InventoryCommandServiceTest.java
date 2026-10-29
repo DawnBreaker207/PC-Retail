@@ -1,6 +1,7 @@
 package com.dawn.inventory.service;
 
 import com.dawn.common.exception.wrapper.InvalidRequestException;
+import com.dawn.common.outbox.OutboxPublisher;
 import com.dawn.inventory.dto.StockDecrementCommandDto;
 import com.dawn.inventory.entity.Inventory;
 import com.dawn.inventory.port.out.InventoryCachePort;
@@ -30,12 +31,14 @@ class InventoryCommandServiceTest {
     InventoryTransactionRepository transactionRepository;
     @Mock
     InventoryCachePort cachePort;
+    @Mock
+    OutboxPublisher outboxPublisher;
 
     InventoryCommandService service;
 
     @BeforeEach
     void setUp() {
-        service = new InventoryCommandService(inventoryRepository, transactionRepository, cachePort);
+        service = new InventoryCommandService(inventoryRepository, transactionRepository, cachePort, outboxPublisher);
     }
 
     private Inventory inv(int stock, int reserved) {

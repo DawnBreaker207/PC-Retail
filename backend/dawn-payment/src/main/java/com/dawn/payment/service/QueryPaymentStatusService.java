@@ -2,7 +2,10 @@ package com.dawn.payment.service;
 
 import com.dawn.common.exception.wrapper.InvalidRequestException;
 import com.dawn.common.exception.wrapper.ResourceNotFoundException;
+import com.dawn.common.event.PaymentCompletedEvent;
+import com.dawn.common.event.PaymentFailedEvent;
 import com.dawn.common.message.Message;
+import com.dawn.common.outbox.OutboxPublisher;
 import com.dawn.payment.dto.PaymentDto;
 import com.dawn.payment.dto.VnpayQueryResult;
 import com.dawn.payment.entity.Payment;
@@ -39,6 +42,7 @@ public class QueryPaymentStatusService implements QueryPaymentStatusUseCase {
     private final PaymentRepository paymentRepo;
     private final PaymentGatewayRegistry gatewayRegistry;
     private final OrderClientPort orderClient;
+    private final OutboxPublisher outboxPublisher;
 
     @Override
     @Transactional
@@ -63,6 +67,7 @@ public class QueryPaymentStatusService implements QueryPaymentStatusUseCase {
             payment.setTransactionRef(result.transactionNo());
             payment.setSettledAt(Instant.now());
             paymentRepo.save(payment);
+            publishCompleted(payment);
             orderClient.markOrderPaid(payment.getOrderId());
         } else if ("UNKNOWN".equals(result.responseCode())) {
             payment.setStatus(PaymentResultStatus.UNKNOWN);
@@ -74,6 +79,7 @@ public class QueryPaymentStatusService implements QueryPaymentStatusUseCase {
         } else {
             payment.setStatus(PaymentResultStatus.FAILED);
             paymentRepo.save(payment);
+            publishFailed(payment, result.responseCode());
             orderClient.markOrderPaymentFailed(payment.getOrderId());
         }
 
@@ -118,10 +124,12 @@ public class QueryPaymentStatusService implements QueryPaymentStatusUseCase {
             payment.setTransactionRef(transactionNo);
             payment.setSettledAt(Instant.now());
             paymentRepo.save(payment);
+            publishCompleted(payment);
             orderClient.markOrderPaid(payment.getOrderId());
         } else {
             payment.setStatus(PaymentResultStatus.FAILED);
             paymentRepo.save(payment);
+            publishFailed(payment, responseCode);
             orderClient.markOrderPaymentFailed(payment.getOrderId());
         }
 
@@ -198,8 +206,22 @@ public class QueryPaymentStatusService implements QueryPaymentStatusUseCase {
         }
     }
 
-    private PaymentDto toDto(Payment p) {
-        return new PaymentDto(
+    private void publishCompleted(Payment payment) {
+        outboxPublisher.publish("payment-events", "PAYMENT", payment.getId(),
+                new PaymentCompletedEvent(
+                        payment.getId(),
+                        payment.getOrderId(),
+                        payment.getAmount(),
+                        payment.getTransactionRef(),
+                        payment.getSettledAt()));
+    }
+
+    private void publishFailed(Payment payment, String reason) {
+        outboxPublisher.publish("payment-events", "PAYMENT", payment.getId(),
+                new PaymentFailedEvent(payment.getId(), payment.getOrderId(), reason));
+    }
+
+    private PaymentDto toDto(Payment p) {        return new PaymentDto(
                 p.getId(),
                 p.getOrderId(),
                 p.getMethod(),
