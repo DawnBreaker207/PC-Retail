@@ -49,6 +49,8 @@ public class SecurityConfig {
             "/api/v1/orders/guest-checkout",
             "/api/v1/payments/callback/**",
             "/api/v1/payments/webhook/**",
+            // service-to-service; InternalTokenFilter chặn bằng shared token
+            "/api/v1/internal/**",
             // STOMP handshake must be reachable; authentication happens on
             // the CONNECT frame (see StompAuthChannelInterceptor).
             "/ws/**"

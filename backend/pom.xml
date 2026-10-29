@@ -215,6 +215,10 @@
         <module>dawn-return</module>
         <module>dawn-builder</module>
         <module>dawn-reporting</module>
+        <module>svc-order</module>
+        <module>svc-inventory</module>
+        <module>svc-payment</module>
+        <module>svc-catalog</module>
     </modules>
 
     <build>
