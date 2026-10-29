@@ -12,4 +12,8 @@ public interface OutboxRepository extends JpaRepository<OutboxEvent, Long> {
 
     @Query(value = "SELECT * FROM outbox_events WHERE published_at IS NULL ORDER BY id ASC LIMIT :limit FOR UPDATE SKIP LOCKED", nativeQuery = true)
     List<OutboxEvent> findPendingEventsWithLock(@Param("limit") int limit);
+
+    @org.springframework.data.jpa.repository.Modifying
+    @Query("DELETE FROM OutboxEvent e WHERE e.publishedAt IS NOT NULL AND e.publishedAt < :threshold")
+    int deleteOldPublishedEvents(@Param("threshold") java.time.Instant threshold);
 }

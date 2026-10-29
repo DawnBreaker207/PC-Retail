@@ -55,10 +55,11 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         String path = exchange.getRequest().getURI().getPath();
-        if (path.startsWith("/api/v1/internal/") || (path.startsWith("/actuator") && !path.startsWith("/actuator/health"))) {
+        if (path.startsWith("/api/v1/internal/") ||
+                (path.startsWith("/actuator") && !path.startsWith("/actuator/health") && !path.startsWith("/actuator/prometheus"))) {
             return reject(exchange, HttpStatus.NOT_FOUND, "Not found");
         }
-        if (path.startsWith("/actuator/health")) {
+        if (path.startsWith("/actuator/health") || path.startsWith("/actuator/prometheus")) {
             return chain.filter(exchange);
         }
 

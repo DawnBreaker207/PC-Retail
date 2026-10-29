@@ -37,6 +37,11 @@ public class FeignClientConfig {
     }
 
     @Bean
+    public feign.codec.ErrorDecoder feignErrorDecoder() {
+        return new CustomFeignErrorDecoder();
+    }
+
+    @Bean
     public Client feignClient() {
         // Apache HttpClient 5 Connection Pool: 200 total, 50 per route, keep-alive & idle eviction
         PoolingHttpClientConnectionManager connectionManager = PoolingHttpClientConnectionManagerBuilder.create()

@@ -64,6 +64,16 @@ public class OutboxRelay {
         }
     }
 
+    @Transactional
+    @Scheduled(cron = "${app.outbox.relay.cleanup-cron:0 0 3 * * ?}")
+    public void cleanupOldPublishedEvents() {
+        Instant threshold = Instant.now().minus(Duration.ofDays(7));
+        int deleted = outboxRepository.deleteOldPublishedEvents(threshold);
+        if (deleted > 0) {
+            log.info("Outbox relay cleaned up {} old published events older than 7 days", deleted);
+        }
+    }
+
     private KafkaProducer<String, String> producer() {
         if (producer == null) {
             Properties props = new Properties();

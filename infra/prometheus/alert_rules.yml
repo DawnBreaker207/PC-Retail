@@ -1,0 +1,38 @@
+groups:
+  - name: pc-retail-alerts
+    rules:
+      - alert: ServiceInstanceDown
+        expr: up == 0
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: "Microservice instance {{ $labels.instance }} is DOWN"
+          description: "Target {{ $labels.job }} ({{ $labels.instance }}) has been unreachable for more than 30 seconds."
+
+      - alert: HighHttp5xxErrorRate
+        expr: (sum(rate(http_server_requests_seconds_count{status=~"5.."}[1m])) by (application) / sum(rate(http_server_requests_seconds_count[1m])) by (application)) * 100 > 5
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High 5xx error rate on {{ $labels.application }}"
+          description: "5xx error rate is above 5% on {{ $labels.application }} (current: {{ $value }}%)."
+
+      - alert: HighHttpLatencyP95
+        expr: histogram_quantile(0.95, sum(rate(http_server_requests_seconds_bucket[1m])) by (le, application)) > 1.0
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High P95 latency on {{ $labels.application }}"
+          description: "P95 request latency exceeds 1s on {{ $labels.application }}."
+
+      - alert: HikariPoolNearExhaustion
+        expr: (hikaricp_connections_active / hikaricp_connections) * 100 > 85
+        for: 30s
+        labels:
+          severity: warning
+        annotations:
+          summary: "HikariCP pool near exhaustion on {{ $labels.application }}"
+          description: "Active database connections above 85% of pool capacity on {{ $labels.application }}."

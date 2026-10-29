@@ -11,3 +11,5 @@ blob-report/
 .nx/
 .angular/
 dist/
+*.jtl
+orders_export_1m.csv
