@@ -36,6 +36,7 @@ x-service-env: &service-env
   JWT_EXPIRATION_MS: ${JWT_EXPIRATION_MS}
   JWT_REFRESH_EXPIRATION_MS: ${JWT_REFRESH_EXPIRATION_MS}
   FRONTEND_URL: ${FRONTEND_URL}
+  MANAGEMENT_ZIPKIN_TRACING_ENDPOINT: http://zipkin:9411/api/v2/spans
 
 services:
   postgres:
@@ -185,6 +186,18 @@ services:
     depends_on:
       - loki
       - prometheus
+      - zipkin
+    networks:
+      - network
+
+  zipkin:
+    container_name: zipkin
+    image: openzipkin/zipkin:3
+    restart: unless-stopped
+    ports:
+      - '9411:9411'
+    environment:
+      - STORAGE_TYPE=mem
     networks:
       - network
 
@@ -463,7 +476,12 @@ services:
       INVENTORY_SERVICE_URL: http://inventory-service:8082
       PAYMENT_SERVICE_URL: http://payment-service:8083
       CATALOG_SERVICE_URL: http://catalog-service:8084
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      MANAGEMENT_ZIPKIN_TRACING_ENDPOINT: http://zipkin:9411/api/v2/spans
     depends_on:
+      - redis
+      - zipkin
       - auth-service
       - order-service
       - inventory-service

@@ -117,10 +117,20 @@
             <artifactId>spring-cloud-starter-circuitbreaker-resilience4j</artifactId>
         </dependency>
 
-        <!-- Micrometer Distributed Tracing (W3C traceparent / Brave bridge) -->
+        <!-- Micrometer Distributed Tracing (W3C traceparent / Brave bridge / Zipkin) -->
         <dependency>
             <groupId>io.micrometer</groupId>
             <artifactId>micrometer-tracing-bridge-brave</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.zipkin.reporter2</groupId>
+            <artifactId>zipkin-reporter-brave</artifactId>
+        </dependency>
+
+        <!-- Spring Kafka (DLQ, Retryable Topics, Event-Driven Architecture) -->
+        <dependency>
+            <groupId>org.springframework.kafka</groupId>
+            <artifactId>spring-kafka</artifactId>
         </dependency>
 
         <!-- Spring Boot Actuator (Health, Readiness/Liveness Probes, Metrics) -->

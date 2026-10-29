@@ -7,6 +7,10 @@ spring:
     timeout-per-shutdown-phase: 30s
   application:
     name: gateway
+  data:
+    redis:
+      host: ${REDIS_HOST:redis}
+      port: ${REDIS_PORT:6379}
   cloud:
     gateway:
       server:
@@ -16,27 +20,53 @@ spring:
               uri: ${AUTH_SERVICE_URL:http://localhost:8085}
               predicates:
                 - Path=/api/v1/auth/**,/api/v1/users/**
+              filters:
+                - name: RequestRateLimiter
+                  args:
+                    rate-limiter: "#{@strictRateLimiter}"
+                    key-resolver: "#{@userKeyResolver}"
             - id: order-service
               uri: ${ORDER_SERVICE_URL:http://localhost:8081}
               predicates:
                 - Path=/api/v1/orders/**,/api/v1/cart/**,/api/v1/promotion/**
+              filters:
+                - name: RequestRateLimiter
+                  args:
+                    rate-limiter: "#{@strictRateLimiter}"
+                    key-resolver: "#{@userKeyResolver}"
             - id: inventory-service
               uri: ${INVENTORY_SERVICE_URL:http://localhost:8082}
               predicates:
                 - Path=/api/v1/inventory/**
+              filters:
+                - name: RequestRateLimiter
+                  args:
+                    rate-limiter: "#{@standardRateLimiter}"
+                    key-resolver: "#{@userKeyResolver}"
             - id: payment-service
               uri: ${PAYMENT_SERVICE_URL:http://localhost:8083}
               predicates:
                 - Path=/api/v1/payments/**
+              filters:
+                - name: RequestRateLimiter
+                  args:
+                    rate-limiter: "#{@strictRateLimiter}"
+                    key-resolver: "#{@userKeyResolver}"
             - id: catalog-service
               uri: ${CATALOG_SERVICE_URL:http://localhost:8084}
               predicates:
                 - Path=/**
+              filters:
+                - name: RequestRateLimiter
+                  args:
+                    rate-limiter: "#{@standardRateLimiter}"
+                    key-resolver: "#{@userKeyResolver}"
 
 app:
   jwt:
     issuer: ${JWT_ISSUER:pc-retail}
     public-key: ${JWT_PUBLIC_KEY}
+
 management:
   endpoints:
     web:
@@ -54,3 +84,6 @@ management:
   tracing:
     sampling:
       probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: ${MANAGEMENT_ZIPKIN_TRACING_ENDPOINT:http://zipkin:9411/api/v2/spans}
