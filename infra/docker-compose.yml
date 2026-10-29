@@ -9,6 +9,7 @@ volumes:
   kafka:
   loki:
   grafana:
+  prometheus:
 
 # Env dùng chung cho các service nghiệp vụ (auth/order/inventory/payment/catalog)
 x-service-env: &service-env
@@ -40,6 +41,7 @@ services:
   postgres:
     image: pgvector/pgvector:pg17
     container_name: postgres
+    command: ["postgres", "-c", "max_connections=300", "-c", "shared_buffers=512MB"]
     environment:
       POSTGRES_DB: demo
       POSTGRES_USER: admin
@@ -150,6 +152,23 @@ services:
     networks:
       - network
 
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    restart: unless-stopped
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=7d'
+      - '--web.enable-lifecycle'
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus:/prometheus
+    ports:
+      - '9090:9090'
+    networks:
+      - network
+
   grafana:
     container_name: grafana
     image: grafana/grafana:13.2.5
@@ -162,14 +181,17 @@ services:
     volumes:
       - grafana:/var/lib/grafana
       - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
     depends_on:
       - loki
+      - prometheus
     networks:
       - network
 
   vector:
     container_name: vector
     image: timberio/vector:0.60.0-alpine
+    command: ["--config", "/etc/vector/vector.toml"]
     volumes:
       - ./vector/vector.toml:/etc/vector/vector.toml:ro
     depends_on:

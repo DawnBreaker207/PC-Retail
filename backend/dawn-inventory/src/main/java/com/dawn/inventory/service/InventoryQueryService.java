@@ -84,10 +84,16 @@ public class InventoryQueryService implements QueryInventoryUseCase {
             log.warn("Redis unavailable, fallback DB for sku {}", skuId);
         }
 
-        // Fallback DB
-        return inventoryRepository.findBySkuId(skuId)
+        // Fallback DB & warm cache
+        int available = inventoryRepository.findBySkuId(skuId)
                 .map(Inventory::getAvailableQuantity)
                 .orElse(0);
+        try {
+            cachePort.syncFromDb(skuId, available);
+        } catch (RuntimeException ignored) {
+            // Best effort cache sync
+        }
+        return available;
     }
 
 

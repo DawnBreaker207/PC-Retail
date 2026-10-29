@@ -1,0 +1,52 @@
+global:
+  scrape_interval: 5s
+  evaluation_interval: 5s
+
+scrape_configs:
+  - job_name: 'pc-retail-gateway'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['gateway:8080']
+        labels:
+          application: 'gateway'
+          environment: 'production'
+
+  - job_name: 'pc-retail-order'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['order-service:8081']
+        labels:
+          application: 'order-service'
+          environment: 'production'
+
+  - job_name: 'pc-retail-inventory'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['inventory-service:8082']
+        labels:
+          application: 'inventory-service'
+          environment: 'production'
+
+  - job_name: 'pc-retail-payment'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['payment-service:8083']
+        labels:
+          application: 'payment-service'
+          environment: 'production'
+
+  - job_name: 'pc-retail-catalog'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['catalog-service:8084']
+        labels:
+          application: 'catalog-service'
+          environment: 'production'
+
+  - job_name: 'pc-retail-auth'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['auth-service:8085']
+        labels:
+          application: 'auth-service'
+          environment: 'production'

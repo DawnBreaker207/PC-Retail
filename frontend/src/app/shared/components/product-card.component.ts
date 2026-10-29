@@ -1,6 +1,9 @@
-import { Component, inject, input, output } from '@angular/core';
+import { Component, computed, inject, input, output } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { NzIconModule } from 'ng-zorro-antd/icon';
+import { HlmCardDirective } from '@shared/ui/card';
+import { HlmButtonDirective } from '@shared/ui/button';
+import { HlmBadgeDirective } from '@shared/ui/badge';
+import { LucideAngularModule, Heart, ShoppingCart, Zap, Star, Loader2 } from 'lucide-angular';
 import { CurrencyFormatPipe } from '@shared/pipes/currency-format.pipe';
 import { FallbackImageDirective } from '@shared/directives/fallback-image.directive';
 import { Sku } from '@core/models/common.model';
@@ -8,7 +11,16 @@ import { WishlistStore } from '@features/wishlist/store/wishlist.store';
 
 @Component({
   selector: 'app-product-card',
-  imports: [RouterLink, NzIconModule, CurrencyFormatPipe, FallbackImageDirective],
+  standalone: true,
+  imports: [
+    RouterLink,
+    HlmCardDirective,
+    HlmButtonDirective,
+    HlmBadgeDirective,
+    LucideAngularModule,
+    CurrencyFormatPipe,
+    FallbackImageDirective,
+  ],
   templateUrl: './product-card.component.html',
   styleUrl: './product-card.component.css',
 })
@@ -22,9 +34,15 @@ export class ProductCardComponent {
   cardClick = output();
   addToCart = output();
 
-  get discountPercent(): number {
+  readonly HeartIcon = Heart;
+  readonly CartIcon = ShoppingCart;
+  readonly ZapIcon = Zap;
+  readonly StarIcon = Star;
+  readonly LoaderIcon = Loader2;
+
+  discountPercent = computed(() => {
     const p = this.product();
     if (!p.originalPrice || p.originalPrice <= p.price) return 0;
     return Math.round((1 - p.price / p.originalPrice) * 100);
-  }
+  });
 }

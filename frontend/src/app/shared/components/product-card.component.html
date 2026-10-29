@@ -1,104 +1,126 @@
 <article
-  class="w-full group bg-surface dark:bg-surface-dark rounded-card border border-border/80 dark:border-border-dark/80 shadow-sm hover:shadow-lg hover:-translate-y-1 hover:border-primary/30 dark:hover:border-primary/40 transition-shadow overflow-hidden flex flex-col cursor-pointer focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2"
+  hlmCard
+  class="group relative flex flex-col overflow-hidden rounded-xl border border-border/80 bg-card p-0 transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-xl cursor-pointer focus-visible:outline-2 focus-visible:outline-primary"
   role="button"
   tabindex="0"
   (click)="cardClick.emit()"
   (keydown.enter)="cardClick.emit()"
   (keydown.space)="$event.preventDefault(); cardClick.emit()"
 >
+  <!-- Media Frame -->
   <a
     [routerLink]="['/products', product().slug]"
-    class="block relative aspect-square bg-bg dark:bg-bg-dark overflow-hidden"
+    class="relative aspect-square w-full overflow-hidden bg-muted/20 p-4 sm:p-6"
     (click)="$event.stopPropagation()"
   >
     <img
       [src]="product().imageUrls[0]"
       appFallbackImage
       [alt]="product().name"
-      class="w-full h-full object-contain p-4 sm:p-6 group-hover:scale-110 transition-transform duration-500"
+      class="h-full w-full object-contain transition-transform duration-500 group-hover:scale-105"
       loading="lazy"
     />
-    @if (badge()) {
-      <span
-        class="absolute top-2 left-2 text-[11px] font-bold px-2.5 py-1 rounded-md z-10 shadow-sm text-white"
-        [class.bg-primary]="badge() === 'flash'"
-        [class.bg-warning]="badge() === 'discount'"
-      >
-        @if (badge() === 'flash') { FLASH SALE }
-        @if (badge() === 'discount') {
-          -{{ discountPercent }}%
-        }
+
+    <!-- Badges -->
+    @if (badge() === 'flash') {
+      <span hlmBadge variant="destructive" class="absolute left-2.5 top-2.5 gap-1 shadow-sm text-[11px] font-bold">
+        <lucide-icon [img]="ZapIcon" class="size-3" /> FLASH SALE
+      </span>
+    } @else if (badge() === 'discount' || discountPercent() > 0) {
+      <span hlmBadge class="absolute left-2.5 top-2.5 bg-amber-500 hover:bg-amber-600 text-white font-bold text-[11px]">
+        -{{ discountPercent() }}%
       </span>
     }
+
+    <!-- Wishlist Floating Button -->
     <button
       type="button"
+      hlmBtn
+      variant="secondary"
+      size="icon"
       [attr.aria-label]="wishlist.has(product().id) ? 'Bỏ yêu thích' : 'Yêu thích'"
-      [attr.aria-pressed]="wishlist.has(product().id)"
-      class="absolute top-2 right-2 w-11 h-11 rounded-full bg-white/80 dark:bg-surface-card-dark/80 shadow-sm transition-opacity duration-200 flex items-center justify-center focus-visible:outline-2 focus-visible:outline-primary/60"
+      class="absolute right-2.5 top-2.5 size-9 rounded-full bg-background/80 backdrop-blur-md transition-transform active:scale-90"
       [class.opacity-0]="!wishlist.has(product().id)"
       [class.group-hover:opacity-100]="!wishlist.has(product().id)"
       (click)="$event.stopPropagation(); wishlist.toggle(product().id)"
     >
-      <span nz-icon [nzType]="wishlist.has(product().id) ? 'heart' : 'heart'" [nzTheme]="wishlist.has(product().id) ? 'fill' : 'outline'" class="text-sm" [class.text-primary]="wishlist.has(product().id)" [class.text-muted]="!wishlist.has(product().id)" [class.dark:text-muted-dark]="!wishlist.has(product().id)"></span>
+      <lucide-icon
+        [img]="HeartIcon"
+        class="size-4 transition-colors"
+        [class.text-red-500]="wishlist.has(product().id)"
+        [class.fill-red-500]="wishlist.has(product().id)"
+      />
     </button>
   </a>
 
-  <div class="p-3 sm:p-4 flex-1 flex flex-col">
-    <p class="text-xs text-muted dark:text-muted-dark mb-1 uppercase tracking-wider font-medium">{{ product().brandName }}</p>
+  <!-- Content -->
+  <div class="flex flex-1 flex-col p-4">
+    <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{{ product().brandName }}</span>
     <a
       [routerLink]="['/products', product().slug]"
-      class="text-sm font-medium line-clamp-2 hover:text-primary transition-colors duration-200 mb-2 flex-1 leading-snug"
+      class="mt-1 line-clamp-2 text-sm font-medium leading-snug hover:text-primary transition-colors flex-1"
       (click)="$event.stopPropagation()"
     >
       {{ product().name }}
     </a>
 
+    <!-- Spec Chips -->
     @if (product().specChips && product().specChips!.length > 0) {
-      <div class="flex flex-wrap gap-1 mb-2">
-        @for (chip of product().specChips!.slice(0, 4); track chip.label) {
-          <span class="inline-flex items-center gap-0.5 text-[11px] bg-bg dark:bg-bg-dark text-muted dark:text-muted-dark px-1.5 py-0.5 rounded border border-border/60 dark:border-border-dark/60">
-            <span nz-icon [nzType]="chip.icon" class="text-[10px]"></span>
-            <span>{{ chip.value }}</span>
+      <div class="mt-2 flex flex-wrap gap-1">
+        @for (chip of product().specChips!.slice(0, 3); track chip.label) {
+          <span class="inline-flex items-center rounded-md bg-secondary px-2 py-0.5 text-[11px] font-medium text-secondary-foreground border border-border/50">
+            {{ chip.value }}
           </span>
         }
       </div>
     }
 
-    <div class="flex items-baseline gap-2 flex-wrap">
-      <span class="text-primary font-bold text-base sm:text-lg tracking-tight">{{ product().price | currencyFormat }}</span>
-      @if (discountPercent > 0) {
-        <span class="text-xs text-muted dark:text-muted-dark line-through">{{ product().originalPrice! | currencyFormat }}</span>
-      }
-    </div>
-
+    <!-- Rating & Sold count -->
     @if (product().soldCount > 0 || product().rating) {
-      <div class="flex items-center gap-2 mt-0.5">
+      <div class="mt-2 flex items-center gap-2 text-xs text-muted-foreground">
         @if (product().rating) {
-          <div class="flex items-center text-warning text-xs">
-            <span nz-icon nzType="star" nzTheme="fill"></span>
-            <span class="ml-0.5 text-muted dark:text-muted-dark font-medium">{{ product().rating }}</span>
+          <div class="flex items-center text-amber-500 font-medium">
+            <lucide-icon [img]="StarIcon" class="size-3.5 fill-amber-500" />
+            <span class="ml-1 text-foreground">{{ product().rating }}</span>
           </div>
           @if (product().reviewCount) {
-            <span class="text-xs text-muted dark:text-muted-dark">({{ product().reviewCount }})</span>
+            <span>({{ product().reviewCount }})</span>
           }
         }
         @if (product().soldCount > 0) {
-          <span class="text-xs text-muted dark:text-muted-dark ml-auto">Đã bán {{ product().soldCount }}</span>
+          <span class="ml-auto">Đã bán {{ product().soldCount }}</span>
         }
       </div>
     }
 
-    <button
-      type="button"
-      class="mt-2.5 w-full rounded-lg border border-primary text-primary hover:bg-primary hover:text-white transition-colors duration-200 text-xs sm:text-sm font-semibold min-h-[44px] flex items-center justify-center gap-1 focus-visible:outline-2 focus-visible:outline-primary/60"
-      [class.bg-primary]="isAdding()"
-      [class.text-white]="isAdding()"
-      (click)="$event.stopPropagation(); addToCart.emit()"
-    >
-      @if (isAdding()) {
-        <span nz-icon nzType="loading" nzTheme="outline"></span>
-      }
-      + Thêm vào giỏ
-    </button>
+    <!-- Price & Add to Cart Action -->
+    <div class="mt-auto pt-3">
+      <div class="flex items-baseline gap-2">
+        <span class="text-base sm:text-lg font-bold tracking-tight text-primary">
+          {{ product().price | currencyFormat }}
+        </span>
+        @if (discountPercent() > 0) {
+          <span class="text-xs text-muted-foreground line-through">
+            {{ product().originalPrice! | currencyFormat }}
+          </span>
+        }
+      </div>
+
+      <button
+        type="button"
+        hlmBtn
+        variant="default"
+        class="mt-2.5 w-full font-semibold gap-1.5 shadow-sm"
+        [disabled]="isAdding()"
+        (click)="$event.stopPropagation(); addToCart.emit()"
+      >
+        @if (isAdding()) {
+          <lucide-icon [img]="LoaderIcon" class="size-4 animate-spin" />
+        } @else {
+          <lucide-icon [img]="CartIcon" class="size-4" />
+        }
+        <span>+ Thêm vào giỏ</span>
+      </button>
+    </div>
   </div>
 </article>

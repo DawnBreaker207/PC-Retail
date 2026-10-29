@@ -115,7 +115,7 @@
             <stringProp name="HTTPSampler.domain">${HOST}</stringProp>
             <stringProp name="HTTPSampler.port">${PORT}</stringProp>
             <stringProp name="HTTPSampler.protocol">http</stringProp>
-            <stringProp name="HTTPSampler.path">/api/v1/skus/1</stringProp>
+            <stringProp name="HTTPSampler.path">/api/v1/skus/${__Random(1,5)}</stringProp>
             <stringProp name="HTTPSampler.method">GET</stringProp>
             <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
             <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
@@ -128,7 +128,7 @@
               <collectionProp name="Arguments.arguments">
                 <elementProp name="" elementType="HTTPArgument">
                   <boolProp name="HTTPArgument.always_encode">false</boolProp>
-                  <stringProp name="Argument.value">{"skuId":1,"quantity":1}</stringProp>
+                  <stringProp name="Argument.value">{"skuId":${__Random(1,5)},"quantity":1}</stringProp>
                   <stringProp name="Argument.metadata">=</stringProp>
                 </elementProp>
               </collectionProp>
