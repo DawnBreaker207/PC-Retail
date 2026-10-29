@@ -3,6 +3,7 @@ package com.dawn.svc.catalog;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.persistence.autoconfigure.EntityScan;
+import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
@@ -16,6 +17,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
         basePackages = {"com.dawn.common", "com.dawn.catalog", "com.dawn.builder"},
         excludeFilters = @ComponentScan.Filter(
                 type = FilterType.ANNOTATION, classes = SpringBootApplication.class))
+@EnableFeignClients(basePackages = "com.dawn")
 @EntityScan(basePackages = {"com.dawn.common", "com.dawn.catalog", "com.dawn.builder"})
 @EnableJpaRepositories(basePackages = {"com.dawn.common", "com.dawn.catalog", "com.dawn.builder"})
 @EnableJpaAuditing
