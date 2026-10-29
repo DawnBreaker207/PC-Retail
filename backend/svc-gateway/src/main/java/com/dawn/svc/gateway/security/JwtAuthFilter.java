@@ -43,6 +43,7 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
             "/api/v1/promotion/**",
             "/api/v1/cart/guest/**",
             "/api/v1/orders/guest-checkout",
+            "/api/v1/orders/export-excel",
             "/api/v1/payments/callback/**",
             "/api/v1/payments/webhook/**",
             "/ws/**");

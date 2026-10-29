@@ -112,8 +112,6 @@ public class CartService implements GetCartUseCase, AddCartItemUseCase, UpdateCa
     }
 
     // WRITE
-    // Upsert 1 câu lệnh: diệt tận gốc race 2 tx cùng tạo dòng (user,sku).
-    // Giữ @Retryable cho các race còn lại (version).
     @Retryable(
             retryFor = {
                     org.springframework.orm.ObjectOptimisticLockingFailureException.class,
@@ -128,11 +126,9 @@ public class CartService implements GetCartUseCase, AddCartItemUseCase, UpdateCa
             throw new InvalidRequestException(Message.Cart.INVALID_QUANTITY);
         }
         Integer available = inventoryQueryPort.getAvailableQuantity(skuId);
-        log.info("Get existing quantity {}", available);
         int newTotal = cartItemRepository.findByUserIdAndSkuId(userId, skuId)
                 .map(CartItem::getQuantity).orElse(0) + quantity;
-        log.info("Get existing quantity {} and total in cart {}", available, newTotal);
-        if (newTotal > available) {
+        if (available != null && newTotal > available) {
             throw new ResourceInsufficientException(Message.format(Message.Cart.INSUFFICIENT_STOCK, skuId, available, newTotal));
         }
 

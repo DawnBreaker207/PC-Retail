@@ -18,11 +18,16 @@ spring:
     virtual:
       enabled: true
   datasource:
+    hikari:
+      maximum-pool-size: 30
+      minimum-idle: 10
+      connection-timeout: 10000
     url: ${DB_URL}
     username: ${DB_USER}
     password: ${DB_PASS}
     driver-class-name: ${DB_DRIVER}
   jpa:
+    open-in-view: false
     hibernate:
       ddl-auto: none
     show-sql: false
