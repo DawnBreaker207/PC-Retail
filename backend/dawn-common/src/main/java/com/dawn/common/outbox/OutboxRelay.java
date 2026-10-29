@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -18,8 +19,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Đọc outbox chưa publish và đẩy Kafka. At-least-once: gửi xong mới set publishedAt.
- * <p>
- * shortcut: giả định 1 relay instance; khi scale ngang cần claim row bằng SKIP LOCKED.
+ * Sử dụng SELECT ... FOR UPDATE SKIP LOCKED để nhiều instance scale ngang không bao giờ bị đụng độ.
  */
 @Component
 @Slf4j
@@ -38,9 +38,10 @@ public class OutboxRelay {
         this.bootstrapServers = bootstrapServers;
     }
 
+    @Transactional
     @Scheduled(fixedDelayString = "${app.outbox.relay.fixed-delay-ms:1000}")
     public void relay() {
-        List<OutboxEvent> pending = outboxRepository.findTop100ByPublishedAtIsNullOrderByIdAsc();
+        List<OutboxEvent> pending = outboxRepository.findPendingEventsWithLock(100);
         if (pending.isEmpty()) {
             return;
         }

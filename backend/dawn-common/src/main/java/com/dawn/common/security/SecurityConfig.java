@@ -55,7 +55,8 @@ public class SecurityConfig {
             "/api/v1/internal/**",
             // STOMP handshake must be reachable; authentication happens on
             // the CONNECT frame (see StompAuthChannelInterceptor).
-            "/ws/**"
+            "/ws/**",
+            "/actuator/**"
     };
 
     private final AuthEntryPointJwt unauthorizedHandler;

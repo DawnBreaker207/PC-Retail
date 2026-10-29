@@ -1,9 +1,16 @@
 package com.dawn.common.feign;
 
+import feign.Client;
 import feign.Logger;
 import feign.Request;
 import feign.RequestInterceptor;
 import feign.Retryer;
+import feign.hc5.ApacheHttp5Client;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
+import org.apache.hc.core5.util.TimeValue;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -27,5 +34,22 @@ public class FeignClientConfig {
     public Request.Options requestOptions() {
         // connectTimeout 5s, readTimeout 10s
         return new Request.Options(5000, TimeUnit.MILLISECONDS, 10000, TimeUnit.MILLISECONDS, true);
+    }
+
+    @Bean
+    public Client feignClient() {
+        // Apache HttpClient 5 Connection Pool: 200 total, 50 per route, keep-alive & idle eviction
+        PoolingHttpClientConnectionManager connectionManager = PoolingHttpClientConnectionManagerBuilder.create()
+                .setMaxConnTotal(200)
+                .setMaxConnPerRoute(50)
+                .build();
+
+        CloseableHttpClient httpClient = HttpClients.custom()
+                .setConnectionManager(connectionManager)
+                .evictExpiredConnections()
+                .evictIdleConnections(TimeValue.ofSeconds(30))
+                .build();
+
+        return new ApacheHttp5Client(httpClient);
     }
 }

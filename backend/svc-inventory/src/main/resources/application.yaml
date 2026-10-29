@@ -52,3 +52,20 @@ app:
     issuer: ${JWT_ISSUER:pc-retail}
     key-id: ${JWT_KEY_ID:pc-retail}
     public-key: ${JWT_PUBLIC_KEY}
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      probes:
+        enabled: true
+  health:
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true
+  tracing:
+    sampling:
+      probability: 1.0
