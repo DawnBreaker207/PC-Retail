@@ -273,7 +273,6 @@ services:
       <<: *service-env
       SERVER_PORT: 8081
       SERVICE_NAME: order-service
-      JAVA_TOOL_OPTIONS: '-Xms128m -Xmx256m -XX:+UseSerialGC -XX:TieredStopAtLevel=1'
       CATALOG_SERVICE_URL: http://catalog-service:8084
       INVENTORY_SERVICE_URL: http://inventory-service:8082
       USER_SERVICE_URL: http://auth-service:8085
@@ -302,7 +301,6 @@ services:
       <<: *service-env
       SERVER_PORT: 8082
       SERVICE_NAME: inventory-service
-      JAVA_TOOL_OPTIONS: '-Xms128m -Xmx256m -XX:+UseSerialGC -XX:TieredStopAtLevel=1'
     depends_on:
       postgres:
         condition: service_healthy
@@ -322,7 +320,6 @@ services:
       <<: *service-env
       SERVER_PORT: 8083
       SERVICE_NAME: payment-service
-      JAVA_TOOL_OPTIONS: '-Xms128m -Xmx256m -XX:+UseSerialGC -XX:TieredStopAtLevel=1'
       ORDER_SERVICE_URL: http://order-service:8081
       VNPAY_URL: ${VNPAY_URL}
       VNPAY_QUERY_URL: ${VNPAY_QUERY_URL}
@@ -351,7 +348,6 @@ services:
       <<: *service-env
       SERVER_PORT: 8084
       SERVICE_NAME: catalog-service
-      JAVA_TOOL_OPTIONS: '-Xms128m -Xmx256m -XX:+UseSerialGC -XX:TieredStopAtLevel=1'
       ORDER_SERVICE_URL: http://order-service:8081
     depends_on:
       postgres:
@@ -374,7 +370,6 @@ services:
       <<: *service-env
       SERVER_PORT: 8085
       SERVICE_NAME: auth-service
-      JAVA_TOOL_OPTIONS: '-Xms128m -Xmx256m -XX:+UseSerialGC -XX:TieredStopAtLevel=1'
       # Identity provider là nơi duy nhất giữ private key
       JWT_PRIVATE_KEY: ${JWT_PRIVATE_KEY}
       APP_OTP_DEBUG: ${APP_OTP_DEBUG:-false}
@@ -409,7 +404,6 @@ services:
     environment:
       SERVER_PORT: 8080
       SERVICE_NAME: gateway
-      JAVA_TOOL_OPTIONS: '-Xms128m -Xmx256m -XX:+UseSerialGC -XX:TieredStopAtLevel=1'
       JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY}
       JWT_ISSUER: ${JWT_ISSUER:-pc-retail}
       AUTH_SERVICE_URL: http://auth-service:8085
