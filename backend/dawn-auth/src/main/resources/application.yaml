@@ -1,0 +1,79 @@
+server:
+  port: ${SERVER_PORT:8085}
+  shutdown: graceful
+
+logging:
+  config: classpath:logback-service.xml
+
+spring:
+  application:
+    name: dawn-auth
+  config:
+    import: 'optional:file:.env[.properties]'
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/dawn_auth}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 3
+      connection-timeout: 20000
+      idle-timeout: 300000
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+  data:
+    redis:
+      host: ${REDIS_HOST:redis}
+      port: ${REDIS_PORT:6379}
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:29092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+  threads:
+    virtual:
+      enabled: true
+  lifecycle:
+    timeout-per-shutdown-phase: 30s
+
+app:
+  jwt:
+    issuer: ${JWT_ISSUER:pc-retail}
+    key-id: ${JWT_KEY_ID:pc-retail}
+    public-key: ${JWT_PUBLIC_KEY}
+    private-key: ${JWT_PRIVATE_KEY}
+    access-token-ttl-minutes: ${ACCESS_TOKEN_TTL_MINUTES:15}
+    refresh-token-ttl-days: ${REFRESH_TOKEN_TTL_DAYS:30}
+  # JWTUtils expects these:
+  jwtExpirationsMs: ${JWT_EXPIRATION_MS:900000}
+  jwtRefreshExpirationsMs: ${JWT_REFRESH_EXPIRATION_MS:2592000000}
+  jwtCookieName: ${JWT_COOKIE_NAME:jwt}
+  jwtRefreshCookieName: ${JWT_REFRESH_COOKIE_NAME:refresh}
+  internal:
+    token: ${INTERNAL_TOKEN:}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true
+  health:
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true
+  tracing:
+    sampling:
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: ${MANAGEMENT_ZIPKIN_TRACING_ENDPOINT:http://zipkin:9411/api/v2/spans}
