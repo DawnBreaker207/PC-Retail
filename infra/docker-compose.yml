@@ -10,6 +10,7 @@ volumes:
   loki:
   grafana:
   prometheus:
+  seaweedfs_data:
 
 # Env dùng chung cho các service nghiệp vụ (auth/order/inventory/payment/catalog)
 x-service-env: &service-env
@@ -119,7 +120,7 @@ services:
     entrypoint: ['/bin/sh', '-c']
     command:
       - |
-        for topic in order-events payment-events inventory-events pc-clickstream app-logs; do
+        for topic in order-events payment-events inventory-events notification-events shipping-events rating-events tax-events media-events low-stock-events pc-clickstream app-logs; do
           /opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:9092 \
             --create --if-not-exists --topic "$$topic" --partitions 3 --replication-factor 1
         done
@@ -454,6 +455,138 @@ services:
       - inventory-service
       - payment-service
       - catalog-service
+    networks:
+      - network
+
+  notification-service:
+    build:
+      context: ../backend
+      dockerfile: ../backend/Dockerfile
+      args:
+        MODULE: dawn-notification
+    container_name: notification-service
+    environment:
+      <<: *service-env
+      SERVER_PORT: 8090
+      MAIL_HOST: ${MAIL_HOST:}
+      MAIL_PORT: ${MAIL_PORT:587}
+      MAIL_USER: ${MAIL_USER:}
+      MAIL_PASS: ${MAIL_PASS:}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    networks:
+      - network
+
+  media-service:
+    build:
+      context: ../backend
+      dockerfile: ../backend/Dockerfile
+      args:
+        MODULE: dawn-media
+    container_name: media-service
+    environment:
+      <<: *service-env
+      SERVER_PORT: 8091
+      S3_ENDPOINT: ${S3_ENDPOINT:http://seaweedfs:8333}
+      S3_ACCESS_KEY: ${S3_ACCESS_KEY:any}
+      S3_SECRET_KEY: ${S3_SECRET_KEY:any}
+      S3_BUCKET: ${S3_BUCKET:pc-retail-media}
+      S3_PUBLIC_URL: ${S3_PUBLIC_URL:http://localhost:8333/pc-retail-media}
+      S3_REGION: ${S3_REGION:us-east-1}
+    depends_on:
+      seaweedfs:
+        condition: service_healthy
+    networks:
+      - network
+
+  shipping-service:
+    build:
+      context: ../backend
+      dockerfile: ../backend/Dockerfile
+      args:
+        MODULE: dawn-shipping
+    container_name: shipping-service
+    environment:
+      <<: *service-env
+      SERVER_PORT: 8092
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    networks:
+      - network
+
+  rating-service:
+    build:
+      context: ../backend
+      dockerfile: ../backend/Dockerfile
+      args:
+        MODULE: dawn-rating
+    container_name: rating-service
+    environment:
+      <<: *service-env
+      SERVER_PORT: 8093
+      ORDER_SERVICE_URL: http://order-service:8081
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - network
+
+  tax-service:
+    build:
+      context: ../backend
+      dockerfile: ../backend/Dockerfile
+      args:
+        MODULE: dawn-tax
+    container_name: tax-service
+    environment:
+      <<: *service-env
+      SERVER_PORT: 8094
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    networks:
+      - network
+
+  wishlist-service:
+    build:
+      context: ../backend
+      dockerfile: ../backend/Dockerfile
+      args:
+        MODULE: dawn-wishlist
+    container_name: wishlist-service
+    environment:
+      <<: *service-env
+      SERVER_PORT: 8095
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - network
+
+  # SeaweedFS: S3-compatible object storage (dev + production, single binary)
+  seaweedfs:
+    image: chrislusf/seaweedfs:3.78
+    container_name: seaweedfs
+    command: server -s3 -s3.port=8333 -dir=/data -master.volumeSizeLimitMB=256
+    ports:
+      - '9333:9333'
+      - '8333:8333'
+      - '8888:8888'
+    volumes:
+      - seaweedfs_data:/data
+    healthcheck:
+      test: ['CMD-SHELL', 'curl -sf http://localhost:9333/cluster/status || exit 1']
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks:
       - network
 
