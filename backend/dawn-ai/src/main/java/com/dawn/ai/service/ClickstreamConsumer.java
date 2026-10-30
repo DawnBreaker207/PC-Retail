@@ -29,6 +29,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class ClickstreamConsumer {
 
     private final UserPreferenceService preferenceService;
+    private final CooccurrenceService cooccurrenceService;
     private final ObjectMapper objectMapper;
     private final String bootstrapServers;
     private final String topic;
@@ -37,11 +38,13 @@ public class ClickstreamConsumer {
 
     public ClickstreamConsumer(
             UserPreferenceService preferenceService,
+            CooccurrenceService cooccurrenceService,
             ObjectMapper objectMapper,
             @Value("${spring.kafka.bootstrap-servers:${KAFKA_BOOTSTRAP_SERVERS:localhost:29092}}")
             String bootstrapServers,
             @Value("${app.clickstream.topic:pc-clickstream}") String topic) {
         this.preferenceService = preferenceService;
+        this.cooccurrenceService = cooccurrenceService;
         this.objectMapper = objectMapper;
         this.bootstrapServers = bootstrapServers;
         this.topic = topic;
@@ -77,7 +80,9 @@ public class ClickstreamConsumer {
 
     private void handle(String payload) {
         try {
-            preferenceService.record(objectMapper.readValue(payload, ClickstreamEvent.class));
+            ClickstreamEvent event = objectMapper.readValue(payload, ClickstreamEvent.class);
+            preferenceService.record(event);
+            cooccurrenceService.recordView(event);
         } catch (RuntimeException e) {
             // poison pill: bỏ record, không chặn partition
             log.warn("Clickstream record skipped: {}", e.getMessage());

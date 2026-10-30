@@ -2,6 +2,7 @@ package com.dawn.ai.controller;
 
 import com.dawn.ai.dto.AiSearchResult;
 import com.dawn.ai.port.in.SearchProductUseCase;
+import com.dawn.ai.service.CooccurrenceService;
 import com.dawn.ai.service.UserPreferenceService;
 import com.dawn.builder.service.BuildSuggestionService;
 import com.dawn.common.response.ResponseObject;
@@ -22,6 +23,7 @@ public class RecommendController {
     private final SearchProductUseCase searchProductUseCase;
     private final UserPreferenceService userPreferenceService;
     private final BuildSuggestionService buildSuggestionService;
+    private final CooccurrenceService cooccurrenceService;
 
     // Content-based: top-K gần nhất theo cosine — dùng search theo tên SKU gốc
     @GetMapping("/ai/recommendations/{skuId}")
@@ -51,6 +53,13 @@ public class RecommendController {
     public ResponseObject<List<String>> suggestCategories(@RequestBody Map<String, String> body) {
         return ResponseObject.success(searchProductUseCase.suggestCategories(
                 body.getOrDefault("name", ""), body.getOrDefault("description", ""), 3));
+    }
+
+    @GetMapping("/ai/recommendations/collab/{skuId}")
+    public ResponseObject<List<Long>> collaborativeRecommend(
+            @PathVariable Long skuId,
+            @RequestParam(defaultValue = "5") int limit) {
+        return ResponseObject.success(cooccurrenceService.getRecommendations(skuId, Math.min(limit, 10)));
     }
 
     // Gợi ý cấu hình theo clickstream + ngân sách; user chưa có sở thích thì xếp theo giá
