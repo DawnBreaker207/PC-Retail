@@ -1,5 +1,6 @@
 package com.dawn.common.dlt;
 
+import com.dawn.common.util.AfterCommit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -39,7 +40,9 @@ public class DeadLetterService {
         DeadLetterRecord record = deadLetterRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("DLT record not found with id: " + id));
         log.info("Replaying DLT record id={}, original topic='{}', key='{}'", id, record.getTopic(), record.getMessageKey());
-        kafkaTemplate.send(record.getTopic(), record.getMessageKey(), record.getPayload());
+        AfterCommit.run(() ->
+            kafkaTemplate.send(record.getTopic(), record.getMessageKey(), record.getPayload())
+        );
         record.setStatus("REPLAYED");
         record.setReplayedAt(Instant.now());
         deadLetterRepository.save(record);
