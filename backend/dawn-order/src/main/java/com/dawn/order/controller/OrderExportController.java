@@ -1,11 +1,13 @@
 package com.dawn.order.controller;
 
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -15,112 +17,112 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
-import java.time.Instant;
+import java.util.concurrent.atomic.AtomicInteger;
 
-/**
- * Controller xuất báo cáo đơn hàng quy mô lớn (1,000,000 records).
- * Sử dụng cơ chế Streaming (Apache POI SXSSF / Streaming CSV có UTF-8 BOM cho Excel)
- * Đảm bảo bộ nhớ RAM luôn cố định dưới 20MB, không bao giờ xảy ra OutOfMemoryError.
- */
 @Slf4j
 @RestController
 @RequestMapping("/orders")
+@RequiredArgsConstructor
 public class OrderExportController {
 
+    private static final String EXPORT_SQL = """
+            SELECT o.id, o.user_id, oi.sku_id, oi.product_name,
+                   oi.quantity, oi.unit_price, oi.total_price, o.status, o.created_at
+            FROM orders o
+            JOIN order_items oi ON oi.order_id = o.id
+            ORDER BY o.id ASC
+            """;
+
+    private static final String[] HEADERS = {
+            "Order ID", "Customer ID", "SKU ID", "Product Name",
+            "Quantity", "Unit Price", "Total Price", "Status", "Created At"
+    };
+
+    private final JdbcTemplate jdbcTemplate;
+
     @GetMapping("/export-excel")
+    @PreAuthorize("hasAnyRole('ADMIN','STAFF')")
     public void exportOrders(
-            @RequestParam(defaultValue = "1000000") int records,
             @RequestParam(defaultValue = "xlsx") String format,
             HttpServletResponse response) throws IOException {
 
-        int totalRecords = Math.min(Math.max(records, 1), 1_000_000);
-        log.info("Starting streaming export of {} records in format={}", totalRecords, format);
-
+        log.info("Starting streaming order export format={}", format);
         if ("csv".equalsIgnoreCase(format)) {
-            exportCsv(totalRecords, response);
+            exportCsv(response);
         } else {
-            exportXlsx(totalRecords, response);
+            exportXlsx(response);
         }
     }
 
-    private void exportXlsx(int totalRecords, HttpServletResponse response) throws IOException {
+    private void exportXlsx(HttpServletResponse response) throws IOException {
         response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-        response.setHeader("Content-Disposition", "attachment; filename=\"orders_export_" + totalRecords + ".xlsx\"");
+        response.setHeader("Content-Disposition", "attachment; filename=\"orders_export.xlsx\"");
 
-        // SXSSFWorkbook với sliding window 100 rows trên RAM, tự động nén và đẩy temp file xuống đĩa
         try (SXSSFWorkbook workbook = new SXSSFWorkbook(100)) {
             workbook.setCompressTempFiles(true);
-            Sheet sheet = workbook.createSheet("Orders_1M");
+            Sheet sheet = workbook.createSheet("Orders");
 
-            // Header
             Row headerRow = sheet.createRow(0);
-            String[] headers = {
-                    "Order ID", "Customer ID", "Customer Email", "SKU ID",
-                    "Product Name", "Quantity", "Unit Price", "Total Amount", "Status", "Created At"
-            };
-            for (int col = 0; col < headers.length; col++) {
-                Cell cell = headerRow.createCell(col);
-                cell.setCellValue(headers[col]);
+            for (int col = 0; col < HEADERS.length; col++) {
+                headerRow.createCell(col).setCellValue(HEADERS[col]);
             }
 
-            Instant now = Instant.now();
-            for (int i = 1; i <= totalRecords; i++) {
-                Row row = sheet.createRow(i);
-                row.createCell(0).setCellValue(1000000L + i);
-                row.createCell(1).setCellValue(100 + (i % 5000));
-                row.createCell(2).setCellValue("customer_" + (i % 5000) + "@pc-retail.com");
-                row.createCell(3).setCellValue(1L + (i % 200));
-                row.createCell(4).setCellValue("PC Component SKU #" + (1 + (i % 200)));
-                row.createCell(5).setCellValue(1 + (i % 5));
-                row.createCell(6).setCellValue(1500000.0);
-                row.createCell(7).setCellValue((1 + (i % 5)) * 1500000.0);
-                row.createCell(8).setCellValue(i % 3 == 0 ? "DELIVERED" : (i % 3 == 1 ? "PROCESSING" : "PAID"));
-                row.createCell(9).setCellValue(now.minusSeconds(i * 30L).toString());
-
-                if (i % 100000 == 0) {
-                    log.info("Exported {} / {} rows to XLSX stream...", i, totalRecords);
+            AtomicInteger rowIdx = new AtomicInteger(1);
+            jdbcTemplate.query(EXPORT_SQL, rs -> {
+                Row row = sheet.createRow(rowIdx.getAndIncrement());
+                row.createCell(0).setCellValue(rs.getLong("id"));
+                row.createCell(1).setCellValue(rs.getLong("user_id"));
+                row.createCell(2).setCellValue(rs.getLong("sku_id"));
+                row.createCell(3).setCellValue(rs.getString("product_name"));
+                row.createCell(4).setCellValue(rs.getInt("quantity"));
+                row.createCell(5).setCellValue(rs.getDouble("unit_price"));
+                row.createCell(6).setCellValue(rs.getDouble("total_price"));
+                row.createCell(7).setCellValue(rs.getString("status"));
+                row.createCell(8).setCellValue(String.valueOf(rs.getTimestamp("created_at")));
+                if (rowIdx.get() % 100_000 == 0) {
+                    log.info("Exported {} rows...", rowIdx.get());
                 }
-            }
+            });
 
             workbook.write(response.getOutputStream());
             response.flushBuffer();
             workbook.dispose();
+            log.info("Finished XLSX export of {} rows", rowIdx.get() - 1);
         }
-        log.info("Finished streaming XLSX export of {} records", totalRecords);
     }
 
-    private void exportCsv(int totalRecords, HttpServletResponse response) throws IOException {
+    private void exportCsv(HttpServletResponse response) throws IOException {
         response.setContentType("application/vnd.ms-excel; charset=UTF-8");
-        response.setHeader("Content-Disposition", "attachment; filename=\"orders_export_" + totalRecords + ".csv\"");
+        response.setHeader("Content-Disposition", "attachment; filename=\"orders_export.csv\"");
 
-        try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(response.getOutputStream(), StandardCharsets.UTF_8))) {
-            // UTF-8 BOM để Microsoft Excel tự động nhận diện tiếng Việt và format cột
-            writer.write('\ufeff');
+        try (BufferedWriter writer = new BufferedWriter(
+                new OutputStreamWriter(response.getOutputStream(), StandardCharsets.UTF_8))) {
+            writer.write('﻿');
+            writer.write("Order ID,Customer ID,SKU ID,Product Name,Quantity,Unit Price,Total Price,Status,Created At\r\n");
 
-            writer.write("Order ID,Customer ID,Customer Email,SKU ID,Product Name,Quantity,Unit Price,Total Amount,Status,Created At\r\n");
-
-            Instant now = Instant.now();
-            for (int i = 1; i <= totalRecords; i++) {
-                writer.write(String.format("%d,%d,customer_%d@pc-retail.com,%d,\"PC Component SKU #%d\",%d,%.2f,%.2f,%s,%s\r\n",
-                        1000000L + i,
-                        100 + (i % 5000),
-                        (i % 5000),
-                        1L + (i % 200),
-                        1 + (i % 200),
-                        1 + (i % 5),
-                        1500000.0,
-                        (1 + (i % 5)) * 1500000.0,
-                        i % 3 == 0 ? "DELIVERED" : (i % 3 == 1 ? "PROCESSING" : "PAID"),
-                        now.minusSeconds(i * 30L).toString()
-                ));
-
-                if (i % 200000 == 0) {
-                    writer.flush();
-                    log.info("Exported {} / {} rows to CSV stream...", i, totalRecords);
+            AtomicInteger count = new AtomicInteger(0);
+            jdbcTemplate.query(EXPORT_SQL, rs -> {
+                try {
+                    writer.write(String.format("%d,%d,%d,\"%s\",%d,%.2f,%.2f,%s,%s\r\n",
+                            rs.getLong("id"),
+                            rs.getLong("user_id"),
+                            rs.getLong("sku_id"),
+                            rs.getString("product_name").replace("\"", "\"\""),
+                            rs.getInt("quantity"),
+                            rs.getDouble("unit_price"),
+                            rs.getDouble("total_price"),
+                            rs.getString("status"),
+                            rs.getTimestamp("created_at")));
+                    if (count.incrementAndGet() % 200_000 == 0) {
+                        writer.flush();
+                        log.info("Exported {} rows...", count.get());
+                    }
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
                 }
-            }
+            });
             writer.flush();
+            log.info("Finished CSV export of {} rows", count.get());
         }
-        log.info("Finished streaming CSV export of {} records", totalRecords);
     }
 }
