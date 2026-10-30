@@ -18,6 +18,11 @@
             <artifactId>dawn-common</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>kafka</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>com.dawn.backend</groupId>
             <artifactId>dawn-cart</artifactId>
         </dependency>
