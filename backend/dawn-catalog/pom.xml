@@ -22,6 +22,14 @@
             <groupId>com.dawn.backend</groupId>
             <artifactId>dawn-builder</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.dawn.backend</groupId>
+            <artifactId>dawn-media</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.dawn.backend</groupId>
+            <artifactId>dawn-rating</artifactId>
+        </dependency>
         <!--  Spring Boot ML & Tools Pack   -->
         <dependency>
             <groupId>org.projectlombok</groupId>
