@@ -66,6 +66,25 @@ app:
     relay:
       enabled: ${OUTBOX_RELAY_ENABLED:true}
 
+resilience4j:
+  circuitbreaker:
+    instances:
+      default:
+        sliding-window-size: 10
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 5s
+        permitted-number-of-calls-in-half-open-state: 3
+        register-health-indicator: true
+  timelimiter:
+    instances:
+      default:
+        timeout-duration: 10s
+  bulkhead:
+    instances:
+      order:
+        max-concurrent-calls: 20
+        max-wait-duration: 100ms
+
 management:
   endpoints:
     web:

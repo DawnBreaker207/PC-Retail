@@ -12,6 +12,7 @@ import com.dawn.rating.entity.Rating;
 import com.dawn.rating.entity.enums.RatingStatus;
 import com.dawn.rating.infra.remote.OrderVerifyFeignClient;
 import com.dawn.rating.repository.RatingRepository;
+import io.github.resilience4j.bulkhead.annotation.Bulkhead;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -33,6 +34,7 @@ public class RatingService {
     private final OutboxPublisher outboxPublisher;
 
     @Transactional
+    @Bulkhead(name = "order")
     public RatingDto submitRating(Long userId, RatingRequest req) {
         if (ratingRepository.existsByUserIdAndSkuIdAndOrderId(userId, req.skuId(), req.orderId())) {
             throw new ConflictException("You have already rated this product for the given order.");

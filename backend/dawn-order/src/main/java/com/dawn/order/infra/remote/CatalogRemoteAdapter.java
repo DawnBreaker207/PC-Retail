@@ -1,6 +1,7 @@
 package com.dawn.order.infra.remote;
 
 import com.dawn.common.contract.CatalogClientPort;
+import io.github.resilience4j.bulkhead.annotation.Bulkhead;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -19,11 +20,13 @@ public class CatalogRemoteAdapter implements CatalogClientPort {
     private final CatalogFeignClient feignClient;
 
     @Override
+    @Bulkhead(name = "catalog")
     public Map<Long, BigDecimal> getPrices(List<Long> skuIds) {
         return feignClient.prices(skuIds);
     }
 
     @Override
+    @Bulkhead(name = "catalog")
     public Map<Long, String> getNames(List<Long> skuIds) {
         return feignClient.names(skuIds);
     }

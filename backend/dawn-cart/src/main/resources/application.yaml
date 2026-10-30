@@ -1,3 +1,38 @@
 spring:
   application:
     name: dawn-cart
+  threads:
+    virtual:
+      enabled: true
+  config:
+    import: 'optional:file:.env[.properties]'
+  cloud:
+    openfeign:
+      client:
+        config:
+          default:
+            connect-timeout: 2000
+            read-timeout: 5000
+            logger-level: basic
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      default:
+        sliding-window-size: 10
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 5s
+        permitted-number-of-calls-in-half-open-state: 3
+        register-health-indicator: true
+  timelimiter:
+    instances:
+      default:
+        timeout-duration: 10s
+  bulkhead:
+    instances:
+      catalog:
+        max-concurrent-calls: 30
+        max-wait-duration: 100ms
+      inventory:
+        max-concurrent-calls: 20
+        max-wait-duration: 100ms
