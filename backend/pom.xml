@@ -224,6 +224,12 @@
         <module>dawn-builder</module>
         <module>dawn-reporting</module>
         <module>dawn-gateway</module>
+        <module>dawn-notification</module>
+        <module>dawn-media</module>
+        <module>dawn-shipping</module>
+        <module>dawn-rating</module>
+        <module>dawn-tax</module>
+        <module>dawn-wishlist</module>
     </modules>
 
     <build>
