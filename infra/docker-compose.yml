@@ -11,6 +11,7 @@ volumes:
   grafana:
   prometheus:
   seaweedfs_data:
+  opensearch_data:
 
 # Env dùng chung cho các service nghiệp vụ (auth/order/inventory/payment/catalog)
 x-service-env: &service-env
@@ -52,6 +53,7 @@ services:
       - '5432:5432'
     volumes:
       - postgres:/var/lib/postgresql/data
+      - ./postgres/init:/docker-entrypoint-initdb.d:ro
     healthcheck:
       test: ['CMD-SHELL', 'pg_isready -U admin -d demo']
       interval: 10s
@@ -187,6 +189,49 @@ services:
       - STORAGE_TYPE=mem
     networks:
       - network
+
+  pgbouncer:
+    image: bitnami/pgbouncer:1.22.1
+    container_name: pc-retail-pgbouncer
+    environment:
+      POSTGRESQL_HOST: postgres
+      POSTGRESQL_PORT: 5432
+      PGBOUNCER_DATABASE: "*"
+      PGBOUNCER_POOL_MODE: session
+      PGBOUNCER_MAX_CLIENT_CONN: 500
+      PGBOUNCER_DEFAULT_POOL_SIZE: 50
+      POSTGRESQL_USERNAME: ${POSTGRES_USER:-admin}
+      POSTGRESQL_PASSWORD: ${POSTGRES_PASSWORD:-admin}
+    ports:
+      - "5433:5432"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - network
+    deploy:
+      resources:
+        limits:
+          memory: 64m
+
+  opensearch:
+    image: opensearchproject/opensearch:2.13.0
+    container_name: pc-retail-opensearch
+    environment:
+      - discovery.type=single-node
+      - DISABLE_SECURITY_PLUGIN=true
+      - OPENSEARCH_JAVA_OPTS=-Xms256m -Xmx256m
+    ports:
+      - "9200:9200"
+    volumes:
+      - opensearch_data:/usr/share/opensearch/data
+    profiles: ["search", "full"]
+    networks:
+      - network
+    deploy:
+      resources:
+        limits:
+          memory: 384m
 
   vector:
     container_name: vector
@@ -459,6 +504,7 @@ services:
       - network
 
   notification-service:
+    profiles: ["notification", "full"]
     build:
       context: ../backend
       dockerfile: ../backend/Dockerfile
@@ -481,6 +527,7 @@ services:
       - network
 
   media-service:
+    profiles: ["media", "full"]
     build:
       context: ../backend
       dockerfile: ../backend/Dockerfile
@@ -503,6 +550,7 @@ services:
       - network
 
   shipping-service:
+    profiles: ["shipping", "full"]
     build:
       context: ../backend
       dockerfile: ../backend/Dockerfile
@@ -521,6 +569,7 @@ services:
       - network
 
   rating-service:
+    profiles: ["rating", "full"]
     build:
       context: ../backend
       dockerfile: ../backend/Dockerfile
@@ -538,6 +587,7 @@ services:
       - network
 
   tax-service:
+    profiles: ["tax", "full"]
     build:
       context: ../backend
       dockerfile: ../backend/Dockerfile
@@ -556,6 +606,7 @@ services:
       - network
 
   wishlist-service:
+    profiles: ["wishlist", "full"]
     build:
       context: ../backend
       dockerfile: ../backend/Dockerfile
@@ -573,6 +624,7 @@ services:
 
   # SeaweedFS: S3-compatible object storage (dev + production, single binary)
   seaweedfs:
+    profiles: ["media", "full"]
     image: chrislusf/seaweedfs:3.78
     container_name: seaweedfs
     command: server -s3 -s3.port=8333 -dir=/data -master.volumeSizeLimitMB=256
