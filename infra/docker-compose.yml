@@ -622,6 +622,26 @@ services:
     networks:
       - network
 
+  dawn-auth:
+    profiles: ["auth", "full"]
+    build:
+      context: ../backend
+      dockerfile: ../backend/Dockerfile
+      args:
+        MODULE: dawn-auth
+    container_name: auth-service
+    environment:
+      <<: *service-env
+      SERVER_PORT: 8085
+      DB_URL: jdbc:postgresql://pgbouncer:5432/dawn_auth
+      # dawn-auth is the only service that signs JWTs
+      JWT_PRIVATE_KEY: ${JWT_PRIVATE_KEY}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - network
+
   # SeaweedFS: S3-compatible object storage (dev + production, single binary)
   seaweedfs:
     profiles: ["media", "full"]

@@ -230,6 +230,7 @@
         <module>dawn-rating</module>
         <module>dawn-tax</module>
         <module>dawn-wishlist</module>
+        <module>dawn-auth</module>
     </modules>
 
     <build>
