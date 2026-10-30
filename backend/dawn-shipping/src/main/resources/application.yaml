@@ -14,7 +14,8 @@ spring:
     hikari:
       maximum-pool-size: 5
       minimum-idle: 2
-      connection-timeout: 10000
+      connection-timeout: 20000
+      idle-timeout: 300000
     url: ${DB_URL}
     username: ${DB_USER}
     password: ${DB_PASS}
