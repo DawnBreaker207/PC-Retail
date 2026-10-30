@@ -14,7 +14,8 @@ import java.util.Map;
         contextId = "orderCatalogFeignClient",
         url = "${app.services.catalog-url:http://dawn-catalog:8084}",
         path = "/api/v1/internal/catalog",
-        configuration = FeignClientConfig.class
+        configuration = FeignClientConfig.class,
+        fallback = CatalogFeignClientFallback.class
 )
 public interface CatalogFeignClient {
 

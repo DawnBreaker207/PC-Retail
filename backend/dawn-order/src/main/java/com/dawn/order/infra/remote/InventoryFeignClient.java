@@ -16,7 +16,8 @@ import java.util.List;
         contextId = "orderInventoryFeignClient",
         url = "${app.services.inventory-url:http://dawn-inventory:8082}",
         path = "/api/v1/internal/inventory",
-        configuration = FeignClientConfig.class
+        configuration = FeignClientConfig.class,
+        fallback = InventoryFeignClientFallback.class
 )
 public interface InventoryFeignClient {
 
