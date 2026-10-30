@@ -5,6 +5,8 @@ import com.dawn.common.contract.OrderClientPort;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 import java.math.BigDecimal;
 import java.time.Instant;
 
@@ -45,5 +47,11 @@ public class InternalOrderController {
     @GetMapping("/sub-orders/{subOrderId}/delivered")
     public boolean delivered(@PathVariable Long subOrderId) {
         return orderQueryPort.isSubOrderDelivered(subOrderId);
+    }
+
+    @GetMapping("/verify-purchase")
+    public Map<String, Boolean> verifyPurchase(@RequestParam Long userId, @RequestParam Long skuId) {
+        boolean purchased = orderQueryPort.hasUserPurchasedSku(userId, skuId);
+        return Map.of("purchased", purchased);
     }
 }

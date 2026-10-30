@@ -21,4 +21,9 @@ public class OrderQueryAdapter implements OrderQueryPort {
     public boolean isSubOrderDelivered(Long subOrderId) {
         return subOrderRepository.isDelivered(subOrderId);
     }
+
+    @Override
+    public boolean hasUserPurchasedSku(Long userId, Long skuId) {
+        return orderItemRepository.existsBySkuIdAndUserIdAndDelivered(skuId, userId);
+    }
 }

@@ -16,4 +16,6 @@ public interface OrderItemRepository {
     List<OrderItem> findBySubOrderIdIn(List<Long> subOrderId);
 
     boolean existsBySkuId(Long skuId);
+
+    boolean existsBySkuIdAndUserIdAndDelivered(Long skuId, Long userId);
 }
