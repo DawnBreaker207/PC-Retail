@@ -13,10 +13,12 @@ import com.dawn.common.response.ResponsePage;
 import com.dawn.common.security.AuthorizationConstants;
 import com.dawn.common.utils.SecurityUtils;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -26,6 +28,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/skus")
 @RequiredArgsConstructor
+@Validated
 public class SkuController {
     private final SkuService skuService;
     private final ClickstreamPublisher clickstreamPublisher;
@@ -33,7 +36,7 @@ public class SkuController {
     @GetMapping("")
     public ResponseObject<ResponsePage<SkuSummaryDto>> search(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "20") @Max(100) int size,
             @RequestParam(required = false) Long brandId,
             @RequestParam(required = false) Long categoryId,
             @RequestParam(required = false) BigDecimal minPrice,

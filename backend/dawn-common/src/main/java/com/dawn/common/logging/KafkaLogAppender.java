@@ -33,7 +33,7 @@ public class KafkaLogAppender extends AppenderBase<ILoggingEvent> {
     @Override
     public void start() {
         topic = env("KAFKA_LOG_TOPIC", DEFAULT_TOPIC);
-        service = env("SERVICE_NAME", "dawn-app");
+        service = env("SERVICE_NAME", "dawn-monolith");
         try {
             Properties props = new Properties();
             props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, env("KAFKA_BOOTSTRAP_SERVERS", DEFAULT_BOOTSTRAP));

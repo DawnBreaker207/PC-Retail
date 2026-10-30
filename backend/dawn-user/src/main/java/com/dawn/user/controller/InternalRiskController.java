@@ -1,6 +1,6 @@
 package com.dawn.user.controller;
 
-import com.dawn.order.port.out.GuestRiskPort;
+import com.dawn.common.contract.GuestRiskPort;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 

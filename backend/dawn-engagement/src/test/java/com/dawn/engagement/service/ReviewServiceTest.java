@@ -5,7 +5,7 @@ import com.dawn.common.exception.wrapper.InvalidRequestException;
 import com.dawn.engagement.controller.request.CreateReviewRequest;
 import com.dawn.engagement.entity.Review;
 import com.dawn.engagement.port.out.ReviewRepository;
-import com.dawn.order.dto.OrderQueryPort;
+import com.dawn.common.contract.OrderQueryPort;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

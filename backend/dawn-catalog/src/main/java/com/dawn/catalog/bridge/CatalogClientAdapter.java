@@ -3,7 +3,7 @@ package com.dawn.catalog.bridge;
 import com.dawn.catalog.entity.Sku;
 import com.dawn.catalog.repository.SkuRepository;
 import com.dawn.common.entity.BaseEntity;
-import com.dawn.order.port.out.CatalogClientPort;
+import com.dawn.common.contract.CatalogClientPort;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

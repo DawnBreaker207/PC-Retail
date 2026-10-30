@@ -7,7 +7,7 @@ import com.dawn.inventory.port.in.ReleaseStockUseCase;
 import com.dawn.inventory.port.in.ReserveStockUseCase;
 import com.dawn.inventory.port.in.RestockUseCase;
 import com.dawn.inventory.port.out.InventoryCachePort;
-import com.dawn.order.dto.StockDecrementCommand;
+import com.dawn.common.contract.StockDecrementCommand;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

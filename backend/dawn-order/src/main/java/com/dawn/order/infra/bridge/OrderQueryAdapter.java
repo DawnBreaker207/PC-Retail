@@ -1,6 +1,6 @@
 package com.dawn.order.infra.bridge;
 
-import com.dawn.order.dto.OrderQueryPort;
+import com.dawn.common.contract.OrderQueryPort;
 import com.dawn.order.port.out.OrderItemRepository;
 import com.dawn.order.port.out.SubOrderRepository;
 import lombok.RequiredArgsConstructor;

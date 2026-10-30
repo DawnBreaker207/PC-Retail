@@ -1,7 +1,7 @@
 package com.dawn.catalog.controller;
 
-import com.dawn.catalog.dto.CatalogQueryPort;
-import com.dawn.catalog.dto.SkuPriceInfo;
+import com.dawn.common.contract.CatalogQueryPort;
+import com.dawn.common.contract.SkuPriceInfo;
 import com.dawn.catalog.entity.Sku;
 import com.dawn.catalog.repository.SkuRepository;
 import lombok.RequiredArgsConstructor;

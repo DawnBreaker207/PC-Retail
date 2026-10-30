@@ -10,9 +10,9 @@ import java.math.BigDecimal;
 import java.time.Instant;
 
 @FeignClient(
-        name = "order-service",
+        name = "dawn-order",
         contextId = "paymentOrderFeignClient",
-        url = "${app.services.order-url:http://order-service:8081}",
+        url = "${app.services.order-url:http://dawn-order:8081}",
         path = "/api/v1/internal/orders",
         configuration = FeignClientConfig.class
 )

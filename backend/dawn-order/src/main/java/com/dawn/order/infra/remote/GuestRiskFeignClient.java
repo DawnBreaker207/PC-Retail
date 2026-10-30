@@ -7,9 +7,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 @FeignClient(
-        name = "auth-service",
+        name = "dawn-user",
         contextId = "orderGuestRiskFeignClient",
-        url = "${app.services.user-url:http://auth-service:8085}",
+        url = "${app.services.user-url:http://dawn-user:8085}",
         path = "/api/v1/internal/risk/guest-phone",
         configuration = FeignClientConfig.class
 )

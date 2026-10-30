@@ -10,7 +10,7 @@ import com.dawn.order.entity.Order;
 import com.dawn.order.entity.OrderItem;
 import com.dawn.order.entity.SubOrder;
 import com.dawn.order.port.in.QueryOrderUseCase;
-import com.dawn.order.port.out.CatalogClientPort;
+import com.dawn.common.contract.CatalogClientPort;
 import com.dawn.order.port.out.OrderItemRepository;
 import com.dawn.order.port.out.OrderRepository;
 import com.dawn.order.port.out.SubOrderRepository;

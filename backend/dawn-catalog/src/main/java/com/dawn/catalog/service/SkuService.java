@@ -18,7 +18,7 @@ import com.dawn.common.exception.wrapper.InvalidRequestException;
 import com.dawn.common.exception.wrapper.ResourceNotFoundException;
 import com.dawn.common.message.Message;
 import com.dawn.common.response.ResponsePage;
-import com.dawn.order.dto.OrderQueryPort;
+import com.dawn.common.contract.OrderQueryPort;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -191,9 +191,11 @@ public class SkuService {
                 predicates.add(cb.lessThanOrEqualTo(root.get("price"), maxPrice));
             }
             if (StringUtils.hasText(search)) {
+                String escaped = search.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_");
                 predicates.add(cb.like(
                         cb.lower(root.get("name")),
-                        "%" + search.toLowerCase() + "%"
+                        "%" + escaped.toLowerCase() + "%",
+                        '\\'
                 ));
             }
             return cb.and(predicates.toArray(new Predicate[0]));

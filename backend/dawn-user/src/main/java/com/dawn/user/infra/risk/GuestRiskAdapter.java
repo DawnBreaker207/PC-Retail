@@ -1,7 +1,7 @@
 package com.dawn.user.infra.risk;
 
 import com.dawn.common.redis.service.RedisService;
-import com.dawn.order.port.out.GuestRiskPort;
+import com.dawn.common.contract.GuestRiskPort;
 import com.dawn.user.port.out.PhoneOtpPort;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;

@@ -1,7 +1,7 @@
 package com.dawn.order.infra.remote;
 
 import com.dawn.common.feign.FeignClientConfig;
-import com.dawn.order.dto.StockDecrementCommand;
+import com.dawn.common.contract.StockDecrementCommand;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -12,9 +12,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.util.List;
 
 @FeignClient(
-        name = "inventory-service",
+        name = "dawn-inventory",
         contextId = "orderInventoryFeignClient",
-        url = "${app.services.inventory-url:http://inventory-service:8082}",
+        url = "${app.services.inventory-url:http://dawn-inventory:8082}",
         path = "/api/v1/internal/inventory",
         configuration = FeignClientConfig.class
 )

@@ -1,6 +1,6 @@
 package com.dawn.order.infra.remote;
 
-import com.dawn.order.port.out.GuestRiskPort;
+import com.dawn.common.contract.GuestRiskPort;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;

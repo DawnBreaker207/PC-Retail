@@ -23,7 +23,7 @@ export class RealtimeService implements OnDestroy {
     this.client = new Client({
       webSocketFactory: () => new SockJS(`${base}/ws`) as WebSocket,
       connectHeaders: { Authorization: `Bearer ${token}` },
-      reconnectDelay: 10000,
+      reconnectDelay: 3000 + Math.floor(Math.random() * 2000), // Jitter to prevent thundering herd
       onConnect: () => {
         this.connected.set(true);
         this.client?.subscribe(`/topic/notifications/${user.id}`, (msg) => {

@@ -1,7 +1,7 @@
 package com.dawn.promotion.infra.bridge;
 
-import com.dawn.order.dto.VoucherApplyResult;
-import com.dawn.order.port.out.PromotionClientPort;
+import com.dawn.common.contract.VoucherApplyResult;
+import com.dawn.common.contract.PromotionClientPort;
 import com.dawn.promotion.port.out.PromotionCheckoutPort;
 import com.dawn.promotion.dto.VoucherValidationResult;
 import lombok.RequiredArgsConstructor;

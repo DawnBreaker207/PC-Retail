@@ -1,8 +1,9 @@
 package com.dawn.order.infra.messaging;
 
+import com.dawn.common.dlt.DeadLetterService;
 import com.dawn.common.exception.wrapper.ConflictException;
 import com.dawn.common.exception.wrapper.ResourceNotFoundException;
-import com.dawn.payment.port.out.OrderClientPort;
+import com.dawn.common.contract.OrderClientPort;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -20,11 +21,12 @@ import tools.jackson.databind.ObjectMapper;
 import java.util.Map;
 
 /**
- * Async fallback for payment → order status transitions.
+ * Async fallback for payment -> order status transitions.
  *
  * Primary path: QueryPaymentStatusService calls orderClient.markOrderPaid/Failed() via Feign (sync).
  * This consumer handles the case where Feign fails (network blip, transient error).
- * Both paths use CAS (transitionIfStatus) so ConflictException means "already done" — idempotent.
+ * Both paths use CAS (transitionIfStatus) so ConflictException means "already done" - idempotent.
+ * Persists exhausted failures into dead_letter_records for operational audit and replay.
  */
 @Slf4j
 @Component
@@ -33,6 +35,7 @@ public class PaymentEventConsumer {
 
     private final OrderClientPort orderClientPort;
     private final ObjectMapper objectMapper;
+    private final DeadLetterService deadLetterService;
 
     @RetryableTopic(
             attempts = "4",
@@ -45,43 +48,38 @@ public class PaymentEventConsumer {
             ConsumerRecord<String, String> record,
             @Header(KafkaHeaders.RECEIVED_TOPIC) String topic,
             @Header(value = KafkaHeaders.RECEIVED_KEY, required = false) String key) {
-
         String payload = record.value();
-        if (payload == null || payload.isBlank()) {
-            log.warn("Received empty payment event: topic='{}', key='{}'", topic, key);
-            return;
-        }
+        if (payload == null || payload.isBlank()) return;
 
         try {
             Map<String, Object> fields = objectMapper.readValue(payload, new TypeReference<>() {});
-            Object rawOrderId = fields.get("orderId");
-            Object rawPaymentId = fields.get("paymentId");
-            if (rawOrderId == null || rawPaymentId == null) {
-                log.error("Malformed payment event (missing orderId/paymentId): topic='{}', key='{}', payload='{}'",
-                        topic, key, payload);
+            Object orderIdObj = fields.get("orderId");
+            if (orderIdObj == null) {
+                log.warn("Payment event missing orderId: {}", payload);
                 return;
             }
-            long orderId = ((Number) rawOrderId).longValue();
-            long paymentId = ((Number) rawPaymentId).longValue();
+            Long orderId = Long.valueOf(orderIdObj.toString());
 
             if (fields.containsKey("transactionRef")) {
+                // PaymentCompletedEvent
+                String transactionRef = (String) fields.get("transactionRef");
+                log.info("Kafka consumer: marking order {} paid (ref={})", orderId, transactionRef);
                 orderClientPort.markOrderPaid(orderId);
-                log.info("Async PAID: orderId={} paymentId={}", orderId, paymentId);
             } else if (fields.containsKey("reason")) {
+                // PaymentFailedEvent
+                String reason = (String) fields.get("reason");
+                log.info("Kafka consumer: marking order {} payment failed (reason={})", orderId, reason);
                 orderClientPort.markOrderPaymentFailed(orderId);
-                log.info("Async FAILED: orderId={} paymentId={} reason='{}'",
-                        orderId, paymentId, fields.get("reason"));
             } else {
-                log.warn("Unknown payment event shape: topic='{}', key='{}': {}", topic, key, payload);
+                log.debug("Ignoring payment event without recognized discriminator: {}", payload);
             }
         } catch (ConflictException e) {
-            // CAS conflict: Feign already transitioned the order — idempotent, do not retry
-            log.info("Idempotent skip (already transitioned): key='{}', {}", key, e.getMessage());
+            // Already in target state (Feign path succeeded first) — idempotent skip
+            log.info("Order status already updated (idempotent skip): {}", e.getMessage());
         } catch (ResourceNotFoundException e) {
-            // Order not found — permanent failure, do not retry
-            log.error("Order not found during async payment event processing: key='{}', {}", key, e.getMessage());
+            log.warn("Order not found during payment event processing: {}", e.getMessage());
         } catch (Exception e) {
-            log.error("Failed to process payment event: topic='{}', key='{}': {}", topic, key, e.getMessage(), e);
+            log.error("Error processing payment event (topic={}, key={}): {}", topic, key, e.getMessage());
             throw new RuntimeException("Payment event processing failed, will retry", e);
         }
     }
@@ -93,5 +91,10 @@ public class PaymentEventConsumer {
             @Header(value = KafkaHeaders.RECEIVED_KEY, required = false) String key) {
         log.error("ALERT: Payment event reached Dead Letter Topic! topic='{}', key='{}', payload='{}'",
                 topic, key, record.value());
+        try {
+            deadLetterService.recordFailure(topic, key, record.value(), "Payment event retry limit reached");
+        } catch (Exception e) {
+            log.error("Failed to persist DLT record to database: {}", e.getMessage());
+        }
     }
 }

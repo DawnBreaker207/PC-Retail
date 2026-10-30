@@ -1,6 +1,6 @@
 package com.dawn.catalog.infra.cache;
 
-import com.dawn.catalog.dto.SkuPriceInfo;
+import com.dawn.common.contract.SkuPriceInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;

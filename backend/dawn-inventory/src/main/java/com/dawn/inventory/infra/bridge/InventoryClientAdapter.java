@@ -1,6 +1,6 @@
 package com.dawn.inventory.infra.bridge;
 
-import com.dawn.cart.port.out.InventoryQueryPort;
+import com.dawn.common.contract.InventoryQueryPort;
 import com.dawn.inventory.dto.StockDecrementCommandDto;
 import com.dawn.inventory.port.in.DeductStockUseCase;
 import com.dawn.inventory.port.in.QueryInventoryUseCase;
@@ -8,8 +8,8 @@ import com.dawn.inventory.port.in.ReleaseStockUseCase;
 import com.dawn.inventory.port.in.ReserveStockUseCase;
 import com.dawn.inventory.port.in.RestockUseCase;
 import com.dawn.inventory.port.out.InventoryCachePort;
-import com.dawn.order.dto.StockDecrementCommand;
-import com.dawn.order.port.out.InventoryClientPort;
+import com.dawn.common.contract.StockDecrementCommand;
+import com.dawn.common.contract.InventoryClientPort;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

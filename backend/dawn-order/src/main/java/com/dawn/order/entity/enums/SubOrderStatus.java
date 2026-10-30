@@ -2,6 +2,7 @@ package com.dawn.order.entity.enums;
 
 public enum SubOrderStatus {
     PENDING_PAYMENT,
+    AWAITING_INVENTORY,
     PAID,
     PROCESSING,
     SHIPPED,
@@ -10,5 +11,7 @@ public enum SubOrderStatus {
     RETURN_REQUESTED,
     RETURNED,
     EXPIRED,
-    CANCELLED
+    CANCELLING,
+    CANCELLED,
+    CANCELLED_OUT_OF_STOCK
 }

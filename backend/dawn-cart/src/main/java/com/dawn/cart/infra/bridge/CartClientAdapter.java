@@ -2,8 +2,8 @@ package com.dawn.cart.infra.bridge;
 
 import com.dawn.cart.port.out.CartCachePort;
 import com.dawn.cart.port.out.CartItemRepository;
-import com.dawn.order.dto.CartItemSnapshot;
-import com.dawn.order.port.out.CartClientPort;
+import com.dawn.common.contract.CartItemSnapshot;
+import com.dawn.common.contract.CartClientPort;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;

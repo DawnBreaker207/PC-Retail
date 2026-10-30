@@ -1,7 +1,7 @@
 package com.dawn.order.controller;
 
-import com.dawn.order.dto.OrderQueryPort;
-import com.dawn.payment.port.out.OrderClientPort;
+import com.dawn.common.contract.OrderQueryPort;
+import com.dawn.common.contract.OrderClientPort;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 

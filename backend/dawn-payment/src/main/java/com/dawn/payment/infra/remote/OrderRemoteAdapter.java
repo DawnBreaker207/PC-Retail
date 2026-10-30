@@ -1,6 +1,6 @@
 package com.dawn.payment.infra.remote;
 
-import com.dawn.payment.port.out.OrderClientPort;
+import com.dawn.common.contract.OrderClientPort;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;

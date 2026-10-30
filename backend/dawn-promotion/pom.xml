@@ -19,10 +19,6 @@
             <artifactId>dawn-common</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.dawn.backend</groupId>
-            <artifactId>dawn-order</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <scope>provided</scope>

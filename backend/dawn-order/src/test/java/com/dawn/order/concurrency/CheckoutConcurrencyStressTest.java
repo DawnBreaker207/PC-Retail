@@ -1,7 +1,7 @@
 package com.dawn.order.concurrency;
 
-import com.dawn.order.dto.CartItemSnapshot;
-import com.dawn.order.dto.StockDecrementCommand;
+import com.dawn.common.contract.CartItemSnapshot;
+import com.dawn.common.contract.StockDecrementCommand;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

@@ -29,7 +29,7 @@ class ReturnServiceTest {
     @Mock
     JpaRefundRepository refundRepo;
     @Mock
-    com.dawn.order.dto.OrderQueryPort orderQueryPort;
+    com.dawn.common.contract.OrderQueryPort orderQueryPort;
 
     ReturnService service;
 

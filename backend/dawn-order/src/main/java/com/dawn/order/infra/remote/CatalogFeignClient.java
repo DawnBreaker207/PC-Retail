@@ -10,9 +10,9 @@ import java.util.List;
 import java.util.Map;
 
 @FeignClient(
-        name = "catalog-service",
+        name = "dawn-catalog",
         contextId = "orderCatalogFeignClient",
-        url = "${app.services.catalog-url:http://catalog-service:8084}",
+        url = "${app.services.catalog-url:http://dawn-catalog:8084}",
         path = "/api/v1/internal/catalog",
         configuration = FeignClientConfig.class
 )

@@ -9,7 +9,7 @@ import com.dawn.payment.entity.enums.PaymentMethod;
 import com.dawn.payment.entity.enums.PaymentResultStatus;
 import com.dawn.payment.infra.gateway.PaymentGatewayRegistry;
 import com.dawn.payment.port.in.CreatePaymentUseCase;
-import com.dawn.payment.port.out.OrderClientPort;
+import com.dawn.common.contract.OrderClientPort;
 import com.dawn.payment.port.out.PaymentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

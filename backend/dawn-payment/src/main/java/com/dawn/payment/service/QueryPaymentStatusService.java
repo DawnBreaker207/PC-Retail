@@ -15,7 +15,7 @@ import com.dawn.payment.infra.gateway.PaymentGateway;
 import com.dawn.payment.infra.gateway.PaymentGatewayRegistry;
 import com.dawn.payment.infra.vnpay.VnpayGatewayAdapter;
 import com.dawn.payment.port.in.QueryPaymentStatusUseCase;
-import com.dawn.payment.port.out.OrderClientPort;
+import com.dawn.common.contract.OrderClientPort;
 import com.dawn.payment.port.out.PaymentRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

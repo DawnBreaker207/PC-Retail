@@ -78,20 +78,6 @@ services:
     networks:
       - network
 
-  rabbitmq:
-    container_name: rabbitmq
-    image: rabbitmq:4-management-alpine
-    ports:
-      - '5672:5672'
-      - '15672:15672'
-    networks:
-      - network
-    healthcheck:
-      test: ['CMD', 'rabbitmq-diagnostics', 'check_port_connectivity']
-      interval: 15s
-      timeout: 5s
-      retries: 5
-
   kafka:
     container_name: kafka
     image: apache/kafka:4.4.0
@@ -135,7 +121,7 @@ services:
       - |
         for topic in order-events payment-events inventory-events pc-clickstream app-logs; do
           /opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:9092 \
-            --create --if-not-exists --topic "$$topic" --partitions 1 --replication-factor 1
+            --create --if-not-exists --topic "$$topic" --partitions 3 --replication-factor 1
         done
     restart: 'no'
     networks:
@@ -239,11 +225,6 @@ services:
       CUSTOM_REDIS_ENABLED: 'true'
       CUSTOM_REDIS_HOST: redis-custom
       CUSTOM_REDIS_PORT: 8888
-      # RabbitMQ
-      RABBITMQ_HOST: ${RABBITMQ_HOST}
-      RABBITMQ_PORT: ${RABBITMQ_PORT}
-      RABBITMQ_USER: ${RABBITMQ_USER}
-      RABBITMQ_PASS: ${RABBITMQ_PASS}
       # Kafka (log appender)
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       KAFKA_LOG_TOPIC: app-logs
@@ -287,8 +268,6 @@ services:
         condition: service_started
       redis-custom:
         condition: service_started
-      rabbitmq:
-        condition: service_healthy
     healthcheck:
       test: ['CMD-SHELL', 'bash -c "</dev/tcp/127.0.0.1/8888"']
       interval: 15s
@@ -311,10 +290,6 @@ services:
       CATALOG_SERVICE_URL: http://catalog-service:8084
       INVENTORY_SERVICE_URL: http://inventory-service:8082
       USER_SERVICE_URL: http://auth-service:8085
-      RABBITMQ_HOST: ${RABBITMQ_HOST}
-      RABBITMQ_PORT: ${RABBITMQ_PORT}
-      RABBITMQ_USER: ${RABBITMQ_USER}
-      RABBITMQ_PASS: ${RABBITMQ_PASS}
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health/readiness"]
       interval: 15s
@@ -326,8 +301,6 @@ services:
         condition: service_healthy
       redis:
         condition: service_started
-      rabbitmq:
-        condition: service_healthy
     networks:
       - network
 
@@ -432,10 +405,6 @@ services:
       # Identity provider là nơi duy nhất giữ private key
       JWT_PRIVATE_KEY: ${JWT_PRIVATE_KEY}
       APP_OTP_DEBUG: ${APP_OTP_DEBUG:-false}
-      RABBITMQ_HOST: ${RABBITMQ_HOST}
-      RABBITMQ_PORT: ${RABBITMQ_PORT}
-      RABBITMQ_USER: ${RABBITMQ_USER}
-      RABBITMQ_PASS: ${RABBITMQ_PASS}
       MAIL_HOST: ${MAIL_HOST}
       MAIL_PORT: ${MAIL_PORT}
       MAIL_USER: ${MAIL_USER}
@@ -452,8 +421,6 @@ services:
         condition: service_healthy
       redis:
         condition: service_started
-      rabbitmq:
-        condition: service_healthy
     networks:
       - network
 

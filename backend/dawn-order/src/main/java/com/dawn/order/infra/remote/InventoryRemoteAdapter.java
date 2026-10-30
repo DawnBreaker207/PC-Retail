@@ -1,7 +1,7 @@
 package com.dawn.order.infra.remote;
 
-import com.dawn.order.dto.StockDecrementCommand;
-import com.dawn.order.port.out.InventoryClientPort;
+import com.dawn.common.contract.StockDecrementCommand;
+import com.dawn.common.contract.InventoryClientPort;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;

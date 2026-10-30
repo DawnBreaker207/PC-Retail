@@ -1,6 +1,6 @@
 package com.dawn.order.infra.remote;
 
-import com.dawn.order.port.out.CatalogClientPort;
+import com.dawn.common.contract.CatalogClientPort;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;

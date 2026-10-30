@@ -1,7 +1,7 @@
 package com.dawn.cart.infra.remote;
 
-import com.dawn.catalog.dto.CatalogQueryPort;
-import com.dawn.catalog.dto.SkuPriceInfo;
+import com.dawn.common.contract.CatalogQueryPort;
+import com.dawn.common.contract.SkuPriceInfo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;

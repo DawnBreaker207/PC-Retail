@@ -6,14 +6,14 @@ import com.dawn.common.exception.wrapper.ConflictException;
 import com.dawn.common.exception.wrapper.ResourceNotFoundException;
 import com.dawn.common.message.Message;
 import com.dawn.common.redis.service.RedisService;
-import com.dawn.order.dto.StockDecrementCommand;
+import com.dawn.common.contract.StockDecrementCommand;
 import com.dawn.order.dto.SubOrderDto;
 import com.dawn.order.entity.OrderItem;
 import com.dawn.order.entity.SubOrder;
 import com.dawn.order.entity.enums.SubOrderStatus;
 import com.dawn.order.port.in.TransitionSubOrderUseCase;
-import com.dawn.order.port.out.InventoryClientPort;
-import com.dawn.order.port.out.GuestRiskPort;
+import com.dawn.common.contract.InventoryClientPort;
+import com.dawn.common.contract.GuestRiskPort;
 import com.dawn.order.port.out.OrderItemRepository;
 import com.dawn.order.port.out.OrderRepository;
 import com.dawn.order.port.out.SubOrderRepository;
@@ -102,8 +102,17 @@ public class SubOrderCommandService implements TransitionSubOrderUseCase {
     @Scheduled(fixedDelay = 60_000)
     @Transactional
     public void expiredUnpaidOrders() {
-        Instant threshold = Instant.now().minusSeconds(120 * 60);
-        List<SubOrder> expired = subOrderRepo.findByStatusAndReservedUntilBefore(SubOrderStatus.PENDING_PAYMENT, threshold);
+        Instant now = Instant.now();
+        List<SubOrder> expired = new java.util.ArrayList<>(
+                subOrderRepo.findByStatusAndReservedUntilBefore(SubOrderStatus.PENDING_PAYMENT, now));
+        // SAGA Stuck Order Detection: Auto-expire orders stuck in PENDING_PAYMENT over 30 mins
+        List<SubOrder> stuckOrders = subOrderRepo.findByStatusAndCreatedAtBefore(
+                SubOrderStatus.PENDING_PAYMENT, now.minus(Duration.ofMinutes(30)));
+        for (SubOrder so : stuckOrders) {
+            if (expired.stream().noneMatch(e -> e.getId().equals(so.getId()))) {
+                expired.add(so);
+            }
+        }
 
         List<Long> subOrderIds = expired.stream().map(SubOrder::getId).toList();
         Map<Long, List<StockDecrementCommand>> itemsMap = orderItemRepo.findBySubOrderIdIn(subOrderIds)

@@ -7,9 +7,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
 @FeignClient(
-        name = "order-service",
+        name = "dawn-order",
         contextId = "catalogOrderFeignClient",
-        url = "${app.services.order-url:http://order-service:8081}",
+        url = "${app.services.order-url:http://dawn-order:8081}",
         path = "/api/v1/internal/orders",
         configuration = FeignClientConfig.class
 )

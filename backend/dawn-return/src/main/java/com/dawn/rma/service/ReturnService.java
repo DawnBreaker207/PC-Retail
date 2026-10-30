@@ -23,7 +23,7 @@ public class ReturnService {
 
     private final JpaReturnRequestRepository returnRepo;
     private final com.dawn.rma.infra.persistence.JpaRefundRepository refundRepo;
-    private final com.dawn.order.dto.OrderQueryPort orderQueryPort;
+    private final com.dawn.common.contract.OrderQueryPort orderQueryPort;
 
     @Transactional
     public ReturnRequest request(Long subOrderId, Long userId, String reason, List<String> images) {

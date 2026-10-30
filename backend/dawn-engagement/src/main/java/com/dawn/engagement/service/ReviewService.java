@@ -10,7 +10,7 @@ import com.dawn.engagement.dto.ReviewDto;
 import com.dawn.engagement.entity.Review;
 import com.dawn.engagement.port.in.CreateReviewUseCase;
 import com.dawn.engagement.port.out.ReviewRepository;
-import com.dawn.order.dto.OrderQueryPort;
+import com.dawn.common.contract.OrderQueryPort;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

@@ -6,9 +6,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
 @FeignClient(
-        name = "inventory-service",
+        name = "dawn-inventory",
         contextId = "cartInventoryFeignClient",
-        url = "${app.services.inventory-url:http://inventory-service:8082}",
+        url = "${app.services.inventory-url:http://dawn-inventory:8082}",
         path = "/api/v1/internal/inventory",
         configuration = FeignClientConfig.class
 )

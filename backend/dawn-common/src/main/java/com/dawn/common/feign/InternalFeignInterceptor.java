@@ -18,7 +18,7 @@ public class InternalFeignInterceptor implements RequestInterceptor {
 
     private final String internalToken;
 
-    public InternalFeignInterceptor(@Value("${app.internal.token:dev-internal-token}") String internalToken) {
+    public InternalFeignInterceptor(@Value("${app.internal.token:}") String internalToken) {
         this.internalToken = internalToken;
     }
 

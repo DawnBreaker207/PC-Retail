@@ -1,5 +1,7 @@
 package com.dawn.order.infra.messaging;
 
+import com.dawn.common.dlt.DeadLetterService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.kafka.annotation.BackOff;
@@ -16,10 +18,14 @@ import org.springframework.stereotype.Component;
  * - Processes Order events published by Transactional Outbox.
  * - Automatic exponential backoff retry on transient processing errors (1s -> 2s -> 4s).
  * - Automatic dead-letter topic routing (order-events-dlt) when retry limit is reached.
+ * - Persists failed events to PostgreSQL dead_letter_records table for audit and replay.
  */
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class OrderEventConsumer {
+
+    private final DeadLetterService deadLetterService;
 
     @RetryableTopic(
             attempts = "3",
@@ -43,5 +49,10 @@ public class OrderEventConsumer {
             @Header(value = KafkaHeaders.RECEIVED_KEY, required = false) String key) {
         log.error("ALERT: Dead Letter Topic reached! Topic='{}', Key='{}', Payload='{}'",
                 topic, key, record.value());
+        try {
+            deadLetterService.recordFailure(topic, key, record.value(), "Order event retry limit reached");
+        } catch (Exception e) {
+            log.error("Failed to persist DLT record to database: {}", e.getMessage());
+        }
     }
 }
