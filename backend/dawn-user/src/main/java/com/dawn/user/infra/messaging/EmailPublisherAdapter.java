@@ -1,5 +1,6 @@
 package com.dawn.user.infra.messaging;
 
+import com.dawn.common.util.AfterCommit;
 import com.dawn.user.dto.EmailMessage;
 import com.dawn.user.port.out.EmailPublisherPort;
 import lombok.RequiredArgsConstructor;
@@ -22,8 +23,10 @@ public class EmailPublisherAdapter implements EmailPublisherPort {
     public void publish(EmailMessage message) {
         try {
             String payload = objectMapper.writeValueAsString(message);
-            kafkaTemplate.send(NOTIFICATION_TOPIC, message.toEmail(), payload);
-            log.debug("Published email notification to Kafka: type={}, to={}", message.type(), message.toEmail());
+            AfterCommit.run(() ->
+                kafkaTemplate.send(NOTIFICATION_TOPIC, message.toEmail(), payload)
+            );
+            log.debug("Scheduled email notification to Kafka after commit: type={}, to={}", message.type(), message.toEmail());
         } catch (Exception e) {
             log.error("Failed to publish email notification to Kafka: type={}, to={}", message.type(), message.toEmail(), e);
             throw new RuntimeException("Failed to publish email notification", e);
