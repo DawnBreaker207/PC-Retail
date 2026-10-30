@@ -1,6 +1,12 @@
 package com.dawn.common.event;
 
+import tools.jackson.annotation.JsonIgnoreProperties;
+
 import java.util.List;
 
-public record InventoryReservedEvent(Long orderId, List<InventoryLine> items) {
+@JsonIgnoreProperties(ignoreUnknown = true)
+public record InventoryReservedEvent(Long orderId, List<InventoryLine> items, int version) {
+    public InventoryReservedEvent(Long orderId, List<InventoryLine> items) {
+        this(orderId, items, 1);
+    }
 }

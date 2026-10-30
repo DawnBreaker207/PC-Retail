@@ -1,13 +1,21 @@
 package com.dawn.common.event;
 
+import tools.jackson.annotation.JsonIgnoreProperties;
+
 import java.math.BigDecimal;
 import java.util.Map;
 
-/** Hành vi xem linh kiện của khách; dawn-ai dùng để tính vector sở thích. */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public record ClickstreamEvent(
         Long userId,
         Long skuId,
         String componentCategory,
         BigDecimal price,
-        Map<String, Object> specs) {
+        Map<String, Object> specs,
+        int version) {
+
+    public ClickstreamEvent(Long userId, Long skuId, String componentCategory,
+                             BigDecimal price, Map<String, Object> specs) {
+        this(userId, skuId, componentCategory, price, specs, 1);
+    }
 }
