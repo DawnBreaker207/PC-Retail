@@ -4,6 +4,8 @@ import com.dawn.common.dlt.DeadLetterService;
 import com.dawn.common.exception.wrapper.ConflictException;
 import com.dawn.common.exception.wrapper.ResourceNotFoundException;
 import com.dawn.common.contract.OrderClientPort;
+import com.dawn.order.entity.enums.SubOrderStatus;
+import com.dawn.order.port.out.SubOrderRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -15,6 +17,7 @@ import org.springframework.kafka.retrytopic.DltStrategy;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
 
@@ -34,6 +37,7 @@ import java.util.Map;
 public class PaymentEventConsumer {
 
     private final OrderClientPort orderClientPort;
+    private final SubOrderRepository subOrderRepository;
     private final ObjectMapper objectMapper;
     private final DeadLetterService deadLetterService;
 
@@ -44,6 +48,7 @@ public class PaymentEventConsumer {
             autoCreateTopics = "true"
     )
     @KafkaListener(topics = "payment-events", groupId = "order-payment-consumer-group")
+    @Transactional
     public void onPaymentEvent(
             ConsumerRecord<String, String> record,
             @Header(KafkaHeaders.RECEIVED_TOPIC) String topic,
@@ -60,11 +65,15 @@ public class PaymentEventConsumer {
             }
             Long orderId = Long.valueOf(orderIdObj.toString());
 
-            if (fields.containsKey("transactionRef")) {
-                // PaymentCompletedEvent
+            if (fields.containsKey("transactionRef") && fields.containsKey("paymentId")) {
+                // PaymentCompletedEvent (has paymentId + transactionRef + settledAt)
                 String transactionRef = (String) fields.get("transactionRef");
                 log.info("Kafka consumer: marking order {} paid (ref={})", orderId, transactionRef);
                 orderClientPort.markOrderPaid(orderId);
+            } else if (fields.containsKey("transactionRef") && !fields.containsKey("paymentId")) {
+                // PaymentRefundedEvent (SAGA compensation: inventory failed → payment refunded → cancel order)
+                log.warn("SAGA compensation: cancelling order {} as CANCELLED_OUT_OF_STOCK after refund", orderId);
+                cancelSubOrdersOutOfStock(orderId);
             } else if (fields.containsKey("reason")) {
                 // PaymentFailedEvent
                 String reason = (String) fields.get("reason");
@@ -82,6 +91,16 @@ public class PaymentEventConsumer {
             log.error("Error processing payment event (topic={}, key={}): {}", topic, key, e.getMessage());
             throw new RuntimeException("Payment event processing failed, will retry", e);
         }
+    }
+
+    private void cancelSubOrdersOutOfStock(Long orderId) {
+        subOrderRepository.findByOrderId(orderId).forEach(sub -> {
+            int updated = subOrderRepository.transitionIfStatus(
+                    sub.getId(), sub.getStatus(), SubOrderStatus.CANCELLED_OUT_OF_STOCK);
+            if (updated == 0) {
+                log.info("SubOrder {} already transitioned, skipping (idempotent)", sub.getId());
+            }
+        });
     }
 
     @DltHandler
