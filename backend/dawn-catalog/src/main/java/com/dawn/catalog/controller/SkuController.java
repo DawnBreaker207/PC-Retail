@@ -84,6 +84,14 @@ public class SkuController {
         return ResponseObject.deleted();
     }
 
+    @GetMapping("/search/keyset")
+    public ResponseObject<List<SkuSummaryDto>> searchKeyset(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) Long lastId,
+            @RequestParam(defaultValue = "20") @Max(100) int size) {
+        return ResponseObject.success(skuService.searchKeyset(keyword, lastId, size));
+    }
+
     @GetMapping("/compare")
     public ResponseObject<List<SkuCompareResponse>> compare(
             @RequestParam("ids") @NotEmpty @Size(min = 2, max = 4) List<Long> ids) {

@@ -136,6 +136,26 @@ public class SkuService {
         skuRepository.save(sku);
     }
 
+    @Transactional(readOnly = true)
+    public List<SkuSummaryDto> searchKeyset(String keyword, Long lastId, int size) {
+        int safeSize = Math.min(size, 100);
+        Specification<Sku> spec = (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            predicates.add(cb.isNull(root.get("deletedAt")));
+            predicates.add(cb.equal(root.get("status"), SkuStatus.ACTIVE));
+            if (lastId != null) {
+                predicates.add(cb.greaterThan(root.get("id"), lastId));
+            }
+            if (StringUtils.hasText(keyword)) {
+                String escaped = keyword.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_");
+                predicates.add(cb.like(cb.lower(root.get("name")), "%" + escaped.toLowerCase() + "%", '\\'));
+            }
+            query.orderBy(cb.asc(root.get("id")));
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+        return skuRepository.findAll(spec, PageRequest.of(0, safeSize)).map(this::toSummary).toList();
+    }
+
     public List<SkuCompareResponse> getSkusForCompare(List<Long> ids) {
         List<Sku> skus = skuRepository.findAllActiveByIds(ids);
         if (skus.isEmpty()) return List.of();
