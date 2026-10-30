@@ -15,4 +15,6 @@ public interface PaymentRepository {
     List<Payment> findByOrderIdAndMethod(Long orderId, PaymentMethod method);
 
     List<Payment> findByStatus(PaymentResultStatus status);
+
+    List<Payment> findByOrderId(Long orderId);
 }

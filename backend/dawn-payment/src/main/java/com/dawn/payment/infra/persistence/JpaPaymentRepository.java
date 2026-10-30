@@ -16,4 +16,7 @@ public interface JpaPaymentRepository extends JpaRepository<Payment, Long>, Paym
 
     @Override
     List<Payment> findByStatus(PaymentResultStatus status);
+
+    @Override
+    List<Payment> findByOrderId(Long orderId);
 }
