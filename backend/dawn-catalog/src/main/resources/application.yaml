@@ -49,8 +49,17 @@ spring:
             logger-level: basic
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:29092}
+  batch:
+    job:
+      enabled: false
+    jdbc:
+      initialize-schema: always
 
 app:
+  opensearch:
+    enabled: ${OPENSEARCH_ENABLED:false}
+    host: ${OPENSEARCH_HOST:localhost}
+    port: ${OPENSEARCH_PORT:9200}
   frontend:
     url: ${FRONTEND_URL:http://localhost:4200}
   outbox:
