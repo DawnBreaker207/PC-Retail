@@ -53,13 +53,15 @@ describe('AuthService', () => {
     expect(service.currentUser()).toBeNull();
   });
 
-  it('should register a new user (mock until OTP verify UI exists)', () => {
+  it('should register a new user', () => {
     const data: RegisterRequest = { fullName: 'New', email: 'new@t.com', phone: '0123456789', password: 'pass' };
 
-    service.register(data).subscribe((user) => {
-      expect(user.email).toBe('new@t.com');
+    service.register(data).subscribe((res) => {
+      expect(res).toBeTruthy();
     });
 
-    httpMock.expectNone(ApiEndpoints.auth.register);
+    const req = httpMock.expectOne(ApiEndpoints.auth.register);
+    expect(req.request.method).toBe('POST');
+    req.flush({ accessToken: 'test-token', refreshToken: 'test-refresh' });
   });
 });

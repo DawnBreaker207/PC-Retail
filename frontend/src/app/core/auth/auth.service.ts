@@ -22,6 +22,26 @@ function readStoredSession(): StoredSession | null {
   }
 }
 
+function decodeJwtUser(token: string): User | null {
+  try {
+    const parts = token.split('.');
+    if (parts.length !== 3) return null;
+    const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+    const rawRole: string = payload.role || '';
+    let systemRole: User['systemRole'] = 'CUSTOMER';
+    if (rawRole.includes('ROLE_ADMIN') || rawRole.includes('ADMIN')) systemRole = 'ADMIN';
+    else if (rawRole.includes('ROLE_STAFF') || rawRole.includes('STAFF')) systemRole = 'STAFF';
+    return {
+      id: payload.id || 1,
+      fullName: payload.username?.split('@')[0] || payload.email?.split('@')[0] || 'User',
+      email: payload.email || payload.sub,
+      systemRole,
+    };
+  } catch {
+    return null;
+  }
+}
+
 function writeStoredSession(session: StoredSession | null): void {
   try {
     if (session) localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(session));
@@ -42,39 +62,15 @@ export class AuthService {
   private refreshToken: string | null = this.stored?.refreshToken ?? null;
 
   login(credentials: LoginRequest): Observable<AuthResponse> {
-    // API thật trước, rớt về mock khi chưa có BE (giữ dev chạy được)
     return this.http.post<AuthResponse>(ApiEndpoints.auth.login, credentials).pipe(
       tap((res) => this.setSession(res)),
-      catchError(() => of(this.buildMockSession(credentials.email)).pipe(
-        tap((res) => this.setSession(res)),
-      )),
     );
   }
 
-  private buildMockSession(email: string): AuthResponse {
-    const mockUser: User = {
-      id: 1,
-      fullName: email === 'admin@dawn.vn' ? 'Admin' : email.split('@')[0],
-      email,
-      phone: '0912345678',
-      systemRole: email === 'admin@dawn.vn' ? 'ADMIN' : 'CUSTOMER',
-    };
-    return {
-      accessToken: 'mock-token-' + Date.now(),
-      refreshToken: 'mock-refresh-' + Date.now(),
-      user: mockUser,
-    };
-  }
-
-  register(data: RegisterRequest): Observable<User> {
-    const mockUser: User = {
-      id: Date.now(),
-      fullName: data.fullName,
-      email: data.email,
-      phone: data.phone,
-      systemRole: 'CUSTOMER',
-    };
-    return of(mockUser);
+  register(data: RegisterRequest): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(ApiEndpoints.auth.register, data).pipe(
+      tap((res) => this.setSession(res)),
+    );
   }
 
   forgotPassword(email: string): Observable<void> {
@@ -114,7 +110,10 @@ export class AuthService {
   private setSession(res: AuthResponse): void {
     this.accessToken = res.accessToken;
     this.refreshToken = res.refreshToken;
-    this.currentUser.set(res.user);
-    writeStoredSession({ accessToken: res.accessToken, refreshToken: res.refreshToken, user: res.user });
+    const user = res.user ?? (res.accessToken ? decodeJwtUser(res.accessToken) : null);
+    this.currentUser.set(user);
+    if (user) {
+      writeStoredSession({ accessToken: res.accessToken, refreshToken: res.refreshToken, user });
+    }
   }
 }
