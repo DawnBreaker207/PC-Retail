@@ -83,6 +83,7 @@ services:
       postgres: { condition: service_healthy }
       redis: { condition: service_healthy }
       kafka: { condition: service_healthy }
+      dawn-auth: { condition: service_healthy }
     environment:
       JAVA_TOOL_OPTIONS: "-Xms64m -Xmx128m -XX:+UseSerialGC"
       SERVER_PORT: 8080
@@ -109,6 +110,12 @@ services:
       SPRING_DATA_REDIS_HOST: redis
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       SPRING_PROFILES_ACTIVE: docker
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8085/actuator/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 8
+      start_period: 60s
     restart: on-failure:3
 
   dawn-user:
@@ -122,6 +129,7 @@ services:
       postgres: { condition: service_healthy }
       redis: { condition: service_healthy }
       kafka: { condition: service_healthy }
+      dawn-auth: { condition: service_healthy }
     environment:
       JAVA_TOOL_OPTIONS: "-Xms128m -Xmx256m -XX:+UseSerialGC"
       SERVER_PORT: 8086
@@ -144,6 +152,7 @@ services:
       postgres: { condition: service_healthy }
       redis: { condition: service_healthy }
       kafka: { condition: service_healthy }
+      dawn-auth: { condition: service_healthy }
     environment:
       JAVA_TOOL_OPTIONS: "-Xms256m -Xmx512m -XX:+UseG1GC"
       SERVER_PORT: 8084
@@ -166,6 +175,7 @@ services:
       postgres: { condition: service_healthy }
       redis: { condition: service_healthy }
       kafka: { condition: service_healthy }
+      dawn-auth: { condition: service_healthy }
     environment:
       JAVA_TOOL_OPTIONS: "-Xms128m -Xmx256m -XX:+UseSerialGC"
       SERVER_PORT: 8082
@@ -188,6 +198,7 @@ services:
       postgres: { condition: service_healthy }
       redis: { condition: service_healthy }
       kafka: { condition: service_healthy }
+      dawn-auth: { condition: service_healthy }
     environment:
       JAVA_TOOL_OPTIONS: "-Xms256m -Xmx512m -XX:+UseG1GC"
       SERVER_PORT: 8081
@@ -210,6 +221,7 @@ services:
       postgres: { condition: service_healthy }
       redis: { condition: service_healthy }
       kafka: { condition: service_healthy }
+      dawn-auth: { condition: service_healthy }
     environment:
       JAVA_TOOL_OPTIONS: "-Xms128m -Xmx256m -XX:+UseSerialGC"
       SERVER_PORT: 8083
@@ -232,6 +244,7 @@ services:
       postgres: { condition: service_healthy }
       redis: { condition: service_healthy }
       kafka: { condition: service_healthy }
+      dawn-auth: { condition: service_healthy }
     environment:
       JAVA_TOOL_OPTIONS: "-Xms128m -Xmx192m -XX:+UseSerialGC"
       SERVER_PORT: 8090
@@ -254,6 +267,7 @@ services:
       postgres: { condition: service_healthy }
       redis: { condition: service_healthy }
       kafka: { condition: service_healthy }
+      dawn-auth: { condition: service_healthy }
     environment:
       JAVA_TOOL_OPTIONS: "-Xms256m -Xmx512m -XX:+UseG1GC"
       SERVER_PORT: 8087
