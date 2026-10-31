@@ -1,1 +1,0 @@
-ALTER TABLE payment ADD COLUMN IF NOT EXISTS user_id BIGINT REFERENCES users (id);

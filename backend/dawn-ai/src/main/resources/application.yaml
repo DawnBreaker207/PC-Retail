@@ -5,3 +5,9 @@ server:
 spring:
   application:
     name: dawn-ai
+  flyway:
+    enabled: true
+    locations: classpath:db/migration/ai
+    table: flyway_schema_history_ai
+    validate-on-migrate: false
+    baseline-on-migrate: true

@@ -33,6 +33,7 @@ spring:
   flyway:
     enabled: true
     locations: classpath:db/migration
+    table: flyway_schema_history_user
     validate-on-migrate: false
     baseline-on-migrate: true
   data:
