@@ -5,7 +5,8 @@ import com.dawn.catalog.controller.request.SkuUpdatedRequest;
 import com.dawn.catalog.dto.SkuCompareResponse;
 import com.dawn.catalog.dto.SkuDetailDto;
 import com.dawn.catalog.dto.SkuSummaryDto;
-import com.dawn.catalog.service.SkuService;
+import com.dawn.catalog.service.SkuCommandService;
+import com.dawn.catalog.service.SkuQueryService;
 import com.dawn.common.event.ClickstreamEvent;
 import com.dawn.common.event.ClickstreamPublisher;
 import com.dawn.common.response.ResponseObject;
@@ -30,7 +31,8 @@ import java.util.Map;
 @RequiredArgsConstructor
 @Validated
 public class SkuController {
-    private final SkuService skuService;
+    private final SkuCommandService skuCommandService;
+    private final SkuQueryService skuQueryService;
     private final ClickstreamPublisher clickstreamPublisher;
 
     @GetMapping("")
@@ -43,12 +45,12 @@ public class SkuController {
             @RequestParam(required = false) BigDecimal maxPrice,
             @RequestParam(required = false) String search) {
         return ResponseObject.success(
-                skuService.search(page, size, brandId, categoryId, minPrice, maxPrice, search));
+                skuQueryService.search(page, size, brandId, categoryId, minPrice, maxPrice, search));
     }
 
     @GetMapping("/{id}")
     public ResponseObject<SkuDetailDto> getDetail(@PathVariable Long id) {
-        return ResponseObject.success(skuService.getDetail(id));
+        return ResponseObject.success(skuQueryService.getById(id));
     }
 
     @PostMapping("/{id}/view")
@@ -66,7 +68,7 @@ public class SkuController {
     @PostMapping("")
     @PreAuthorize(AuthorizationConstants.ADMIN_ONLY)
     public ResponseObject<SkuDetailDto> create(@Valid @RequestBody SkuCreatedRequest request) {
-        return ResponseObject.created(skuService.create(request));
+        return ResponseObject.created(skuCommandService.createSku(request));
     }
 
     @PutMapping("/{id}")
@@ -74,13 +76,13 @@ public class SkuController {
     public ResponseObject<SkuDetailDto> update(
             @PathVariable Long id,
             @Valid @RequestBody SkuUpdatedRequest request) {
-        return ResponseObject.success(skuService.update(id, request));
+        return ResponseObject.success(skuCommandService.updateSku(id, request));
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize(AuthorizationConstants.ADMIN_ONLY)
     public ResponseObject<Void> softDelete(@PathVariable Long id) {
-        skuService.softDelete(id);
+        skuCommandService.softDeleteSku(id);
         return ResponseObject.deleted();
     }
 
@@ -89,12 +91,12 @@ public class SkuController {
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) Long lastId,
             @RequestParam(defaultValue = "20") @Max(100) int size) {
-        return ResponseObject.success(skuService.searchKeyset(keyword, lastId, size));
+        return ResponseObject.success(skuQueryService.searchKeyset(keyword, lastId, size));
     }
 
     @GetMapping("/compare")
     public ResponseObject<List<SkuCompareResponse>> compare(
             @RequestParam("ids") @NotEmpty @Size(min = 2, max = 4) List<Long> ids) {
-        return ResponseObject.success(skuService.getSkusForCompare(ids));
+        return ResponseObject.success(skuQueryService.getSkusForCompare(ids));
     }
 }

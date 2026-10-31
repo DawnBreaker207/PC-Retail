@@ -11,8 +11,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
-// docs §13.3: BE tính lại + ghi đè fee — không tin số FE gửi.
-// PICKUP = 0 tường minh. Không resolve được zone → chặn checkout.
+// Server recalculates and overrides fee; client-supplied value is ignored. PICKUP = 0. No matching zone blocks checkout.
 @Service
 @RequiredArgsConstructor
 public class ShippingService {
@@ -23,7 +22,7 @@ public class ShippingService {
         if (type == FulfillmentType.PICKUP) return BigDecimal.ZERO;
         String city = address == null ? null : (String) address.get("city");
         List<ShippingZone> zones = zoneRepo.findByActiveTrue();
-        if (zones.isEmpty()) return BigDecimal.valueOf(30000); // fallback khi chưa seed zone
+        if (zones.isEmpty()) return BigDecimal.valueOf(30000); // fallback when no zones seeded
         for (ShippingZone z : zones) {
             if (z.getMatchCity() == null || (city != null && city.equalsIgnoreCase(z.getMatchCity()))) {
                 return z.getFee();

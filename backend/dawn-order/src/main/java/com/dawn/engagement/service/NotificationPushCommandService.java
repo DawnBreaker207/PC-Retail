@@ -15,18 +15,17 @@ import org.springframework.transaction.event.TransactionalEventListener;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class NotificationPushService {
+public class NotificationPushCommandService {
 
     private final JpaNotificationRepository notificationRepo;
     private final SimpMessagingTemplate messaging;
 
-    // Sau checkout commit: lưu DB (để offline pull) + đẩy WS realtime.
-    // REQUIRES_NEW: AFTER_COMMIT chạy khi tx cha đã commit xong — không có tx mới thì
-    // save() bám vào connection zombie, persist treo không flush, mất row mà không lỗi (giống CartCleanupListener)
+    // After checkout commit: persist for offline pull + push via WebSocket.
+    // REQUIRES_NEW: AFTER_COMMIT runs outside the parent tx; without it save() may silently not flush
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void onOrderCreated(OrderCreatedEvent event) {
-        if (event.userId() == null) return; // guest: không có user để push
+        if (event.userId() == null) return; // no user to push for guest orders
         Notification saved = notificationRepo.save(Notification.builder()
                 .userId(event.userId())
                 .type("ORDER_CREATED")
@@ -38,7 +37,7 @@ public class NotificationPushService {
         try {
             messaging.convertAndSend("/topic/notifications/" + event.userId(), saved);
         } catch (Exception e) {
-            // WS rớt không được làm hỏng flow — client pull DB khi reconnect
+            // WebSocket failure must not break the flow; client pulls DB on reconnect
             log.warn("WebSocket push failed for user {}", event.userId(), e);
         }
     }

@@ -2,14 +2,13 @@ package com.dawn.promotion.service;
 
 import com.dawn.common.exception.wrapper.InvalidRequestException;
 import com.dawn.common.message.Message;
-import com.dawn.promotion.port.out.PromotionCheckoutPort;
 import com.dawn.promotion.dto.VoucherValidationResult;
 import com.dawn.promotion.entity.Voucher;
 import com.dawn.promotion.entity.VoucherUsage;
 import com.dawn.promotion.entity.enums.DiscountType;
 import com.dawn.promotion.entity.enums.ScopeType;
-import com.dawn.promotion.port.in.ValidatePromotionUseCase;
 import com.dawn.promotion.port.out.PromotionCachePort;
+import com.dawn.promotion.port.out.PromotionCheckoutPort;
 import com.dawn.promotion.port.out.VoucherRepository;
 import com.dawn.promotion.port.out.VoucherUsageRepository;
 import lombok.RequiredArgsConstructor;
@@ -18,19 +17,18 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.time.Instant;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class PromotionCheckoutService implements ValidatePromotionUseCase, PromotionCheckoutPort {
+public class PromotionCheckoutCommandService implements PromotionCheckoutPort {
+
     private final VoucherRepository voucherRepo;
     private final VoucherUsageRepository voucherUsageRepo;
     private final PromotionCachePort cachePort;
 
     @Override
     public void reservePromotions(List<String> voucherCodes, List<Long> flashSaleSkuIds) {
-        // Tự nạp key Redis còn thiếu từ DB (key hết TTL/mất sau flush) trước khi trừ
         if (voucherCodes != null) {
             List<Voucher> vouchers = voucherRepo.findByCodeInAndDeletedAtIsNull(voucherCodes);
             for (Voucher v : vouchers) {
@@ -85,52 +83,11 @@ public class PromotionCheckoutService implements ValidatePromotionUseCase, Promo
                         .discountAmount(calculateDiscount(voucher, orderTotal))
                         .build());
             } catch (org.springframework.dao.DataIntegrityViolationException dup) {
-                // Lưới an toàn UNIQUE(voucher_id, user_id) khi 2 checkout đua qua exists-check
                 throw new InvalidRequestException(Message.format(Message.Promotion.VOUCHER_ALREADY_USED, voucher.getCode()));
             }
             voucher.setRemainingQuantity(voucher.getRemainingQuantity() - 1);
             voucherRepo.save(voucher);
         }
-    }
-
-    @Transactional(readOnly = true)
-    @Override
-    public VoucherValidationResult validate(String code, BigDecimal orderTotal) {
-        Voucher voucher = voucherRepo
-                .findByCodeAndDeletedAtIsNull(code)
-                .orElse(null);
-
-        if (voucher == null) {
-            return VoucherValidationResult.fail(Message.format(Message.Promotion.VOUCHER_NOT_FOUND, code));
-        }
-
-        if (voucher.getRemainingQuantity() <= 0) {
-            return VoucherValidationResult.fail(Message.Promotion.VOUCHER_OUT_OF_STOCK);
-        }
-
-        Instant now = Instant.now();
-        if (now.isBefore(voucher.getValidFrom()) || now.isAfter(voucher.getValidTo())) {
-            return VoucherValidationResult.fail(Message.Promotion.VOUCHER_EXPIRED);
-        }
-
-        // Check remaining quantity - Redis first, fallback DB
-        int remaining = getRemainingFromCache(voucher);
-        if (remaining <= 0) {
-            return VoucherValidationResult.fail(Message.Promotion.VOUCHER_OUT_OF_STOCK);
-        }
-
-        if (orderTotal.compareTo(voucher.getMinOrderValue()) < 0) {
-            return VoucherValidationResult.fail(Message.format(Message.Promotion.VOUCHER_MIN_ORDER_NOT_MET, voucher.getMinOrderValue()));
-        }
-
-        BigDecimal discount = calculateDiscount(voucher, orderTotal);
-        return VoucherValidationResult.ok(discount);
-    }
-
-
-    private int getRemainingFromCache(Voucher voucher) {
-        Integer cached = cachePort.getVoucherRemaining(voucher.getCode());
-        return cached != null ? cached : voucher.getRemainingQuantity();
     }
 
     private BigDecimal calculateDiscount(Voucher voucher, BigDecimal orderTotal) {

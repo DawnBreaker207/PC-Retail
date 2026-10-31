@@ -28,9 +28,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Guest checkout (docs 13.5 lite): không login, giỏ theo guest_token,
- * đơn user_id null + liên hệ khách. Không voucher (cần user để chống dùng lại).
- * Risk-gate: rate limit theo guest_token + OTP SĐT bắt buộc + ngưỡng giá trị + lịch sử SĐT.
+ * Guest checkout (docs 13.5 lite): no login, cart keyed by guest_token,
+ * order has user_id null with guest contact. No vouchers (requires a user to prevent reuse).
+ * Risk-gate: rate limit by guest_token + mandatory phone OTP + order value cap + phone abuse history.
  */
 @Service
 @RequiredArgsConstructor
@@ -56,7 +56,7 @@ public class GuestCheckoutService {
 
     @Transactional
     public OrderDto checkout(GuestCheckoutRequest req) {
-        // Risk-gate: rate limit theo guest_token
+        // rate limit by guest_token
         String rateKey = "guest:checkout:" + req.guestToken();
         Long count = redisService.increment(rateKey, 1L);
         if (count != null && count == 1L) {
@@ -66,12 +66,12 @@ public class GuestCheckoutService {
             throw new ConflictException("Too many guest checkouts, please try again later");
         }
 
-        // Risk-gate docs 13.5: SĐT phải verify OTP trước khi hoàn tất
+        // phone must pass OTP verification before completing order
         String phone = req.guestPhone();
         if (!guestRiskPort.isPhoneVerified(phone)) {
             throw new InvalidRequestException(Message.Order.PHONE_NOT_VERIFIED);
         }
-        // Risk-gate docs 13.5: SĐT bùng nhiều lần thì ép login + online payment
+        // excessive phone abuse requires login and online payment
         if (guestRiskPort.phoneAbuseCount(phone) >= phoneAbuseThreshold) {
             throw new InvalidRequestException(Message.Order.PHONE_ABUSE_BLOCKED);
         }
@@ -96,7 +96,7 @@ public class GuestCheckoutService {
                         .multiply(BigDecimal.valueOf(item.quantity())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        // Risk-gate docs 13.5: vượt ngưỡng thì bắt buộc online payment (guest chưa có) → chặn
+        // order over threshold requires online payment, which guest flow lacks
         if (subTotal.compareTo(BigDecimal.valueOf(guestMaxOrderTotal)) > 0) {
             throw new InvalidRequestException(Message.Order.ORDER_OVER_THRESHOLD);
         }
@@ -110,7 +110,7 @@ public class GuestCheckoutService {
             throw new InvalidRequestException(Message.format(Message.Order.INSUFFICIENT_STOCK_SKUS, failedSkuIds));
         }
 
-        // BE tự tính ship (ghi đè FE) — PICKUP = 0
+        // server calculates shipping, ignoring client value; PICKUP = 0
         BigDecimal shippingFee = req.fulfillmentType() == FulfillmentType.DELIVERY
                 ? BigDecimal.valueOf(30000) : BigDecimal.ZERO;
         BigDecimal finalAmount = subTotal.add(shippingFee);
@@ -121,7 +121,7 @@ public class GuestCheckoutService {
                     req.guestEmail(), req.guestPhone(),
                     cartItems, stockItems, priceMap, subTotal, BigDecimal.ZERO, shippingFee, finalAmount);
             cartClient.clearGuestCart(req.guestToken());
-            // OTP dùng 1 lần: đơn tạo xong mới đốt (fail thì giữ để retry)
+            // consume OTP only after order is created; keep it on failure to allow retry
             guestRiskPort.consumePhoneVerification(phone);
             return dto;
         } catch (Exception e) {

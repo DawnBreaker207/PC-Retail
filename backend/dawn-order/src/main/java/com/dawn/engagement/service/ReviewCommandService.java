@@ -1,8 +1,7 @@
 package com.dawn.engagement.service;
 
-import com.dawn.common.exception.wrapper.InvalidRequestException;
 import com.dawn.common.exception.wrapper.ConflictException;
-import com.dawn.common.exception.wrapper.ResourceNotFoundException;
+import com.dawn.common.exception.wrapper.InvalidRequestException;
 import com.dawn.common.message.Message;
 import com.dawn.common.utils.SecurityUtils;
 import com.dawn.engagement.controller.request.CreateReviewRequest;
@@ -17,7 +16,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-public class ReviewService implements CreateReviewUseCase {
+public class ReviewCommandService implements CreateReviewUseCase {
+
     private final ReviewRepository reviewRepository;
     private final OrderQueryPort orderQueryPort;
 

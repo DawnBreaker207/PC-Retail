@@ -3,13 +3,13 @@ package com.dawn.notification.service;
 import com.dawn.notification.dto.NotificationEvent;
 import com.dawn.notification.entity.NotificationRecord;
 import com.dawn.notification.entity.enums.NotificationStatus;
+import com.dawn.notification.port.in.SendNotificationUseCase;
 import com.dawn.notification.repository.NotificationRecordRepository;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -19,19 +19,19 @@ import tools.jackson.databind.ObjectMapper;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.List;
 import java.util.Map;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class NotificationService {
+public class NotificationCommandService implements SendNotificationUseCase {
 
     private final JavaMailSender mailSender;
     private final NotificationRecordRepository recordRepository;
     private final TemplateRenderer templateRenderer;
     private final ObjectMapper objectMapper;
 
+    @Override
     @Transactional
     public void processEvent(NotificationEvent event) {
         String variablesJson = serializeVariables(event.variables());
@@ -56,32 +56,6 @@ public class NotificationService {
             record.setErrorMessage(e.getMessage());
         }
         recordRepository.save(record);
-    }
-
-    private void dispatch(NotificationEvent event) throws Exception {
-        switch (event.channel()) {
-            case EMAIL -> {
-                String html = templateRenderer.render(event.templateId(), event.variables());
-                String subject = resolveSubject(event.templateId(), event.variables());
-                sendEmail(event.recipientEmail(), subject, html);
-            }
-            case SMS -> log.info("SMS channel not yet integrated — skipping recipientPhone={}", event.recipientPhone());
-            case PUSH -> log.info("PUSH channel not yet integrated — skipping recipientId={}", event.recipientId());
-        }
-    }
-
-    public void sendEmail(String to, String subject, String htmlBody) throws Exception {
-        MimeMessage msg = mailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(msg, true, "UTF-8");
-        helper.setTo(to);
-        helper.setSubject(subject);
-        helper.setText(htmlBody, true);
-        mailSender.send(msg);
-        log.debug("Email sent to '{}'", to);
-    }
-
-    public Page<NotificationRecord> listByRecipient(Long recipientId, Pageable pageable) {
-        return recordRepository.findByRecipientIdOrderByCreatedAtDesc(recipientId, pageable);
     }
 
     @Scheduled(fixedDelay = 300_000)
@@ -112,11 +86,28 @@ public class NotificationService {
         }
     }
 
-    public Map<String, Long> getStats() {
-        long sent = recordRepository.count();
-        long failed = recordRepository.findByStatusAndCreatedAtBefore(
-                NotificationStatus.FAILED.name(), Instant.now(), PageRequest.of(0, 1)).getTotalElements();
-        return Map.of("total", sent, "failed", failed);
+    public void sendEmail(String to, String subject, String htmlBody) throws Exception {
+        MimeMessage msg = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(msg, true, "UTF-8");
+        helper.setTo(to);
+        helper.setSubject(subject);
+        helper.setText(htmlBody, true);
+        mailSender.send(msg);
+        log.debug("Email sent to '{}'", to);
+    }
+
+    // --- Private helpers ---
+
+    private void dispatch(NotificationEvent event) throws Exception {
+        switch (event.channel()) {
+            case EMAIL -> {
+                String html = templateRenderer.render(event.templateId(), event.variables());
+                String subject = resolveSubject(event.templateId(), event.variables());
+                sendEmail(event.recipientEmail(), subject, html);
+            }
+            case SMS -> log.info("SMS channel not yet integrated — skipping recipientPhone={}", event.recipientPhone());
+            case PUSH -> log.info("PUSH channel not yet integrated — skipping recipientId={}", event.recipientId());
+        }
     }
 
     private String serializeVariables(Map<String, Object> vars) {

@@ -4,7 +4,7 @@ import com.dawn.common.response.ResponseObject;
 import com.dawn.common.response.ResponsePage;
 import com.dawn.common.utils.SecurityUtils;
 import com.dawn.tax.dto.TaxInvoiceDto;
-import com.dawn.tax.service.TaxCalculationService;
+import com.dawn.tax.service.TaxQueryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class TaxController {
 
-    private final TaxCalculationService taxCalculationService;
+    private final TaxQueryService taxQueryService;
 
     @GetMapping("/invoices/my")
     public ResponseObject<ResponsePage<TaxInvoiceDto>> myInvoices(
@@ -23,7 +23,7 @@ public class TaxController {
             @RequestParam(defaultValue = "20") int size) {
         Long userId = SecurityUtils.getCurrentUserId();
         var pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-        var result = taxCalculationService.getByUserId(userId, pageable)
+        var result = taxQueryService.getByUserId(userId, pageable)
                 .map(TaxInvoiceDto::from);
         return ResponseObject.success(ResponsePage.of(result));
     }
@@ -31,7 +31,7 @@ public class TaxController {
     @GetMapping("/invoices/{invoiceId}")
     public ResponseObject<TaxInvoiceDto> getInvoice(@PathVariable Long invoiceId) {
         Long userId = SecurityUtils.getCurrentUserId();
-        var invoice = taxCalculationService.getByUserId(userId,
+        var invoice = taxQueryService.getByUserId(userId,
                 PageRequest.of(0, 1))
                 .stream()
                 .filter(i -> i.getId().equals(invoiceId))

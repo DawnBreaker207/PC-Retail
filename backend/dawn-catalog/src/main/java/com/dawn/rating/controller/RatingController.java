@@ -7,7 +7,8 @@ import com.dawn.common.utils.SecurityUtils;
 import com.dawn.rating.dto.RatingDto;
 import com.dawn.rating.dto.RatingRequest;
 import com.dawn.rating.dto.SkuRatingSummary;
-import com.dawn.rating.service.RatingService;
+import com.dawn.rating.service.RatingCommandService;
+import com.dawn.rating.service.RatingQueryService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -20,12 +21,13 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class RatingController {
 
-    private final RatingService ratingService;
+    private final RatingCommandService ratingCommandService;
+    private final RatingQueryService ratingQueryService;
 
     @PostMapping
     public ResponseObject<RatingDto> submit(@Valid @RequestBody RatingRequest request) {
         Long userId = SecurityUtils.getCurrentUserId();
-        return ResponseObject.created(ratingService.submitRating(userId, request));
+        return ResponseObject.created(ratingCommandService.submitRating(userId, request));
     }
 
     @GetMapping("/sku/{skuId}")
@@ -34,18 +36,18 @@ public class RatingController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(page, size);
-        return ResponseObject.success(ratingService.getSkuRatings(skuId, pageable));
+        return ResponseObject.success(ratingQueryService.getSkuRatings(skuId, pageable));
     }
 
     @GetMapping("/sku/{skuId}/summary")
     public ResponseObject<SkuRatingSummary> summary(@PathVariable Long skuId) {
-        return ResponseObject.success(ratingService.getSkuSummary(skuId));
+        return ResponseObject.success(ratingQueryService.getSkuSummary(skuId));
     }
 
     @PutMapping("/{id}/approve")
     @PreAuthorize(AuthorizationConstants.ADMIN_ONLY)
     public ResponseObject<Void> approve(@PathVariable Long id) {
-        ratingService.approveRating(id);
+        ratingCommandService.approveRating(id);
         return ResponseObject.success(null);
     }
 
@@ -54,7 +56,7 @@ public class RatingController {
     public ResponseObject<Void> reject(
             @PathVariable Long id,
             @RequestParam(required = false) String reason) {
-        ratingService.rejectRating(id, reason);
+        ratingCommandService.rejectRating(id, reason);
         return ResponseObject.success(null);
     }
 }

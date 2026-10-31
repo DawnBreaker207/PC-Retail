@@ -4,10 +4,8 @@ import com.dawn.common.exception.wrapper.ConflictException;
 import com.dawn.common.exception.wrapper.PermissionDeniedException;
 import com.dawn.common.exception.wrapper.ResourceNotFoundException;
 import com.dawn.common.outbox.OutboxPublisher;
-import com.dawn.common.response.ResponsePage;
 import com.dawn.rating.dto.RatingDto;
 import com.dawn.rating.dto.RatingRequest;
-import com.dawn.rating.dto.SkuRatingSummary;
 import com.dawn.rating.entity.Rating;
 import com.dawn.rating.entity.enums.RatingStatus;
 import com.dawn.rating.infra.remote.OrderVerifyFeignClient;
@@ -15,19 +13,15 @@ import com.dawn.rating.repository.RatingRepository;
 import io.github.resilience4j.bulkhead.annotation.Bulkhead;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class RatingService {
+public class RatingCommandService {
 
     private final RatingRepository ratingRepository;
     private final OrderVerifyFeignClient orderVerifyFeignClient;
@@ -88,26 +82,6 @@ public class RatingService {
         rating.setStatus(RatingStatus.REJECTED);
         ratingRepository.save(rating);
         log.info("Rating {} rejected: {}", ratingId, reason);
-    }
-
-    @Transactional(readOnly = true)
-    public ResponsePage<RatingDto> getSkuRatings(Long skuId, Pageable pageable) {
-        Page<Rating> page = ratingRepository.findBySkuIdAndStatus(skuId, RatingStatus.APPROVED.name(), pageable);
-        return ResponsePage.of(page.map(this::toDto));
-    }
-
-    @Transactional(readOnly = true)
-    public SkuRatingSummary getSkuSummary(Long skuId) {
-        Double avg = ratingRepository.findAverageScoreBySkuId(skuId);
-        Long count = ratingRepository.countApprovedBySkuId(skuId);
-        List<Object[]> raw = ratingRepository.findScoreDistributionBySkuId(skuId);
-
-        Map<Integer, Long> distribution = new HashMap<>();
-        for (Object[] row : raw) {
-            distribution.put(((Number) row[0]).intValue(), ((Number) row[1]).longValue());
-        }
-
-        return new SkuRatingSummary(skuId, avg != null ? avg : 0.0, count != null ? count : 0L, distribution);
     }
 
     private Rating findOrThrow(Long id) {

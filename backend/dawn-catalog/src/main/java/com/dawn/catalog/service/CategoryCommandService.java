@@ -5,8 +5,8 @@ import com.dawn.catalog.dto.CategoryDto;
 import com.dawn.catalog.entity.Category;
 import com.dawn.catalog.repository.CategoryRepository;
 import com.dawn.catalog.repository.SkuRepository;
-import com.dawn.common.exception.wrapper.InvalidRequestException;
 import com.dawn.common.exception.wrapper.ConflictException;
+import com.dawn.common.exception.wrapper.InvalidRequestException;
 import com.dawn.common.exception.wrapper.ResourceNotFoundException;
 import com.dawn.common.message.Message;
 import lombok.RequiredArgsConstructor;
@@ -15,45 +15,25 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class CategoryService {
+public class CategoryCommandService {
 
     private final CategoryRepository categoryRepository;
     private final SkuRepository skuRepository;
-
-    @Transactional(readOnly = true)
-    public List<CategoryDto> getTree() {
-        List<Category> all = categoryRepository.findAllByDeletedAtIsNull();
-
-        Map<Long, List<CategoryDto>> byParent = all.stream()
-                .map(c -> new CategoryDto(
-                        c.getId(),
-                        c.getName(),
-                        c.getSlug(),
-                        c.getParentId(),
-                        new ArrayList<>()))
-                .collect(Collectors.groupingBy(dto -> dto.parentId() != null ? dto.parentId() : 0L));
-        List<CategoryDto> roots = byParent.getOrDefault(0L, List.of());
-        roots.forEach(root -> attachChildren(root, byParent));
-        return roots;
-    }
 
     @Transactional
     public CategoryDto create(CategoryRequest req) {
         if (categoryRepository.existsBySlugAndDeletedAtIsNull(req.slug())) {
             throw new ConflictException(Message.Catalog.CATEGORY_SLUG_EXISTS);
         }
-
         if (req.parentId() != null) {
             categoryRepository.findByIdAndDeletedAtIsNull(req.parentId())
-                    .orElseThrow(() -> new ResourceNotFoundException(Message.format(Message.Catalog.CATEGORY_PARENT_NOT_FOUND, req.parentId())));
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            Message.format(Message.Catalog.CATEGORY_PARENT_NOT_FOUND, req.parentId())));
         }
         Category category = Category.builder()
                 .name(req.name())
@@ -72,10 +52,8 @@ public class CategoryService {
                 categoryRepository.existsBySlugAndDeletedAtIsNull(req.slug())) {
             throw new ConflictException(Message.Catalog.CATEGORY_SLUG_EXISTS);
         }
-
         category.setName(req.name());
         category.setSlug(req.slug());
-
         if (req.parentId() != null) {
             category.setParentId(req.parentId());
         }
@@ -95,11 +73,5 @@ public class CategoryService {
         }
         category.setDeletedAt(Instant.now());
         categoryRepository.save(category);
-    }
-
-    private void attachChildren(CategoryDto node, Map<Long, List<CategoryDto>> byParent) {
-        List<CategoryDto> children = byParent.getOrDefault(node.id(), List.of());
-        children.forEach(child -> attachChildren(child, byParent));
-        node.children().addAll(children);
     }
 }

@@ -6,10 +6,8 @@ import com.dawn.tax.dto.TaxCalculateResponse;
 import com.dawn.tax.dto.TaxLineItem;
 import com.dawn.tax.entity.TaxInvoice;
 import com.dawn.tax.entity.enums.BuyerType;
-import com.dawn.tax.entity.enums.InvoiceStatus;
 import com.dawn.tax.repository.TaxInvoiceRepository;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -17,16 +15,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.time.Instant;
-import java.time.Year;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
-public class TaxCalculationService {
+public class TaxQueryService {
 
     private static final BigDecimal VAT_COMPONENT = new BigDecimal("0.10");
     private static final BigDecimal VAT_ACCESSORY = new BigDecimal("0.08");
@@ -35,6 +30,7 @@ public class TaxCalculationService {
 
     private final TaxInvoiceRepository taxInvoiceRepository;
 
+    @Transactional(readOnly = true)
     public TaxCalculateResponse calculateTax(TaxCalculateRequest req) {
         if (req.buyerType() == BuyerType.B2B
                 && req.businessTaxCode() != null
@@ -63,36 +59,6 @@ public class TaxCalculationService {
                 : taxTotal.divide(subtotal, 4, RoundingMode.HALF_UP);
 
         return new TaxCalculateResponse(subtotal, taxTotal, total, effectiveRate, breakdown);
-    }
-
-    @Transactional
-    public TaxInvoice generateInvoice(Long orderId) {
-        return taxInvoiceRepository.findByOrderId(orderId).orElseGet(() -> {
-            String invoiceNumber = "INV-" + Year.now().getValue() + "-"
-                    + String.format("%06d", taxInvoiceRepository.count() + 1000);
-
-            TaxInvoice invoice = TaxInvoice.builder()
-                    .orderId(orderId)
-                    .subtotal(BigDecimal.ZERO)
-                    .taxAmount(BigDecimal.ZERO)
-                    .total(BigDecimal.ZERO)
-                    .taxRate(VAT_DEFAULT)
-                    .buyerType(BuyerType.B2C)
-                    .invoiceStatus(InvoiceStatus.ISSUED)
-                    .invoiceNumber(invoiceNumber)
-                    .issuedAt(Instant.now())
-                    .build();
-            return taxInvoiceRepository.save(invoice);
-        });
-    }
-
-    @Transactional
-    public void cancelInvoice(Long invoiceId) {
-        TaxInvoice invoice = taxInvoiceRepository.findById(invoiceId)
-                .orElseThrow(() -> new ResourceNotFoundException("Invoice not found: " + invoiceId));
-        invoice.setInvoiceStatus(InvoiceStatus.CANCELLED);
-        taxInvoiceRepository.save(invoice);
-        log.info("Invoice {} cancelled", invoiceId);
     }
 
     @Transactional(readOnly = true)

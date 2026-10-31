@@ -42,7 +42,7 @@ public class CheckoutService implements CheckoutUseCase {
 
     @Override
     public OrderDto checkout(CheckoutRequest req, Long userId) {
-        // docs §13.11.2: scope theo owner, chống lộ order khi đoán key
+        // scope by owner to prevent order enumeration via idempotency key
         var existing = orderQueryService.findByUserIdAndIdempotencyKey(userId, req.idempotencyKey());
         if (existing.isPresent()) return existing.get();
 
@@ -61,7 +61,7 @@ public class CheckoutService implements CheckoutUseCase {
                 .map(CartItemSnapshot::skuId)
                 .toList();
 
-        // Parallel fork-join: fetch prices + validate voucher concurrently
+        // fetch prices and validate voucher concurrently
         CompletableFuture<Map<Long, BigDecimal>> pricesFuture = CompletableFuture
                 .supplyAsync(() -> catalogClient.getPrices(skuIds), checkoutExecutor);
 
@@ -101,7 +101,7 @@ public class CheckoutService implements CheckoutUseCase {
                 .map(item -> new StockDecrementCommand(item.skuId(), item.quantity()))
                 .toList();
 
-        // Phase 1: Lua gatekeeper (Out of transaction)
+        // Phase 1: Lua atomic decrement, outside transaction
         List<Long> failedSkuIds = inventoryClient.decrementBatch(stockItems);
         if (!failedSkuIds.isEmpty())
             throw new InvalidRequestException(Message.format(Message.Order.INSUFFICIENT_STOCK_SKUS, failedSkuIds));
@@ -109,7 +109,7 @@ public class CheckoutService implements CheckoutUseCase {
         if (!voucherCodes.isEmpty())
             promotionClient.reservePromotions(voucherCodes, List.of());
 
-        // Phase 2: DB Transaction — BE tự tính ship, ghi đè số FE
+        // Phase 2: DB transaction; server recalculates shipping, ignoring client-supplied value
         BigDecimal shippingFee = shippingService.resolveFee(req.fulfillmentType(), req.shippingAddress());
         BigDecimal finalAmount = subTotal.subtract(discountAmount).add(shippingFee);
         try {
@@ -147,7 +147,7 @@ public class CheckoutService implements CheckoutUseCase {
         }
     }
 
-    /** join() bọc lỗi thành CompletionException → gỡ ra để giữ mã lỗi gốc (400/409 thay vì 500). */
+    /** Unwraps CompletionException so the original error code (400/409) propagates instead of 500. */
     private static <T> T joinUnchecked(CompletableFuture<T> future) {
         try {
             return future.join();

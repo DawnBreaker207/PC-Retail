@@ -14,7 +14,7 @@ public class GuestOrderController {
 
     private final GuestCheckoutService guestCheckoutService;
 
-    // Khách vãng lai: không cần JWT
+    // Guest: no JWT required
     @PostMapping("/guest-checkout")
     public OrderDto guestCheckout(@Valid @RequestBody GuestCheckoutRequest req) {
         return guestCheckoutService.checkout(req);

@@ -54,7 +54,7 @@ public class SubOrderCommandService implements TransitionSubOrderUseCase {
 
         stateMachine.assertValidTransition(subOrder.getStatus(), target);
 
-        // ponytail: CAS gate trước inventory — thua race thì throw ngay, không gọi inventory 2 lần
+        // CAS before inventory call; losing the race throws immediately, avoiding duplicate inventory calls
         int claimed = subOrderRepo.transitionIfStatus(subOrderId, subOrder.getStatus(), target);
         if (claimed == 0) {
             throw new ConflictException(Message.format(Message.Order.INVALID_TRANSITION, "STALE", target));
@@ -68,15 +68,15 @@ public class SubOrderCommandService implements TransitionSubOrderUseCase {
             if (target == SubOrderStatus.CANCELLED || target == SubOrderStatus.EXPIRED) {
                 List<StockDecrementCommand> items = toStockCommands(subOrder.getId());
                 if (subOrder.getStatus() == SubOrderStatus.PENDING_PAYMENT) {
-                    // Chưa trừ kho → chỉ nhả reservation
+                    // stock not yet decremented; release reservation only
                     inventoryClient.release(items, subOrder.getOrderId());
                 } else {
-                    // Đã trừ kho (từ PAID/PROCESSING) → nhập kho bù
+                    // stock already decremented (from PAID/PROCESSING); restock to compensate
                     inventoryClient.restock(items, staffId);
                 }
             }
         } catch (RuntimeException e) {
-            // Compensate: nhả claim CAS nếu inventory fail
+            // roll back CAS claim if inventory call fails
             subOrderRepo.transitionIfStatus(subOrderId, target, subOrder.getStatus());
             throw e;
         }
@@ -94,7 +94,7 @@ public class SubOrderCommandService implements TransitionSubOrderUseCase {
     @Override
     @Transactional
     public SubOrderDto cancel(Long subOrderId, Long userId) {
-        // ponytail: cancel = transition(CANCELLED), xóa logic duplicate
+        // cancel delegates to transition to avoid duplicated logic
         return transition(subOrderId, SubOrderStatus.CANCELLED, userId);
     }
 
@@ -129,7 +129,7 @@ public class SubOrderCommandService implements TransitionSubOrderUseCase {
             if (Boolean.FALSE.equals(locked)) continue;
 
 
-            // ponytail: CAS PENDING_PAYMENT->EXPIRED, đơn đã PAID thì skip (tránh ghi đè)
+            // CAS PENDING_PAYMENT→EXPIRED; already-PAID orders are skipped
             int claimed = subOrderRepo.transitionIfStatus(
                     subOrder.getId(), SubOrderStatus.PENDING_PAYMENT, SubOrderStatus.EXPIRED);
             if (claimed == 0) continue;
@@ -152,7 +152,7 @@ public class SubOrderCommandService implements TransitionSubOrderUseCase {
                 .toList();
     }
 
-    // Risk-gate docs 13.5: đơn guest bị hủy/hết hạn/thanh toán fail thì cộng lịch sử SĐT
+    // record phone abuse for guest orders that are cancelled, expired, or payment-failed
     private void recordGuestAbuse(Long orderId) {
         try {
             orderRepo.findById(orderId).ifPresent(o -> {
@@ -161,7 +161,7 @@ public class SubOrderCommandService implements TransitionSubOrderUseCase {
                 }
             });
         } catch (RuntimeException e) {
-            // Ghi lịch sử không được làm hỏng flow chính
+            // abuse recording must not break the main flow
             log.warn("Record phone abuse failed for order {}", orderId);
         }
     }

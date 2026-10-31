@@ -7,6 +7,8 @@ import com.dawn.cart.port.in.AddCartItemUseCase;
 import com.dawn.cart.port.in.GetCartUseCase;
 import com.dawn.cart.port.in.RemoveCartItemUseCase;
 import com.dawn.cart.port.in.UpdateCartItemUseCase;
+import com.dawn.cart.service.CartCommandService;
+import com.dawn.cart.service.CartQueryService;
 import com.dawn.common.response.ResponseObject;
 import com.dawn.common.security.AuthorizationConstants;
 import com.dawn.common.utils.SecurityUtils;
@@ -24,7 +26,8 @@ public class CartController {
     private final AddCartItemUseCase addCartItemUseCase;
     private final UpdateCartItemUseCase updateCartItemUseCase;
     private final RemoveCartItemUseCase removeCartItemUseCase;
-    private final com.dawn.cart.service.CartService cartService;
+    private final CartCommandService cartCommandService;
+    private final CartQueryService cartQueryService;
 
     @GetMapping
     @PreAuthorize(AuthorizationConstants.CUSTOMER_ONLY)
@@ -63,36 +66,36 @@ public class CartController {
         return ResponseObject.deleted();
     }
 
-    // ---- Guest cart (không cần JWT, key bằng guest_token) ----
+    // Guest cart: no JWT required, keyed by guest_token
 
     @GetMapping("/guest")
     public ResponseObject<CartSummaryDto> getGuestCart(@RequestParam String token) {
-        return ResponseObject.success(cartService.getGuestCart(token));
+        return ResponseObject.success(cartQueryService.getGuestCart(token));
     }
 
     @PostMapping("/guest/items")
     public ResponseObject<CartItemDto> addGuestItem(
             @RequestParam String token, @Valid @RequestBody CartItemRequest req) {
-        return ResponseObject.created(cartService.addGuestItem(token, req.skuId(), req.quantity()));
+        return ResponseObject.created(cartCommandService.addGuestItem(token, req.skuId(), req.quantity()));
     }
 
     @DeleteMapping("/guest/items/{skuId}")
     public ResponseObject<Void> removeGuestItem(
             @RequestParam String token, @PathVariable Long skuId) {
-        cartService.removeGuestItem(token, skuId);
+        cartCommandService.removeGuestItem(token, skuId);
         return ResponseObject.deleted();
     }
 
     @DeleteMapping("/guest")
     public ResponseObject<Void> clearGuestCart(@RequestParam String token) {
-        cartService.clearGuestCart(token);
+        cartCommandService.clearGuestCart(token);
         return ResponseObject.deleted();
     }
 
     @PostMapping("/merge")
     @PreAuthorize(AuthorizationConstants.CUSTOMER_ONLY)
     public ResponseObject<Void> mergeGuestCart(@RequestParam String token) {
-        cartService.mergeGuestCart(token, SecurityUtils.getCurrentUserId());
+        cartCommandService.mergeGuestCart(token, SecurityUtils.getCurrentUserId());
         return ResponseObject.success(null);
     }
 }

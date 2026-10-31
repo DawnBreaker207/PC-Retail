@@ -1,6 +1,5 @@
 package com.dawn.wishlist.service;
 
-import com.dawn.common.exception.wrapper.ConflictException;
 import com.dawn.wishlist.dto.WishlistItemDto;
 import com.dawn.wishlist.entity.WishlistItem;
 import com.dawn.wishlist.repository.WishlistRepository;
@@ -14,29 +13,12 @@ import java.util.List;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class WishlistService {
+public class WishlistQueryService {
 
     private final WishlistRepository wishlistRepository;
 
-    @Transactional
-    public WishlistItemDto addItem(Long userId, Long skuId) {
-        if (wishlistRepository.existsByUserIdAndSkuId(userId, skuId)) {
-            throw new ConflictException("SKU " + skuId + " already in wishlist");
-        }
-        WishlistItem item = WishlistItem.builder()
-                .userId(userId)
-                .skuId(skuId)
-                .build();
-        return WishlistItemDto.from(wishlistRepository.save(item));
-    }
-
-    @Transactional
-    public void removeItem(Long userId, Long skuId) {
-        wishlistRepository.deleteByUserIdAndSkuId(userId, skuId);
-    }
-
     @Transactional(readOnly = true)
-    public List<WishlistItemDto> getWishlist(Long userId) {
+    public List<WishlistItemDto> listByUser(Long userId) {
         return wishlistRepository.findByUserIdOrderByAddedAtDesc(userId)
                 .stream()
                 .map(WishlistItemDto::from)
@@ -44,7 +26,7 @@ public class WishlistService {
     }
 
     @Transactional(readOnly = true)
-    public boolean isWishlisted(Long userId, Long skuId) {
+    public boolean existsInWishlist(Long userId, Long skuId) {
         return wishlistRepository.existsByUserIdAndSkuId(userId, skuId);
     }
 

@@ -5,8 +5,8 @@ import com.dawn.catalog.dto.BrandDto;
 import com.dawn.catalog.entity.Brand;
 import com.dawn.catalog.repository.BrandRepository;
 import com.dawn.catalog.repository.SkuRepository;
-import com.dawn.common.exception.wrapper.InvalidRequestException;
 import com.dawn.common.exception.wrapper.ConflictException;
+import com.dawn.common.exception.wrapper.InvalidRequestException;
 import com.dawn.common.exception.wrapper.ResourceNotFoundException;
 import com.dawn.common.message.Message;
 import lombok.RequiredArgsConstructor;
@@ -15,31 +15,20 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
-import java.util.Comparator;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class BrandService {
+public class BrandCommandService {
+
     private final BrandRepository brandRepository;
     private final SkuRepository skuRepository;
-
-    @Transactional(readOnly = true)
-    public List<BrandDto> getAll() {
-        return brandRepository.findAllByDeletedAtIsNull()
-                .stream()
-                .sorted(Comparator.comparing(Brand::getName))
-                .map(b -> new BrandDto(b.getId(), b.getName(), b.getLogoUrl()))
-                .toList();
-    }
 
     @Transactional
     public BrandDto create(BrandRequest req) {
         if (brandRepository.existsByNameAndDeletedAtIsNull(req.name())) {
             throw new ConflictException(Message.Catalog.BRAND_ALREADY_EXISTS);
         }
-
         Brand brand = Brand.builder()
                 .name(req.name())
                 .logoUrl(req.logoUrl())
@@ -65,7 +54,6 @@ public class BrandService {
         if (skuRepository.existsByBrandIdAndDeletedAtIsNull(id)) {
             throw new InvalidRequestException(Message.Catalog.BRAND_HAS_SKU);
         }
-
         brand.setDeletedAt(Instant.now());
         brandRepository.save(brand);
     }

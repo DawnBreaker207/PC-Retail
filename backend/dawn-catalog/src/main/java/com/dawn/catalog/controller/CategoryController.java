@@ -2,7 +2,8 @@ package com.dawn.catalog.controller;
 
 import com.dawn.catalog.controller.request.CategoryRequest;
 import com.dawn.catalog.dto.CategoryDto;
-import com.dawn.catalog.service.CategoryService;
+import com.dawn.catalog.service.CategoryCommandService;
+import com.dawn.catalog.service.CategoryQueryService;
 import com.dawn.common.response.ResponseObject;
 import com.dawn.common.security.AuthorizationConstants;
 import jakarta.validation.Valid;
@@ -16,30 +17,31 @@ import java.util.List;
 @RequestMapping("/categories")
 @RequiredArgsConstructor
 public class CategoryController {
-    private final CategoryService categoryService;
+    private final CategoryCommandService categoryCommandService;
+    private final CategoryQueryService categoryQueryService;
 
     @GetMapping("")
     public ResponseObject<List<CategoryDto>> getTree() {
-        return ResponseObject.success(categoryService.getTree());
+        return ResponseObject.success(categoryQueryService.getTree());
     }
 
     @PostMapping("")
     @PreAuthorize(AuthorizationConstants.ADMIN_ONLY)
     public ResponseObject<CategoryDto> create(@Valid @RequestBody CategoryRequest request) {
-        return ResponseObject.created(categoryService.create(request));
+        return ResponseObject.created(categoryCommandService.create(request));
     }
 
     @PutMapping("/{id}")
     @PreAuthorize(AuthorizationConstants.ADMIN_ONLY)
     public ResponseObject<CategoryDto> update(@PathVariable Long id,
                                               @Valid @RequestBody CategoryRequest request) {
-        return ResponseObject.success(categoryService.update(id, request));
+        return ResponseObject.success(categoryCommandService.update(id, request));
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize(AuthorizationConstants.ADMIN_ONLY)
     public ResponseObject<Void> delete(@PathVariable Long id) {
-        categoryService.delete(id);
+        categoryCommandService.delete(id);
         return ResponseObject.deleted();
     }
 

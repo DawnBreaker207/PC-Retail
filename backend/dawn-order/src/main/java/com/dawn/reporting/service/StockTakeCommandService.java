@@ -1,11 +1,12 @@
 package com.dawn.reporting.service;
 
 import com.dawn.common.exception.wrapper.ConflictException;
+import com.dawn.common.exception.wrapper.InvalidRequestException;
 import com.dawn.common.exception.wrapper.ResourceNotFoundException;
 import com.dawn.reporting.entity.StockTakeItem;
 import com.dawn.reporting.entity.StockTakeSession;
-import com.dawn.reporting.infra.persistence.JpaStockTakeItemRepository;
-import com.dawn.reporting.infra.persistence.JpaStockTakeSessionRepository;
+import com.dawn.reporting.repository.JpaStockTakeItemRepository;
+import com.dawn.reporting.repository.JpaStockTakeSessionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -17,7 +18,7 @@ import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
-public class StockTakeService {
+public class StockTakeCommandService {
 
     private final JpaStockTakeSessionRepository sessionRepo;
     private final JpaStockTakeItemRepository itemRepo;
@@ -26,7 +27,7 @@ public class StockTakeService {
     @Transactional
     public StockTakeSession start(Long staffId, List<Map<String, Object>> counts) {
         if (counts == null || counts.isEmpty()) {
-            throw new com.dawn.common.exception.wrapper.InvalidRequestException("Count list must not be empty");
+            throw new InvalidRequestException("Count list must not be empty");
         }
         StockTakeSession session = sessionRepo.save(StockTakeSession.builder()
                 .startedBy(staffId).status("IN_PROGRESS").build());
@@ -34,7 +35,7 @@ public class StockTakeService {
             Long skuId = Long.valueOf(String.valueOf(c.get("skuId")));
             int counted = Integer.parseInt(String.valueOf(c.get("countedQuantity")));
             if (counted < 0) {
-                throw new com.dawn.common.exception.wrapper.InvalidRequestException("Counted quantity must be >= 0");
+                throw new InvalidRequestException("Counted quantity must be >= 0");
             }
             Integer systemQty = jdbc.queryForObject(
                     "SELECT COALESCE(stock_quantity,0)-COALESCE(reserved_quantity,0) FROM inventory WHERE sku_id=?",
@@ -57,13 +58,5 @@ public class StockTakeService {
         session.setStatus("COMPLETED");
         session.setCompletedAt(Instant.now());
         return sessionRepo.save(session);
-    }
-
-    @Transactional(readOnly = true)
-    public List<Map<String, Object>> variances(Long sessionId) {
-        return jdbc.queryForList(
-                "SELECT sku_id, system_quantity, counted_quantity, (counted_quantity - system_quantity) AS variance "
-                        + "FROM stock_take_item WHERE session_id = ? ORDER BY ABS(counted_quantity - system_quantity) DESC",
-                sessionId);
     }
 }

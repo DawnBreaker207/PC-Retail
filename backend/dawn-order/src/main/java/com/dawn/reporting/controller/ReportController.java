@@ -17,7 +17,7 @@ public class ReportController {
 
     private final JdbcTemplate jdbc;
 
-    // ponytail: JDBC trực tiếp thay repository — báo cáo chỉ đọc, không cần entity
+    // direct JDBC instead of repository; read-only reports do not need entities
     @GetMapping("/revenue")
     public List<Map<String, Object>> revenue(@RequestParam String from, @RequestParam String to) {
         return jdbc.queryForList("""
@@ -41,7 +41,7 @@ public class ReportController {
                 """, from, to, safeLimit);
     }
 
-    // ponytail: CSV thuần text thay Excel lib — đủ cho kế toán, thêm lib khi cần xlsx thật
+    // plain text CSV instead of Excel lib; sufficient for accounting, add xlsx lib if needed
     @GetMapping(value = "/export", produces = "text/csv")
     public String export(@RequestParam String from, @RequestParam String to,
                          @RequestParam(defaultValue = "revenue") String type) {
