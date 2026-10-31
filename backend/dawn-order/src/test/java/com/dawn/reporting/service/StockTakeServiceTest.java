@@ -31,11 +31,11 @@ class StockTakeServiceTest {
     @Mock
     JdbcTemplate jdbc;
 
-    StockTakeService service;
+    StockTakeCommandService service;
 
     @BeforeEach
     void setUp() {
-        service = new StockTakeService(sessionRepo, itemRepo, jdbc);
+        service = new StockTakeCommandService(sessionRepo, itemRepo, jdbc);
         lenient().when(sessionRepo.save(any())).thenAnswer(inv -> inv.getArgument(0));
     }
 
