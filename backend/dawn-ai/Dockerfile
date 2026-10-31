@@ -1,4 +1,4 @@
-FROM eclipse-temurin:21-jre-alpine
+FROM eclipse-temurin:25-jre-alpine
 RUN apk add --no-cache curl
 WORKDIR /app
 COPY target/dawn-ai-0.0.1-SNAPSHOT-exec.jar app.jar

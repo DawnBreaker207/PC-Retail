@@ -8,6 +8,8 @@ logging:
 spring:
   application:
     name: dawn-auth
+  main:
+    allow-bean-definition-overriding: true
   config:
     import: 'optional:file:.env[.properties]'
   datasource:
