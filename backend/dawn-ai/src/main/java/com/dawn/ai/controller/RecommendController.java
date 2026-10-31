@@ -4,7 +4,7 @@ import com.dawn.ai.dto.AiSearchResult;
 import com.dawn.ai.port.in.SearchProductUseCase;
 import com.dawn.ai.service.CooccurrenceService;
 import com.dawn.ai.service.UserPreferenceService;
-import com.dawn.builder.service.BuildSuggestionService;
+import com.dawn.builder.service.BuildQueryService;
 import com.dawn.common.response.ResponseObject;
 import com.dawn.common.security.AuthorizationConstants;
 import com.dawn.common.utils.SecurityUtils;
@@ -22,10 +22,10 @@ public class RecommendController {
 
     private final SearchProductUseCase searchProductUseCase;
     private final UserPreferenceService userPreferenceService;
-    private final BuildSuggestionService buildSuggestionService;
+    private final BuildQueryService buildQueryService;
     private final CooccurrenceService cooccurrenceService;
 
-    // Content-based: top-K gần nhất theo cosine — dùng search theo tên SKU gốc
+    // content-based: top-K cosine nearest neighbors, keyed by SKU id
     @GetMapping("/ai/recommendations/{skuId}")
     @PreAuthorize(AuthorizationConstants.CUSTOMER_ONLY)
     public ResponseObject<List<AiSearchResult>> recommend(@PathVariable Long skuId) {
@@ -40,7 +40,6 @@ public class RecommendController {
         return ResponseObject.success(searchProductUseCase.similar(skuId, limit));
     }
 
-    // Admin dedup-check khi tạo SKU mới
     @PostMapping("/ai/dedup-check")
     @PreAuthorize(AuthorizationConstants.ADMIN_ONLY)
     public ResponseObject<List<AiSearchResult>> dedupCheck(@RequestBody Map<String, String> body) {
@@ -62,13 +61,13 @@ public class RecommendController {
         return ResponseObject.success(cooccurrenceService.getRecommendations(skuId, Math.min(limit, 10)));
     }
 
-    // Gợi ý cấu hình theo clickstream + ngân sách; user chưa có sở thích thì xếp theo giá
+    // falls back to price-ordering when user has no preference weights yet
     @GetMapping("/ai/build-suggestions")
-    public ResponseObject<List<BuildSuggestionService.SuggestedBuild>> suggestBuilds(
+    public ResponseObject<List<BuildQueryService.SuggestedBuild>> suggestBuilds(
             @RequestParam(required = false) BigDecimal budget,
             @RequestParam(defaultValue = "3") int limit) {
         Long userId = SecurityUtils.getCurrentUserId();
         Map<String, Double> weights = userId == null ? Map.of() : userPreferenceService.weights(userId);
-        return ResponseObject.success(buildSuggestionService.suggest(weights, budget, limit));
+        return ResponseObject.success(buildQueryService.suggest(weights, budget, limit));
     }
 }

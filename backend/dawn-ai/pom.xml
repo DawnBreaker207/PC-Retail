@@ -20,7 +20,7 @@
         </dependency>
         <dependency>
             <groupId>com.dawn.backend</groupId>
-            <artifactId>dawn-builder</artifactId>
+            <artifactId>dawn-catalog</artifactId>
         </dependency>
         <!--  Spring Boot ML & Tools Pack   -->
         <dependency>
