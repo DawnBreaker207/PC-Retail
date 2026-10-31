@@ -36,6 +36,7 @@ spring:
     table: flyway_schema_history_user
     validate-on-migrate: false
     baseline-on-migrate: true
+    baseline-version: '0'
   data:
     redis:
       host: ${REDIS_HOST}
@@ -49,10 +50,10 @@ spring:
             read-timeout: 5000
             logger-level: basic
   mail:
-    host: ${MAIL_HOST}
-    port: ${MAIL_PORT}
-    username: ${MAIL_USER}
-    password: ${MAIL_PASS}
+    host: ${MAIL_HOST:localhost}
+    port: ${MAIL_PORT:25}
+    username: ${MAIL_USER:}
+    password: ${MAIL_PASS:}
     properties:
       mail:
         smtp:

@@ -51,7 +51,7 @@ public class RatingCommandService {
 
         ratingRepository.save(rating);
 
-        outboxPublisher.publish("rating-events", String.valueOf(req.skuId()), Map.of(
+        outboxPublisher.publish("rating-events", "Rating", rating.getId(), Map.of(
                 "type", "RATING_SUBMITTED",
                 "ratingId", rating.getId(),
                 "skuId", req.skuId(),
@@ -68,7 +68,7 @@ public class RatingCommandService {
         rating.setStatus(RatingStatus.APPROVED);
         ratingRepository.save(rating);
 
-        outboxPublisher.publish("rating-events", String.valueOf(rating.getSkuId()), Map.of(
+        outboxPublisher.publish("rating-events", "Rating", ratingId, Map.of(
                 "type", "RATING_APPROVED",
                 "ratingId", ratingId,
                 "skuId", rating.getSkuId(),

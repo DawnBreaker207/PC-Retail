@@ -11,3 +11,10 @@ spring:
     table: flyway_schema_history_ai
     validate-on-migrate: false
     baseline-on-migrate: true
+    baseline-version: '0'
+
+app:
+  jwt:
+    issuer: ${JWT_ISSUER:pc-retail}
+    key-id: ${JWT_KEY_ID:pc-retail}
+    public-key: ${JWT_PUBLIC_KEY:}

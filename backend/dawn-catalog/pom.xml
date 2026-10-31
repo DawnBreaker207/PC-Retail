@@ -33,11 +33,27 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-batch</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.batch</groupId>
+            <artifactId>spring-batch-core</artifactId>
+            <version>5.2.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.batch</groupId>
+            <artifactId>spring-batch-infrastructure</artifactId>
+            <version>5.2.1</version>
+        </dependency>
         <!-- EasyExcel for reading .xlsx files -->
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>easyexcel</artifactId>
             <version>4.0.3</version>
+        </dependency>
+        <!-- AWS S3 SDK for Media upload & presigning -->
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>s3</artifactId>
+            <version>2.29.35</version>
         </dependency>
         <!-- OpenSearch (opt-in) -->
         <dependency>

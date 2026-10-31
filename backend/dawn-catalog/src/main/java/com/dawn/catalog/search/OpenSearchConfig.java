@@ -5,12 +5,14 @@ import org.apache.http.HttpHost;
 import org.opensearch.client.RestClient;
 import org.opensearch.client.RestHighLevelClient;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Slf4j
 @Configuration
+@ConditionalOnClass(name = "org.opensearch.client.RestHighLevelClient")
 @ConditionalOnProperty(name = "app.opensearch.enabled", havingValue = "true", matchIfMissing = false)
 public class OpenSearchConfig {
 

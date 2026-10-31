@@ -11,6 +11,7 @@ import org.opensearch.index.query.MultiMatchQueryBuilder;
 import org.opensearch.index.query.QueryBuilders;
 import org.opensearch.search.builder.SearchSourceBuilder;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 import tools.jackson.databind.JsonNode;
@@ -24,7 +25,8 @@ import java.util.Map;
 
 @Slf4j
 @Service
-@ConditionalOnBean(RestHighLevelClient.class)
+@ConditionalOnClass(name = "org.opensearch.client.RestHighLevelClient")
+@ConditionalOnBean(type = "org.opensearch.client.RestHighLevelClient")
 @RequiredArgsConstructor
 public class OpenSearchIndexService {
 

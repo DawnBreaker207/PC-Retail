@@ -16,14 +16,32 @@ spring:
       server:
         webflux:
           routes:
-            - id: dawn-user
+            - id: dawn-auth
               uri: ${AUTH_SERVICE_URL:http://localhost:8085}
               predicates:
-                - Path=/api/v1/auth/**,/api/v1/users/**
+                - Path=/api/v1/auth/**
               filters:
                 - name: RequestRateLimiter
                   args:
                     rate-limiter: "#{@strictRateLimiter}"
+                    key-resolver: "#{@userKeyResolver}"
+            - id: dawn-user
+              uri: ${USER_SERVICE_URL:http://localhost:8086}
+              predicates:
+                - Path=/api/v1/users/**
+              filters:
+                - name: RequestRateLimiter
+                  args:
+                    rate-limiter: "#{@strictRateLimiter}"
+                    key-resolver: "#{@userKeyResolver}"
+            - id: dawn-ai
+              uri: ${AI_SERVICE_URL:http://localhost:8087}
+              predicates:
+                - Path=/api/v1/ai/**,/api/v1/recommendations/**
+              filters:
+                - name: RequestRateLimiter
+                  args:
+                    rate-limiter: "#{@standardRateLimiter}"
                     key-resolver: "#{@userKeyResolver}"
             - id: dawn-order
               uri: ${ORDER_SERVICE_URL:http://localhost:8081}

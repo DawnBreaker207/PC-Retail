@@ -21,16 +21,16 @@ public class JWTUtils {
 
     private final JwtKeyProvider keyProvider;
 
-    @Value("${app.jwtExpirationsMs}")
+    @Value("${app.jwtExpirationsMs:900000}")
     private long jwtExpirations;
 
-    @Value("${app.jwtRefreshExpirationsMs}")
+    @Value("${app.jwtRefreshExpirationsMs:604800000}")
     private long refreshTokenExpirations;
 
-    @Value("${app.jwtCookieName}")
+    @Value("${app.jwtCookieName:accessToken}")
     private String jwtCookie;
 
-    @Value("${app.jwtRefreshCookieName}")
+    @Value("${app.jwtRefreshCookieName:refreshToken}")
     private String jwtRefreshCookie;
 
     private final String endpoint = "/api/v1/auth/refresh-token";

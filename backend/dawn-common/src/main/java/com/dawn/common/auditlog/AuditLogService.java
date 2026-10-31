@@ -85,7 +85,7 @@ public class AuditLogService {
                     .newValue(toJson(newValue))
                     .actorId(actorId)
                     .actorRole(actorRole)
-                    .tier(tier)
+                    .tier((short) tier)
                     .status(status)
                     .errorMessage(errorMessage)
                     .build();

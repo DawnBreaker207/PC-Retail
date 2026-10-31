@@ -36,6 +36,7 @@ spring:
     table: flyway_schema_history_catalog
     validate-on-migrate: false
     baseline-on-migrate: true
+    baseline-version: '0'
   data:
     redis:
       host: ${REDIS_HOST}

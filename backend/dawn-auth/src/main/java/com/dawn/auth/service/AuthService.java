@@ -22,20 +22,19 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final TokenService tokenService;
 
-    private static final AtomicLong USER_ID_SEQ = new AtomicLong(1000);
-
     @Transactional
     public TokenResponse register(RegisterRequest req) {
         if (userCredentialRepository.existsByEmail(req.email())) {
             throw new IllegalArgumentException("Email already registered");
         }
-        Long userId = Optional.ofNullable(req.userId()).orElseGet(USER_ID_SEQ::incrementAndGet);
+        Long userId = Optional.ofNullable(req.userId())
+                .orElseGet(() -> userCredentialRepository.findMaxUserId() + 1);
 
         UserCredential cred = UserCredential.builder()
                 .userId(userId)
                 .email(req.email())
                 .passwordHash(passwordEncoder.encode(req.password()))
-                .roles(new String[]{"ROLE_USER"})
+                .roles(new String[]{"ROLE_USER", "ROLE_CUSTOMER"})
                 .build();
         userCredentialRepository.save(cred);
 

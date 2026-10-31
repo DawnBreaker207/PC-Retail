@@ -37,7 +37,7 @@ public class AuditLog extends AbstractMappedEntity {
 
     private String ipAddress;
 
-    private Integer tier;
+    private Short tier;
 
     private String status;
 

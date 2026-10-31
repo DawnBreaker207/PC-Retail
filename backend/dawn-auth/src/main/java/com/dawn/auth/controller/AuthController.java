@@ -5,6 +5,7 @@ import com.dawn.auth.dto.RefreshRequest;
 import com.dawn.auth.dto.RegisterRequest;
 import com.dawn.auth.dto.TokenResponse;
 import com.dawn.auth.service.AuthService;
+import com.dawn.common.security.JwtKeyProvider;
 import com.dawn.common.utils.JWTUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -14,14 +15,23 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
-@RequestMapping("/api/v1/auth")
+@RequestMapping("/auth")
 @Tag(name = "Auth", description = "Authentication endpoints")
 @RequiredArgsConstructor
 public class AuthController {
 
     private final AuthService authService;
     private final JWTUtils jwtUtils;
+    private final JwtKeyProvider jwtKeyProvider;
+
+    @GetMapping("/jwks")
+    @Operation(summary = "Get JSON Web Key Set (JWKS)")
+    public ResponseEntity<Map<String, Object>> jwks() {
+        return ResponseEntity.ok(jwtKeyProvider.jwks());
+    }
 
     @PostMapping("/register")
     @Operation(summary = "Register a new user account")

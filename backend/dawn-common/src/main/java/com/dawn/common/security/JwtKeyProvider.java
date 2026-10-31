@@ -32,8 +32,8 @@ public class JwtKeyProvider {
     private final String issuer;
 
     public JwtKeyProvider(
-            @Value("${app.jwt.public-key:}") String publicKeyValue,
-            @Value("${app.jwt.private-key:}") String privateKeyValue,
+            @Value("${app.jwt.public-key:${JWT_PUBLIC_KEY:}}") String publicKeyValue,
+            @Value("${app.jwt.private-key:${JWT_PRIVATE_KEY:}}") String privateKeyValue,
             @Value("${app.jwt.key-id:pc-retail}") String keyId,
             @Value("${app.jwt.issuer:pc-retail}") String issuer) {
         if (publicKeyValue == null || publicKeyValue.isBlank()) {

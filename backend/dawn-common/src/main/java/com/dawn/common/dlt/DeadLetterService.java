@@ -1,8 +1,8 @@
 package com.dawn.common.dlt;
 
 import com.dawn.common.util.AfterCommit;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,10 +12,15 @@ import java.util.List;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class DeadLetterService {
     private final DeadLetterRepository deadLetterRepository;
-    private final KafkaTemplate<String, String> kafkaTemplate;
+    @SuppressWarnings("rawtypes")
+    @Autowired(required = false)
+    private KafkaTemplate kafkaTemplate;
+
+    public DeadLetterService(DeadLetterRepository deadLetterRepository) {
+        this.deadLetterRepository = deadLetterRepository;
+    }
 
     @Transactional
     public DeadLetterRecord recordFailure(String topic, String key, String payload, String exceptionMessage) {
@@ -36,10 +41,14 @@ public class DeadLetterService {
     }
 
     @Transactional
+    @SuppressWarnings("unchecked")
     public void replay(Long id) {
         DeadLetterRecord record = deadLetterRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("DLT record not found with id: " + id));
         log.info("Replaying DLT record id={}, original topic='{}', key='{}'", id, record.getTopic(), record.getMessageKey());
+        if (kafkaTemplate == null) {
+            throw new IllegalStateException("KafkaTemplate not available for replay");
+        }
         AfterCommit.run(() ->
             kafkaTemplate.send(record.getTopic(), record.getMessageKey(), record.getPayload())
         );
