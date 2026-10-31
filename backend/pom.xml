@@ -178,8 +178,7 @@
     </dependencyManagement>
 
     <modules>
-        <module>dawn-monolith</module>
-        <module>dawn-common</module>
+<module>dawn-common</module>
         <module>dawn-catalog</module>
         <module>dawn-inventory</module>
         <module>dawn-user</module>
