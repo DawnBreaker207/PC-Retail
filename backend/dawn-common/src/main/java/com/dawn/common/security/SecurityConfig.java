@@ -53,10 +53,12 @@ public class SecurityConfig {
             "/api/v1/payments/webhook/**",
             // service-to-service; gated by InternalTokenFilter with shared token
             "/api/v1/internal/**",
+            "/internal/**",
             // STOMP handshake must be reachable; authentication happens on
             // the CONNECT frame (see StompAuthChannelInterceptor).
             "/ws/**",
-            "/actuator/**"
+            "/actuator/**",
+            "/error"
     };
 
     private final AuthEntryPointJwt unauthorizedHandler;
@@ -66,6 +68,7 @@ public class SecurityConfig {
     private final CorsConfig corsConfig;
 
     private final AuthTokenFilter authTokenFilter;
+    private final InternalTokenFilter internalTokenFilter;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -81,6 +84,7 @@ public class SecurityConfig {
                 .sessionManagement(this::configSession)
                 .authorizeHttpRequests(this::configAuth);
 
+        http.addFilterBefore(internalTokenFilter, UsernamePasswordAuthenticationFilter.class);
         http.addFilterBefore(authTokenFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

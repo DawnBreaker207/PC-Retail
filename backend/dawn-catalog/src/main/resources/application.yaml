@@ -73,7 +73,7 @@ app:
       host: ${CUSTOM_REDIS_HOST:localhost}
       port: ${CUSTOM_REDIS_PORT:6380}
   internal:
-    token: ${INTERNAL_TOKEN:}
+    token: ${INTERNAL_TOKEN:dawn-internal-secret}
   services:
     mode: distributed
     order-url: ${ORDER_SERVICE_URL:http://localhost:8081}

@@ -88,6 +88,7 @@ services:
       JAVA_TOOL_OPTIONS: "-Xms64m -Xmx128m -XX:+UseSerialGC"
       SERVER_PORT: 8080
       SPRING_PROFILES_ACTIVE: docker
+      INTERNAL_TOKEN: dawn-internal-secret
       AUTH_SERVICE_URL: http://dawn-auth:8085
       ORDER_SERVICE_URL: http://dawn-order:8081
       INVENTORY_SERVICE_URL: http://dawn-inventory:8082
@@ -123,6 +124,7 @@ services:
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       SPRING_PROFILES_ACTIVE: docker
+      INTERNAL_TOKEN: dawn-internal-secret
     healthcheck:
       test: ["CMD-SHELL", "curl -sf http://localhost:8085/actuator/health || exit 1"]
       interval: 15s
@@ -157,6 +159,7 @@ services:
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       SPRING_PROFILES_ACTIVE: docker
+      INTERNAL_TOKEN: dawn-internal-secret
     restart: on-failure:3
 
   dawn-catalog:
@@ -186,6 +189,7 @@ services:
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       SPRING_PROFILES_ACTIVE: docker
+      INTERNAL_TOKEN: dawn-internal-secret
     restart: on-failure:3
 
   dawn-inventory:
@@ -214,6 +218,7 @@ services:
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       SPRING_PROFILES_ACTIVE: docker
+      INTERNAL_TOKEN: dawn-internal-secret
     restart: on-failure:3
 
   dawn-order:
@@ -245,6 +250,7 @@ services:
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       SPRING_PROFILES_ACTIVE: docker
+      INTERNAL_TOKEN: dawn-internal-secret
     restart: on-failure:3
 
   dawn-payment:
@@ -274,6 +280,7 @@ services:
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       SPRING_PROFILES_ACTIVE: docker
+      INTERNAL_TOKEN: dawn-internal-secret
     restart: on-failure:3
 
   dawn-notification:
@@ -302,6 +309,7 @@ services:
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       SPRING_PROFILES_ACTIVE: docker
+      INTERNAL_TOKEN: dawn-internal-secret
     restart: on-failure:3
 
   dawn-ai:
@@ -330,4 +338,5 @@ services:
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       SPRING_PROFILES_ACTIVE: docker
+      INTERNAL_TOKEN: dawn-internal-secret
     restart: on-failure:3

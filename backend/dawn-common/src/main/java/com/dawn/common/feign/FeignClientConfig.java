@@ -11,6 +11,7 @@ import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
 import org.apache.hc.core5.util.TimeValue;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -18,6 +19,15 @@ import java.util.concurrent.TimeUnit;
 
 @Configuration
 public class FeignClientConfig {
+
+    @Bean
+    public RequestInterceptor internalTokenInterceptor(
+            @Value("${app.internal.token:${INTERNAL_TOKEN:dawn-internal-secret}}") String configuredToken) {
+        String token = (configuredToken != null && !configuredToken.isBlank())
+                ? configuredToken
+                : "dawn-internal-secret";
+        return template -> template.header("X-Internal-Token", token);
+    }
 
     @Bean
     public Logger.Level feignLoggerLevel() {

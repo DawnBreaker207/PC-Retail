@@ -59,7 +59,7 @@ app:
     relay:
       enabled: ${OUTBOX_RELAY_ENABLED:true}
   internal:
-    token: ${INTERNAL_TOKEN:}
+    token: ${INTERNAL_TOKEN:dawn-internal-secret}
   services:
     mode: distributed
     order-url: ${ORDER_SERVICE_URL:http://localhost:8081}

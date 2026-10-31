@@ -49,7 +49,7 @@ spring:
 
 app:
   internal:
-    token: ${INTERNAL_TOKEN:}
+    token: ${INTERNAL_TOKEN:dawn-internal-secret}
   jwt:
     issuer: ${JWT_ISSUER:pc-retail}
     key-id: ${JWT_KEY_ID:pc-retail}

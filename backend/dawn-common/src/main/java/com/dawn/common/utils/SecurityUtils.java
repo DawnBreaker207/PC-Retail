@@ -16,7 +16,21 @@ public class SecurityUtils {
         if (auth == null || !auth.isAuthenticated() || auth.getPrincipal() == null) {
             return null;
         }
-        return (Long) auth.getPrincipal();
+        Object principal = auth.getPrincipal();
+        if (principal instanceof Long l) {
+            return l;
+        }
+        if (principal instanceof Number n) {
+            return n.longValue();
+        }
+        if (principal instanceof String s) {
+            try {
+                return Long.valueOf(s);
+            } catch (NumberFormatException ignored) {
+                return null;
+            }
+        }
+        return null;
     }
 
     public static String getCurrentUserRole() {

@@ -65,7 +65,7 @@ app:
     relay:
       enabled: ${OUTBOX_RELAY_ENABLED:true}
   internal:
-    token: ${INTERNAL_TOKEN:}
+    token: ${INTERNAL_TOKEN:dawn-internal-secret}
   services:
     mode: distributed
     catalog-url: ${CATALOG_SERVICE_URL:http://localhost:8084}

@@ -63,7 +63,7 @@ app:
   jwtCookieName: ${JWT_COOKIE_NAME:jwt}
   jwtRefreshCookieName: ${JWT_REFRESH_COOKIE_NAME:refresh}
   internal:
-    token: ${INTERNAL_TOKEN:}
+    token: ${INTERNAL_TOKEN:dawn-internal-secret}
 
 management:
   endpoints:
