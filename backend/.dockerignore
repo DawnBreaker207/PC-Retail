@@ -1,5 +1,11 @@
-.git
-.mvn
-node_modules
-**/*.java
-**/src/
+.git/
+.idea/
+.vscode/
+.settings/
+*.iml
+*.log
+docs/
+k8s/
+**/src/test/
+**/target/
+!**/target/*-exec.jar

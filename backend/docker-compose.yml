@@ -1,0 +1,266 @@
+version: "3.8"
+
+networks:
+  dawn-net:
+    driver: bridge
+
+volumes:
+  postgres_data:
+
+services:
+
+  # ─── Infrastructure ────────────────────────────────────────────────────────
+
+  postgres:
+    image: postgres:16-alpine
+    networks: [dawn-net]
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: dawn_db
+      POSTGRES_USER: dawn
+      POSTGRES_PASSWORD: dawn_secret
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dawn -d dawn_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  redis:
+    image: redis:7-alpine
+    networks: [dawn-net]
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.6.0
+    networks: [dawn-net]
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+
+  kafka:
+    image: confluentinc/cp-kafka:7.6.0
+    networks: [dawn-net]
+    ports:
+      - "29092:29092"
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+    healthcheck:
+      test: ["CMD", "kafka-topics", "--bootstrap-server", "localhost:9092", "--list"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  # ─── Application services ──────────────────────────────────────────────────
+
+  dawn-gateway:
+    build:
+      context: ./dawn-gateway
+    image: dawn-gateway:local
+    networks: [dawn-net]
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      kafka: { condition: service_healthy }
+    environment:
+      JAVA_TOOL_OPTIONS: "-Xms64m -Xmx128m -XX:+UseSerialGC"
+      SERVER_PORT: 8080
+      SPRING_PROFILES_ACTIVE: docker
+    restart: on-failure:3
+
+  dawn-auth:
+    build:
+      context: ./dawn-auth
+    image: dawn-auth:local
+    networks: [dawn-net]
+    ports:
+      - "8085:8085"
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      kafka: { condition: service_healthy }
+    environment:
+      JAVA_TOOL_OPTIONS: "-Xms128m -Xmx256m -XX:+UseSerialGC"
+      SERVER_PORT: 8085
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/dawn_db
+      SPRING_DATASOURCE_USERNAME: dawn
+      SPRING_DATASOURCE_PASSWORD: dawn_secret
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      SPRING_PROFILES_ACTIVE: docker
+    restart: on-failure:3
+
+  dawn-user:
+    build:
+      context: ./dawn-user
+    image: dawn-user:local
+    networks: [dawn-net]
+    ports:
+      - "8086:8086"
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      kafka: { condition: service_healthy }
+    environment:
+      JAVA_TOOL_OPTIONS: "-Xms128m -Xmx256m -XX:+UseSerialGC"
+      SERVER_PORT: 8086
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/dawn_db
+      SPRING_DATASOURCE_USERNAME: dawn
+      SPRING_DATASOURCE_PASSWORD: dawn_secret
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      SPRING_PROFILES_ACTIVE: docker
+    restart: on-failure:3
+
+  dawn-catalog:
+    build:
+      context: ./dawn-catalog
+    image: dawn-catalog:local
+    networks: [dawn-net]
+    ports:
+      - "8084:8084"
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      kafka: { condition: service_healthy }
+    environment:
+      JAVA_TOOL_OPTIONS: "-Xms256m -Xmx512m -XX:+UseG1GC"
+      SERVER_PORT: 8084
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/dawn_db
+      SPRING_DATASOURCE_USERNAME: dawn
+      SPRING_DATASOURCE_PASSWORD: dawn_secret
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      SPRING_PROFILES_ACTIVE: docker
+    restart: on-failure:3
+
+  dawn-inventory:
+    build:
+      context: ./dawn-inventory
+    image: dawn-inventory:local
+    networks: [dawn-net]
+    ports:
+      - "8082:8082"
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      kafka: { condition: service_healthy }
+    environment:
+      JAVA_TOOL_OPTIONS: "-Xms128m -Xmx256m -XX:+UseSerialGC"
+      SERVER_PORT: 8082
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/dawn_db
+      SPRING_DATASOURCE_USERNAME: dawn
+      SPRING_DATASOURCE_PASSWORD: dawn_secret
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      SPRING_PROFILES_ACTIVE: docker
+    restart: on-failure:3
+
+  dawn-order:
+    build:
+      context: ./dawn-order
+    image: dawn-order:local
+    networks: [dawn-net]
+    ports:
+      - "8081:8081"
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      kafka: { condition: service_healthy }
+    environment:
+      JAVA_TOOL_OPTIONS: "-Xms256m -Xmx512m -XX:+UseG1GC"
+      SERVER_PORT: 8081
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/dawn_db
+      SPRING_DATASOURCE_USERNAME: dawn
+      SPRING_DATASOURCE_PASSWORD: dawn_secret
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      SPRING_PROFILES_ACTIVE: docker
+    restart: on-failure:3
+
+  dawn-payment:
+    build:
+      context: ./dawn-payment
+    image: dawn-payment:local
+    networks: [dawn-net]
+    ports:
+      - "8083:8083"
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      kafka: { condition: service_healthy }
+    environment:
+      JAVA_TOOL_OPTIONS: "-Xms128m -Xmx256m -XX:+UseSerialGC"
+      SERVER_PORT: 8083
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/dawn_db
+      SPRING_DATASOURCE_USERNAME: dawn
+      SPRING_DATASOURCE_PASSWORD: dawn_secret
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      SPRING_PROFILES_ACTIVE: docker
+    restart: on-failure:3
+
+  dawn-notification:
+    build:
+      context: ./dawn-notification
+    image: dawn-notification:local
+    networks: [dawn-net]
+    ports:
+      - "8090:8090"
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      kafka: { condition: service_healthy }
+    environment:
+      JAVA_TOOL_OPTIONS: "-Xms128m -Xmx192m -XX:+UseSerialGC"
+      SERVER_PORT: 8090
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/dawn_db
+      SPRING_DATASOURCE_USERNAME: dawn
+      SPRING_DATASOURCE_PASSWORD: dawn_secret
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      SPRING_PROFILES_ACTIVE: docker
+    restart: on-failure:3
+
+  dawn-ai:
+    build:
+      context: ./dawn-ai
+    image: dawn-ai:local
+    networks: [dawn-net]
+    ports:
+      - "8087:8087"
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      kafka: { condition: service_healthy }
+    environment:
+      JAVA_TOOL_OPTIONS: "-Xms256m -Xmx512m -XX:+UseG1GC"
+      SERVER_PORT: 8087
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/dawn_db
+      SPRING_DATASOURCE_USERNAME: dawn
+      SPRING_DATASOURCE_PASSWORD: dawn_secret
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      SPRING_PROFILES_ACTIVE: docker
+    restart: on-failure:3
