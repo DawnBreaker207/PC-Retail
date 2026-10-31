@@ -1,3 +1,7 @@
+server:
+  port: ${SERVER_PORT:8087}
+  shutdown: graceful
+
 spring:
   application:
     name: dawn-ai
