@@ -1,7 +1,8 @@
 package com.dawn.builder.controller;
 
 import com.dawn.builder.entity.BuildTemplate;
-import com.dawn.builder.infra.persistence.JpaBuildTemplateRepository;
+import com.dawn.builder.service.BuildCommandService;
+import com.dawn.builder.service.BuildQueryService;
 import com.dawn.builder.service.CompatibilityEngine;
 import com.dawn.common.security.AuthorizationConstants;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +18,8 @@ import java.util.Map;
 public class BuilderController {
 
     private final CompatibilityEngine engine;
-    private final JpaBuildTemplateRepository templateRepo;
+    private final BuildQueryService buildQueryService;
+    private final BuildCommandService buildCommandService;
 
     @PostMapping("/validate")
     public CompatibilityEngine.Result validate(@RequestBody Map<String, Map<String, Object>> body) {
@@ -29,12 +31,13 @@ public class BuilderController {
 
     @GetMapping("/templates")
     public List<BuildTemplate> templates() {
-        return templateRepo.findAll();
+        return buildQueryService.findAllTemplates();
     }
 
     @GetMapping("/templates/{id}")
     public BuildTemplate template(@PathVariable Long id) {
-        return templateRepo.findById(id).orElseThrow(() -> new com.dawn.common.exception.wrapper.ResourceNotFoundException("Template not found: " + id));
+        return buildQueryService.findTemplateById(id)
+                .orElseThrow(() -> new com.dawn.common.exception.wrapper.ResourceNotFoundException("Template not found: " + id));
     }
 
     @PostMapping("/templates")
@@ -42,7 +45,7 @@ public class BuilderController {
     public BuildTemplate create(@RequestBody BuildTemplate t) {
         t.setId(null);
         t.setCreatedBy(com.dawn.common.utils.SecurityUtils.getCurrentUserId());
-        return templateRepo.save(t);
+        return buildCommandService.saveTemplate(t);
     }
 
     @PutMapping("/templates/{id}")
@@ -53,13 +56,13 @@ public class BuilderController {
         existing.setDescription(t.getDescription());
         existing.setThumbnailUrl(t.getThumbnailUrl());
         existing.setStatus(t.getStatus());
-        return templateRepo.save(existing);
+        return buildCommandService.saveTemplate(existing);
     }
 
     @DeleteMapping("/templates/{id}")
     @PreAuthorize(AuthorizationConstants.ADMIN_ONLY)
     public void delete(@PathVariable Long id) {
-        templateRepo.deleteById(id);
+        buildCommandService.deleteTemplate(id);
     }
 
     @SuppressWarnings("unchecked")

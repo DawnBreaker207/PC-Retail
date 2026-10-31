@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-// ponytail: 10 rules gộp 1 engine (thay 10 class) — đủ kiểm tra spec, tách class khi rule phình to
+// 10 rules in one engine instead of 10 classes — split when rules outgrow this
 @Service
 public class CompatibilityEngine {
 
@@ -68,7 +68,7 @@ public class CompatibilityEngine {
         checkIn(board, pcCase, "formFactor", "supportedFormFactors", "MAINBOARD", "FORM_FACTOR", errors);
         // 9. PSU formFactor in Case
         checkIn(psu, pcCase, "formFactor", "supportedPsuFormFactors", "PSU", "PSU_FORM_FACTOR", errors);
-        // 10. RAM slots capacity (WARNING khi vượt)
+        // 10. RAM slots capacity (WARNING when exceeded)
         if (ram != null && board != null) {
             double sticks = num(ram, "sticks");
             double slots = num(board, "slotCount");

@@ -1,4 +1,4 @@
-package com.dawn.reporting.infra.persistence;
+package com.dawn.reporting.repository;
 
 import com.dawn.reporting.entity.StockTakeItem;
 import org.springframework.data.jpa.repository.JpaRepository;

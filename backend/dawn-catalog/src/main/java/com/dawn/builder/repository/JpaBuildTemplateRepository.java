@@ -1,4 +1,4 @@
-package com.dawn.builder.infra.persistence;
+package com.dawn.builder.repository;
 
 import com.dawn.builder.entity.BuildTemplate;
 import org.springframework.data.jpa.repository.JpaRepository;
