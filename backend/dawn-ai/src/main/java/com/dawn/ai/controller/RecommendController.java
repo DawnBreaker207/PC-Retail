@@ -4,7 +4,7 @@ import com.dawn.ai.dto.AiSearchResult;
 import com.dawn.ai.port.in.SearchProductUseCase;
 import com.dawn.ai.service.CooccurrenceService;
 import com.dawn.ai.service.UserPreferenceService;
-import com.dawn.builder.service.BuildQueryService;
+import com.dawn.ai.service.BuildSuggestionService;
 import com.dawn.common.response.ResponseObject;
 import com.dawn.common.security.AuthorizationConstants;
 import com.dawn.common.utils.SecurityUtils;
@@ -22,7 +22,7 @@ public class RecommendController {
 
     private final SearchProductUseCase searchProductUseCase;
     private final UserPreferenceService userPreferenceService;
-    private final BuildQueryService buildQueryService;
+    private final BuildSuggestionService buildSuggestionService;
     private final CooccurrenceService cooccurrenceService;
 
     // content-based: top-K cosine nearest neighbors, keyed by SKU id
@@ -63,11 +63,11 @@ public class RecommendController {
 
     // falls back to price-ordering when user has no preference weights yet
     @GetMapping("/ai/build-suggestions")
-    public ResponseObject<List<BuildQueryService.SuggestedBuild>> suggestBuilds(
+    public ResponseObject<List<BuildSuggestionService.SuggestedBuild>> suggestBuilds(
             @RequestParam(required = false) BigDecimal budget,
             @RequestParam(defaultValue = "3") int limit) {
         Long userId = SecurityUtils.getCurrentUserId();
         Map<String, Double> weights = userId == null ? Map.of() : userPreferenceService.weights(userId);
-        return ResponseObject.success(buildQueryService.suggest(weights, budget, limit));
+        return ResponseObject.success(buildSuggestionService.suggest(weights, budget, limit));
     }
 }

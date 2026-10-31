@@ -18,10 +18,6 @@
             <groupId>com.dawn.backend</groupId>
             <artifactId>dawn-common</artifactId>
         </dependency>
-        <dependency>
-            <groupId>com.dawn.backend</groupId>
-            <artifactId>dawn-catalog</artifactId>
-        </dependency>
         <!--  Spring Boot ML & Tools Pack   -->
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -48,6 +44,11 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-autoconfigure</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.tngtech.archunit</groupId>
+            <artifactId>archunit-junit5</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
