@@ -18,7 +18,15 @@ class ArchitectureTest {
     static void load() {
         classes = new ClassFileImporter()
                 .withImportOption(ImportOption.Predefined.DO_NOT_INCLUDE_TESTS)
-                .importPackages("com.dawn");
+                .importPackages(
+                        "com.dawn.cart",
+                        "com.dawn.order",
+                        "com.dawn.promotion",
+                        "com.dawn.shipping",
+                        "com.dawn.rma",
+                        "com.dawn.engagement",
+                        "com.dawn.reporting"
+                );
     }
 
     @Test

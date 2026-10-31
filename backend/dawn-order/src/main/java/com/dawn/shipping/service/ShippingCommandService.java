@@ -44,7 +44,7 @@ public class ShippingCommandService implements CreateShipmentUseCase {
 
         shippingOrderRepository.save(order);
 
-        outboxPublisher.publish("shipping-events", String.valueOf(orderId),
+        outboxPublisher.publish("shipping-events", "ShippingOrder", orderId,
                 new ShippingCreatedEvent(orderId, order.getId(), fee, estimatedDelivery));
 
         log.info("Created shipping order {} for orderId={}", order.getId(), orderId);
@@ -60,7 +60,7 @@ public class ShippingCommandService implements CreateShipmentUseCase {
         order.setStatus(status);
         shippingOrderRepository.save(order);
 
-        outboxPublisher.publish("shipping-events", String.valueOf(order.getOrderId()),
+        outboxPublisher.publish("shipping-events", "ShippingOrder", order.getOrderId(),
                 new ShippingStatusUpdatedEvent(order.getOrderId(), trackingCode, newStatus));
 
         log.info("Updated shipping status: trackingCode={}, status={}", trackingCode, newStatus);

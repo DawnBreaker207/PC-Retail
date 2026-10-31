@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.Instant;
 import java.util.List;
 
 @Service
@@ -88,6 +89,25 @@ public class PromotionCheckoutCommandService implements PromotionCheckoutPort {
             voucher.setRemainingQuantity(voucher.getRemainingQuantity() - 1);
             voucherRepo.save(voucher);
         }
+    }
+
+    @Override
+    public VoucherValidationResult validate(String code, BigDecimal orderTotal) {
+        return voucherRepo.findByCodeAndDeletedAtIsNull(code)
+                .map(v -> {
+                    Instant now = Instant.now();
+                    if ((v.getValidFrom() != null && now.isBefore(v.getValidFrom()))
+                            || (v.getValidTo() != null && now.isAfter(v.getValidTo())))
+                        return VoucherValidationResult.fail("Voucher expired or not yet active: " + code);
+                    Integer remaining = cachePort.getVoucherRemaining(v.getCode());
+                    if (remaining != null && remaining <= 0)
+                        return VoucherValidationResult.fail("Voucher exhausted: " + code);
+                    if (orderTotal != null && v.getMinOrderValue() != null
+                            && orderTotal.compareTo(v.getMinOrderValue()) < 0)
+                        return VoucherValidationResult.fail("Order total below minimum for voucher: " + code);
+                    return VoucherValidationResult.ok(calculateDiscount(v, orderTotal != null ? orderTotal : BigDecimal.ZERO));
+                })
+                .orElse(VoucherValidationResult.fail("Voucher not found: " + code));
     }
 
     private BigDecimal calculateDiscount(Voucher voucher, BigDecimal orderTotal) {

@@ -4,8 +4,8 @@ import com.dawn.common.exception.wrapper.ConflictException;
 import com.dawn.common.exception.wrapper.InvalidRequestException;
 import com.dawn.rma.entity.ReturnRequest;
 import com.dawn.rma.entity.ReturnStatus;
-import com.dawn.rma.infra.persistence.JpaRefundRepository;
-import com.dawn.rma.infra.persistence.JpaReturnRequestRepository;
+import com.dawn.rma.port.out.RefundRepository;
+import com.dawn.rma.port.out.ReturnRequestRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -25,17 +25,17 @@ import static org.mockito.Mockito.*;
 class ReturnServiceTest {
 
     @Mock
-    JpaReturnRequestRepository returnRepo;
+    ReturnRequestRepository returnRepo;
     @Mock
-    JpaRefundRepository refundRepo;
+    RefundRepository refundRepo;
     @Mock
     com.dawn.common.contract.OrderQueryPort orderQueryPort;
 
-    ReturnService service;
+    ReturnCommandService service;
 
     @BeforeEach
     void setUp() {
-        service = new ReturnService(returnRepo, refundRepo, orderQueryPort);
+        service = new ReturnCommandService(returnRepo, refundRepo, orderQueryPort);
         lenient().when(orderQueryPort.isSubOrderDelivered(anyLong())).thenReturn(true);
     }
 
@@ -157,9 +157,9 @@ class ReturnServiceTest {
         @Test
         @DisplayName("approve/reject gắn @Loggable tier=1")
         void approveReject_tier1Logged() throws Exception {
-            var approve = ReturnService.class.getMethod("approve", Long.class, Long.class,
+            var approve = ReturnCommandService.class.getMethod("approve", Long.class, Long.class,
                     java.math.BigDecimal.class, String.class);
-            var reject = ReturnService.class.getMethod("reject", Long.class, Long.class);
+            var reject = ReturnCommandService.class.getMethod("reject", Long.class, Long.class);
 
             assertThat(approve.getAnnotation(com.dawn.common.auditlog.Loggable.class).tier()).isOne();
             assertThat(reject.getAnnotation(com.dawn.common.auditlog.Loggable.class).tier()).isOne();

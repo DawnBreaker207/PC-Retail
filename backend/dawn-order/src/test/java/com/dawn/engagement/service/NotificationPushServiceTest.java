@@ -24,11 +24,11 @@ class NotificationPushServiceTest {
     @Mock
     SimpMessagingTemplate messaging;
 
-    NotificationPushService service;
+    NotificationPushCommandService service;
 
     @BeforeEach
     void setUp() {
-        service = new NotificationPushService(notificationRepo, messaging);
+        service = new NotificationPushCommandService(notificationRepo, messaging);
     }
 
     @Test

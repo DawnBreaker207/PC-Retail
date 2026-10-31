@@ -27,11 +27,11 @@ class ReviewServiceTest {
     @Mock
     OrderQueryPort orderQueryPort;
 
-    ReviewService service;
+    ReviewCommandService service;
 
     @BeforeEach
     void setUp() {
-        service = new ReviewService(reviewRepository, orderQueryPort);
+        service = new ReviewCommandService(reviewRepository, orderQueryPort);
     }
 
     private CreateReviewRequest req(int rating) {

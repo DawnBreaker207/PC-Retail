@@ -39,7 +39,7 @@ public class PromotionCheckoutServiceTest {
     PromotionCachePort cachePort;
 
     @InjectMocks
-    PromotionCheckoutService service;
+    PromotionCheckoutCommandService service;
 
 
     // validateStack

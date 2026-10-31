@@ -3,6 +3,7 @@ package com.dawn.builder.service;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import com.dawn.builder.repository.JpaBuildTemplateRepository;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -22,6 +23,9 @@ class BuildSuggestionServiceTest {
     @Mock
     JdbcTemplate jdbcTemplate;
 
+    @Mock
+    JpaBuildTemplateRepository templateRepository;
+
     @Test
     @DisplayName("suggest: ưu tiên danh mục sở thích, lọc theo ngân sách")
     void suggest_ranksByPreferenceAndBudget() {
@@ -37,10 +41,10 @@ class BuildSuggestionServiceTest {
         when(jdbcTemplate.queryForList(anyString(), eq(3L))).thenReturn(List.of(
                 component("CPU", 31L, "cpu đắt", "1500.00", "CPU")));
 
-        List<BuildSuggestionService.SuggestedBuild> result = new BuildSuggestionService(jdbcTemplate)
+        List<BuildQueryService.SuggestedBuild> result = new BuildQueryService(jdbcTemplate, templateRepository)
                 .suggest(Map.of("CPU", 2.0), new BigDecimal("1000.00"), 3);
 
-        assertThat(result).extracting(BuildSuggestionService.SuggestedBuild::name)
+        assertThat(result).extracting(BuildQueryService.SuggestedBuild::name)
                 .containsExactly("Gaming", "Budget");
         assertThat(result.getFirst().score()).isEqualTo(2.0);
         assertThat(result.getFirst().totalPrice()).isEqualByComparingTo("700.00");

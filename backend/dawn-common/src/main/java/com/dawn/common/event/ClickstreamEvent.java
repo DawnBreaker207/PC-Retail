@@ -1,6 +1,6 @@
 package com.dawn.common.event;
 
-import tools.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import java.math.BigDecimal;
 import java.util.Map;

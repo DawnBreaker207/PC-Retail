@@ -1,6 +1,6 @@
 package com.dawn.common.event;
 
-import tools.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record PaymentFailedEvent(Long paymentId, Long orderId, String reason, int version) {

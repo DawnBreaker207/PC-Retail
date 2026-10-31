@@ -17,16 +17,14 @@ public class ReviewQueryService {
 
     @Transactional(readOnly = true)
     public List<ReviewDto> listBySkuId(Long skuId) {
-        return reviewRepository.findAll().stream()
-                .filter(r -> r.getSkuId().equals(skuId))
+        return reviewRepository.findBySkuId(skuId).stream()
                 .map(this::toDto)
                 .toList();
     }
 
     @Transactional(readOnly = true)
     public List<ReviewDto> listByUserId(Long userId) {
-        return reviewRepository.findAll().stream()
-                .filter(r -> r.getUserId().equals(userId))
+        return reviewRepository.findByUserId(userId).stream()
                 .map(this::toDto)
                 .toList();
     }

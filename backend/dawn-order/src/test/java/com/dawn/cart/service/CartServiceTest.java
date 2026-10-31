@@ -39,7 +39,10 @@ public class CartServiceTest {
     InventoryQueryPort inventoryQueryPort;
 
     @InjectMocks
-    CartService cartService;
+    CartCommandService CartCommandService;
+
+    @InjectMocks
+    CartQueryService CartQueryService;
 
     @BeforeEach
     void setUp() {
@@ -63,7 +66,7 @@ public class CartServiceTest {
             CartSummaryDto cached = new CartSummaryDto(List.of(), 0, BigDecimal.ZERO);
             when(cartCachePort.getCart(1L)).thenReturn(Optional.of(cached));
 
-            CartSummaryDto result = cartService.getCart(1L);
+            CartSummaryDto result = CartQueryService.getCart(1L);
 
             assertThat(result).isSameAs(cached);
             verifyNoInteractions(cartItemRepository);
@@ -75,7 +78,7 @@ public class CartServiceTest {
             when(cartCachePort.getCart(1L)).thenReturn(Optional.empty());
             when(cartItemRepository.findByUserId(1L)).thenReturn(List.of());
 
-            CartSummaryDto result = cartService.getCart(1L);
+            CartSummaryDto result = CartQueryService.getCart(1L);
 
             assertThat(result.items()).isEmpty();
             assertThat(result.totalAmount()).isEqualByComparingTo(BigDecimal.ZERO);
@@ -92,7 +95,7 @@ public class CartServiceTest {
             when(cartItemRepository.findByUserId(1L)).thenReturn(List.of(item));
             when(catalogQueryPort.getSkuDetailsMap(List.of(10L))).thenReturn(Map.of(10L, priceInfo));
 
-            CartSummaryDto result = cartService.getCart(1L);
+            CartSummaryDto result = CartQueryService.getCart(1L);
 
             assertThat(result.items()).hasSize(1);
             assertThat(result.totalAmount()).isEqualByComparingTo(BigDecimal.valueOf(10_000_000));
@@ -108,7 +111,7 @@ public class CartServiceTest {
             when(cartItemRepository.findByUserId(1L)).thenReturn(List.of(item));
             when(catalogQueryPort.getSkuDetailsMap(List.of(99L))).thenReturn(Map.of());
 
-            CartSummaryDto result = cartService.getCart(1L);
+            CartSummaryDto result = CartQueryService.getCart(1L);
 
             assertThat(result.items()).hasSize(1);
             assertThat(result.items().get(0).unitPrice()).isEqualByComparingTo(BigDecimal.ZERO);
@@ -125,7 +128,7 @@ public class CartServiceTest {
             when(inventoryQueryPort.getAvailableQuantity(10L)).thenReturn(10);
             when(cartItemRepository.findByUserIdAndSkuId(1L, 10L)).thenReturn(Optional.empty());
 
-            cartService.addItem(1L, 10L, 2);
+            CartCommandService.addItem(1L, 10L, 2);
 
             verify(cartItemRepository).upsertMemberQuantity(1L, 10L, 2);
         }
@@ -137,7 +140,7 @@ public class CartServiceTest {
             CartItem existing = buildCartItem(1L, 10L, 3);
             when(cartItemRepository.findByUserIdAndSkuId(1L, 10L)).thenReturn(Optional.of(existing));
 
-            cartService.addItem(1L, 10L, 2);
+            CartCommandService.addItem(1L, 10L, 2);
 
             verify(cartItemRepository).upsertMemberQuantity(1L, 10L, 5);
         }
@@ -148,7 +151,7 @@ public class CartServiceTest {
             when(inventoryQueryPort.getAvailableQuantity(anyLong())).thenReturn(10);
             when(cartItemRepository.findByUserIdAndSkuId(anyLong(), anyLong())).thenReturn(Optional.empty());
 
-            cartService.addItem(1L, 10L, 1);
+            CartCommandService.addItem(1L, 10L, 1);
         }
     }
 
@@ -165,7 +168,7 @@ public class CartServiceTest {
             when(cartItemRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
             when(inventoryQueryPort.getAvailableQuantity(10L)).thenReturn(10);
 
-            cartService.updateItem(1L, 10L, 5);
+            CartCommandService.updateItem(1L, 10L, 5);
 
             verify(cartItemRepository).save(argThat(i -> i.getQuantity() == 5));
         }
@@ -175,16 +178,16 @@ public class CartServiceTest {
         void itemNotExists_throws() {
             when(cartItemRepository.findByUserIdAndSkuId(1L, 10L)).thenReturn(Optional.empty());
 
-            assertThatThrownBy(() -> cartService.updateItem(1L, 10L, 5))
+            assertThatThrownBy(() -> CartCommandService.updateItem(1L, 10L, 5))
                     .isInstanceOf(ResourceNotFoundException.class);
         }
 
         @Test
         @DisplayName("Quantity <= 0 -> throw InvalidRequestException")
         void nonPositiveQuantity_throws() {
-            assertThatThrownBy(() -> cartService.updateItem(1L, 10L, 0))
+            assertThatThrownBy(() -> CartCommandService.updateItem(1L, 10L, 0))
                     .isInstanceOf(com.dawn.common.exception.wrapper.InvalidRequestException.class);
-            assertThatThrownBy(() -> cartService.addItem(1L, 10L, -2))
+            assertThatThrownBy(() -> CartCommandService.addItem(1L, 10L, -2))
                     .isInstanceOf(com.dawn.common.exception.wrapper.InvalidRequestException.class);
         }
 
@@ -195,7 +198,7 @@ public class CartServiceTest {
             when(cartItemRepository.findByUserIdAndSkuId(1L, 10L)).thenReturn(Optional.of(item));
             when(inventoryQueryPort.getAvailableQuantity(10L)).thenReturn(4);
 
-            assertThatThrownBy(() -> cartService.updateItem(1L, 10L, 5))
+            assertThatThrownBy(() -> CartCommandService.updateItem(1L, 10L, 5))
                     .isInstanceOf(com.dawn.common.exception.wrapper.ResourceInsufficientException.class);
         }
     }
@@ -207,7 +210,7 @@ public class CartServiceTest {
         @Test
         @DisplayName("Remove item -> delete from DB and evict cache")
         void removeItem_deletesAndEvicts() {
-            cartService.removeItem(1L, 10L);
+            CartCommandService.removeItem(1L, 10L);
 
             verify(cartItemRepository).deleteByUserIdAndSkuId(1L, 10L);
         }
@@ -222,7 +225,7 @@ public class CartServiceTest {
         void cacheHit_returnsFromCache() {
             when(cartCachePort.getItemCount(1L)).thenReturn(Optional.of(3));
 
-            int count = cartService.getItemCount(1L);
+            int count = CartQueryService.getItemCount(1L);
 
             assertThat(count).isEqualTo(3);
             verifyNoInteractions(cartItemRepository);
@@ -234,7 +237,7 @@ public class CartServiceTest {
             when(cartCachePort.getItemCount(1L)).thenReturn(Optional.empty());
             when(cartItemRepository.countByUserId(1L)).thenReturn(4);
 
-            int count = cartService.getItemCount(1L);
+            int count = CartQueryService.getItemCount(1L);
 
             assertThat(count).isEqualTo(4);
             verify(cartCachePort).putItemCount(1L, 4);

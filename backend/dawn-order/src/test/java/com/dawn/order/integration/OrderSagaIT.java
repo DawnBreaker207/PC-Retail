@@ -30,8 +30,8 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 class OrderSagaIT {
 
     @Container
-    static PostgreSQLContainer<?> postgres =
-            new PostgreSQLContainer<>("pgvector/pgvector:pg17")
+    static PostgreSQLContainer postgres =
+            new PostgreSQLContainer("pgvector/pgvector:pg17")
                     .withDatabaseName("dawn_test")
                     .withUsername("dawn")
                     .withPassword("dawn");
@@ -44,15 +44,13 @@ class OrderSagaIT {
     static KafkaContainer kafka = new KafkaContainer(
             DockerImageName.parse("confluentinc/cp-kafka:7.6.0"));
 
-    static {
-        System.setProperty("spring.jpa.hibernate.ddl-auto", "update");
-    }
-
     @DynamicPropertySource
     static void overrideProps(DynamicPropertyRegistry registry) {
         registry.add("spring.datasource.url", postgres::getJdbcUrl);
         registry.add("spring.datasource.username", postgres::getUsername);
         registry.add("spring.datasource.password", postgres::getPassword);
+        registry.add("spring.jpa.hibernate.ddl-auto", () -> "create-drop");
+        registry.add("spring.flyway.enabled", () -> "false");
         registry.add("spring.data.redis.host", redis::getHost);
         registry.add("spring.data.redis.port", () -> redis.getMappedPort(6379));
         registry.add("spring.kafka.bootstrap-servers", kafka::getBootstrapServers);

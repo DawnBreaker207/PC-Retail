@@ -41,6 +41,7 @@ import static org.mockito.BDDMockito.*;
 public class CheckoutFlowIT {
     // Container
     @Container
+    @SuppressWarnings("resource")
     static PostgreSQLContainer postgres =
             new PostgreSQLContainer("pgvector/pgvector:pg17")
             .withDatabaseName("dawn_test")
