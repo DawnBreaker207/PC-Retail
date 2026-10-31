@@ -16,7 +16,7 @@ import java.util.Map;
 
 @Entity
 @Table(name = "orders", uniqueConstraints = {
-        // docs §13.11.2: chống lộ order khi đoán key + cho phép trùng key khác user
+        // prevents order enumeration by idempotency key; allows same key across different users
         @UniqueConstraint(name = "uq_orders_user_idempotency", columnNames = {"user_id", "idempotency_key"})
 })
 @Data
@@ -31,7 +31,7 @@ public class Order extends AbstractMappedEntity {
     @Column(name = "user_id")
     private Long userId;
 
-    // Guest checkout (docs 13.5 lite): user_id null + liên hệ khách
+    // Guest checkout: user_id null, contact info stored directly
     @Column(name = "guest_email", length = 255)
     private String guestEmail;
 

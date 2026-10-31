@@ -42,8 +42,7 @@ public class RedisConfig {
 
     private final ObjectMapper mapper;
 
-    // Connect to Redis server — timeout ngắn: Redis stall thì fail-fast trong ~2s
-    // (không treo thread), service fallback DB / trả 503 thay vì treo hàng chục giây
+    // short timeout: fail-fast in ~2s when Redis stalls rather than blocking threads for tens of seconds
     @Bean
     @Primary
     public RedisConnectionFactory redisConnectionFactory() {

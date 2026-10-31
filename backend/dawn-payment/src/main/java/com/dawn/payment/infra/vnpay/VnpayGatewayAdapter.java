@@ -89,8 +89,8 @@ public class VnpayGatewayAdapter implements PaymentGateway {
     public boolean verifyCallback(Map<String, String> params) {
         String receivedHash = params.get("vnp_SecureHash");
         if (receivedHash == null) return false;
-        // VNPay spec: hash mọi field vnp_*, trừ vnp_SecureHash/vnp_SecureHashType.
-        // Không mutate map đầu vào.
+        // VNPay spec: hash all vnp_* fields except vnp_SecureHash/vnp_SecureHashType
+        // do not mutate the input map
         Map<String, String> data = new HashMap<>(params);
         data.remove("vnp_SecureHash");
         data.remove("vnp_SecureHashType");

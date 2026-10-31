@@ -20,12 +20,11 @@ public class SearchProductService implements SearchProductUseCase {
 
     @Override
     public List<AiSearchResult> search(String query, int limit) {
-        // Bước 1: Semantic search → lấy list (skuId, similarityScore)
         List<EmbeddingSearchResult> similar;
         try {
             similar = embeddingPort.searchSimilar(query, limit);
         } catch (Exception e) {
-            // Không có key AI / embedding lỗi → rớt về keyword search, không 500
+            // no AI key or embedding error — fall back to keyword search instead of 500
             org.slf4j.LoggerFactory.getLogger(SearchProductService.class)
                     .warn("Semantic search failed, fallback to keyword: {}", e.toString());
             return keywordSearch(query, limit);
@@ -33,11 +32,9 @@ public class SearchProductService implements SearchProductUseCase {
 
         if (similar.isEmpty()) return keywordSearch(query, limit);
 
-        // Bước 2: Map skuId → similarity score
         Map<Long, Double> scoreMap = similar.stream()
                 .collect(Collectors.toMap(EmbeddingSearchResult::skuId, EmbeddingSearchResult::similarity));
 
-        // Bước 3: Query SKU details
         String inClause = scoreMap.keySet().stream().map(String::valueOf).collect(Collectors.joining(","));
         String sql = String.format("""
                 SELECT s.id, s.name, c.name as category_name, b.name as brand_name,
@@ -58,7 +55,7 @@ public class SearchProductService implements SearchProductUseCase {
                 scoreMap.getOrDefault(rs.getLong("id"), 0.0)
         ));
 
-        // Bước 4: Sort lại theo similarity score (query DB không giữ thứ tự IN clause)
+        // re-sort by similarity score; DB does not preserve IN-clause order
         results.sort((a, b) -> Double.compare(b.similarityScore(), a.similarityScore()));
         return results;
     }
@@ -72,7 +69,7 @@ public class SearchProductService implements SearchProductUseCase {
     @Override
     public List<AiSearchResult> similar(Long skuId, int limit) {
         int safeLimit = Math.min(Math.max(limit, 1), 10);
-        // Lấy vector của SKU gốc rồi tìm K gần nhất (bỏ chính nó)
+        // find K nearest neighbors of the source SKU's vector, excluding itself
         String sql = """
                 SELECT s.id, s.name, c.name as category_name, b.name as brand_name,
                        s.price, COALESCE(s.image_urls->>0, '') AS thumbnail_url,

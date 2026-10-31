@@ -2,7 +2,7 @@ package com.dawn.notification.infra.messaging;
 
 import com.dawn.common.dlt.DeadLetterService;
 import com.dawn.notification.dto.NotificationEvent;
-import com.dawn.notification.service.NotificationService;
+import com.dawn.notification.service.NotificationCommandService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -16,7 +16,7 @@ public class NotificationEventConsumer {
 
     private static final String TOPIC = "notification-events";
 
-    private final NotificationService notificationService;
+    private final NotificationCommandService notificationCommandService;
     private final DeadLetterService deadLetterService;
     private final ObjectMapper objectMapper;
 
@@ -25,7 +25,7 @@ public class NotificationEventConsumer {
         try {
             NotificationEvent event = objectMapper.readValue(payload, NotificationEvent.class);
             log.debug("Received notification event type='{}' channel={} recipientId={}", event.type(), event.channel(), event.recipientId());
-            notificationService.processEvent(event);
+            notificationCommandService.processEvent(event);
         } catch (Exception e) {
             log.error("Failed to process notification event: {}", e.getMessage(), e);
             deadLetterService.recordFailure(TOPIC, null, payload, e.getMessage());

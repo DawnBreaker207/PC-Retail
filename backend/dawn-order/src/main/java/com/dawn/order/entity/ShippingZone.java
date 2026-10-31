@@ -19,7 +19,7 @@ public class ShippingZone extends AbstractMappedEntity {
     @Column(name = "zone_code", nullable = false, unique = true, length = 50)
     private String zoneCode;
 
-    // JSON match đơn giản: {"city": "HCM", "district": "..."} — null = match all
+    // simple city match field; null matches all cities
     @Column(name = "match_city", length = 100)
     private String matchCity;
 

@@ -29,7 +29,6 @@ public class MailtrapAdapter implements EmailPort {
     private String frontendUrl;
 
 
-    // WELCOME MAIL
     @Override
     public void sendWelcomeEmail(String toEmail, String recipientName) {
         Context ctx = new Context();
@@ -39,7 +38,6 @@ public class MailtrapAdapter implements EmailPort {
     }
 
 
-    // OPT MAIL
     @Override
     public void sendOtpVerificationEmail(String toEmail, String recipientName, String otp) {
         Context ctx = new Context();
@@ -50,7 +48,6 @@ public class MailtrapAdapter implements EmailPort {
         sendHtml(toEmail, "Mã xác thực tài khoản PC Retail", "email/otp-verification", ctx);
     }
 
-    // RESET MAIL
     @Override
     public void sendPasswordResetEmail(String toEmail, String recipientName, String rawToken) {
         Context ctx = new Context();
@@ -88,7 +85,7 @@ public class MailtrapAdapter implements EmailPort {
         } catch (MessagingException ex) {
             log.warn("Failed to send email '{}' to {}: {}", subject, to, ex.getMessage());
         } catch (org.springframework.mail.MailException ex) {
-            // SMTP down/timeout: nuốt lỗi, consumer quyết định retry/DLQ — không vỡ flow gọi
+            // SMTP down/timeout: swallowed so the caller's flow is not broken; caller decides retry/DLQ
             log.warn("Mail provider error for '{}' to {}: {}", subject, to, ex.getMessage());
         }
     }

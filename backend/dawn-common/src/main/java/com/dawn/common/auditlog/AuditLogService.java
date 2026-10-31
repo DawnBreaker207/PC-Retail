@@ -56,10 +56,10 @@ public class AuditLogService {
     /** Dispatcher: Tier 1 đồng bộ + tx riêng; Tier 2 bất đồng bộ best-effort. */
     public void log(String action, String entityType, Long entityId, String oldValue, String newValue, Long actorId, String actorRole, int tier) {
         if (tier == 1) {
-            // Tier 1 (refund/dispute): đồng bộ, transaction riêng — sống sót cả khi tx chính rollback
+            // Tier 1 (refund/dispute): synchronous, separate transaction — survives main tx rollback
             self.writeTier1Log(action, entityType, entityId, oldValue, newValue, actorId, actorRole);
         } else {
-            // Qua proxy để @Async có hiệu lực (self-call sẽ chạy đồng bộ)
+            // via proxy so @Async takes effect; direct self-call bypasses the proxy
             self.writeTier2Log(action, entityType, entityId, oldValue, newValue, actorId, actorRole);
         }
     }

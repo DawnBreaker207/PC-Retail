@@ -24,10 +24,8 @@ public class InternalFeignInterceptor implements RequestInterceptor {
 
     @Override
     public void apply(RequestTemplate template) {
-        // Luôn gửi shared internal token
         template.header("X-Internal-Token", internalToken);
 
-        // Forward identity headers nếu có HTTP request hiện tại
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         if (attributes != null) {
             HttpServletRequest request = attributes.getRequest();

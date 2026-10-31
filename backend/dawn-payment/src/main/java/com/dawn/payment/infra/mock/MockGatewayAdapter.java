@@ -63,7 +63,7 @@ public class MockGatewayAdapter implements PaymentGateway {
 
     @Override
     public PaymentDto processWebhook(Long paymentId, Map<String, String> params) {
-        // Mock hỗ trợ webhook (để demo idempotency) — khác VNPay
+        // supports webhook unlike VNPay, for idempotency demo
         return processCallback(paymentId, params);
     }
 

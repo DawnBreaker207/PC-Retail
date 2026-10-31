@@ -30,7 +30,7 @@ public class CreatePaymentService implements CreatePaymentUseCase {
     @Override
     @Transactional
     public CreatePaymentResult create(Long orderId, PaymentMethod method, Long userId) {
-        // FE cũ không gửi method → mặc định VNPAY để không vỡ flow
+        // legacy clients omit method; default to VNPAY to preserve flow
         PaymentMethod effectiveMethod = method == null ? PaymentMethod.VNPAY : method;
         Instant reservedUntil = orderClient.getOrderReservedUntil(orderId);
         if (reservedUntil != null && reservedUntil.isBefore(Instant.now())) {

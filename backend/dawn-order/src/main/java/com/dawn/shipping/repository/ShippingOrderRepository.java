@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 import java.util.Optional;
 
-public interface ShippingOrderRepository extends JpaRepository<ShippingOrder, Long> {
+public interface ShippingOrderRepository extends JpaRepository<ShippingOrder, Long>, com.dawn.shipping.port.out.ShippingOrderRepository {
     Optional<ShippingOrder> findByOrderId(Long orderId);
     List<ShippingOrder> findByStatus(String status);
     Page<ShippingOrder> findByUserIdOrderByCreatedAtDesc(Long userId, Pageable pageable);

@@ -95,7 +95,7 @@ public class PaymentController {
         return queryPaymentStatusUseCase.queryAndSync(id);
     }
 
-    // Mock gateway: dựng kịch bản cho demo/black-box (SUCCESS/FAILED/TIMEOUT/PENDING)
+    // programs mock scenario for demo/black-box (SUCCESS/FAILED/TIMEOUT/PENDING)
     @PostMapping("/mock/{id}/scenario")
     @PreAuthorize(AuthorizationConstants.ADMIN_ONLY)
     public Map<String, String> programMockScenario(

@@ -36,7 +36,7 @@ public class OrderItem extends BaseEntity {
     @Builder.Default
     private BigDecimal discountAllocated = BigDecimal.ZERO;
 
-    // docs §13.11.2: snapshot chống giá 0đ khi SKU soft-delete
+    // snapshot prevents zero-price orders when SKU is soft-deleted
     @Column(name = "product_name")
     private String productName;
 

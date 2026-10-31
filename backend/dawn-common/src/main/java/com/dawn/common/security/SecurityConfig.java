@@ -44,14 +44,14 @@ public class SecurityConfig {
             "/api/v1/builder/**",
             "/api/v1/articles/**",
             "/api/v1/articles",
-            // gợi ý cấu hình theo sở thích/ngân sách (chỉ đọc build_template)
+            // read-only build suggestions by preference/budget
             "/api/v1/ai/build-suggestions",
             "/api/v1/promotion/**",
             "/api/v1/cart/guest/**",
             "/api/v1/orders/guest-checkout",
             "/api/v1/payments/callback/**",
             "/api/v1/payments/webhook/**",
-            // service-to-service; InternalTokenFilter chặn bằng shared token
+            // service-to-service; gated by InternalTokenFilter with shared token
             "/api/v1/internal/**",
             // STOMP handshake must be reachable; authentication happens on
             // the CONNECT frame (see StompAuthChannelInterceptor).

@@ -26,7 +26,7 @@ public class FeignClientConfig {
 
     @Bean
     public Retryer feignRetryer() {
-        // Retry tối đa 3 lần, backoff từ 100ms đến 1000ms
+        // max 3 retries, backoff 100ms–1000ms
         return new Retryer.Default(100, TimeUnit.MILLISECONDS.toMillis(1000), 3);
     }
 

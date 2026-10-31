@@ -95,15 +95,13 @@ public class CheckoutFlowIT {
     // Setup
     @BeforeEach
     void setup() {
-        // Giả lập cart có 1 item
         given(cartClient.getItems(USER_ID))
                 .willReturn(List.of(new CartItemSnapshot(SKU_ID, 2)));
 
-        // Giả lập giá SKU
         given(catalogClient.getPrices(List.of(SKU_ID)))
                 .willReturn(Map.of(SKU_ID, BigDecimal.valueOf(1_000_000)));
 
-        // Inventory decrement thành công (list rỗng = không có SKU nào fail)
+        // empty list means no failed SKUs
         given(inventoryClient.decrementBatch(any()))
                 .willReturn(List.of());
     }
@@ -117,7 +115,6 @@ public class CheckoutFlowIT {
         assertThat(result).isNotNull();
         assertThat(result.paymentStatus()).isEqualTo(PaymentStatus.PENDING);
 
-        // Verify DB thật
         var saved = orderRepository.findByIdempotencyKey(req.idempotencyKey());
         assertThat(saved).isPresent();
         assertThat(saved.get().getUserId()).isEqualTo(USER_ID);
@@ -131,7 +128,6 @@ public class CheckoutFlowIT {
         OrderDto second = checkoutService.checkout(buildRequest(key), USER_ID);
 
         assertThat(first.id()).isEqualTo(second.id());
-        // Inventory chỉ bị gọi 1 lần
         verify(inventoryClient, times(1)).decrementBatch(any());
     }
 
@@ -145,22 +141,21 @@ public class CheckoutFlowIT {
         assertThatThrownBy(() -> checkoutService.checkout(req, USER_ID))
                 .isInstanceOf(InvalidRequestException.class);
 
-        // Không có order trong DB
         assertThat(orderRepository.findByIdempotencyKey(req.idempotencyKey())).isEmpty();
     }
 
     @Disabled("SpyBean stubbing of repository.save() is complex; written/pending in integration test refactor")
     @Test
     void checkout_dbFail_shouldCompensateInventory() {
-        // Giả lập DB fail sau khi inventory đã decrement
-        given(orderRepository.save(any()))  // hoặc bất kỳ repo nào trong transaction
+        // simulate DB failure after inventory already decremented
+        given(orderRepository.save(any()))
                 .willThrow(new RuntimeException("DB down"));
 
         var req = buildRequest(UUID.randomUUID().toString());
 
         assertThatThrownBy(() -> checkoutService.checkout(req, USER_ID));
 
-        // Phải gọi incrementBatch để compensate
+        // must compensate inventory since decrement already happened
         verify(inventoryClient, times(1)).incrementBatch(any());
     }
 

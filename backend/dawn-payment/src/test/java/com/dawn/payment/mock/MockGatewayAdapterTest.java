@@ -66,7 +66,7 @@ class MockGatewayAdapterTest {
 
         assertThat(preview.id()).isEqualTo(9L);
         assertThat(gateway.scenarioOf(9L)).isEqualTo(MockGatewayAdapter.SCENARIO_FAILED);
-        // Webhook cùng luồng (idempotent ở service)
+        // webhook shares the same flow; idempotency enforced at service layer
         assertThat(gateway.processWebhook(null, Map.of("paymentId", "9")).id()).isEqualTo(9L);
     }
 }

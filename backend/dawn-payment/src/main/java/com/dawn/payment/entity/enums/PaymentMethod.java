@@ -6,6 +6,6 @@ public enum PaymentMethod {
     MOMO,
     VNPAY,
     INSTALLMENT,
-    // Mock gateway cho dev/demo/black-box (thay MoMo/VNPay thật)
+    // stub gateway for dev/demo replacing real MoMo/VNPay
     MOCK
 }

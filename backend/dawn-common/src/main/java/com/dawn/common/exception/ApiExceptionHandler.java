@@ -60,14 +60,14 @@ public class ApiExceptionHandler {
         return buildResponse(DEFAULT_STATUS, errorMsg);
     }
 
-    //  501 Not Implemented (webhook/provider chưa hỗ trợ)
+    //  501 Not Implemented (webhook/provider not yet supported)
     @ExceptionHandler(UnsupportedOperationException.class)
     public ResponseEntity<ExceptionMessage> handlerUnsupported(final UnsupportedOperationException ex) {
         String msg = ex.getMessage() != null ? ex.getMessage() : "Not implemented";
         return buildResponse(HttpStatus.NOT_IMPLEMENTED, msg);
     }
 
-    //  403 Forbidden (Spring Security 6+: AuthorizationDeniedException từ @PreAuthorize)
+    //  403 Forbidden (Spring Security 6+: AuthorizationDeniedException from @PreAuthorize)
     @ExceptionHandler({
             org.springframework.security.access.AccessDeniedException.class,
             org.springframework.security.authorization.AuthorizationDeniedException.class
@@ -92,7 +92,7 @@ public class ApiExceptionHandler {
         return buildResponse(DEFAULT_STATUS, ex.getMessage());
     }
 
-    //  503 Redis chết: fail-closed cho write (read đã fallback DB ở service)
+    //  503 Redis down: fail-closed for writes (reads already fall back to DB in service)
     @ExceptionHandler({
             org.springframework.data.redis.RedisConnectionFailureException.class,
             org.springframework.dao.QueryTimeoutException.class
@@ -102,14 +102,14 @@ public class ApiExceptionHandler {
         return buildResponse(HttpStatus.SERVICE_UNAVAILABLE, "Service temporarily unavailable, please retry");
     }
 
-    //  404 route không tồn tại (static resource fallback của Spring)
+    //  404 route not found (Spring static resource fallback)
     @ExceptionHandler(org.springframework.web.servlet.resource.NoResourceFoundException.class)
     public ResponseEntity<ExceptionMessage> handlerNoResource(
             final org.springframework.web.servlet.resource.NoResourceFoundException ex) {
         return buildResponse(HttpStatus.NOT_FOUND, "Not found");
     }
 
-    //  400 body JSON sai (enum lạ, kiểu sai, thiếu field)
+    //  400 malformed JSON body (unknown enum, type mismatch, missing field)
     @ExceptionHandler(org.springframework.http.converter.HttpMessageNotReadableException.class)
     public ResponseEntity<ExceptionMessage> handlerNotReadable(
             final org.springframework.http.converter.HttpMessageNotReadableException ex) {
@@ -117,7 +117,7 @@ public class ApiExceptionHandler {
         return buildResponse(DEFAULT_STATUS, "Malformed request body");
     }
 
-    //  409 ghi đồng thời cùng dòng (hết retry optimistic-lock) — client retry lại là xong
+    //  409 concurrent write on same row (optimistic-lock retries exhausted) — client should retry
     @ExceptionHandler(org.springframework.orm.ObjectOptimisticLockingFailureException.class)
     public ResponseEntity<ExceptionMessage> handlerOptimisticLock(
             final org.springframework.orm.ObjectOptimisticLockingFailureException ex) {
@@ -125,8 +125,8 @@ public class ApiExceptionHandler {
         return buildResponse(HttpStatus.CONFLICT, "Conflict, please retry");
     }
 
-    //  400 vi phạm ràng buộc DB (FK/unique) — thường do reference id không tồn tại;
-    // log full stack vì lỗi gốc hay bị bọc nhiều lớp (flush sau exception)
+    //  400 DB constraint violation (FK/unique) — usually invalid reference id
+    // log full stack: root cause is often wrapped in multiple layers (flushed after exception)
     @ExceptionHandler(org.springframework.dao.DataIntegrityViolationException.class)
     public ResponseEntity<ExceptionMessage> handlerDataIntegrity(
             final org.springframework.dao.DataIntegrityViolationException ex) {

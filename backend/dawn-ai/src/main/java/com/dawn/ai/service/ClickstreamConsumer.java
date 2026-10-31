@@ -84,7 +84,7 @@ public class ClickstreamConsumer {
             preferenceService.record(event);
             cooccurrenceService.recordView(event);
         } catch (RuntimeException e) {
-            // poison pill: bỏ record, không chặn partition
+            // poison-pill: skip record to avoid blocking the partition
             log.warn("Clickstream record skipped: {}", e.getMessage());
         }
     }

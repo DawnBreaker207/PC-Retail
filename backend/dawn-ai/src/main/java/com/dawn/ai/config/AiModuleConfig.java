@@ -17,7 +17,7 @@ public class AiModuleConfig {
     @Value("${ai.embedding-model}")
     private String embeddingModel;
 
-    // embedding-only (docs §13.8): gỡ ChatModel/AiAssistant/Tools
+    // embedding-only: no ChatModel/AiAssistant/Tools
 
     @Bean
     public EmbeddingModel embeddingModel() {

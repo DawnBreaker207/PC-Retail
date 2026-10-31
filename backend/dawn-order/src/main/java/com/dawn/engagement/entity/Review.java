@@ -42,7 +42,7 @@ public class Review extends AuditableEntity {
     @Column(columnDefinition = "jsonb")
     private List<String> images;
 
-    // docs §2.9: shop trả lời review
+    // shop reply to review (docs §2.9)
     @Column(name = "shop_reply", columnDefinition = "TEXT")
     private String shopReply;
 

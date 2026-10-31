@@ -63,7 +63,7 @@ public class OrderClientAdapter implements OrderClientPort {
         for (SubOrder so : subOrders) {
             stateMachine.assertValidTransition(so.getStatus(), SubOrderStatus.PAID);
             String fromStatus = so.getStatus().name();
-            // ponytail: CAS PENDING->PAID — cron expiry concurrently thì 1 bên thua, không hồi sinh EXPIRED
+            // CAS PENDING_PAYMENT→PAID; concurrent expiry loses the race, preventing EXPIRED revival
             int claimed = subOrderRepository.transitionIfStatus(so.getId(), SubOrderStatus.PENDING_PAYMENT, SubOrderStatus.PAID);
             if (claimed == 0) {
                 throw new ConflictException(Message.format(Message.Order.INVALID_TRANSITION, fromStatus, SubOrderStatus.PAID));
@@ -91,7 +91,7 @@ public class OrderClientAdapter implements OrderClientPort {
                 .orElseThrow(() -> new ResourceNotFoundException(Message.format(Message.Order.NOT_FOUND, orderId)));
         order.setPaymentStatus(PaymentStatus.FAILED);
         orderRepository.save(order);
-        // Risk-gate docs 13.5: đơn guest fail thì cộng lịch sử SĐT
+        // track phone abuse for failed guest orders
         if (order.getUserId() == null && order.getGuestPhone() != null) {
             guestRiskPort.recordPhoneAbuse(order.getGuestPhone());
         }
@@ -103,7 +103,7 @@ public class OrderClientAdapter implements OrderClientPort {
         for (SubOrder so : subOrders) {
             stateMachine.assertValidTransition(so.getStatus(), SubOrderStatus.CANCELLED);
             String fromStatus = so.getStatus().name();
-            // ponytail: CAS — đơn đã đi tiếp (PAID/…) thì không kéo ngược về CANCELLED
+            // CAS guard: orders already past PENDING_PAYMENT cannot be pulled back to CANCELLED
             int claimed = subOrderRepository.transitionIfStatus(so.getId(), SubOrderStatus.PENDING_PAYMENT, SubOrderStatus.CANCELLED);
             if (claimed == 0) {
                 throw new ConflictException(Message.format(Message.Order.INVALID_TRANSITION, fromStatus, SubOrderStatus.CANCELLED));

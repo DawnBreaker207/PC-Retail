@@ -54,7 +54,7 @@ public class InventoryClientAdapter implements InventoryClientPort, InventoryQue
     @Override
     public void restock(List<StockDecrementCommand> items, Long actorId) {
         for (StockDecrementCommandDto cmd : toInventoryCommands(items)) {
-            // actorId nullable: system restock khi actor null; chi tiết ở SubOrder.statusHistory
+            // actorId nullable: null means system-initiated restock; see SubOrder.statusHistory
             restockUseCase.restock(cmd.skuId(), cmd.quantity(), null, actorId);
         }
     }

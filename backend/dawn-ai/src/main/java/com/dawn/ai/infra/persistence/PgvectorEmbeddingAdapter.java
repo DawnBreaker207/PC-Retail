@@ -61,7 +61,7 @@ public class PgvectorEmbeddingAdapter implements EmbeddingPort {
         float[] vector = generateEmbedding(query);
         String vec = toPostgresVectorString(vector);
         int safeLimit = Math.min(Math.max(limit, 1), 10);
-        // cosine distance (<=>) trên HNSW index; similarity = 1 - distance
+        // cosine distance via HNSW index; similarity = 1 - distance
         String sql = """
                 SELECT sku_id, 1 - (embedding <=> ?::vector) AS similarity
                 FROM product_embedding

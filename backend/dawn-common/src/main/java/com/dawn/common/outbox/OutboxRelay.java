@@ -54,7 +54,7 @@ public class OutboxRelay {
             } catch (Exception e) {
                 event.setAttempts(event.getAttempts() + 1);
                 outboxRepository.save(event);
-                // dừng batch để giữ thứ tự; lần sau retry
+                // stop batch to preserve order; retry on next run
                 log.warn("Outbox relay paused at id={}: {}", event.getId(), e.getMessage());
                 return;
             }

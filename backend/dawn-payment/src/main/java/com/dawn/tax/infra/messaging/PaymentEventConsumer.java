@@ -1,7 +1,7 @@
 package com.dawn.tax.infra.messaging;
 
 import com.dawn.common.dlt.DeadLetterService;
-import com.dawn.tax.service.TaxCalculationService;
+import com.dawn.tax.service.TaxCommandService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -14,7 +14,7 @@ import tools.jackson.databind.ObjectMapper;
 @RequiredArgsConstructor
 public class PaymentEventConsumer {
 
-    private final TaxCalculationService taxCalculationService;
+    private final TaxCommandService taxCommandService;
     private final DeadLetterService deadLetterService;
     private final ObjectMapper objectMapper;
 
@@ -32,7 +32,7 @@ public class PaymentEventConsumer {
                 return;
             }
             log.info("Payment completed for order {}, generating tax invoice", orderId);
-            taxCalculationService.generateInvoice(orderId);
+            taxCommandService.generateInvoice(orderId);
         } catch (Exception e) {
             log.error("Failed to process payment event for tax invoice", e);
             deadLetterService.recordFailure("payment-events", null, payload, e.getMessage());

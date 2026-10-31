@@ -8,8 +8,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-// docs: cron low-stock → push Notification (tránh spam bằng check chưa đọc).
-// ponytail: JDBC trực tiếp thay dep dawn-engagement
+// cron: push low-stock notifications, skipping already-unread ones to avoid spam
+// uses direct JDBC to avoid a dependency on dawn-engagement
 @Component
 @RequiredArgsConstructor
 @Slf4j

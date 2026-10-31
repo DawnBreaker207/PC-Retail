@@ -6,7 +6,7 @@ public enum TransactionType {
     DEDUCT,
     RESTOCK,
     ADJUST,
-    // docs §13.6: tách ADJUST + thêm RETURN
+    // docs §13.6: split ADJUST and add RETURN
     ADJUSTMENT_IN,
     ADJUSTMENT_OUT,
     RETURN

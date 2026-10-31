@@ -36,7 +36,6 @@ public class AuthService implements RegisterUseCase, LoginUseCase, TokenRefreshU
     private final EmailVerificationCachePort emailVerificationCachePort;
 
 
-    // REGISTER
     @Override
     @Transactional
     public RegisterInitResponse register(RegisterRequest request) {
@@ -56,7 +55,7 @@ public class AuthService implements RegisterUseCase, LoginUseCase, TokenRefreshU
         try {
             userRepository.save(user);
         } catch (org.springframework.dao.DataIntegrityViolationException dup) {
-            // Đua concurrent: check-then-insert thua → 409 thay vì 500
+            // concurrent check-then-insert race: return 409 instead of 500
             throw new ConflictException(Message.User.EMAIL_ALREADY_USED);
         }
 
@@ -67,7 +66,7 @@ public class AuthService implements RegisterUseCase, LoginUseCase, TokenRefreshU
         return new RegisterInitResponse(user.getId(), user.getEmail(), "Vui lòng kiểm tra email để lấy mã xác thực");
     }
 
-    // Verify OTP — peek trước, chỉ consume khi đúng; sai 5 lần thì đốt mã
+    // peek OTP before consuming; burn the code after 5 failed attempts
     @Override
     @Transactional
     public AuthResponse verify(VerifyOtpRequest request) {
@@ -102,7 +101,6 @@ public class AuthService implements RegisterUseCase, LoginUseCase, TokenRefreshU
         return refreshTokenService.buildAuthResponse(user, refreshToken);
     }
 
-    // RESEND OTP
     @Override
     public void resend(String email) {
         String normalizedEmail = email.toLowerCase();
@@ -120,7 +118,6 @@ public class AuthService implements RegisterUseCase, LoginUseCase, TokenRefreshU
         sendOtp(user.getEmail(), user.getFullName());
     }
 
-    // LOGIN
     @Override
     @Transactional
     public AuthResponse login(LoginRequest request) {
@@ -144,7 +141,6 @@ public class AuthService implements RegisterUseCase, LoginUseCase, TokenRefreshU
     }
 
 
-    // REFRESH / LOGOUT
     @Override
     @Transactional
     public AuthResponse refresh(String refreshToken) {
@@ -157,7 +153,7 @@ public class AuthService implements RegisterUseCase, LoginUseCase, TokenRefreshU
         refreshTokenService.revokeRefreshToken(refreshToken);
     }
 
-    // FORGOT PASSWORD — không lộ email tồn tại; rate limit 1 req/60s
+    // does not reveal whether the email exists; rate-limited to 1 req/60s
     @Override
     @Transactional
     public void forgotPassword(ForgotPasswordRequest request) {
@@ -175,7 +171,6 @@ public class AuthService implements RegisterUseCase, LoginUseCase, TokenRefreshU
                 user.getEmail(), user.getFullName(), rawToken));
     }
 
-    // RESET PASSWORD
     @Override
     @Transactional
     public void resetPassword(ResetPasswordRequest request) {
@@ -193,7 +188,6 @@ public class AuthService implements RegisterUseCase, LoginUseCase, TokenRefreshU
     }
 
 
-    // Private Helper
     private void sendOtp(String email, String fullName) {
         String otp = TokenUtils.generateOtp();
         emailVerificationCachePort.storeOtp(email, otp);

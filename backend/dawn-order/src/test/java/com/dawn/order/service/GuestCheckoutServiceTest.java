@@ -54,7 +54,7 @@ class GuestCheckoutServiceTest {
 
     @BeforeEach
     void setUp() {
-        // @Value defaults chỉ có khi chạy Spring — set tay cho unit test
+        // @Value fields are not injected outside Spring context; set manually
         org.springframework.test.util.ReflectionTestUtils.setField(service, "guestMaxOrderTotal", 30_000_000L);
         org.springframework.test.util.ReflectionTestUtils.setField(service, "phoneAbuseThreshold", 3L);
     }

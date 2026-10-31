@@ -24,7 +24,7 @@ public class CartItem extends AbstractMappedEntity {
     @Column(name = "user_id")
     private Long userId;
 
-    // Giỏ khách vãng lai: user_id null + guest_token (CHECK 1-trong-2 ở DB)
+    // Guest cart row: user_id null, guest_token set; DB CHECK enforces exactly one
     @Column(name = "guest_token", length = 100)
     private String guestToken;
 

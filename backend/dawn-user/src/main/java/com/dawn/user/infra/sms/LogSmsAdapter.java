@@ -10,7 +10,7 @@ public class LogSmsAdapter implements SmsPort {
 
     @Override
     public void send(String phone, String message) {
-        // Chưa có SMS gateway: ghi log để dev/demo lấy mã. PROD phải thay bằng provider thật.
+        // No SMS gateway yet; logs the code for dev/demo — replace with a real provider in prod
         log.info("SMS to {}: {}", phone, message);
     }
 }

@@ -40,7 +40,7 @@ public class StockReceiptService {
         return r;
     }
 
-    // docs §13.2: confirm idempotent — gọi lại không nhập kho 2 lần
+    // docs §13.2: confirm is idempotent — repeated calls do not double-restock
     @Transactional
     public StockReceipt confirm(Long receiptId, Long staffId) {
         StockReceipt r = receiptRepo.findById(receiptId).orElseThrow();

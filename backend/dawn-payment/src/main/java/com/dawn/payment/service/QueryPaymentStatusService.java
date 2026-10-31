@@ -74,7 +74,7 @@ public class QueryPaymentStatusService implements QueryPaymentStatusUseCase {
             paymentRepo.save(payment);
             log.warn("Payment {} status UNKNOWN after VNPay query", paymentId);
         } else if ("PENDING".equals(result.responseCode())) {
-            // Mock PENDING: giữ nguyên, chờ lần sync sau
+            // stay PENDING; next scheduled sync will re-check
             log.info("Payment {} still PENDING at gateway", paymentId);
         } else {
             payment.setStatus(PaymentResultStatus.FAILED);
@@ -90,7 +90,7 @@ public class QueryPaymentStatusService implements QueryPaymentStatusUseCase {
     @Transactional
     public PaymentDto handleWebhook(String provider, Map<String, String> payload) {
         if ("mock".equals(provider)) {
-            // Mock: dựng kịch bản từ params rồi đi chung luồng sync (idempotent như vnpay)
+            // programs scenario from params then reuses sync flow, idempotent like VNPay
             com.dawn.payment.infra.mock.MockGatewayAdapter mock =
                     (com.dawn.payment.infra.mock.MockGatewayAdapter) gatewayRegistry.get(PaymentMethod.MOCK);
             String rawId = payload.get("paymentId");
@@ -113,7 +113,7 @@ public class QueryPaymentStatusService implements QueryPaymentStatusUseCase {
         Payment payment = paymentRepo.findById(paymentId)
                 .orElseThrow(() -> new ResourceNotFoundException(Message.format(Message.Payment.NOT_FOUND, paymentId)));
 
-        // Webhook duplicate/delayed: đã xử lý rồi thì trả về, không gọi markOrder* lần 2
+        // guard against duplicate/delayed webhooks; avoid double markOrder calls
         if (payment.getStatus() == PaymentResultStatus.COMPLETED
                 || payment.getStatus() == PaymentResultStatus.FAILED) {
             return toDto(payment);

@@ -14,13 +14,13 @@ import org.springframework.transaction.event.TransactionalEventListener;
 @RequiredArgsConstructor
 public class CartCleanupListener {
 
-    private final CartService cartService;
+    private final CartCommandService cartCommandService;
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     @Retryable(maxAttempts = 3, retryFor = OptimisticLockingFailureException.class)
     public void onOrderCreated(OrderCreatedEvent event) {
-        if (event.userId() == null) return; // guest: đã clear theo token ở checkout
-        cartService.clearCart(event.userId());
+        if (event.userId() == null) return; // guest cart cleared by token during checkout
+        cartCommandService.clearCart(event.userId());
     }
 }
