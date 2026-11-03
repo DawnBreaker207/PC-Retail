@@ -24,10 +24,6 @@ x-service-env: &service-env
   KAFKA_BOOTSTRAP_SERVERS: kafka:9092
   KAFKA_LOG_TOPIC: app-logs
   OUTBOX_RELAY_ENABLED: 'true'
-  # Custom Redis (infra/redis-custom) chỉ dùng cho cache SKU; cache lỗi thì fallback DB
-  CUSTOM_REDIS_ENABLED: 'true'
-  CUSTOM_REDIS_HOST: redis-custom
-  CUSTOM_REDIS_PORT: 8888
   INTERNAL_TOKEN: ${INTERNAL_TOKEN:-dev-internal-token}
   JWT_COOKIE_NAME: ${JWT_COOKIE_NAME}
   JWT_REFRESH_COOKIE_NAME: ${JWT_REFRESH_COOKIE_NAME}
@@ -64,22 +60,12 @@ services:
 
   redis:
     container_name: redis
-    image: redis:7-alpine
+    image: valkey/valkey:8-alpine
     ports:
       - '6379:6379'
     networks:
       - network
-    command: ['redis-server', '--notify-keyspace-events', 'Ex']
-
-  # Redis tự build (RESP, SET/GET/PX) — cache SKU, chạy song song redis chính.
-  redis-custom:
-    build:
-      context: ./redis-custom
-    container_name: redis-custom
-    ports:
-      - '6380:8888'
-    networks:
-      - network
+    command: ['valkey-server', '--notify-keyspace-events', 'Ex']
 
   kafka:
     container_name: kafka
@@ -267,10 +253,6 @@ services:
       # Redis
       REDIS_HOST: ${REDIS_HOST}
       REDIS_PORT: ${REDIS_PORT}
-      # Custom Redis (cache SKU)
-      CUSTOM_REDIS_ENABLED: 'true'
-      CUSTOM_REDIS_HOST: redis-custom
-      CUSTOM_REDIS_PORT: 8888
       # Kafka (log appender)
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       KAFKA_LOG_TOPIC: app-logs
@@ -311,8 +293,6 @@ services:
       postgres:
         condition: service_healthy
       redis:
-        condition: service_started
-      redis-custom:
         condition: service_started
     healthcheck:
       test: ['CMD-SHELL', 'bash -c "</dev/tcp/127.0.0.1/8888"']
@@ -431,8 +411,6 @@ services:
       postgres:
         condition: service_healthy
       redis:
-        condition: service_started
-      redis-custom:
         condition: service_started
     networks:
       - network
@@ -664,10 +642,8 @@ services:
 
   frontend:
     build:
-      context: ..
-      dockerfile: infra/Dockerfile.frontend
-    image: pc-retail-frontend
-    container_name: frontend
+      context: ../frontend
+    container_name: dawn-frontend
     ports:
       - '4000:4000'
     environment:
