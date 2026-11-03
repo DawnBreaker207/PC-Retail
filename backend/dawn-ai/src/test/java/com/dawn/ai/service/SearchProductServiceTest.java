@@ -13,48 +13,59 @@ import org.springframework.jdbc.core.RowMapper;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Map;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class SearchProductServiceTest {
 
-    @Mock
-    EmbeddingPort embeddingPort;
-    @Mock
-    JdbcTemplate jdbcTemplate;
+    @Mock EmbeddingPort embeddingPort;
+    @Mock JdbcTemplate jdbcTemplate;
 
-    @InjectMocks
-    SearchProductService service;
+    @InjectMocks SearchProductService service;
 
-    private Map<String, Object> row(long id) {
-        return Map.of(
-                "id", id,
-                "name", "Laptop Test",
-                "category_name", "Laptop",
-                "brand_name", "Brand",
-                "price", BigDecimal.valueOf(10000000),
-                "thumbnail_url", "img");
+    private AiSearchResult sampleResult() {
+        return new AiSearchResult(1L, "Laptop Test", "Laptop", "Brand",
+                BigDecimal.valueOf(10_000_000), "img", 0.5);
     }
 
     @Test
-    @DisplayName("AI chết (key sai/mất mạng): rớt về keyword, không 500")
-    void embeddingFails_keywordFallback() {
-        when(embeddingPort.searchSimilar(anyString(), anyInt()))
-                .thenThrow(new RuntimeException("401 openrouter"));
-        doReturn(List.of(new AiSearchResult(1L, "Laptop Test", "Laptop",
-                "Brand", BigDecimal.valueOf(10000000), "img", 0.0)))
-                .when(jdbcTemplate).query(anyString(), any(RowMapper.class), any(), any(), any());
+    @DisplayName("FTS thành công: trả kết quả đã sort theo rank")
+    void ftsSearch_returnsRankedResults() {
+        doReturn(List.of(sampleResult()))
+                .when(jdbcTemplate).query(contains("ts_rank_cd"), any(RowMapper.class),
+                        any(), any(), any());
 
         List<AiSearchResult> results = service.search("laptop gaming", 5);
 
         assertThat(results).hasSize(1);
-        assertThat(results.get(0).similarityScore()).isZero();
+    }
+
+    @Test
+    @DisplayName("FTS không ra kết quả: rớt về ILIKE keyword search")
+    void ftsReturnsEmpty_keywordFallback() {
+        // FTS returns empty
+        doReturn(List.<AiSearchResult>of())
+                .when(jdbcTemplate).query(contains("ts_rank_cd"), any(RowMapper.class),
+                        any(), any(), any());
+        // Keyword search returns a result
+        doReturn(List.of(sampleResult()))
+                .when(jdbcTemplate).query(contains("ILIKE"), any(RowMapper.class),
+                        any(), any(), any());
+
+        List<AiSearchResult> results = service.search("laptop gaming", 5);
+
+        assertThat(results).hasSize(1);
         verify(jdbcTemplate).query(contains("ILIKE"), any(RowMapper.class), any(), any(), any());
+    }
+
+    @Test
+    @DisplayName("Query trống: trả danh sách rỗng ngay lập tức")
+    void emptyQuery_returnsEmpty() {
+        List<AiSearchResult> results = service.search("  ", 5);
+        assertThat(results).isEmpty();
+        verifyNoInteractions(jdbcTemplate);
     }
 }

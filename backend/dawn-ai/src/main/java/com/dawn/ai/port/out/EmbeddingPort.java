@@ -9,5 +9,5 @@ public interface EmbeddingPort {
 
     void generateBatch();
 
-    List<EmbeddingSearchResult> searchSimilar(String query, int limit);
+    List<EmbeddingSearchResult> findSimilarByVector(Long skuId, int limit);
 }

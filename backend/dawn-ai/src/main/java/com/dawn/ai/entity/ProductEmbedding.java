@@ -23,7 +23,7 @@ public class ProductEmbedding extends BaseEntity {
     @Column(name = "sku_id", nullable = false, unique = true)
     private Long skuId;
 
-    @Column(name = "embedding", nullable = false, columnDefinition = "vector(1536)")
+    @Column(name = "embedding", nullable = false, columnDefinition = "vector(13)")
     @JdbcTypeCode(SqlTypes.VECTOR)
     private float[] embedding;
 

@@ -18,3 +18,11 @@ app:
     issuer: ${JWT_ISSUER:pc-retail}
     key-id: ${JWT_KEY_ID:pc-retail}
     public-key: ${JWT_PUBLIC_KEY:}
+
+dawn:
+  ai:
+    vector-dimensions: 13
+    bm25:
+      k: 1.5
+      b: 0.75
+    trending-decay-hours: 24

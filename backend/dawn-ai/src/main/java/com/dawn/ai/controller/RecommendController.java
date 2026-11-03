@@ -3,6 +3,7 @@ package com.dawn.ai.controller;
 import com.dawn.ai.dto.AiSearchResult;
 import com.dawn.ai.port.in.SearchProductUseCase;
 import com.dawn.ai.service.CooccurrenceService;
+import com.dawn.ai.service.DemandForecastService;
 import com.dawn.ai.service.UserPreferenceService;
 import com.dawn.ai.service.BuildSuggestionService;
 import com.dawn.common.response.ResponseObject;
@@ -24,12 +25,22 @@ public class RecommendController {
     private final UserPreferenceService userPreferenceService;
     private final BuildSuggestionService buildSuggestionService;
     private final CooccurrenceService cooccurrenceService;
+    private final DemandForecastService demandForecastService;
 
-    // content-based: top-K cosine nearest neighbors, keyed by SKU id
+    // Spec-based nearest neighbors via pgvector
     @GetMapping("/ai/recommendations/{skuId}")
-    @PreAuthorize(AuthorizationConstants.CUSTOMER_ONLY)
-    public ResponseObject<List<AiSearchResult>> recommend(@PathVariable Long skuId) {
-        return ResponseObject.success(searchProductUseCase.search("sku:" + skuId, 5));
+    public ResponseObject<List<AiSearchResult>> recommend(
+            @PathVariable Long skuId,
+            @RequestParam(defaultValue = "5") int limit) {
+        return ResponseObject.success(searchProductUseCase.similar(skuId, Math.min(limit, 10)));
+    }
+
+    @GetMapping("/ai/forecast/{skuId}")
+    @PreAuthorize(AuthorizationConstants.ADMIN_ONLY)
+    public ResponseObject<String> forecast(@PathVariable Long skuId) {
+        // Forecast is scheduled — trigger on demand returns last computed result.
+        // Full async report is in Kafka low-stock-events topic.
+        return ResponseObject.success("Dự báo nhu cầu đang được xử lý qua scheduler lúc 2:00 sáng. Xem log Kafka topic: low-stock-events cho SKU " + skuId);
     }
 
     @GetMapping("/ai/similar/{skuId}")

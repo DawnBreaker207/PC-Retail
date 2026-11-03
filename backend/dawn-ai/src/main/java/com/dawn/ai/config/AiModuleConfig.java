@@ -1,32 +1,34 @@
 package com.dawn.ai.config;
 
-import dev.langchain4j.model.embedding.EmbeddingModel;
-import dev.langchain4j.model.openai.OpenAiEmbeddingModel;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@ConditionalOnProperty(name = "ai.base-url")
+@EnableConfigurationProperties(AiModuleConfig.AiProperties.class)
 public class AiModuleConfig {
-    @Value("${ai.base-url}")
-    private String baseUrl;
-
-    @Value("${ai.api-key:}")
-    private String apiKey;
-
-    @Value("${ai.embedding-model:text-embedding-ada-002}")
-    private String embeddingModel;
-
-    // embedding-only: no ChatModel/AiAssistant/Tools
 
     @Bean
-    public EmbeddingModel embeddingModel() {
-        return OpenAiEmbeddingModel.builder()
-                .baseUrl(baseUrl)
-                .apiKey(apiKey)
-                .modelName(embeddingModel)
-                .build();
+    @ConditionalOnMissingBean
+    public ObjectMapper objectMapper() {
+        return new ObjectMapper()
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    }
+
+    @ConfigurationProperties(prefix = "dawn.ai")
+    public record AiProperties(
+            int vectorDimensions,
+            Bm25Properties bm25,
+            int trendingDecayHours
+    ) {
+        public AiProperties() {
+            this(13, new Bm25Properties(1.5, 0.75), 24);
+        }
+
+        public record Bm25Properties(double k, double b) {}
     }
 }
