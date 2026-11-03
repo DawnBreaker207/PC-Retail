@@ -1,6 +1,6 @@
 <article
   hlmCard
-  class="group relative flex flex-col overflow-hidden rounded-xl border border-border/80 bg-card p-0 transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-xl cursor-pointer focus-visible:outline-2 focus-visible:outline-primary"
+  class="group relative flex flex-col overflow-hidden rounded-2xl border border-border/70 dark:border-border-dark/70 bg-surface dark:bg-surface-dark p-0 transition-all duration-300 hover:-translate-y-1 hover:border-primary/50 dark:hover:border-primary/50 hover:shadow-xl hover:shadow-primary/5 cursor-pointer focus-visible:outline-2 focus-visible:outline-primary"
   role="button"
   tabindex="0"
   (click)="cardClick.emit()"
@@ -10,65 +10,90 @@
   <!-- Media Frame -->
   <a
     [routerLink]="['/products', product().slug]"
-    class="relative aspect-square w-full overflow-hidden bg-muted/20 p-4 sm:p-6"
+    class="relative aspect-square w-full overflow-hidden bg-bg/60 dark:bg-bg-dark/40 p-4 sm:p-5 flex items-center justify-center"
     (click)="$event.stopPropagation()"
   >
     <img
       [src]="product().imageUrls[0]"
       appFallbackImage
       [alt]="product().name"
-      class="h-full w-full object-contain transition-transform duration-500 group-hover:scale-105"
+      class="h-full w-full object-contain transition-all duration-500 group-hover:scale-105"
+      [class.group-hover:opacity-0]="product().imageUrls.length > 1"
       loading="lazy"
     />
-
-    <!-- Badges -->
-    @if (badge() === 'flash') {
-      <span hlmBadge variant="destructive" class="absolute left-2.5 top-2.5 gap-1 shadow-sm text-[11px] font-bold">
-        <lucide-icon [img]="ZapIcon" class="size-3" /> FLASH SALE
-      </span>
-    } @else if (badge() === 'discount' || discountPercent() > 0) {
-      <span hlmBadge class="absolute left-2.5 top-2.5 bg-amber-500 hover:bg-amber-600 text-white font-bold text-[11px]">
-        -{{ discountPercent() }}%
-      </span>
+    @if (product().imageUrls.length > 1) {
+      <img
+        [src]="product().imageUrls[1]"
+        appFallbackImage
+        [alt]="product().name"
+        class="absolute inset-0 h-full w-full object-contain p-4 sm:p-5 opacity-0 group-hover:opacity-100 transition-all duration-500 group-hover:scale-105 pointer-events-none"
+        loading="lazy"
+      />
     }
+
+    <!-- Status Badges -->
+    <div class="absolute left-2.5 top-2.5 flex flex-col gap-1 z-10 pointer-events-none">
+      @if (badge() === 'flash') {
+        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-destructive text-white font-black text-[10px] tracking-wide shadow-xs">
+          <lucide-angular [img]="ZapIcon" class="w-3 h-3 fill-white" /> FLASH SALE
+        </span>
+      } @else if (discountPercent() > 0) {
+        <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-primary text-white font-bold text-[11px] shadow-xs">
+          -{{ discountPercent() }}%
+        </span>
+      }
+      <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-surface/90 dark:bg-surface-dark/90 backdrop-blur-xs text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 shadow-2xs">
+        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Sẵn hàng
+      </span>
+    </div>
 
     <!-- Wishlist Floating Button -->
     <button
       type="button"
-      hlmBtn
-      variant="secondary"
-      size="icon"
-      [attr.aria-label]="wishlist.has(product().id) ? 'Bỏ yêu thích' : 'Yêu thích'"
-      class="absolute right-2.5 top-2.5 size-9 rounded-full bg-background/80 backdrop-blur-md transition-transform active:scale-90"
+      [attr.aria-label]="wishlist.has(product().id) ? 'Bỏ yêu thích' : 'Thêm vào yêu thích'"
+      class="absolute right-2.5 top-2.5 w-8 h-8 rounded-full bg-surface/80 dark:bg-surface-dark/80 backdrop-blur-md border border-border/60 dark:border-border-dark/60 flex items-center justify-center transition-all active:scale-90 shadow-2xs z-10"
       [class.opacity-0]="!wishlist.has(product().id)"
       [class.group-hover:opacity-100]="!wishlist.has(product().id)"
       (click)="$event.stopPropagation(); wishlist.toggle(product().id)"
     >
-      <lucide-icon
+      <lucide-angular
         [img]="HeartIcon"
-        class="size-4 transition-colors"
-        [class.text-red-500]="wishlist.has(product().id)"
-        [class.fill-red-500]="wishlist.has(product().id)"
+        class="w-4 h-4 transition-colors"
+        [class.text-primary]="wishlist.has(product().id)"
+        [class.fill-primary]="wishlist.has(product().id)"
+        [class.text-muted]="!wishlist.has(product().id)"
       />
     </button>
   </a>
 
-  <!-- Content -->
+  <!-- Content Info -->
   <div class="flex flex-1 flex-col p-4">
-    <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{{ product().brandName }}</span>
+    <!-- Brand Name -->
+    <div class="flex items-center justify-between">
+      <span class="text-[11px] font-bold uppercase tracking-wider text-muted/70 dark:text-muted-dark/70">{{ product().brandName }}</span>
+      <span class="text-[10px] font-medium text-muted/60 dark:text-muted-dark/60">BH 24T chính hãng</span>
+    </div>
+
+    <!-- Product Title -->
     <a
       [routerLink]="['/products', product().slug]"
-      class="mt-1 line-clamp-2 text-sm font-medium leading-snug hover:text-primary transition-colors flex-1"
+      class="mt-1 line-clamp-2 text-xs sm:text-sm font-semibold leading-snug text-ink dark:text-ink-dark group-hover:text-primary transition-colors flex-1"
       (click)="$event.stopPropagation()"
     >
       {{ product().name }}
     </a>
 
+    <!-- Retail Gift Tag -->
+    <div class="mt-1.5 flex items-center gap-1.5 text-[11px] text-amber-600 dark:text-amber-400 font-medium">
+      <span class="px-1.5 py-0.2 rounded bg-amber-500/10 border border-amber-500/20 text-[10px] font-bold shrink-0">Quà tặng</span>
+      <span class="line-clamp-1 text-[11px]">Balo Gaming + Voucher 300K</span>
+    </div>
+
     <!-- Spec Chips -->
     @if (product().specChips && product().specChips!.length > 0) {
-      <div class="mt-2 flex flex-wrap gap-1">
+      <div class="mt-2.5 flex flex-wrap gap-1">
         @for (chip of product().specChips!.slice(0, 3); track chip.label) {
-          <span class="inline-flex items-center rounded-md bg-secondary px-2 py-0.5 text-[11px] font-medium text-secondary-foreground border border-border/50">
+          <span class="inline-flex items-center rounded-md bg-bg dark:bg-bg-dark px-2 py-0.5 text-[10px] font-medium text-muted dark:text-muted-dark border border-border/60 dark:border-border-dark/60">
             {{ chip.value }}
           </span>
         }
@@ -76,50 +101,48 @@
     }
 
     <!-- Rating & Sold count -->
-    @if (product().soldCount > 0 || product().rating) {
-      <div class="mt-2 flex items-center gap-2 text-xs text-muted-foreground">
-        @if (product().rating) {
-          <div class="flex items-center text-amber-500 font-medium">
-            <lucide-icon [img]="StarIcon" class="size-3.5 fill-amber-500" />
-            <span class="ml-1 text-foreground">{{ product().rating }}</span>
-          </div>
-          @if (product().reviewCount) {
-            <span>({{ product().reviewCount }})</span>
-          }
+    <div class="mt-3 flex items-center gap-2 text-xs text-muted dark:text-muted-dark">
+      @if (product().rating) {
+        <div class="flex items-center text-amber-500 font-medium">
+          <lucide-angular [img]="StarIcon" class="w-3.5 h-3.5 fill-amber-500" />
+          <span class="ml-1 text-ink dark:text-ink-dark font-semibold text-xs">{{ product().rating }}</span>
+        </div>
+        @if (product().reviewCount) {
+          <span class="text-[11px]">({{ product().reviewCount }})</span>
         }
-        @if (product().soldCount > 0) {
-          <span class="ml-auto">Đã bán {{ product().soldCount }}</span>
-        }
-      </div>
-    }
+      }
+      @if (product().soldCount > 0) {
+        <span class="ml-auto text-[11px]">Đã bán {{ product().soldCount }}</span>
+      }
+    </div>
 
-    <!-- Price & Add to Cart Action -->
-    <div class="mt-auto pt-3">
-      <div class="flex items-baseline gap-2">
-        <span class="text-base sm:text-lg font-bold tracking-tight text-primary">
+    <!-- Price & Compact Action Bar -->
+    <div class="mt-3 pt-3 border-t border-border/50 dark:border-border-dark/50 flex items-center justify-between gap-2">
+      <div class="min-w-0">
+        <div class="text-base sm:text-lg font-black tracking-tight text-primary">
           {{ product().price | currencyFormat }}
-        </span>
+        </div>
         @if (discountPercent() > 0) {
-          <span class="text-xs text-muted-foreground line-through">
+          <div class="text-[11px] text-muted dark:text-muted-dark line-through -mt-0.5">
             {{ product().originalPrice! | currencyFormat }}
-          </span>
+          </div>
         }
       </div>
 
+      <!-- Quick Add to Cart Button -->
       <button
         type="button"
-        hlmBtn
-        variant="default"
-        class="mt-2.5 w-full font-semibold gap-1.5 shadow-sm"
         [disabled]="isAdding()"
+        [attr.aria-label]="'Thêm ' + product().name + ' vào giỏ'"
         (click)="$event.stopPropagation(); addToCart.emit()"
+        class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-primary/10 hover:bg-primary text-primary hover:text-white border border-primary/25 flex items-center justify-center transition-all duration-200 shadow-2xs hover:shadow-md hover:shadow-primary/25 shrink-0 disabled:opacity-50"
       >
+        <span class="sr-only">Thêm vào giỏ</span>
         @if (isAdding()) {
-          <lucide-icon [img]="LoaderIcon" class="size-4 animate-spin" />
+          <lucide-angular [img]="LoaderIcon" class="w-4 h-4 animate-spin" />
         } @else {
-          <lucide-icon [img]="CartIcon" class="size-4" />
+          <lucide-angular [img]="CartIcon" class="w-4 h-4" />
         }
-        <span>+ Thêm vào giỏ</span>
       </button>
     </div>
   </div>

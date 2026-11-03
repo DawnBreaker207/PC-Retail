@@ -38,7 +38,7 @@
               "src/styles.css"
             ],
             "security": {
-              "allowedHosts": ["localhost", "127.0.0.1", "frontend"]
+              "allowedHosts": ["localhost", "localhost:4200", "localhost:4000", "127.0.0.1", "127.0.0.1:4200", "frontend"]
             },
             "outputMode": "server"
           },

@@ -1,15 +1,16 @@
-<nz-empty
-  nzNotFoundImage="simple"
-  [nzNotFoundContent]="title()"
->
-  <div nz-not-found-content>
-    <p class="text-muted dark:text-muted-dark">{{ description() }}</p>
+<div class="flex flex-col items-center justify-center py-12 px-4 text-center">
+  <div class="w-16 h-16 rounded-full bg-surface dark:bg-surface-dark border border-border/80 flex items-center justify-center text-muted dark:text-muted-dark mb-3">
+    <lucide-angular [img]="Inbox" class="w-8 h-8" />
   </div>
-</nz-empty>
-@if (actionLabel() && actionRoute()) {
-  <div class="text-center mt-4">
-    <button nz-button nzType="primary" [routerLink]="actionRoute()">
-      {{ actionLabel() }}
-    </button>
-  </div>
-}
+  <h3 class="text-base font-semibold text-ink dark:text-ink-dark">{{ title() }}</h3>
+  @if (description()) {
+    <p class="text-xs text-muted dark:text-muted-dark max-w-sm mt-1">{{ description() }}</p>
+  }
+  @if (actionLabel() && actionRoute()) {
+    <div class="mt-4">
+      <a hlmBtn [routerLink]="actionRoute()">
+        {{ actionLabel() }}
+      </a>
+    </div>
+  }
+</div>

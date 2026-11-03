@@ -1,9 +1,19 @@
 @if (fullPage()) {
-  <div class="fixed inset-0 z-[var(--z-modal-backdrop)] flex items-center justify-center bg-black/20">
-    <nz-spin nzSize="large"></nz-spin>
+  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs">
+    <lucide-angular
+      [img]="Loader2"
+      [style.width.px]="pixelSize"
+      [style.height.px]="pixelSize"
+      class="text-primary animate-spin"
+    />
   </div>
 } @else {
-  <div class="flex justify-center py-10">
-    <nz-spin nzSize="large"></nz-spin>
+  <div class="flex justify-center items-center py-6">
+    <lucide-angular
+      [img]="Loader2"
+      [style.width.px]="pixelSize"
+      [style.height.px]="pixelSize"
+      class="text-primary animate-spin"
+    />
   </div>
 }

@@ -1,17 +1,16 @@
 @if (breadcrumbs().length > 0) {
-  <nz-breadcrumb class="mb-2">
-    @for (crumb of breadcrumbs(); track crumb.label) {
-      <nz-breadcrumb-item>
-        @if (crumb.url) {
-          <a [routerLink]="crumb.url">{{ crumb.label }}</a>
-        } @else {
-          {{ crumb.label }}
-        }
-      </nz-breadcrumb-item>
+  <nav class="flex items-center gap-1.5 text-xs text-muted dark:text-muted-dark mb-2">
+    @for (crumb of breadcrumbs(); track crumb.label; let last = $last) {
+      @if (crumb.url && !last) {
+        <a [routerLink]="crumb.url" class="hover:text-primary transition-colors">{{ crumb.label }}</a>
+        <lucide-angular [img]="ChevronRight" class="w-3.5 h-3.5 text-muted/60" />
+      } @else {
+        <span class="text-ink dark:text-ink-dark font-medium">{{ crumb.label }}</span>
+      }
     }
-  </nz-breadcrumb>
+  </nav>
 }
-<h1 class="text-2xl font-bold mb-1">{{ title() }}</h1>
+<h1 class="text-2xl font-bold mb-1 text-ink dark:text-ink-dark">{{ title() }}</h1>
 @if (subtitle()) {
   <p class="text-muted dark:text-muted-dark text-sm mb-6">{{ subtitle() }}</p>
 }

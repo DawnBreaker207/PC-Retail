@@ -1,8 +1,6 @@
 import { Component, computed, inject, input, output } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { HlmCardDirective } from '@shared/ui/card';
-import { HlmButtonDirective } from '@shared/ui/button';
-import { HlmBadgeDirective } from '@shared/ui/badge';
 import { LucideAngularModule, Heart, ShoppingCart, Zap, Star, Loader2 } from 'lucide-angular';
 import { CurrencyFormatPipe } from '@shared/pipes/currency-format.pipe';
 import { FallbackImageDirective } from '@shared/directives/fallback-image.directive';
@@ -15,8 +13,6 @@ import { WishlistStore } from '@features/wishlist/store/wishlist.store';
   imports: [
     RouterLink,
     HlmCardDirective,
-    HlmButtonDirective,
-    HlmBadgeDirective,
     LucideAngularModule,
     CurrencyFormatPipe,
     FallbackImageDirective,
