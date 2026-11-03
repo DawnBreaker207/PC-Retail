@@ -15,7 +15,7 @@ export default defineConfig({
   //   npx playwright test --reporter=html && npx playwright show-report
   reporter: [['list'], ['html', { open: 'never', outputFolder: 'playwright-report' }]],
   use: {
-    baseURL: (process.env.E2E_BASE_URL || 'http://localhost:8888/api/v1') + '/',
+    baseURL: (process.env.E2E_BASE_URL || 'http://localhost:8080/api/v1') + '/',
     headless: !headed,
     actionTimeout: 15_000,
     navigationTimeout: 30_000,

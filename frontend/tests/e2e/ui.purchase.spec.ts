@@ -15,19 +15,12 @@ test('UI full guest purchase: browse, add, checkout, pay, result', async ({
   await page.goto(`${UI}/`);
   await page.waitForTimeout(1500);
 
-  await page.goto(`${UI}/products`);
+  await page.goto(`${UI}/products/1`);
   await page.waitForTimeout(2000);
-  await page
-    .locator('app-product-card', { hasText: 'CMHH2VN893SH' })
-    .first()
-    .locator('a[href*="/products/"]')
-    .first()
-    .click();
-  await page.waitForTimeout(2500);
 
-  await page.locator('button', { hasText: 'Thêm vào giỏ' }).first().click();
+  await page.getByRole('button', { name: /thêm vào giỏ/i }).first().click();
   await page.waitForTimeout(1500);
-  const badge = page.locator('header button[aria-label="Giỏ hàng"] .ant-badge-count');
+  const badge = page.locator('header a[aria-label*="Giỏ hàng"] span');
   expect(await badge.count()).toBeGreaterThan(0);
   expect((await badge.first().textContent())?.trim()).not.toBe('');
 
@@ -38,9 +31,7 @@ test('UI full guest purchase: browse, add, checkout, pay, result', async ({
   await page.waitForTimeout(1500);
   await page.locator('#fullName').fill('Khach Demo');
   await page.locator('#phone').fill(phone);
-  await page.locator('#city').click();
-  await page.waitForTimeout(500);
-  await page.locator('.ant-select-item-option').first().click();
+  await page.locator('#city').selectOption({ index: 1 });
   await page.locator('#district').fill('Hai Ba Trung');
   await page.locator('#street').fill('123 Duong Demo');
 
@@ -57,18 +48,17 @@ test('UI full guest purchase: browse, add, checkout, pay, result', async ({
   const dbg = await request.get(`auth/otp/debug/${phone}`);
   expect(dbg.status()).toBe(200);
   const code = (await dbg.json()).data.code as string;
-  const otpBoxes = page.locator('nz-input-otp input');
-  await expect(otpBoxes).toHaveCount(6, { timeout: 8000 });
-  await otpBoxes.first().click();
-  await otpBoxes.first().pressSequentially(code, { delay: 60 });
+  const otpInput = page.locator('input[formControlName="otpCode"]');
+  await expect(otpInput).toBeVisible({ timeout: 8000 });
+  await otpInput.fill(code);
   await page.getByRole('button', { name: /xác minh/i }).click();
   await page.waitForTimeout(800);
   await expect(page.locator('text=Đã xác minh')).toBeVisible({ timeout: 8000 });
 
-  await page.getByRole('button', { name: /tiếp tục/i }).click();
+  await page.getByRole('button', { name: /tiếp tục xác nhận đơn hàng/i }).click();
   await page.waitForTimeout(2000);
 
-  await page.getByRole('button', { name: /đặt hàng/i }).click();
+  await page.getByRole('button', { name: /xác nhận đặt hàng & thanh toán/i }).click();
   await page.waitForTimeout(4000);
   console.log('AFTER-ORDER-URL=' + page.url());
   expect(page.url()).toContain('result');

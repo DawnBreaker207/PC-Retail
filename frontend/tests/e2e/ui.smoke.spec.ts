@@ -6,6 +6,9 @@ import { test, expect } from '@playwright/test';
 const UI = process.env.E2E_UI_URL || 'http://localhost:4200';
 
 test('UI walkthrough: home -> products -> add to cart -> cart', async ({ page }) => {
+  page.on('console', (m) => console.log('PAGE LOG:', m.type(), m.text()));
+  page.on('request', (r) => console.log('PAGE REQ:', r.method(), r.url()));
+  page.on('response', (r) => console.log('PAGE RES:', r.status(), r.url()));
   await page.goto(`${UI}/`);
   await expect(page.locator('header')).toBeVisible({ timeout: 20000 });
   await page.screenshot({ path: 'test-results/ui-home.png' });
@@ -20,8 +23,8 @@ test('UI walkthrough: home -> products -> add to cart -> cart', async ({ page })
   await page.screenshot({ path: 'test-results/ui-added.png' });
 
   // Thêm giỏ thành công (badge tăng) HOẶC thất bại có toast (hết hàng...) — cấm im lặng
-  const badge = page.locator('header button[aria-label="Giỏ hàng"] .ant-badge-count');
-  const toast = page.locator('.ant-message-notice');
+  const badge = page.locator('header a[aria-label*="Giỏ hàng"] span');
+  const toast = page.locator('app-toast-container, .toast');
   const badgeText = (await badge.count()) > 0 ? await badge.first().textContent() : null;
   const sawToast = (await toast.count()) > 0;
   expect(badgeText?.trim() || (sawToast ? 'toast' : '')).not.toBe('');

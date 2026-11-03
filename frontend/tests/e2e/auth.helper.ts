@@ -1,4 +1,5 @@
 import { createHmac } from 'node:crypto';
+import { execFileSync } from 'node:child_process';
 
 const SECRET_B64 =
   process.env.E2E_JWT_SECRET ||
@@ -36,9 +37,43 @@ export function mintToken(id: number, role: 'ADMIN' | 'STAFF' | 'CUSTOMER'): str
   return `${data}.${sig}`;
 }
 
-export const ADMIN = () => mintToken(1, 'ADMIN');
-export const CUSTOMER = () => mintToken(2, 'CUSTOMER');
-export const STAFF = () => mintToken(3, 'STAFF');
+const tokenCache: Record<string, { token: string; exp: number }> = {};
+
+function getRealToken(email: string, password: string, fallbackId: number, fallbackRole: 'ADMIN' | 'STAFF' | 'CUSTOMER'): string {
+  const now = Math.floor(Date.now() / 1000);
+  if (tokenCache[email] && tokenCache[email].exp > now + 30) {
+    return tokenCache[email].token;
+  }
+  try {
+    const baseUrl = process.env.E2E_BASE_URL || 'http://localhost:8080/api/v1';
+    const authUrl = baseUrl.endsWith('/') ? `${baseUrl}auth/login` : `${baseUrl}/auth/login`;
+    const res = execFileSync('curl.exe', [
+      '-s',
+      '-X',
+      'POST',
+      authUrl,
+      '-H',
+      'Content-Type: application/json',
+      '-d',
+      JSON.stringify({ email, password }),
+    ], { encoding: 'utf-8', timeout: 8000 });
+    const parsed = JSON.parse(res);
+    if (parsed.accessToken) {
+      tokenCache[email] = {
+        token: parsed.accessToken,
+        exp: now + (parsed.expiresIn || 900),
+      };
+      return parsed.accessToken;
+    }
+  } catch (err) {
+    // fallback to mintToken if backend unreachable
+  }
+  return mintToken(fallbackId, fallbackRole);
+}
+
+export const ADMIN = () => getRealToken('admin@pc-retail.com', 'AdminPassword123!', 1, 'ADMIN');
+export const CUSTOMER = () => getRealToken('customer@pc-retail.com', 'CustomerPassword123!', 2, 'CUSTOMER');
+export const STAFF = () => getRealToken('staff@pc-retail.com', 'StaffPassword123!', 3, 'STAFF');
 export const auth = (token: string) => ({ Authorization: `Bearer ${token}` });
 export const uuid = () =>
   'xxxxxxxx-xxxx-4xxx'.replace(/x/g, () => Math.floor(Math.random() * 16).toString(16));

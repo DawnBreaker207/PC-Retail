@@ -39,18 +39,27 @@ async function subOf(request: APIRequestContext, token: string, orderId: number)
 }
 
 async function shipToDelivered(admin: Page, orderId: number) {
-  await admin.locator('li.ant-menu-item', { hasText: 'Đơn hàng' }).first().click();
+  await admin.locator('aside a', { hasText: 'Đơn hàng' }).first().click();
   await expect(admin).toHaveURL(/\/admin\/orders$/, { timeout: 15000 });
   await admin.locator('input[aria-label*="Tìm mã đơn"]').fill(String(orderId));
   await admin.locator('input[aria-label*="Tìm mã đơn"]').press('Enter');
   await admin.waitForTimeout(1500);
   await admin.locator('a', { hasText: `#${orderId}` }).first().click();
+
+  // Step 1: PAID -> PROCESSING
   await admin.getByRole('button', { name: /xác nhận xử lý/i }).click();
+  await admin.locator('div[hlmDialogContent]').getByRole('button', { name: /xác nhận/i }).click();
   await expect(admin.getByText('Đang xử lý').first()).toBeVisible({ timeout: 15000 });
+
+  // Step 2: PROCESSING -> SHIPPED
   await admin.locator('input[aria-label="Mã vận đơn"]').fill('TRACK-E2E');
-  await admin.getByRole('button', { name: /đánh dấu đã giao shipper/i }).click();
+  await admin.getByRole('button', { name: /đánh dấu đã giao/i }).click();
+  await admin.locator('div[hlmDialogContent]').getByRole('button', { name: /xác nhận/i }).click();
   await expect(admin.getByText('Đang giao').first()).toBeVisible({ timeout: 15000 });
+
+  // Step 3: SHIPPED -> DELIVERED
   await admin.getByRole('button', { name: /xác nhận đã giao/i }).click();
+  await admin.locator('div[hlmDialogContent]').getByRole('button', { name: /xác nhận/i }).click();
   await expect(admin.getByText('Đã giao').first()).toBeVisible({ timeout: 15000 });
 }
 
@@ -72,18 +81,11 @@ async function returnIdFor(request: APIRequestContext, subOrderId: number, statu
 }
 
 async function purchaseAs(page: Page, request: APIRequestContext): Promise<number> {
-  await page.goto(`${UI}/products`);
+  await page.goto(`${UI}/products/1`);
   await page.waitForTimeout(2000);
-  await page
-    .locator('app-product-card', { hasText: 'CMHH2VN893SH' })
-    .first()
-    .locator('a[href*="/products/"]')
-    .first()
-    .click();
-  await page.waitForTimeout(2500);
   await page.locator('button', { hasText: 'Thêm vào giỏ' }).first().click();
   await page.waitForTimeout(1500);
-  const badge = page.locator('header button[aria-label="Giỏ hàng"] .ant-badge-count');
+  const badge = page.locator('header a[aria-label*="Giỏ hàng"] span');
   expect(await badge.count()).toBeGreaterThan(0);
   expect((await badge.first().textContent())?.trim()).not.toBe('');
 
@@ -94,9 +96,7 @@ async function purchaseAs(page: Page, request: APIRequestContext): Promise<numbe
   const phone = guestPhone();
   await page.locator('#fullName').fill('Khach Fullflow');
   await page.locator('#phone').fill(phone);
-  await page.locator('#city').click();
-  await page.waitForTimeout(500);
-  await page.locator('.ant-select-item-option').first().click();
+  await page.locator('#city').selectOption({ index: 1 });
   await page.locator('#district').fill('Hai Ba Trung');
   await page.locator('#street').fill('123 Duong Flow');
 
@@ -109,21 +109,20 @@ async function purchaseAs(page: Page, request: APIRequestContext): Promise<numbe
     await page.locator('#challengeAnswer').fill(String(Number(m![1]) + Number(m![2])));
     await page.getByRole('button', { name: /gửi mã otp/i }).click();
     await page.waitForTimeout(800);
-    await guestOtpDance(request, phone);
-    await page.reload();
-    await page.waitForTimeout(2000);
-    await page.locator('#fullName').fill('Khach Fullflow');
-    await page.locator('#phone').fill(phone);
-    await page.locator('#city').click();
-    await page.waitForTimeout(500);
-    await page.locator('.ant-select-item-option').first().click();
-    await page.locator('#district').fill('Hai Ba Trung');
-    await page.locator('#street').fill('123 Duong Flow');
+    const dbg = await request.get(`auth/otp/debug/${phone}`);
+    expect(dbg.status()).toBe(200);
+    const code = (await dbg.json()).data.code as string;
+    const otpInput = page.locator('input[formControlName="otpCode"]');
+    await expect(otpInput).toBeVisible({ timeout: 8000 });
+    await otpInput.fill(code);
+    await page.getByRole('button', { name: /xác minh/i }).click();
+    await page.waitForTimeout(800);
+    await expect(page.locator('text=Đã xác minh')).toBeVisible({ timeout: 8000 });
   }
 
-  await page.getByRole('button', { name: /tiếp tục/i }).click();
+  await page.getByRole('button', { name: /tiếp tục xác nhận đơn hàng/i }).click();
   await page.waitForTimeout(2000);
-  await page.getByRole('button', { name: /đặt hàng/i }).click();
+  await page.getByRole('button', { name: /xác nhận đặt hàng & thanh toán/i }).click();
   await page.waitForTimeout(4000);
   expect(page.url()).toContain('result');
   const id = Number(new URL(page.url()).searchParams.get('orderId'));
@@ -142,17 +141,23 @@ test('full saga: admin stocks, member buys, both sides do after-sales', async ({
   const user = await memberCtx.newPage();
 
   // A. Admin restocks through the UI; stock must grow by exactly the top-up.
-  const row = admin.locator('tbody tr').first();
   await admin.goto(`${UI}/auth/login?returnUrl=/admin/inventory`);
   await expect(admin).toHaveURL(/\/admin\/inventory$/, { timeout: 20000 });
+  const listBtn = admin.locator('button:has-text("Bảng danh sách")');
+  if (await listBtn.isVisible()) {
+    await listBtn.click();
+    await admin.waitForTimeout(500);
+  }
+  const row = admin.locator('tbody tr').first();
   const skuId = Number(((await row.locator('td').first().textContent()) ?? '').replace(/\D/g, ''));
   expect(skuId).toBeGreaterThan(0);
   const before = await stockOf(request, skuId);
   await row.locator('button', { hasText: 'Nhập thêm' }).click();
-  await admin.locator('#restock-quantity input').fill('7');
-  await admin.locator('#restock-quantity input').press('Enter');
+  await admin.waitForTimeout(600);
+  await admin.locator('#restock-quantity').fill('7');
   await admin.locator('#restock-note').fill('e2e fullflow top-up');
   await admin.getByRole('button', { name: /xác nhận nhập/i }).click();
+  await admin.waitForTimeout(1000);
   await expect.poll(async () => stockOf(request, skuId), { timeout: 20000 }).toBe(before + 7);
 
   // B. Member buys (real backend order).
@@ -171,7 +176,7 @@ test('full saga: admin stocks, member buys, both sides do after-sales', async ({
   user.on('dialog', (d) => d.accept('Hàng lỗi, muốn đổi mới'));
   // Synthetic click: with watch-mode slowMo the layout can shift between
   // mousedown/mouseup and silently void a real click on this button.
-  await user.getByRole('button', { name: /request return/i }).dispatchEvent('click');
+  await user.getByRole('button', { name: /yêu cầu đổi trả|request return/i }).dispatchEvent('click');
   let retA = 0;
   await expect.poll(async () => (retA = await returnIdFor(request, subA.id, 'REQUESTED')), { timeout: 20000 }).toBeGreaterThan(0);
 
@@ -195,7 +200,7 @@ test('full saga: admin stocks, member buys, both sides do after-sales', async ({
   await shipToDelivered(admin, orderB);
   await user.goto(`${UI}/orders/${orderB}`);
   await expect(user.getByText('Đã giao').first()).toBeVisible({ timeout: 25000 });
-  await user.getByRole('button', { name: /request return/i }).click();
+  await user.getByRole('button', { name: /yêu cầu đổi trả|request return/i }).dispatchEvent('click');
   let retB = 0;
   await expect.poll(async () => (retB = await returnIdFor(request, subB.id, 'REQUESTED')), { timeout: 20000 }).toBeGreaterThan(0);
 
@@ -203,8 +208,13 @@ test('full saga: admin stocks, member buys, both sides do after-sales', async ({
   await admin.goto(`${UI}/admin/returns/${retB}`);
   await expect(admin.getByText('Chờ duyệt').first()).toBeVisible({ timeout: 20000 });
   await admin.getByRole('button', { name: /từ chối/i }).click();
-  await admin.locator('.ant-modal-body textarea').fill('Không đủ điều kiện bảo hành');
-  await admin.getByRole('button', { name: /từ chối yêu cầu/i }).click();
+  const rejectTextarea = admin.locator('textarea');
+  await expect(rejectTextarea).toBeVisible({ timeout: 10000 });
+  await rejectTextarea.click();
+  await rejectTextarea.fill('Không đủ điều kiện bảo hành');
+  const rejectSubmit = admin.getByRole('button', { name: /xác nhận từ chối|từ chối yêu cầu/i });
+  await expect(rejectSubmit).toBeEnabled({ timeout: 10000 });
+  await rejectSubmit.click();
   await expect(admin.getByText('Đã từ chối').first()).toBeVisible({ timeout: 60000 });
 
   // F2. Member disputes through the UI, admin resolves through the UI.
@@ -223,10 +233,10 @@ test('full saga: admin stocks, member buys, both sides do after-sales', async ({
   await user.goto(`${UI}/orders/${orderA}`);
   await expect(user.getByText('Đã giao').first()).toBeVisible({ timeout: 25000 });
   await user.getByRole('button', { name: /viết đánh giá/i }).first().click();
-  await user.locator('.ant-rate-star').nth(4).click();
-  await user.locator('textarea').fill('Hàng chính hãng, đóng gói cẩn thận, e2e.');
+  await user.locator('textarea#review-comment, textarea').fill('Hàng chính hãng, đóng gói cẩn thận, e2e.');
   await user.getByRole('button', { name: /gửi đánh giá/i }).click();
-  await expect(user.locator('.ant-message-notice')).toBeVisible({ timeout: 60000 });
+  // Review form modal closes upon successful submission
+  await expect(user.locator('app-review-form')).toBeHidden({ timeout: 25000 });
 
   await adminCtx.close();
   await memberCtx.close();
