@@ -1,15 +1,28 @@
-<div class="grid grid-cols-2 md:grid-cols-4 auto-rows-fr gap-4">
+<div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
   @for (cat of categories; track cat.label) {
-    <a [routerLink]="['/products']" [queryParams]="{ category: cat.slug }"
-       class="flex flex-col items-center justify-center gap-3 bg-surface dark:bg-surface-dark rounded-xl border border-border/80 dark:border-border-dark/80 shadow-sm p-6 hover:shadow-md hover:border-primary/30 transition-shadow group min-h-[240px]">
-      <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary/20 transition-colors">
-        <span nz-icon [nzType]="cat.icon" nzTheme="outline" class="text-primary text-xl"></span>
+    <a
+      [routerLink]="['/products']"
+      [queryParams]="{ category: cat.slug }"
+      class="group relative flex flex-col items-center justify-center p-3.5 sm:p-4 rounded-2xl bg-surface dark:bg-surface-dark border border-border/70 dark:border-border-dark/70 transition-all duration-300 hover:-translate-y-1 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/5 text-center min-h-[140px]"
+    >
+      <div
+        class="w-12 h-12 rounded-xl flex items-center justify-center mb-2.5 transition-transform duration-300 group-hover:scale-110 shadow-2xs"
+        [class]="'border ' + cat.color"
+      >
+        <lucide-angular [img]="cat.icon" class="w-6 h-6" />
       </div>
-      <div class="text-center">
-        <p class="text-sm font-semibold leading-tight">{{ cat.label }}</p>
-        <p class="text-xs text-muted dark:text-muted-dark mt-1">{{ cat.count }} sản phẩm</p>
+
+      <p class="text-xs sm:text-sm font-bold leading-tight text-ink dark:text-ink-dark group-hover:text-primary transition-colors line-clamp-1">
+        {{ cat.label }}
+      </p>
+      <p class="text-[11px] text-muted/80 dark:text-muted-dark/80 mt-1 line-clamp-1">
+        {{ cat.sub }}
+      </p>
+
+      <div class="mt-2 flex items-center gap-1 text-[10px] font-semibold text-primary opacity-0 group-hover:opacity-100 transition-opacity">
+        <span>Xem ngay</span>
+        <lucide-angular [img]="ArrowRightIcon" class="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
       </div>
-      <span nz-icon nzType="right" nzTheme="outline" class="text-xs text-muted dark:text-muted-dark group-hover:text-primary transition-colors"></span>
     </a>
   }
 </div>

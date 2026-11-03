@@ -1,93 +1,243 @@
-<div class="mb-6 flex items-center justify-between">
+<div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
   <div>
-    <h1 class="text-2xl font-bold text-ink dark:text-ink-dark">Sản phẩm</h1>
-    <p class="text-muted dark:text-muted-dark text-sm">Quản lý danh sách sản phẩm (mock, chưa nối backend thật)</p>
+    <h1 class="text-2xl font-bold tracking-tight text-foreground">Quản lý sản phẩm</h1>
+    <p class="text-muted-foreground text-sm mt-1">Danh mục sản phẩm, cấu hình giá bán và kiểm soát trạng thái</p>
   </div>
-  <button nz-button nzType="primary" (click)="openCreateModal()">
-    <span nz-icon nzType="plus"></span>
-    Thêm sản phẩm
+  <button
+    hlmBtn
+    variant="default"
+    size="sm"
+    (click)="openCreateModal()"
+    class="h-9 px-4 gap-1.5 text-xs bg-primary text-primary-foreground self-start sm:self-auto cursor-pointer"
+  >
+    <lucide-icon [img]="Plus" class="w-4 h-4"></lucide-icon>
+    Thêm sản phẩm mới
   </button>
 </div>
 
-<div class="flex flex-wrap items-center gap-3 mb-4">
-  <input
-    nz-input
-    placeholder="Tìm theo tên sản phẩm"
-    [(ngModel)]="search"
-    (keydown.enter)="onSearch()"
-    class="max-w-xs"
-  />
-  <button nz-button nzType="default" (click)="onSearch()">
-    <span nz-icon nzType="search"></span>
-  </button>
-  <nz-select [ngModel]="categoryFilter()" (ngModelChange)="onCategoryChange($event)" nzPlaceHolder="Danh mục" nzAllowClear class="min-w-[160px]">
+<!-- Filters -->
+<div class="flex flex-wrap items-center gap-3 mb-5">
+  <div class="relative w-full sm:w-64">
+    <input
+      hlmInput
+      placeholder="Tìm theo tên sản phẩm..."
+      [(ngModel)]="search"
+      (keydown.enter)="onSearch()"
+      class="w-full pl-9 h-9 text-xs"
+    />
+    <lucide-icon [img]="Search" class="w-4 h-4 text-muted-foreground absolute left-3 top-2.5 pointer-events-none"></lucide-icon>
+  </div>
+
+  <select
+    [ngModel]="categoryFilter()"
+    (ngModelChange)="onCategoryChange($event)"
+    aria-label="Danh mục"
+    class="h-9 px-3 text-xs rounded-md border border-input bg-background text-foreground"
+  >
+    <option value="">Tất cả danh mục</option>
     @for (c of categories; track c.slug) {
-      <nz-option [nzValue]="c.slug" [nzLabel]="c.name" />
+      <option [value]="c.slug">{{ c.name }}</option>
     }
-  </nz-select>
-  <nz-select [ngModel]="brandFilter()" (ngModelChange)="onBrandChange($event)" nzPlaceHolder="Thương hiệu" nzAllowClear class="min-w-[160px]">
+  </select>
+
+  <select
+    [ngModel]="brandFilter()"
+    (ngModelChange)="onBrandChange($event)"
+    aria-label="Thương hiệu"
+    class="h-9 px-3 text-xs rounded-md border border-input bg-background text-foreground"
+  >
+    <option value="">Tất cả thương hiệu</option>
     @for (b of brands; track b.id) {
-      <nz-option [nzValue]="b.name" [nzLabel]="b.name" />
+      <option [value]="b.name">{{ b.name }}</option>
     }
-  </nz-select>
-  <nz-select [ngModel]="statusFilter()" (ngModelChange)="onStatusChange($event)" nzPlaceHolder="Trạng thái" nzAllowClear class="min-w-[160px]">
-    <nz-option nzValue="ACTIVE" nzLabel="Đang bán" />
-    <nz-option nzValue="INACTIVE" nzLabel="Ngừng bán" />
-  </nz-select>
+  </select>
+
+  <select
+    [ngModel]="statusFilter()"
+    (ngModelChange)="onStatusChange($event)"
+    aria-label="Trạng thái"
+    class="h-9 px-3 text-xs rounded-md border border-input bg-background text-foreground"
+  >
+    <option value="">Tất cả trạng thái</option>
+    <option value="ACTIVE">Đang bán</option>
+    <option value="INACTIVE">Ngừng bán</option>
+  </select>
+
+  <button hlmBtn variant="outline" size="sm" (click)="onSearch()" class="h-9 gap-1.5 text-xs">
+    <lucide-icon [img]="Search" class="w-3.5 h-3.5"></lucide-icon>
+    Tìm kiếm
+  </button>
 </div>
 
-<nz-table
-  [nzData]="products()"
-  [nzLoading]="loading()"
-  [nzTotal]="total()"
-  [nzPageIndex]="page"
-  [nzPageSize]="size"
-  [nzPageSizeOptions]="pageSizeOptions"
-  [nzFrontPagination]="false"
-  (nzPageIndexChange)="onPageChange($event)"
-  (nzPageSizeChange)="onPageSizeChange($event)"
->
-  <thead>
-    <tr>
-      <th>Sản phẩm</th>
-      <th>Thương hiệu</th>
-      <th>Danh mục</th>
-      <th class="text-right">Giá</th>
-      <th>Trạng thái</th>
-      <th class="text-right">Thao tác</th>
-    </tr>
-  </thead>
-  <tbody>
-    @for (p of products(); track p.id) {
-      <tr>
-        <td>
-          <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-lg bg-bg dark:bg-bg-dark flex items-center justify-center overflow-hidden shrink-0">
-              <img [src]="p.imageUrls[0]" loading="lazy" appFallbackImage alt="{{ p.name }}" class="w-full h-full object-contain p-0.5" />
-            </div>
-            <span class="max-w-64 truncate text-sm font-medium">{{ p.name }}</span>
-          </div>
-        </td>
-        <td>{{ p.brandName }}</td>
-        <td>{{ p.categoryName }}</td>
-        <td class="text-right">{{ p.price | currencyFormat }}</td>
-        <td>
-          <nz-tag [nzColor]="p.status === 'ACTIVE' ? 'success' : 'default'">{{ p.status === 'ACTIVE' ? 'Đang bán' : 'Ngừng bán' }}</nz-tag>
-        </td>
-        <td class="text-right">
-          <button nz-button nzType="text" nzSize="small" (click)="openEditModal(p)" aria-label="Sửa">
-            <span nz-icon nzType="edit"></span>
+@if (loading()) {
+  <div class="flex flex-col items-center justify-center py-24 gap-3 text-muted-foreground">
+    <lucide-icon [img]="Loader2" class="w-8 h-8 animate-spin text-primary"></lucide-icon>
+    <p class="text-xs">Đang tải danh sách sản phẩm...</p>
+  </div>
+} @else {
+  <div class="rounded-xl border border-border/80 bg-card overflow-hidden shadow-2xs">
+    <div class="overflow-x-auto">
+      <table hlmTable class="w-full text-xs">
+        <thead hlmTableHeader>
+          <tr hlmTableRow class="border-b border-border bg-muted/40">
+            <th hlmTableHead>Sản phẩm</th>
+            <th hlmTableHead class="w-32">Thương hiệu</th>
+            <th hlmTableHead class="w-36">Danh mục</th>
+            <th hlmTableHead class="w-32 text-right">Giá bán</th>
+            <th hlmTableHead class="w-28 text-center">Trạng thái</th>
+            <th hlmTableHead class="w-28 text-right">Thao tác</th>
+          </tr>
+        </thead>
+        <tbody hlmTableBody>
+          @for (p of products(); track p.id) {
+            <tr hlmTableRow class="border-b border-border/60 hover:bg-muted/20 transition-colors">
+              <td hlmTableCell>
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-lg bg-muted/30 border border-border/60 flex items-center justify-center overflow-hidden shrink-0">
+                    <img [src]="p.imageUrls[0]" loading="lazy" appFallbackImage [alt]="p.name" class="w-full h-full object-contain p-1" />
+                  </div>
+                  <span class="max-w-xs truncate font-medium text-foreground">{{ p.name }}</span>
+                </div>
+              </td>
+              <td hlmTableCell class="text-foreground">{{ p.brandName }}</td>
+              <td hlmTableCell class="text-muted-foreground">{{ p.categoryName }}</td>
+              <td hlmTableCell class="text-right font-semibold text-foreground">{{ p.price | currencyFormat }}</td>
+              <td hlmTableCell class="text-center">
+                <span
+                  hlmBadge
+                  variant="outline"
+                  class="px-2.5 py-0.5 rounded-full text-[11px] font-medium"
+                  [ngClass]="p.status === 'ACTIVE' ? 'border-emerald-400 bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400' : 'border-slate-300 bg-slate-50 text-slate-700 dark:bg-slate-900/40 dark:text-slate-400'"
+                >
+                  {{ p.status === 'ACTIVE' ? 'Đang bán' : 'Ngừng bán' }}
+                </span>
+              </td>
+              <td hlmTableCell class="text-right">
+                <div class="flex items-center justify-end gap-1">
+                  <button
+                    hlmBtn
+                    variant="ghost"
+                    size="sm"
+                    (click)="openEditModal(p)"
+                    class="h-7 w-7 p-0 text-muted-foreground hover:text-foreground cursor-pointer"
+                    aria-label="Sửa"
+                  >
+                    <lucide-icon [img]="Edit2" class="w-3.5 h-3.5"></lucide-icon>
+                  </button>
+                  <button
+                    hlmBtn
+                    variant="ghost"
+                    size="sm"
+                    (click)="confirmDelete(p.id)"
+                    class="h-7 w-7 p-0 text-destructive hover:bg-destructive/10 cursor-pointer"
+                    aria-label="Xóa"
+                  >
+                    <lucide-icon [img]="Trash2" class="w-3.5 h-3.5"></lucide-icon>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="6" class="text-center py-12 text-muted-foreground italic">
+                Không tìm thấy sản phẩm nào
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Spartan Pagination -->
+    <div class="flex flex-col sm:flex-row items-center justify-between px-4 py-3 border-t border-border gap-3 text-xs text-muted-foreground">
+      <div class="flex items-center gap-2">
+        <span>Tổng cộng <strong>{{ total() }}</strong> sản phẩm</span>
+        <span class="text-border">|</span>
+        <select
+          [ngModel]="size"
+          (ngModelChange)="onPageSizeChange($event)"
+          aria-label="Kích thước trang"
+          class="h-7 px-2 text-xs rounded border border-input bg-background text-foreground"
+        >
+          @for (s of pageSizeOptions; track s) {
+            <option [value]="s">{{ s }} sản phẩm / trang</option>
+          }
+        </select>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <span>Trang {{ page }} / {{ totalPages }}</span>
+        <div class="inline-flex rounded-md border border-input p-0.5 bg-card">
+          <button
+            hlmBtn
+            variant="ghost"
+            size="sm"
+            [disabled]="page <= 1"
+            (click)="onPageChange(page - 1)"
+            class="h-7 w-7 p-0 cursor-pointer"
+          >
+            <lucide-icon [img]="ChevronLeft" class="w-4 h-4"></lucide-icon>
           </button>
           <button
-            nz-button nzType="text" nzSize="small" nzDanger
-            nz-popconfirm nzPopconfirmTitle="Xóa sản phẩm này?"
-            (nzOnConfirm)="deleteProduct(p.id)"
-            aria-label="Xóa"
+            hlmBtn
+            variant="ghost"
+            size="sm"
+            [disabled]="page >= totalPages"
+            (click)="onPageChange(page + 1)"
+            class="h-7 w-7 p-0 cursor-pointer"
           >
-            <span nz-icon nzType="delete"></span>
+            <lucide-icon [img]="ChevronRight" class="w-4 h-4"></lucide-icon>
           </button>
-        </td>
-      </tr>
-    }
-  </tbody>
-</nz-table>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Product Form Spartan Dialog -->
+@if (formModalProduct(); as item) {
+  <div class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div hlmDialogContent class="max-w-xl w-full bg-card border border-border rounded-xl p-6 shadow-xl space-y-4 max-h-[90vh] overflow-y-auto">
+      <div hlmDialogHeader class="space-y-1">
+        <h3 hlmDialogTitle class="text-base font-semibold text-foreground">
+          {{ item === 'create' ? 'Thêm sản phẩm mới' : 'Chỉnh sửa thông tin sản phẩm' }}
+        </h3>
+        <p hlmDialogDescription class="text-xs text-muted-foreground">
+          Điền các thông tin kỹ thuật, hình ảnh và phân loại cho sản phẩm.
+        </p>
+      </div>
+
+      <app-product-form
+        [product]="item === 'create' ? null : item"
+        (saved)="onFormSaved()"
+        (cancelled)="closeFormModal()"
+      ></app-product-form>
+    </div>
+  </div>
+}
+
+<!-- Delete Confirmation Spartan Dialog -->
+@if (deleteTargetId(); as delId) {
+  <div class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div hlmDialogContent class="max-w-md w-full bg-card border border-border rounded-xl p-6 shadow-xl space-y-4">
+      <div hlmDialogHeader class="space-y-1.5">
+        <h3 hlmDialogTitle class="text-base font-semibold text-foreground flex items-center gap-2">
+          <lucide-icon [img]="AlertCircle" class="w-5 h-5 text-destructive"></lucide-icon>
+          Xác nhận xóa sản phẩm?
+        </h3>
+        <p hlmDialogDescription class="text-xs text-muted-foreground">
+          Hành động này sẽ xóa sản phẩm #{{ delId }} khỏi hệ thống và không thể hoàn tác.
+        </p>
+      </div>
+
+      <div hlmDialogFooter class="flex items-center justify-end gap-2 pt-2">
+        <button hlmBtn variant="outline" size="sm" (click)="cancelDelete()">
+          Hủy bỏ
+        </button>
+        <button hlmBtn variant="destructive" size="sm" (click)="executeDelete()" class="bg-destructive text-destructive-foreground">
+          Xóa sản phẩm
+        </button>
+      </div>
+    </div>
+  </div>
+}

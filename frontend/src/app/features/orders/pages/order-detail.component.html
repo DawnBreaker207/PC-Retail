@@ -1,67 +1,115 @@
 <div class="max-w-screen-2xl mx-auto px-4 py-6 lg:py-8 min-h-[60vh]">
   @if (isLoading()) {
-    <div class="flex justify-center py-20"><nz-spin nzSize="large"></nz-spin></div>
+    <div class="flex justify-center py-20">
+      <app-loading-spinner [size]="40" />
+    </div>
   } @else if (order(); as o) {
+    <!-- Top Bar -->
     <div class="flex flex-wrap items-start justify-between gap-3 mb-6">
       <div class="min-w-0 flex-1">
-        <a routerLink="/orders" class="text-sm text-muted dark:text-muted-dark hover:text-primary transition-colors duration-200">← Đơn hàng</a>
-        <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold mt-1 tracking-tight">Đơn hàng #ORD-{{ o.id }}</h1>
+        <a routerLink="/orders" class="text-sm text-muted dark:text-muted-dark hover:text-primary transition-colors inline-flex items-center gap-1">
+          <lucide-angular [img]="ChevronLeft" class="w-4 h-4" />
+          Quay lại danh sách đơn
+        </a>
+        <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold mt-1 tracking-tight text-ink dark:text-ink-dark">Đơn hàng #ORD-{{ o.id }}</h1>
+        <p class="text-xs text-muted dark:text-muted-dark mt-0.5">Đặt ngày {{ DateHelper.formatDate(o.createdAt) || 'Hôm nay' }}</p>
       </div>
-      @if (isReturnable) {
-        <button nz-button nzSize="small" (click)="requestReturn()" class="shrink-0 !rounded-lg !shadow-sm">
-          Request return
-        </button>
-      }
-      @if (isCancellable) {
-        <button nz-button nzSize="small" nzDanger nz-popconfirm nzPopconfirmTitle="Hủy đơn hàng này?" (nzOnConfirm)="cancelOrder()" class="shrink-0 !rounded-lg !shadow-sm">
-          Hủy đơn
-        </button>
-      }
+
+      <div class="flex items-center gap-2 shrink-0">
+        @if (isReturnable) {
+          <button hlmBtn variant="outline" size="sm" (click)="requestReturn()">
+            Yêu cầu đổi trả
+          </button>
+        }
+        @if (isCancellable) {
+          <button hlmBtn variant="destructive" size="sm" (click)="cancelOrder()">
+            Hủy đơn hàng
+          </button>
+        }
+      </div>
     </div>
 
+    <!-- Status Tracking Steps -->
     @if (o.subOrders[0]?.status === 'CANCELLED' || o.subOrders[0]?.status === 'EXPIRED') {
-      <nz-alert nzType="error" nzMessage="Đơn hàng đã bị hủy" nzShowIcon class="mb-6 !rounded-xl !border-0"></nz-alert>
+      <div class="mb-8 p-4 rounded-xl border border-destructive/20 bg-destructive/10 text-destructive flex items-center gap-3">
+        <lucide-angular [img]="XCircle" class="w-5 h-5 shrink-0" />
+        <span class="text-sm font-semibold">Đơn hàng đã bị hủy bỏ</span>
+      </div>
     } @else {
-      <nz-steps [nzCurrent]="currentStep" nzSize="small" class="mb-8 [&_.ant-steps-item-title]:!text-xs sm:[&_.ant-steps-item-title]:!text-sm" [nzDirection]="(windowWidth() < 640) ? 'vertical' : 'horizontal'">
-        <nz-step nzTitle="Đặt hàng"></nz-step>
-        <nz-step nzTitle="Đã thanh toán"></nz-step>
-        <nz-step nzTitle="Đang xử lý"></nz-step>
-        <nz-step nzTitle="Đang giao"></nz-step>
-        <nz-step nzTitle="Đã giao"></nz-step>
-      </nz-steps>
-    }
-
-    @if (o.shippingAddress) {
-      <div class="bg-surface dark:bg-surface-dark rounded-card border border-border/80 dark:border-border-dark/80 shadow-sm p-5 lg:p-6 mb-6 animate-fade-in-up">
-        <h2 class="font-semibold mb-3 tracking-tight text-sm">Địa chỉ giao hàng</h2>
-        <div class="flex items-center gap-2 mb-1">
-          <span nz-icon nzType="environment" class="text-primary text-sm"></span>
-          <p class="font-medium text-sm">{{ o.shippingAddress.fullName }} — {{ o.shippingAddress.phone }}</p>
+      <div class="bg-surface dark:bg-surface-dark rounded-card border border-border/80 dark:border-border-dark/80 p-5 mb-8 shadow-sm">
+        <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 relative">
+          @for (step of steps; track step.key; let idx = $index) {
+            <div class="flex flex-col items-center text-center relative z-10">
+              <div
+                class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-xs transition-colors mb-2"
+                [class.bg-primary]="idx <= currentStep"
+                [class.text-white]="idx <= currentStep"
+                [class.bg-bg]="idx > currentStep"
+                [class.dark:bg-bg-dark]="idx > currentStep"
+                [class.text-muted]="idx > currentStep"
+                [class.border]="idx > currentStep"
+                [class.border-border]="idx > currentStep"
+              >
+                @if (idx < currentStep) {
+                  <lucide-angular [img]="CheckCircle2" class="w-5 h-5" />
+                } @else {
+                  <span>{{ idx + 1 }}</span>
+                }
+              </div>
+              <span
+                class="text-xs font-medium"
+                [class.text-primary]="idx === currentStep"
+                [class.font-bold]="idx === currentStep"
+                [class.text-ink]="idx < currentStep"
+                [class.dark:text-ink-dark]="idx < currentStep"
+                [class.text-muted]="idx > currentStep"
+              >
+                {{ step.label }}
+              </span>
+            </div>
+          }
         </div>
-        <p class="text-sm text-muted dark:text-muted-dark ml-5">
-          {{ o.shippingAddress.street }}, {{ o.shippingAddress.district }}, {{ o.shippingAddress.city }}
-        </p>
       </div>
     }
 
+    <!-- Shipping Address -->
+    @if (o.shippingAddress) {
+      <div class="bg-surface dark:bg-surface-dark rounded-card border border-border/80 dark:border-border-dark/80 shadow-sm p-5 lg:p-6 mb-6 animate-fade-in-up">
+        <h2 class="font-semibold mb-3 tracking-tight text-sm text-ink dark:text-ink-dark flex items-center gap-2">
+          <lucide-angular [img]="MapPin" class="w-4 h-4 text-primary" />
+          Địa chỉ giao hàng
+        </h2>
+        <div class="pl-6 text-sm">
+          <p class="font-semibold text-ink dark:text-ink-dark">{{ o.shippingAddress.fullName }} — {{ o.shippingAddress.phone }}</p>
+          <p class="text-muted dark:text-muted-dark mt-1">
+            {{ o.shippingAddress.street }}, {{ o.shippingAddress.district }}, {{ o.shippingAddress.city }}
+          </p>
+        </div>
+      </div>
+    }
+
+    <!-- Order Items -->
     <div class="bg-surface dark:bg-surface-dark rounded-card border border-border/80 dark:border-border-dark/80 shadow-sm p-5 lg:p-6 mb-6 animate-fade-in-up">
-      <h2 class="font-semibold mb-4 tracking-tight text-sm">Sản phẩm</h2>
+      <h2 class="font-semibold mb-4 tracking-tight text-sm text-ink dark:text-ink-dark flex items-center gap-2">
+        <lucide-angular [img]="Package" class="w-4 h-4 text-primary" />
+        Danh sách sản phẩm
+      </h2>
       @for (sub of o.subOrders; track sub.id) {
         @for (item of sub.items; track item.skuId) {
           <div class="flex flex-wrap items-center gap-3 sm:gap-4 py-3.5 border-b last:border-0 border-border/60 dark:border-border-dark/60">
-            <div class="w-12 h-12 sm:w-16 sm:h-16 rounded-lg bg-bg dark:bg-bg-dark flex items-center justify-center overflow-hidden shrink-0">
-              <img [src]="item.imageUrl" loading="lazy" appFallbackImage alt="{{ item.name }}" class="w-full h-full object-contain p-0.5" />
+            <div class="w-12 h-12 sm:w-16 sm:h-16 rounded-lg bg-bg dark:bg-bg-dark flex items-center justify-center overflow-hidden shrink-0 border border-border/40">
+              <img [src]="item.imageUrl || item.primaryImageUrl || 'https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=600&auto=format&fit=crop&q=80'" loading="lazy" appFallbackImage alt="{{ item.name || item.skuName }}" class="w-full h-full object-contain p-1" />
             </div>
             <div class="flex-1 min-w-0 w-full sm:w-auto order-last sm:order-none mt-2 sm:mt-0">
-              <p class="font-medium text-sm line-clamp-2">{{ item.name }}</p>
-              <p class="text-xs text-muted dark:text-muted-dark mt-0.5">x{{ item.quantity }}</p>
+              <p class="font-medium text-sm line-clamp-2 text-ink dark:text-ink-dark">{{ item.name || item.skuName }}</p>
+              <p class="text-xs text-muted dark:text-muted-dark mt-0.5">Số lượng: x{{ item.quantity }}</p>
             </div>
             <div class="flex items-center gap-3 sm:gap-4 ml-auto sm:ml-0">
               <span class="text-xs sm:text-sm text-muted dark:text-muted-dark">{{ item.unitPrice | currencyFormat }}</span>
-              <span class="font-semibold text-primary text-xs sm:text-sm">{{ item.unitPrice * item.quantity | currencyFormat }}</span>
+              <span class="font-bold text-primary text-xs sm:text-sm">{{ item.unitPrice * item.quantity | currencyFormat }}</span>
             </div>
             @if (sub.status === 'DELIVERED') {
-              <button nz-button nzSize="small" nzType="link" (click)="openReviewForm(item)" class="w-full sm:w-auto !text-xs !font-medium">
+              <button hlmBtn variant="outline" size="sm" (click)="openReviewForm(item)" class="w-full sm:w-auto text-xs font-medium">
                 Viết đánh giá
               </button>
             }
@@ -70,45 +118,81 @@
       }
     </div>
 
+    <!-- Return Info if any -->
     @if (returnInfo(); as ret) {
       <div class="bg-surface dark:bg-surface-dark rounded-card border border-border/80 dark:border-border-dark/80 shadow-sm p-5 lg:p-6 mb-6 animate-fade-in-up">
-        <h2 class="font-semibold mb-4 tracking-tight text-sm">Đổi trả / bảo hành</h2>
-        <div class="flex justify-between items-center">
-          <span class="text-muted dark:text-muted-dark text-sm">Trạng thái yêu cầu</span>
-          <nz-tag [nzColor]="RETURN_COLOR[ret.status]">{{ RETURN_LABEL[ret.status] ?? ret.status }}</nz-tag>
+        <h2 class="font-semibold mb-4 tracking-tight text-sm text-ink dark:text-ink-dark">Đổi trả / Bảo hành</h2>
+        <div class="flex justify-between items-center text-sm">
+          <span class="text-muted dark:text-muted-dark">Trạng thái yêu cầu:</span>
+          <span hlmBadge variant="secondary">{{ RETURN_LABEL[ret.status] || ret.status }}</span>
         </div>
         @if (ret.status === 'REJECTED') {
           <p class="text-sm mt-2"><span class="text-muted dark:text-muted-dark">Lý do từ chối:</span> {{ ret.rejectReason }}</p>
-          <button nz-button nzSize="small" nzType="link" (click)="disputeReturn()" class="mt-2 !px-0">
+          <button hlmBtn variant="link" size="sm" (click)="disputeReturn()" class="mt-2 p-0 h-auto">
             Khiếu nại quyết định này
           </button>
         }
         @if (ret.status === 'DISPUTED') {
-          <p class="text-sm mt-2 text-muted dark:text-muted-dark">Shop đang xem xét khiếu nại của bạn.</p>
+          <p class="text-sm mt-2 text-muted dark:text-muted-dark">Shop đang xem xét và sẽ liên hệ hỗ trợ bạn.</p>
         }
       </div>
     }
 
+    <!-- Payment & Totals -->
     <div class="bg-surface dark:bg-surface-dark rounded-card border border-border/80 dark:border-border-dark/80 shadow-sm p-5 lg:p-6 animate-fade-in-up">
-      <h2 class="font-semibold mb-4 tracking-tight text-sm">Thanh toán</h2>
-      <div class="space-y-2.5 text-sm">
+      <h2 class="font-semibold mb-4 tracking-tight text-sm text-ink dark:text-ink-dark">Chi tiết thanh toán</h2>
+      <div class="space-y-3 text-sm">
         <div class="flex justify-between items-center">
-          <span class="text-muted dark:text-muted-dark">Trạng thái</span>
-          <nz-tag [nzColor]="o.paymentStatus === 'PAID' ? 'success' : 'gold'" class="!rounded-full !border-0 !px-3 !font-medium">
+          <span class="text-muted dark:text-muted-dark">Trạng thái thanh toán</span>
+          <span
+            hlmBadge
+            [variant]="o.paymentStatus === 'PAID' ? 'default' : 'secondary'"
+            class="rounded-full px-3"
+          >
             {{ o.paymentStatus === 'PAID' ? 'Đã thanh toán' : 'Chưa thanh toán' }}
-          </nz-tag>
+          </span>
         </div>
         @for (sub of o.subOrders; track sub.id) {
-          <div class="flex justify-between"><span class="text-muted dark:text-muted-dark">Tạm tính</span><span>{{ sub.subtotal | currencyFormat }}</span></div>
-          <div class="flex justify-between"><span class="text-muted dark:text-muted-dark">Giảm giá</span><span class="text-success font-medium">-{{ sub.discountAmount | currencyFormat }}</span></div>
-          <div class="flex justify-between"><span class="text-muted dark:text-muted-dark">Phí ship</span><span>{{ sub.shippingFee === 0 ? 'Miễn phí' : (sub.shippingFee | currencyFormat) }}</span></div>
+          <div class="flex justify-between">
+            <span class="text-muted dark:text-muted-dark">Tạm tính:</span>
+            <span class="text-ink dark:text-ink-dark font-medium">{{ sub.subtotal | currencyFormat }}</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-muted dark:text-muted-dark">Giảm giá:</span>
+            <span class="text-success font-medium">-{{ sub.discountAmount | currencyFormat }}</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-muted dark:text-muted-dark">Phí vận chuyển:</span>
+            <span class="text-ink dark:text-ink-dark font-medium">{{ sub.shippingFee === 0 ? 'Miễn phí' : (sub.shippingFee | currencyFormat) }}</span>
+          </div>
           <hr class="border-border/60 dark:border-border-dark/60 my-3" />
           <div class="flex justify-between items-baseline">
-            <span class="text-base font-semibold">Tổng</span>
-            <span class="text-primary text-xl font-bold">{{ sub.finalAmount | currencyFormat }}</span>
+            <span class="text-base font-semibold text-ink dark:text-ink-dark">Tổng cộng:</span>
+            <span class="text-primary text-xl font-black">{{ sub.finalAmount | currencyFormat }}</span>
           </div>
         }
       </div>
+    </div>
+
+    <!-- Review Modal -->
+    @if (reviewItem(); as rItem) {
+      <app-review-form
+        [orderId]="o.id"
+        [item]="rItem"
+        (closed)="reviewItem.set(null)"
+        (submitted)="loadOrder(o.id)"
+      />
+    }
+  } @else {
+    <div class="text-center py-20 bg-surface dark:bg-surface-dark rounded-2xl border border-border/80 p-8 my-6 max-w-xl mx-auto shadow-xs">
+      <div class="w-16 h-16 mx-auto rounded-full bg-muted/20 flex items-center justify-center mb-4 text-muted dark:text-muted-dark">
+        <lucide-angular [img]="AlertCircle" class="w-8 h-8" />
+      </div>
+      <h2 class="text-lg font-bold mb-2 text-foreground">Không tìm thấy thông tin đơn hàng</h2>
+      <p class="text-sm text-muted dark:text-muted-dark mb-6">Đơn hàng này không tồn tại hoặc bạn chưa có quyền truy cập.</p>
+      <a routerLink="/orders" hlmBtn variant="default" class="rounded-xl px-6">
+        Quay lại danh sách đơn hàng
+      </a>
     </div>
   }
 </div>

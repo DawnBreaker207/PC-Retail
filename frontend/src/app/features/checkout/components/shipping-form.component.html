@@ -1,100 +1,329 @@
-<form nz-form [formGroup]="form" (ngSubmit)="submit()" class="bg-surface dark:bg-surface-dark rounded-card border border-border/80 dark:border-border-dark/80 shadow-sm p-6 lg:p-8">
-  <h2 class="text-xl font-semibold mb-6 tracking-tight">Địa chỉ giao hàng</h2>
-
-  <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6">
-    <nz-form-item class="sm:col-span-2">
-      <nz-form-label nzFor="fullName" nzRequired class="!pb-1.5 !text-sm !font-medium">Họ và tên</nz-form-label>
-      <nz-form-control [nzErrorTip]="'Vui lòng nhập họ tên'">
-        <input nz-input id="fullName" formControlName="fullName" placeholder="Nguyễn Văn A" class="!rounded-lg !py-2.5" />
-      </nz-form-control>
-    </nz-form-item>
-
-    <nz-form-item class="sm:col-span-2">
-      <nz-form-label nzFor="phone" nzRequired class="!pb-1.5 !text-sm !font-medium">Số điện thoại</nz-form-label>
-      <nz-form-control [nzErrorTip]="'Số điện thoại không hợp lệ'">
-        <input nz-input id="phone" formControlName="phone" placeholder="0912 345 678" class="!rounded-lg !py-2.5" />
-      </nz-form-control>
-    </nz-form-item>
-
-    @if (isGuest()) {
-      <div class="sm:col-span-2 rounded-lg border border-border/60 p-4 bg-bg/50">
-        <p class="text-sm font-medium mb-2">
-          Xác minh số điện thoại
-          @if (otpVerified()) {
-            <span class="ml-2 text-xs text-green-600 font-semibold">Đã xác minh ✓</span>
-          }
-        </p>
-        @if (!otpVerified()) {
-          @if (challengeQ()) {
-            <p class="text-sm text-muted mb-2">Chống bot: {{ challengeQ() }}</p>
-          }
-          <div class="flex flex-col sm:flex-row gap-2">
-            @if (challengeQ()) {
-              <input nz-input id="challengeAnswer" formControlName="challengeAnswer" placeholder="Kết quả phép tính" class="!rounded-lg !py-2.5 sm:max-w-[180px]" />
-            }
-            <button type="button" nz-button (click)="sendOtp()" [nzLoading]="otpBusy()" [disabled]="cooldownLeft() > 0" class="!rounded-lg">
-              @if (cooldownLeft() > 0) {
-                Gửi lại sau {{ cooldownLeft() }}s
-              } @else {
-                {{ otpSent() ? 'Gửi lại mã' : 'Gửi mã OTP' }}
-              }
-            </button>
+<form [formGroup]="form" (ngSubmit)="submit()" class="bg-surface dark:bg-surface-dark rounded-xl border border-border/80 dark:border-border-dark/80 shadow-xs p-6 lg:p-8 space-y-6">
+  <!-- Fulfillment Type Selector -->
+  <div>
+    <h2 class="text-xl font-bold mb-4 tracking-tight text-foreground">1. Hình thức nhận hàng</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <label
+        class="flex items-start gap-3 p-4 rounded-xl border transition-all cursor-pointer"
+        [class.border-primary]="form.controls.fulfillmentType.value === 'DELIVERY'"
+        [class.bg-primary/5]="form.controls.fulfillmentType.value === 'DELIVERY'"
+        [class.border-border/80]="form.controls.fulfillmentType.value !== 'DELIVERY'"
+      >
+        <input
+          type="radio"
+          formControlName="fulfillmentType"
+          value="DELIVERY"
+          class="mt-1 size-4 text-primary accent-primary"
+        />
+        <div>
+          <div class="flex items-center gap-1.5 font-bold text-sm text-foreground">
+            <lucide-icon [img]="TruckIcon" class="size-4 text-primary" />
+            Giao hàng tận nơi
           </div>
-          @if (otpSent()) {
-            <div class="flex flex-col sm:flex-row gap-2 mt-2 sm:items-center">
-              <nz-input-otp formControlName="otpCode" [nzLength]="6" />
-              <button type="button" nz-button nzType="primary" (click)="verifyOtp()" [nzLoading]="otpBusy()" class="!rounded-lg">
-                Xác minh
-              </button>
-            </div>
+          <p class="text-xs text-muted dark:text-muted-dark mt-0.5">Giao nhanh toàn quốc, miễn phí vận chuyển cho đơn hàng từ 1 triệu</p>
+        </div>
+      </label>
+
+      <label
+        class="flex items-start gap-3 p-4 rounded-xl border transition-all cursor-pointer"
+        [class.border-primary]="form.controls.fulfillmentType.value === 'PICKUP'"
+        [class.bg-primary/5]="form.controls.fulfillmentType.value === 'PICKUP'"
+        [class.border-border/80]="form.controls.fulfillmentType.value !== 'PICKUP'"
+      >
+        <input
+          type="radio"
+          formControlName="fulfillmentType"
+          value="PICKUP"
+          class="mt-1 size-4 text-primary accent-primary"
+        />
+        <div>
+          <div class="flex items-center gap-1.5 font-bold text-sm text-foreground">
+            <lucide-icon [img]="StoreIcon" class="size-4 text-primary" />
+            Nhận tại Showroom (GearVN)
+          </div>
+          <p class="text-xs text-muted dark:text-muted-dark mt-0.5">Giữ hàng trong 48h, có kỹ thuật viên hỗ trợ ráp và kiểm tra máy trực tiếp</p>
+        </div>
+      </label>
+    </div>
+
+    @if (form.controls.fulfillmentType.value === 'PICKUP') {
+      <div class="mt-4 p-4 rounded-xl bg-muted/20 dark:bg-muted-dark/10 border border-border/80">
+        <label for="showroomSelect" class="block text-xs font-semibold text-foreground mb-1.5">
+          Chọn Showroom thuận tiện cho bạn <span class="text-destructive">*</span>
+        </label>
+        <select
+          id="showroomSelect"
+          formControlName="selectedShowroom"
+          (change)="onShowroomSelect(form.controls.selectedShowroom.value)"
+          class="w-full h-11 appearance-none rounded-lg border border-border/80 bg-surface dark:bg-surface-dark px-3.5 pr-8 text-sm font-medium text-foreground shadow-xs transition-colors hover:border-primary/50 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+        >
+          @for (sr of showrooms; track sr.id) {
+            <option [value]="sr.id">{{ sr.name }}</option>
           }
-        }
+        </select>
+        <p class="text-xs text-emerald-600 dark:text-emerald-400 mt-2 font-medium">
+          ✓ Có sẵn hàng và kỹ thuật viên đón tiếp bạn tại cửa hàng
+        </p>
       </div>
     }
-
-    <nz-form-item>
-      <nz-form-label nzFor="city" nzRequired class="!pb-1.5 !text-sm !font-medium">Tỉnh/Thành phố</nz-form-label>
-      <nz-form-control [nzErrorTip]="'Vui lòng chọn tỉnh/thành phố'">
-        <nz-select id="city" formControlName="city" nzPlaceHolder="Chọn tỉnh/thành phố" class="w-full">
-          @for (c of cities; track c) {
-            <nz-option [nzValue]="c" [nzLabel]="c"></nz-option>
-          }
-        </nz-select>
-      </nz-form-control>
-    </nz-form-item>
-
-    <nz-form-item>
-      <nz-form-label nzFor="district" nzRequired class="!pb-1.5 !text-sm !font-medium">Quận/Huyện</nz-form-label>
-      <nz-form-control [nzErrorTip]="'Vui lòng nhập quận/huyện'">
-        <input nz-input id="district" formControlName="district" placeholder="Quận Hà Đông" class="!rounded-lg !py-2.5" />
-      </nz-form-control>
-    </nz-form-item>
-
-    <nz-form-item class="sm:col-span-2">
-      <nz-form-label nzFor="street" nzRequired class="!pb-1.5 !text-sm !font-medium">Địa chỉ</nz-form-label>
-      <nz-form-control [nzErrorTip]="'Vui lòng nhập địa chỉ'">
-        <input nz-input id="street" formControlName="street" placeholder="123 Đường ABC" class="!rounded-lg !py-2.5" />
-      </nz-form-control>
-    </nz-form-item>
   </div>
 
-  <nz-form-item class="mb-0">
-    <nz-form-label class="!pb-1.5 !text-sm !font-medium">Phương thức nhận hàng</nz-form-label>
-    <nz-form-control>
-      <div class="flex flex-col sm:flex-row gap-3 sm:gap-4">
-        <label nz-radio nzId="ship-delivery" for="ship-delivery" formControlName="fulfillmentType" nzValue="DELIVERY" class="!py-2.5 !px-4 !rounded-lg !border !border-border dark:!border-border-dark hover:!border-primary !transition-colors [&.ant-radio-wrapper-checked]:!border-primary">🚚 Giao hàng tận nơi</label>
-        <label nz-radio nzId="ship-pickup" for="ship-pickup" formControlName="fulfillmentType" nzValue="PICKUP" nzDisabled class="!py-2.5 !px-4 !rounded-lg !border !border-border dark:!border-border-dark !opacity-50">🏪 Nhận tại cửa hàng</label>
+  <hr class="border-border/70 dark:border-border-dark/70" />
+
+  <!-- Customer Information -->
+  <div>
+    <h2 class="text-xl font-bold mb-4 tracking-tight text-foreground">
+      {{ form.controls.fulfillmentType.value === 'PICKUP' ? '2. Thông tin người nhận hàng tại Showroom' : '2. Địa chỉ nhận hàng' }}
+    </h2>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+      <!-- Full Name -->
+      <div class="sm:col-span-2">
+        <label for="fullName" class="block text-xs font-semibold text-foreground mb-1.5">
+          Họ và tên người nhận <span class="text-destructive">*</span>
+        </label>
+        <input
+          hlmInput
+          id="fullName"
+          type="text"
+          formControlName="fullName"
+          placeholder="Nguyễn Văn A"
+          class="w-full h-11 px-3.5 rounded-lg border-border/80 text-sm"
+        />
+        @if (form.controls.fullName.touched && form.controls.fullName.invalid) {
+          <p class="text-destructive text-xs mt-1">Vui lòng nhập họ và tên</p>
+        }
       </div>
-    </nz-form-control>
-  </nz-form-item>
+
+      <!-- Phone -->
+      <div class="sm:col-span-2">
+        <label for="phone" class="block text-xs font-semibold text-foreground mb-1.5">
+          Số điện thoại nhận hàng <span class="text-destructive">*</span>
+        </label>
+        <input
+          hlmInput
+          id="phone"
+          type="tel"
+          formControlName="phone"
+          placeholder="0912 345 678"
+          class="w-full h-11 px-3.5 rounded-lg border-border/80 text-sm"
+        />
+        @if (form.controls.phone.touched && form.controls.phone.invalid) {
+          <p class="text-destructive text-xs mt-1">Số điện thoại không hợp lệ (10 số, bắt đầu bằng 03, 05, 07, 08, 09)</p>
+        }
+      </div>
+
+      <!-- Guest OTP Verification -->
+      @if (isGuest()) {
+        <div class="sm:col-span-2 rounded-xl border border-border/80 p-4 bg-bg dark:bg-bg-dark">
+          <div class="flex items-center justify-between mb-2">
+            <p class="text-xs font-bold text-foreground">Xác minh số điện thoại</p>
+            @if (otpVerified()) {
+              <span class="inline-flex items-center gap-1 text-xs text-emerald-600 dark:text-emerald-400 font-semibold">
+                <lucide-icon [img]="CheckCircleIcon" class="size-3.5" />
+                Đã xác minh
+              </span>
+            }
+          </div>
+
+          @if (!otpVerified()) {
+            @if (challengeQ()) {
+              <p class="text-xs text-muted dark:text-muted-dark mb-2">Chống bot: {{ challengeQ() }}</p>
+            }
+            <div class="flex flex-col sm:flex-row gap-2">
+              @if (challengeQ()) {
+                <input
+                  hlmInput
+                  id="challengeAnswer"
+                  formControlName="challengeAnswer"
+                  placeholder="Kết quả phép tính"
+                  class="h-10 text-xs sm:max-w-[180px] rounded-lg"
+                />
+              }
+              <button
+                type="button"
+                hlmBtn
+                variant="outline"
+                size="sm"
+                (click)="sendOtp()"
+                [disabled]="otpBusy() || cooldownLeft() > 0"
+                class="h-10 px-4 text-xs font-semibold rounded-lg shrink-0"
+              >
+                @if (cooldownLeft() > 0) {
+                  Gửi lại sau {{ cooldownLeft() }}s
+                } @else {
+                  {{ otpSent() ? 'Gửi lại mã' : 'Gửi mã OTP' }}
+                }
+              </button>
+            </div>
+
+            @if (otpSent()) {
+              <div class="flex flex-col sm:flex-row gap-2 mt-3 sm:items-center">
+                <input
+                  hlmInput
+                  formControlName="otpCode"
+                  placeholder="Nhập 6 số OTP"
+                  maxlength="6"
+                  class="h-10 text-xs sm:max-w-[160px] tracking-widest text-center font-bold rounded-lg"
+                />
+                <button
+                  type="button"
+                  hlmBtn
+                  variant="default"
+                  size="sm"
+                  (click)="verifyOtp()"
+                  [disabled]="otpBusy() || !form.controls.otpCode.value"
+                  class="h-10 px-4 text-xs font-bold rounded-lg"
+                >
+                  Xác minh
+                </button>
+              </div>
+            }
+          }
+        </div>
+      }
+
+      @if (form.controls.fulfillmentType.value === 'DELIVERY') {
+        <!-- City -->
+        <div>
+          <label for="city" class="block text-xs font-semibold text-foreground mb-1.5">
+            Tỉnh / Thành phố <span class="text-destructive">*</span>
+          </label>
+          <div class="relative">
+            <select
+              id="city"
+              formControlName="city"
+              class="w-full h-11 appearance-none rounded-lg border border-border/80 bg-surface dark:bg-surface-dark px-3.5 pr-8 text-sm font-medium text-foreground shadow-xs transition-colors hover:border-primary/50 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+            >
+              <option value="" disabled selected>Chọn Tỉnh / Thành phố</option>
+              @for (c of cities; track c) {
+                <option [value]="c">{{ c }}</option>
+              }
+            </select>
+            <div class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-muted dark:text-muted-dark text-xs">▼</div>
+          </div>
+          @if (form.controls.city.touched && form.controls.city.invalid) {
+            <p class="text-destructive text-xs mt-1">Vui lòng chọn tỉnh/thành phố</p>
+          }
+        </div>
+
+        <!-- District -->
+        <div>
+          <label for="district" class="block text-xs font-semibold text-foreground mb-1.5">
+            Quận / Huyện <span class="text-destructive">*</span>
+          </label>
+          <input
+            hlmInput
+            id="district"
+            type="text"
+            formControlName="district"
+            placeholder="Quận Cầu Giấy / Quận 1"
+            class="w-full h-11 px-3.5 rounded-lg border-border/80 text-sm"
+          />
+          @if (form.controls.district.touched && form.controls.district.invalid) {
+            <p class="text-destructive text-xs mt-1">Vui lòng nhập quận/huyện</p>
+          }
+        </div>
+
+        <!-- Street -->
+        <div class="sm:col-span-2">
+          <label for="street" class="block text-xs font-semibold text-foreground mb-1.5">
+            Địa chỉ chi tiết (số nhà, tên đường, phường/xã) <span class="text-destructive">*</span>
+          </label>
+          <input
+            hlmInput
+            id="street"
+            type="text"
+            formControlName="street"
+            placeholder="Số 123 Đường Cầu Giấy, Phường Dịch Vọng"
+            class="w-full h-11 px-3.5 rounded-lg border-border/80 text-sm"
+          />
+          @if (form.controls.street.touched && form.controls.street.invalid) {
+            <p class="text-destructive text-xs mt-1">Vui lòng nhập địa chỉ cụ thể</p>
+          }
+        </div>
+      }
+    </div>
+  </div>
+
+  <hr class="border-border/70 dark:border-border-dark/70" />
+
+  <!-- VAT Tax Invoice Section -->
+  <div class="rounded-xl border border-border/80 p-5 bg-muted/10 dark:bg-muted-dark/5">
+    <label class="flex items-center gap-3 cursor-pointer">
+      <input
+        type="checkbox"
+        formControlName="invoiceRequested"
+        class="size-4.5 rounded border-border text-primary accent-primary"
+      />
+      <div class="flex items-center gap-2">
+        <lucide-icon [img]="BuildingIcon" class="size-4 text-primary" />
+        <span class="font-bold text-sm text-foreground">Yêu cầu xuất hóa đơn điện tử VAT (cho công ty / doanh nghiệp)</span>
+      </div>
+    </label>
+
+    @if (form.controls.invoiceRequested.value) {
+      <div class="mt-4 pt-4 border-t border-border/70 grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="sm:col-span-2">
+          <label for="companyName" class="block text-xs font-semibold text-foreground mb-1.5">
+            Tên công ty / Doanh nghiệp <span class="text-destructive">*</span>
+          </label>
+          <input
+            hlmInput
+            id="companyName"
+            formControlName="companyName"
+            placeholder="CÔNG TY TNHH PHÁT TRIỂN CÔNG NGHỆ ABC"
+            class="w-full h-10 px-3 rounded-lg border-border/80 text-sm"
+          />
+        </div>
+        <div>
+          <label for="taxCode" class="block text-xs font-semibold text-foreground mb-1.5">
+            Mã số thuế doanh nghiệp <span class="text-destructive">*</span>
+          </label>
+          <input
+            hlmInput
+            id="taxCode"
+            formControlName="taxCode"
+            placeholder="0101234567"
+            class="w-full h-10 px-3 rounded-lg border-border/80 text-sm font-mono"
+          />
+        </div>
+        <div>
+          <label for="invoiceEmail" class="block text-xs font-semibold text-foreground mb-1.5">
+            Email nhận hóa đơn điện tử (.xml, .pdf)
+          </label>
+          <input
+            hlmInput
+            id="invoiceEmail"
+            type="email"
+            formControlName="invoiceEmail"
+            placeholder="ketoan@congty.com"
+            class="w-full h-10 px-3 rounded-lg border-border/80 text-sm"
+          />
+        </div>
+        <div class="sm:col-span-2">
+          <label for="companyAddress" class="block text-xs font-semibold text-foreground mb-1.5">
+            Địa chỉ doanh nghiệp (theo giấy phép ĐKKD) <span class="text-destructive">*</span>
+          </label>
+          <input
+            hlmInput
+            id="companyAddress"
+            formControlName="companyAddress"
+            placeholder="Tầng 5, Tòa nhà Landmark, Quận 1, TP. Hồ Chí Minh"
+            class="w-full h-10 px-3 rounded-lg border-border/80 text-sm"
+          />
+        </div>
+      </div>
+    }
+  </div>
 
   <button
     type="submit"
-    nz-button
-    nzType="primary"
+    hlmBtn
+    variant="default"
     [disabled]="form.invalid"
-    class="mt-8 !rounded-lg !py-2.5 !h-auto !font-semibold !px-8 !shadow-sm hover:!shadow-md !transition-shadow !duration-200"
+    class="w-full sm:w-auto h-12 px-8 rounded-xl font-bold text-sm shadow-xs hover:shadow-sm"
   >
-    Tiếp tục
+    Tiếp tục xác nhận đơn hàng →
   </button>
 </form>

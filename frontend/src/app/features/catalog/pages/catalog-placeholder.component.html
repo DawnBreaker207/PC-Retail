@@ -1,9 +1,8 @@
-<nz-result
-  nzStatus="404"
-  nzTitle="Đang phát triển"
-  nzSubTitle="Trang danh mục sản phẩm đang được xây dựng."
->
-  <div nz-result-extra>
-    <button nz-button nzType="primary" routerLink="/">Về trang chủ</button>
+<div class="min-h-[50vh] flex flex-col items-center justify-center text-center px-4 py-12">
+  <div class="w-16 h-16 rounded-full bg-primary/10 text-primary flex items-center justify-center mb-4">
+    <lucide-angular [img]="Hammer" class="w-8 h-8" />
   </div>
-</nz-result>
+  <h2 class="text-xl font-bold text-ink dark:text-ink-dark mb-2">Đang phát triển</h2>
+  <p class="text-sm text-muted dark:text-muted-dark max-w-md mb-6">Trang danh mục sản phẩm đang được xây dựng và hoàn thiện.</p>
+  <a hlmBtn routerLink="/">Về trang chủ</a>
+</div>

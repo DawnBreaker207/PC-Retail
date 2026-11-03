@@ -1,18 +1,40 @@
 import { Component, inject, DestroyRef, signal } from '@angular/core';
-import { DatePipe } from '@angular/common';
+import { DatePipe, NgClass } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { NzTableModule } from 'ng-zorro-antd/table';
-import { NzButtonModule } from 'ng-zorro-antd/button';
-import { NzIconModule } from 'ng-zorro-antd/icon';
-import { NzSpinModule } from 'ng-zorro-antd/spin';
-import { NzTagModule } from 'ng-zorro-antd/tag';
-import { NzInputModule } from 'ng-zorro-antd/input';
-import { NzSelectModule } from 'ng-zorro-antd/select';
-import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
-import { NzMessageService } from 'ng-zorro-antd/message';
-import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
+import {
+  LucideAngularModule,
+  Plus,
+  Search,
+  Edit2,
+  Key,
+  Lock,
+  Unlock,
+  ChevronLeft,
+  ChevronRight,
+  AlertCircle,
+  Loader2,
+} from 'lucide-angular';
+import { HlmButtonDirective } from '@shared/ui/button';
+import { HlmInputDirective } from '@shared/ui/input';
+import { HlmBadgeDirective } from '@shared/ui/badge';
+import {
+  HlmTableDirective,
+  HlmTableHeaderDirective,
+  HlmTableBodyDirective,
+  HlmTableRowDirective,
+  HlmTableHeadDirective,
+  HlmTableCellDirective,
+} from '@shared/ui/table';
+import {
+  HlmDialogContentDirective,
+  HlmDialogHeaderDirective,
+  HlmDialogTitleDirective,
+  HlmDialogDescriptionDirective,
+  HlmDialogFooterDirective,
+} from '@shared/ui/dialog';
+import { ToastService } from '@core/services/toast.service';
 import { ApiEndpoints } from '@core/api/api.endpoints';
 import { User } from '@core/models/common.model';
 import { UserFormComponent } from '../components/user-form.component';
@@ -32,17 +54,45 @@ const ROLE_OPTIONS = [
 
 @Component({
   selector: 'app-admin-user-list',
+  standalone: true,
   imports: [
-    DatePipe, FormsModule, NzTableModule, NzButtonModule, NzIconModule, NzSpinModule,
-    NzTagModule, NzInputModule, NzSelectModule, NzPopconfirmModule, NzModalModule,
+    DatePipe,
+    NgClass,
+    FormsModule,
+    LucideAngularModule,
+    HlmButtonDirective,
+    HlmInputDirective,
+    HlmBadgeDirective,
+    HlmTableDirective,
+    HlmTableHeaderDirective,
+    HlmTableBodyDirective,
+    HlmTableRowDirective,
+    HlmTableHeadDirective,
+    HlmTableCellDirective,
+    HlmDialogContentDirective,
+    HlmDialogHeaderDirective,
+    HlmDialogTitleDirective,
+    HlmDialogDescriptionDirective,
+    HlmDialogFooterDirective,
+    UserFormComponent,
   ],
   templateUrl: './admin-user-list.component.html',
 })
 export class AdminUserListComponent {
   private http = inject(HttpClient);
   private destroyRef = inject(DestroyRef);
-  private modal = inject(NzModalService);
-  private message = inject(NzMessageService);
+  private toast = inject(ToastService);
+
+  readonly Plus = Plus;
+  readonly Search = Search;
+  readonly Edit2 = Edit2;
+  readonly Key = Key;
+  readonly Lock = Lock;
+  readonly Unlock = Unlock;
+  readonly ChevronLeft = ChevronLeft;
+  readonly ChevronRight = ChevronRight;
+  readonly AlertCircle = AlertCircle;
+  readonly Loader2 = Loader2;
 
   users = signal<User[]>([]);
   loading = signal(false);
@@ -52,6 +102,17 @@ export class AdminUserListComponent {
   page = 1;
   size = 20;
   pageSizeOptions = [10, 20, 50];
+
+  // Form Modal State
+  formModalUser = signal<User | null | 'create'>(null);
+
+  // Confirmation Modal State (Password reset or Status toggle)
+  confirmAction = signal<{
+    title: string;
+    description: string;
+    confirmText: string;
+    action: () => void;
+  } | null>(null);
 
   protected readonly ROLE_OPTIONS = ROLE_OPTIONS;
 
@@ -80,8 +141,8 @@ export class AdminUserListComponent {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res) => {
-          this.users.set(res.content);
-          this.total.set(res.totalElements);
+          this.users.set(res.content ?? []);
+          this.total.set(res.totalElements ?? 0);
           this.loading.set(false);
         },
         error: () => this.loading.set(false),
@@ -89,6 +150,7 @@ export class AdminUserListComponent {
   }
 
   onPageChange(page: number) {
+    if (page < 1 || page > this.totalPages) return;
     this.page = page;
     this.loadData();
   }
@@ -99,51 +161,74 @@ export class AdminUserListComponent {
     this.loadData();
   }
 
+  get totalPages(): number {
+    return Math.max(1, Math.ceil(this.total() / this.size));
+  }
+
   openCreateModal() {
-    this.openForm(null);
+    this.formModalUser.set('create');
   }
 
   openEditModal(user: User) {
-    this.openForm(user);
+    this.formModalUser.set(user);
   }
 
-  private openForm(user: User | null) {
-    const modalRef = this.modal.create({
-      nzTitle: user ? 'Sửa người dùng' : 'Thêm người dùng mới',
-      nzContent: UserFormComponent,
-      nzData: { user },
-      nzFooter: null,
-      nzWidth: 480,
-    });
-    modalRef.afterClose.subscribe((success) => {
-      if (success) {
-        this.message.success(user ? 'Cập nhật người dùng thành công' : 'Thêm người dùng thành công');
-        this.loadData();
-      }
+  closeFormModal() {
+    this.formModalUser.set(null);
+  }
+
+  onFormSaved() {
+    this.closeFormModal();
+    this.loadData();
+  }
+
+  promptResetPassword(user: User) {
+    this.confirmAction.set({
+      title: 'Đặt lại mật khẩu?',
+      description: `Hệ thống sẽ tạo mật khẩu ngẫu nhiên tạm thời cho ${user.fullName} (${user.email}).`,
+      confirmText: 'Đặt lại mật khẩu',
+      action: () => this.executeResetPassword(user),
     });
   }
 
-  resetPassword(user: User) {
+  private executeResetPassword(user: User) {
     this.http.post<{ tempPassword: string }>(ApiEndpoints.admin.userResetPassword(user.id), {})
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res) => {
-          this.message.success(`Đã đặt lại mật khẩu cho ${user.fullName}. Mật khẩu tạm: ${res.tempPassword}`, { nzDuration: 8000 });
+          this.toast.success(`Đã đặt lại mật khẩu cho ${user.fullName}. Mật khẩu tạm: ${res.tempPassword}`);
+          this.closeConfirmAction();
         },
-        error: () => this.message.error('Đặt lại mật khẩu thất bại'),
+        error: () => this.toast.error('Đặt lại mật khẩu thất bại'),
       });
   }
 
-  toggleStatus(user: User) {
+  promptToggleStatus(user: User) {
     const nextStatus = user.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
+    this.confirmAction.set({
+      title: nextStatus === 'ACTIVE' ? 'Kích hoạt lại tài khoản?' : 'Khóa tài khoản này?',
+      description: nextStatus === 'ACTIVE'
+        ? `Tài khoản ${user.email} sẽ có thể đăng nhập lại vào hệ thống.`
+        : `Người dùng ${user.email} sẽ bị tước quyền truy cập ngay lập tức.`,
+      confirmText: nextStatus === 'ACTIVE' ? 'Kích hoạt' : 'Khóa tài khoản',
+      action: () => this.executeToggleStatus(user, nextStatus),
+    });
+  }
+
+  private executeToggleStatus(user: User, nextStatus: string) {
     this.http.put(ApiEndpoints.admin.userStatus(user.id), { status: nextStatus })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
-          this.message.success(nextStatus === 'ACTIVE' ? 'Đã kích hoạt tài khoản' : 'Đã khóa tài khoản');
+          this.toast.success(nextStatus === 'ACTIVE' ? 'Đã kích hoạt tài khoản' : 'Đã khóa tài khoản');
+          this.closeConfirmAction();
           this.loadData();
         },
-        error: () => this.message.error('Thao tác thất bại'),
+        error: () => this.toast.error('Thao tác thất bại'),
       });
+  }
+
+  closeConfirmAction() {
+    this.confirmAction.set(null);
   }
 }

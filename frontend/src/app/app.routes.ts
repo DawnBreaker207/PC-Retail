@@ -44,6 +44,7 @@ export const routes: Routes = [
           description: 'Tự build PC theo nhu cầu, kiểm tra tương thích linh kiện tự động.',
         },
       },
+      { path: 'build-pc', redirectTo: '/pc-builder/custom', pathMatch: 'full' },
       {
         path: 'products',
         loadChildren: () => import('./features/catalog/catalog.routes').then((r) => r.CATALOG_ROUTES),

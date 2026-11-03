@@ -1,57 +1,74 @@
-import { Component, DestroyRef, inject, signal } from '@angular/core';
+import { Component, DestroyRef, inject, input, output, OnInit, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpClient } from '@angular/common/http';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { NzFormModule } from 'ng-zorro-antd/form';
-import { NzInputModule } from 'ng-zorro-antd/input';
-import { NzInputNumberModule } from 'ng-zorro-antd/input-number';
-import { NzSelectModule } from 'ng-zorro-antd/select';
-import { NzButtonModule } from 'ng-zorro-antd/button';
-import { NzMessageService } from 'ng-zorro-antd/message';
-import { NZ_MODAL_DATA, NzModalRef } from 'ng-zorro-antd/modal';
+import { HlmButtonDirective } from '@shared/ui/button';
+import { HlmInputDirective } from '@shared/ui/input';
+import { ToastService } from '@core/services/toast.service';
 import { ApiEndpoints } from '@core/api/api.endpoints';
 import { MockDataService } from '@core/services/mock-data.service';
 import { Sku } from '@core/models/common.model';
 
-interface ProductFormData {
-  product: Sku | null;
-}
-
 @Component({
   selector: 'app-product-form',
+  standalone: true,
   imports: [
-    ReactiveFormsModule, NzFormModule, NzInputModule, NzInputNumberModule, NzSelectModule, NzButtonModule,
+    ReactiveFormsModule,
+    HlmButtonDirective,
+    HlmInputDirective,
   ],
   templateUrl: './product-form.component.html',
 })
-export class ProductFormComponent {
+export class ProductFormComponent implements OnInit {
   private fb = inject(FormBuilder);
   private http = inject(HttpClient);
   private destroyRef = inject(DestroyRef);
-  private message = inject(NzMessageService);
+  private toast = inject(ToastService);
   private mock = inject(MockDataService);
-  private modalRef = inject(NzModalRef);
-  private data: ProductFormData = inject(NZ_MODAL_DATA);
+
+  readonly product = input<Sku | null>(null);
+  readonly saved = output<boolean>();
+  readonly cancelled = output<void>();
 
   categories = this.mock.categories;
   brands = this.mock.brands;
   submitting = signal(false);
-  isEdit = !!this.data.product;
 
   form = this.fb.nonNullable.group({
-    name: [this.data.product?.name ?? '', Validators.required],
-    brandName: [this.data.product?.brandName ?? '', Validators.required],
-    categoryName: [this.data.product?.categoryName ?? '', Validators.required],
-    price: [this.data.product?.price ?? 0, [Validators.required, Validators.min(1000)]],
-    originalPrice: [this.data.product?.originalPrice ?? null],
-    status: [this.data.product?.status ?? 'ACTIVE', Validators.required],
-    imageUrl: [this.data.product?.imageUrls?.[0] ?? '', Validators.required],
-    description: [this.data.product?.description ?? ''],
-    stockAvailable: [this.data.product?.stockAvailable ?? 0, [Validators.min(0)]],
+    name: ['', Validators.required],
+    brandName: ['', Validators.required],
+    categoryName: ['', Validators.required],
+    price: [0, [Validators.required, Validators.min(1000)]],
+    originalPrice: [null as number | null],
+    status: ['ACTIVE', Validators.required],
+    imageUrl: ['', Validators.required],
+    description: [''],
+    stockAvailable: [0, [Validators.min(0)]],
   });
 
+  get isEdit(): boolean {
+    return !!this.product();
+  }
+
+  ngOnInit() {
+    const p = this.product();
+    if (p) {
+      this.form.patchValue({
+        name: p.name ?? '',
+        brandName: p.brandName ?? '',
+        categoryName: p.categoryName ?? '',
+        price: p.price ?? 0,
+        originalPrice: p.originalPrice ?? null,
+        status: p.status ?? 'ACTIVE',
+        imageUrl: p.imageUrls?.[0] ?? '',
+        description: p.description ?? '',
+        stockAvailable: p.stockAvailable ?? 0,
+      });
+    }
+  }
+
   cancel() {
-    this.modalRef.close();
+    this.cancelled.emit();
   }
 
   submit() {
@@ -61,18 +78,20 @@ export class ProductFormComponent {
     const body: Record<string, unknown> = { ...rest, imageUrls: [imageUrl] };
     if (!this.isEdit) body['stockAvailable'] = stockAvailable;
 
-    const request$ = this.isEdit
-      ? this.http.put(ApiEndpoints.admin.productDetail(this.data.product!.id), body)
+    const currentProd = this.product();
+    const request$ = this.isEdit && currentProd
+      ? this.http.put(ApiEndpoints.admin.productDetail(currentProd.id), body)
       : this.http.post(ApiEndpoints.admin.products, body);
 
     request$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.submitting.set(false);
-        this.modalRef.close(true);
+        this.toast.success(this.isEdit ? 'Cập nhật sản phẩm thành công' : 'Thêm sản phẩm thành công');
+        this.saved.emit(true);
       },
       error: () => {
         this.submitting.set(false);
-        this.message.error('Thao tác thất bại');
+        this.toast.error('Thao tác thất bại');
       },
     });
   }

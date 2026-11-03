@@ -1,11 +1,10 @@
 import { Component, inject, output, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { NzFormModule } from 'ng-zorro-antd/form';
-import { NzInputModule } from 'ng-zorro-antd/input';
-import { NzButtonModule } from 'ng-zorro-antd/button';
-import { NzIconModule } from 'ng-zorro-antd/icon';
-import { NzMessageService } from 'ng-zorro-antd/message';
+import { LucideAngularModule, Eye, EyeOff, Loader2 } from 'lucide-angular';
+import { HlmButtonDirective } from '@shared/ui/button';
+import { HlmInputDirective } from '@shared/ui/input';
+import { ToastService } from '@core/services/toast.service';
 import { AuthService } from '@core/auth/auth.service';
 import { HttpClient, HttpContext, HttpParams } from '@angular/common/http';
 import { SKIP_AUTH_LOGOUT } from '@core/interceptors/auth.interceptor';
@@ -15,14 +14,25 @@ import { catchError, finalize, of, switchMap } from 'rxjs';
 
 @Component({
   selector: 'app-login-form',
-  imports: [RouterLink, ReactiveFormsModule, NzFormModule, NzInputModule, NzButtonModule, NzIconModule],
+  standalone: true,
+  imports: [
+    RouterLink,
+    ReactiveFormsModule,
+    LucideAngularModule,
+    HlmButtonDirective,
+    HlmInputDirective,
+  ],
   templateUrl: './login-form.component.html',
 })
 export class LoginFormComponent {
   private http = inject(HttpClient);
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
-  private msg = inject(NzMessageService);
+  private toast = inject(ToastService);
+
+  readonly EyeIcon = Eye;
+  readonly EyeOffIcon = EyeOff;
+  readonly LoaderIcon = Loader2;
 
   loginSuccess = output();
   isLoading = signal(false);
@@ -33,9 +43,8 @@ export class LoginFormComponent {
     password: ['', [Validators.required, Validators.minLength(6)]],
   });
 
-  // OAuth chưa có BE: báo rõ thay vì nút chết
   socialLogin(provider: string) {
-    this.msg.info(`Đăng nhập ${provider} đang phát triển, bạn đăng nhập bằng email nhé`);
+    this.toast.info(`Đăng nhập ${provider} đang phát triển, bạn đăng nhập bằng email nhé`);
   }
 
   submit() {
@@ -44,7 +53,6 @@ export class LoginFormComponent {
     this.authService
       .login(this.form.getRawValue())
       .pipe(
-        // Gộp giỏ guest vào user sau login (best-effort, lỗi thì bỏ qua)
         switchMap(() => {
           let token: string | null = null;
           try {
@@ -55,15 +63,17 @@ export class LoginFormComponent {
           if (!token) return of(null);
           const params = new HttpParams().set('token', token);
           return this.http
-            .post(ApiEndpoints.cart.merge, {}, {
-              params,
-              context: new HttpContext().set(SKIP_AUTH_LOGOUT, true),
-            })
-            .pipe(
-              catchError(() => of(null)),
-            );
+            .post(
+              ApiEndpoints.cart.merge,
+              {},
+              {
+                params,
+                context: new HttpContext().set(SKIP_AUTH_LOGOUT, true),
+              }
+            )
+            .pipe(catchError(() => of(null)));
         }),
-        finalize(() => this.isLoading.set(false)),
+        finalize(() => this.isLoading.set(false))
       )
       .subscribe(() => {
         clearGuestToken();

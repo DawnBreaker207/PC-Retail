@@ -2,13 +2,8 @@ import { Component, inject, signal, computed, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { NzButtonModule } from 'ng-zorro-antd/button';
-import { NzSelectModule } from 'ng-zorro-antd/select';
-import { NzIconModule } from 'ng-zorro-antd/icon';
-import { NzPaginationModule } from 'ng-zorro-antd/pagination';
-import { NzSpinModule } from 'ng-zorro-antd/spin';
-import { NzEmptyModule } from 'ng-zorro-antd/empty';
-import { NzBreadCrumbModule } from 'ng-zorro-antd/breadcrumb';
+import { LucideAngularModule, Filter, Frown, ChevronLeft, ChevronRight, X } from 'lucide-angular';
+import { HlmButtonDirective } from '@shared/ui/button';
 import { ProductCardComponent } from '@shared/components/product-card.component';
 import { LoadingSpinnerComponent } from '@shared/components/loading-spinner.component';
 import { MockDataService } from '@core/services/mock-data.service';
@@ -25,8 +20,15 @@ const SORT_OPTIONS = [
 
 function defaultFilters(): FilterState {
   return {
-    q: '', category: '', brands: [], minPrice: 0, maxPrice: 500_000_000, specs: {},
-    sort: 'sold', page: 1, size: 20,
+    q: '',
+    category: '',
+    brands: [],
+    minPrice: 0,
+    maxPrice: 500_000_000,
+    specs: {},
+    sort: 'sold',
+    page: 1,
+    size: 20,
   };
 }
 
@@ -44,12 +46,14 @@ function parseSpecParam(raw: string | string[] | undefined): Record<string, stri
 
 @Component({
   selector: 'app-product-list',
+  standalone: true,
   imports: [
-    RouterLink, FormsModule,
-    NzButtonModule, NzSelectModule, NzIconModule,
-    NzPaginationModule, NzSpinModule, NzEmptyModule,
-    NzBreadCrumbModule,
-    ProductCardComponent, LoadingSpinnerComponent,
+    RouterLink,
+    FormsModule,
+    LucideAngularModule,
+    HlmButtonDirective,
+    ProductCardComponent,
+    LoadingSpinnerComponent,
     FilterSidebarComponent,
   ],
   templateUrl: './product-list.component.html',
@@ -62,6 +66,12 @@ export class ProductListComponent {
   private cartStore = inject(CartStore);
   private destroyRef = inject(DestroyRef);
 
+  readonly FilterIcon = Filter;
+  readonly FrownIcon = Frown;
+  readonly ChevronLeftIcon = ChevronLeft;
+  readonly ChevronRightIcon = ChevronRight;
+  readonly XIcon = X;
+
   products: Sku[] = [];
   totalElements = 0;
   totalPages = 0;
@@ -72,22 +82,24 @@ export class ProductListComponent {
     const f = this.filters();
     if (f.q) return `Kết quả tìm kiếm cho "${f.q}"`;
     if (!f.category) return 'Sản phẩm';
-    return this.categories.find(c => c.slug === f.category)?.name || 'Sản phẩm';
+    return this.categories.find((c) => c.slug === f.category)?.name || 'Sản phẩm';
   });
 
   activeCategory = computed(() => {
     const slug = this.filters().category;
     if (!slug) return null;
-    return this.categories.find(c => c.slug === slug) ?? null;
+    return this.categories.find((c) => c.slug === slug) ?? null;
   });
 
   categories = this.mock.categories;
-  brands = this.mock.brands.map(b => b.name);
+  brands = this.mock.brands.map((b) => b.name);
   sortOptions = SORT_OPTIONS;
 
   filters = signal<FilterState>(defaultFilters());
 
-  specOptions = computed<SpecFilterOption[]>(() => this.mock.getSpecFilterOptions(this.filters().category || undefined));
+  specOptions = computed<SpecFilterOption[]>(() =>
+    this.mock.getSpecFilterOptions(this.filters().category || undefined)
+  );
 
   constructor() {
     this.route.queryParams.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
@@ -95,7 +107,11 @@ export class ProductListComponent {
       this.filters.set({
         q: params['q'] || f.q,
         category: params['category'] || f.category,
-        brands: params['brand'] ? (Array.isArray(params['brand']) ? params['brand'] : [params['brand']]) : f.brands,
+        brands: params['brand']
+          ? Array.isArray(params['brand'])
+            ? params['brand']
+            : [params['brand']]
+          : f.brands,
         minPrice: params['minPrice'] ? Number(params['minPrice']) : f.minPrice,
         maxPrice: params['maxPrice'] ? Number(params['maxPrice']) : f.maxPrice,
         specs: params['spec'] ? parseSpecParam(params['spec']) : f.specs,
@@ -120,21 +136,22 @@ export class ProductListComponent {
     params['page'] = String(f.page - 1);
     params['size'] = String(f.size);
 
-    this.mock.getProducts(params, f.specs).pipe(
-      takeUntilDestroyed(this.destroyRef),
-    ).subscribe({
-      next: (res) => {
-        this.products = res.content;
-        this.totalElements = res.pagination.totalElements;
-        this.totalPages = Math.ceil(res.pagination.totalElements / res.pagination.pageSize);
-        this.isLoading = false;
-      },
-      error: () => {
-        this.products = [];
-        this.totalElements = 0;
-        this.isLoading = false;
-      },
-    });
+    this.mock
+      .getProducts(params, f.specs)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res) => {
+          this.products = res.content;
+          this.totalElements = res.pagination.totalElements;
+          this.totalPages = Math.ceil(res.pagination.totalElements / res.pagination.pageSize);
+          this.isLoading = false;
+        },
+        error: () => {
+          this.products = [];
+          this.totalElements = 0;
+          this.isLoading = false;
+        },
+      });
   }
 
   private updateUrl() {
@@ -145,7 +162,9 @@ export class ProductListComponent {
     if (f.brands.length > 0) qp['brand'] = f.brands;
     if (f.minPrice > 0) qp['minPrice'] = f.minPrice;
     if (f.maxPrice < 500_000_000) qp['maxPrice'] = f.maxPrice;
-    const specParams = Object.entries(f.specs).flatMap(([label, values]) => values.map(v => `${label}::${v}`));
+    const specParams = Object.entries(f.specs).flatMap(([label, values]) =>
+      values.map((v) => `${label}::${v}`)
+    );
     if (specParams.length > 0) qp['spec'] = specParams;
     if (f.sort && f.sort !== 'sold') qp['sort'] = f.sort;
     if (f.page > 1) qp['page'] = f.page;
@@ -162,12 +181,18 @@ export class ProductListComponent {
   }
 
   onPageChange(page: number) {
-    this.filters.update(f => ({ ...f, page }));
+    if (page < 1 || page > this.totalPages) return;
+    this.filters.update((f) => ({ ...f, page }));
     this.onFiltersChanged();
   }
 
+  onSortChange(event: Event) {
+    const target = event.target as HTMLSelectElement;
+    this.setSort(target.value);
+  }
+
   setSort(sort: string) {
-    this.filters.update(f => ({ ...f, sort, page: 1 }));
+    this.filters.update((f) => ({ ...f, sort, page: 1 }));
     this.onFiltersChanged();
   }
 

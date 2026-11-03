@@ -1,88 +1,235 @@
-<div class="mb-6 flex items-center justify-between">
+<div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
   <div>
-    <h1 class="text-2xl font-bold text-ink dark:text-ink-dark">Người dùng</h1>
-    <p class="text-muted dark:text-muted-dark text-sm">Quản lý tài khoản (mock, chưa nối backend thật)</p>
+    <h1 class="text-2xl font-bold tracking-tight text-foreground">Quản lý người dùng</h1>
+    <p class="text-muted-foreground text-sm mt-1">Quản lý danh sách tài khoản, phân quyền và trạng thái truy cập</p>
   </div>
-  <button nz-button nzType="primary" (click)="openCreateModal()">
-    <span nz-icon nzType="plus"></span>
-    Thêm người dùng
+  <button
+    hlmBtn
+    variant="default"
+    size="sm"
+    (click)="openCreateModal()"
+    class="h-9 px-4 gap-1.5 text-xs bg-primary text-primary-foreground self-start sm:self-auto cursor-pointer"
+  >
+    <lucide-icon [img]="Plus" class="w-4 h-4"></lucide-icon>
+    Thêm người dùng mới
   </button>
 </div>
 
-<div class="flex flex-wrap items-center gap-3 mb-4">
-  <input
-    nz-input
-    placeholder="Tìm theo tên hoặc email"
-    [(ngModel)]="search"
-    (ngModelChange)="onSearch()"
-    class="max-w-xs"
-  />
-  <nz-select [ngModel]="roleFilter()" (ngModelChange)="onRoleChange($event)" class="min-w-[160px]">
+<!-- Filters -->
+<div class="flex flex-wrap items-center gap-3 mb-5">
+  <div class="relative w-full sm:w-64">
+    <input
+      hlmInput
+      placeholder="Tìm theo tên hoặc email..."
+      [(ngModel)]="search"
+      (ngModelChange)="onSearch()"
+      class="w-full pl-9 h-9 text-xs"
+    />
+    <lucide-icon [img]="Search" class="w-4 h-4 text-muted-foreground absolute left-3 top-2.5 pointer-events-none"></lucide-icon>
+  </div>
+
+  <select
+    [ngModel]="roleFilter()"
+    (ngModelChange)="onRoleChange($event)"
+    aria-label="Vai trò"
+    class="h-9 px-3 text-xs rounded-md border border-input bg-background text-foreground"
+  >
     @for (opt of ROLE_OPTIONS; track opt.value) {
-      <nz-option [nzValue]="opt.value" [nzLabel]="opt.label" />
+      <option [value]="opt.value">{{ opt.label }}</option>
     }
-  </nz-select>
+  </select>
 </div>
 
-<nz-table
-  [nzData]="users()"
-  [nzLoading]="loading()"
-  [nzTotal]="total()"
-  [nzPageIndex]="page"
-  [nzPageSize]="size"
-  [nzPageSizeOptions]="pageSizeOptions"
-  [nzFrontPagination]="false"
-  (nzPageIndexChange)="onPageChange($event)"
-  (nzPageSizeChange)="onPageSizeChange($event)"
->
-  <thead>
-    <tr>
-      <th>Họ tên</th>
-      <th>Email</th>
-      <th>SĐT</th>
-      <th>Vai trò</th>
-      <th>Trạng thái</th>
-      <th>Ngày tạo</th>
-      <th class="text-right">Thao tác</th>
-    </tr>
-  </thead>
-  <tbody>
-    @for (u of users(); track u.id) {
-      <tr>
-        <td class="font-medium">{{ u.fullName }}</td>
-        <td>{{ u.email }}</td>
-        <td>{{ u.phone || '—' }}</td>
-        <td><nz-tag>{{ u.systemRole }}</nz-tag></td>
-        <td>
-          <nz-tag [nzColor]="u.status === 'ACTIVE' ? 'success' : 'default'">
-            {{ u.status === 'ACTIVE' ? 'Đang hoạt động' : 'Đã khóa' }}
-          </nz-tag>
-        </td>
-        <td>{{ u.createdAt ? (u.createdAt | date:'dd/MM/yyyy') : '—' }}</td>
-        <td class="text-right">
-          <button nz-button nzType="text" nzSize="small" (click)="openEditModal(u)" aria-label="Sửa">
-            <span nz-icon nzType="edit"></span>
+@if (loading()) {
+  <div class="flex flex-col items-center justify-center py-24 gap-3 text-muted-foreground">
+    <lucide-icon [img]="Loader2" class="w-8 h-8 animate-spin text-primary"></lucide-icon>
+    <p class="text-xs">Đang tải danh sách người dùng...</p>
+  </div>
+} @else {
+  <div class="rounded-xl border border-border/80 bg-card overflow-hidden shadow-2xs">
+    <div class="overflow-x-auto">
+      <table hlmTable class="w-full text-xs">
+        <thead hlmTableHeader>
+          <tr hlmTableRow class="border-b border-border bg-muted/40">
+            <th hlmTableHead>Họ và tên</th>
+            <th hlmTableHead>Email</th>
+            <th hlmTableHead class="w-32">Số điện thoại</th>
+            <th hlmTableHead class="w-28 text-center">Vai trò</th>
+            <th hlmTableHead class="w-32 text-center">Trạng thái</th>
+            <th hlmTableHead class="w-28">Ngày tạo</th>
+            <th hlmTableHead class="w-32 text-right">Thao tác</th>
+          </tr>
+        </thead>
+        <tbody hlmTableBody>
+          @for (u of users(); track u.id) {
+            <tr hlmTableRow class="border-b border-border/60 hover:bg-muted/20 transition-colors">
+              <td hlmTableCell class="font-medium text-foreground">{{ u.fullName }}</td>
+              <td hlmTableCell class="text-muted-foreground font-mono text-[11px]">{{ u.email }}</td>
+              <td hlmTableCell class="text-muted-foreground">{{ u.phone || '—' }}</td>
+              <td hlmTableCell class="text-center">
+                <span
+                  hlmBadge
+                  variant="outline"
+                  class="px-2 py-0.5 rounded text-[10px] font-mono font-semibold"
+                  [ngClass]="{
+                    'border-purple-400 bg-purple-50 text-purple-700 dark:bg-purple-950/40 dark:text-purple-400': u.systemRole === 'SUPER_ADMIN',
+                    'border-blue-400 bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-400': u.systemRole === 'ADMIN',
+                    'border-cyan-400 bg-cyan-50 text-cyan-700 dark:bg-cyan-950/40 dark:text-cyan-400': u.systemRole === 'STAFF',
+                    'border-slate-300 bg-slate-50 text-slate-700 dark:bg-slate-900/40 dark:text-slate-400': u.systemRole === 'CUSTOMER'
+                  }"
+                >
+                  {{ u.systemRole }}
+                </span>
+              </td>
+              <td hlmTableCell class="text-center">
+                <span
+                  hlmBadge
+                  variant="outline"
+                  class="px-2.5 py-0.5 rounded-full text-[11px] font-medium"
+                  [ngClass]="u.status === 'ACTIVE' ? 'border-emerald-400 bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400' : 'border-slate-300 bg-slate-50 text-slate-700 dark:bg-slate-900/40 dark:text-slate-400'"
+                >
+                  {{ u.status === 'ACTIVE' ? 'Đang hoạt động' : 'Đã khóa' }}
+                </span>
+              </td>
+              <td hlmTableCell class="text-muted-foreground">{{ u.createdAt ? (u.createdAt | date:'dd/MM/yyyy') : '—' }}</td>
+              <td hlmTableCell class="text-right">
+                <div class="flex items-center justify-end gap-1">
+                  <button
+                    hlmBtn
+                    variant="ghost"
+                    size="sm"
+                    (click)="openEditModal(u)"
+                    class="h-7 w-7 p-0 text-muted-foreground hover:text-foreground cursor-pointer"
+                    title="Chỉnh sửa"
+                  >
+                    <lucide-icon [img]="Edit2" class="w-3.5 h-3.5"></lucide-icon>
+                  </button>
+                  <button
+                    hlmBtn
+                    variant="ghost"
+                    size="sm"
+                    (click)="promptResetPassword(u)"
+                    class="h-7 w-7 p-0 text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-950/30 cursor-pointer"
+                    title="Đặt lại mật khẩu"
+                  >
+                    <lucide-icon [img]="Key" class="w-3.5 h-3.5"></lucide-icon>
+                  </button>
+                  <button
+                    hlmBtn
+                    variant="ghost"
+                    size="sm"
+                    (click)="promptToggleStatus(u)"
+                    [class.text-rose-600]="u.status === 'ACTIVE'"
+                    [class.text-emerald-600]="u.status !== 'ACTIVE'"
+                    class="h-7 w-7 p-0 hover:bg-muted cursor-pointer"
+                    [title]="u.status === 'ACTIVE' ? 'Khóa tài khoản' : 'Kích hoạt tài khoản'"
+                  >
+                    <lucide-icon [img]="u.status === 'ACTIVE' ? Lock : Unlock" class="w-3.5 h-3.5"></lucide-icon>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="7" class="text-center py-12 text-muted-foreground italic">
+                Không tìm thấy người dùng nào
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Spartan Pagination -->
+    <div class="flex flex-col sm:flex-row items-center justify-between px-4 py-3 border-t border-border gap-3 text-xs text-muted-foreground">
+      <div class="flex items-center gap-2">
+        <span>Tổng cộng <strong>{{ total() }}</strong> người dùng</span>
+        <span class="text-border">|</span>
+        <select
+          [ngModel]="size"
+          (ngModelChange)="onPageSizeChange($event)"
+          aria-label="Kích thước trang"
+          class="h-7 px-2 text-xs rounded border border-input bg-background text-foreground"
+        >
+          @for (s of pageSizeOptions; track s) {
+            <option [value]="s">{{ s }} dòng / trang</option>
+          }
+        </select>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <span>Trang {{ page }} / {{ totalPages }}</span>
+        <div class="inline-flex rounded-md border border-input p-0.5 bg-card">
+          <button
+            hlmBtn
+            variant="ghost"
+            size="sm"
+            [disabled]="page <= 1"
+            (click)="onPageChange(page - 1)"
+            class="h-7 w-7 p-0 cursor-pointer"
+          >
+            <lucide-icon [img]="ChevronLeft" class="w-4 h-4"></lucide-icon>
           </button>
           <button
-            nz-button nzType="text" nzSize="small"
-            nz-popconfirm
-            nzPopconfirmTitle="Đặt lại mật khẩu cho người dùng này?"
-            (nzOnConfirm)="resetPassword(u)"
-            aria-label="Đặt lại mật khẩu"
+            hlmBtn
+            variant="ghost"
+            size="sm"
+            [disabled]="page >= totalPages"
+            (click)="onPageChange(page + 1)"
+            class="h-7 w-7 p-0 cursor-pointer"
           >
-            <span nz-icon nzType="key"></span>
+            <lucide-icon [img]="ChevronRight" class="w-4 h-4"></lucide-icon>
           </button>
-          <button
-            nz-button nzType="text" nzSize="small"
-            nz-popconfirm
-            [nzPopconfirmTitle]="u.status === 'ACTIVE' ? 'Khóa tài khoản này?' : 'Kích hoạt lại tài khoản này?'"
-            (nzOnConfirm)="toggleStatus(u)"
-          >
-            <span nz-icon [nzType]="u.status === 'ACTIVE' ? 'lock' : 'unlock'"></span>
-            {{ u.status === 'ACTIVE' ? 'Khóa' : 'Kích hoạt' }}
-          </button>
-        </td>
-      </tr>
-    }
-  </tbody>
-</nz-table>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- User Form Spartan Dialog -->
+@if (formModalUser(); as item) {
+  <div class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div hlmDialogContent class="max-w-md w-full bg-card border border-border rounded-xl p-6 shadow-xl space-y-4">
+      <div hlmDialogHeader class="space-y-1">
+        <h3 hlmDialogTitle class="text-base font-semibold text-foreground">
+          {{ item === 'create' ? 'Thêm người dùng mới' : 'Chỉnh sửa người dùng' }}
+        </h3>
+        <p hlmDialogDescription class="text-xs text-muted-foreground">
+          Thiết lập thông tin tài khoản và phân quyền quản trị hệ thống.
+        </p>
+      </div>
+
+      <app-user-form
+        [user]="item === 'create' ? null : item"
+        (saved)="onFormSaved()"
+        (cancelled)="closeFormModal()"
+      ></app-user-form>
+    </div>
+  </div>
+}
+
+<!-- Confirm Action Spartan Dialog -->
+@if (confirmAction(); as modal) {
+  <div class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div hlmDialogContent class="max-w-md w-full bg-card border border-border rounded-xl p-6 shadow-xl space-y-4">
+      <div hlmDialogHeader class="space-y-1.5">
+        <h3 hlmDialogTitle class="text-base font-semibold text-foreground flex items-center gap-2">
+          <lucide-icon [img]="AlertCircle" class="w-5 h-5 text-primary"></lucide-icon>
+          {{ modal.title }}
+        </h3>
+        <p hlmDialogDescription class="text-xs text-muted-foreground">
+          {{ modal.description }}
+        </p>
+      </div>
+
+      <div hlmDialogFooter class="flex items-center justify-end gap-2 pt-2">
+        <button hlmBtn variant="outline" size="sm" (click)="closeConfirmAction()">
+          Hủy bỏ
+        </button>
+        <button hlmBtn variant="default" size="sm" (click)="modal.action()" class="bg-primary text-primary-foreground">
+          {{ modal.confirmText }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

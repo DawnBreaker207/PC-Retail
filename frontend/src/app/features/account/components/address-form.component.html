@@ -1,50 +1,60 @@
-<form nz-form [formGroup]="form" (ngSubmit)="submit()">
-  <nz-form-item>
-    <nz-form-label nzFor="label" nzRequired>Tên gợi nhớ</nz-form-label>
-    <nz-form-control nzErrorTip="Vui lòng nhập tên gợi nhớ">
-      <input nz-input id="label" formControlName="label" placeholder="VD: Nhà riêng, Công ty..." />
-    </nz-form-control>
-  </nz-form-item>
+<div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fade-in">
+  <div class="bg-surface dark:bg-surface-dark border border-border/80 dark:border-border-dark/80 rounded-2xl shadow-2xl max-w-lg w-full p-6 animate-scale-in relative">
+    <div class="flex items-center justify-between pb-3 border-b border-border/60 dark:border-border-dark/60 mb-5">
+      <h3 class="text-base font-bold text-ink dark:text-ink-dark">
+        {{ address() ? 'Cập nhật địa chỉ' : 'Thêm địa chỉ nhận hàng mới' }}
+      </h3>
+      <button
+        type="button"
+        (click)="cancel()"
+        class="text-muted hover:text-ink dark:hover:text-ink-dark p-1 rounded-lg hover:bg-bg dark:hover:bg-bg-dark transition-colors"
+      >
+        <lucide-angular [img]="X" class="w-5 h-5" />
+      </button>
+    </div>
 
-  <nz-form-item>
-    <nz-form-label nzFor="fullName" nzRequired>Người nhận</nz-form-label>
-    <nz-form-control nzErrorTip="Vui lòng nhập tên người nhận">
-      <input nz-input id="fullName" formControlName="fullName" placeholder="Họ và tên" />
-    </nz-form-control>
-  </nz-form-item>
+    <form [formGroup]="form" (ngSubmit)="submit()" class="space-y-4">
+      <div>
+        <label for="label" class="block text-xs font-semibold text-ink dark:text-ink-dark mb-1.5">Tên gợi nhớ (VD: Nhà riêng, Công ty...)</label>
+        <input hlmInput id="label" formControlName="label" placeholder="VD: Nhà riêng" class="w-full" />
+      </div>
 
-  <nz-form-item>
-    <nz-form-label nzFor="phone" nzRequired>Số điện thoại</nz-form-label>
-    <nz-form-control nzErrorTip="Vui lòng nhập số điện thoại">
-      <input nz-input id="phone" formControlName="phone" placeholder="Số điện thoại" />
-    </nz-form-control>
-  </nz-form-item>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <label for="fullName" class="block text-xs font-semibold text-ink dark:text-ink-dark mb-1.5">Người nhận</label>
+          <input hlmInput id="fullName" formControlName="fullName" placeholder="Họ và tên" class="w-full" />
+        </div>
+        <div>
+          <label for="phone" class="block text-xs font-semibold text-ink dark:text-ink-dark mb-1.5">Số điện thoại</label>
+          <input hlmInput id="phone" formControlName="phone" placeholder="Số điện thoại" class="w-full" />
+        </div>
+      </div>
 
-  <nz-form-item>
-    <nz-form-label nzFor="street" nzRequired>Địa chỉ cụ thể</nz-form-label>
-    <nz-form-control nzErrorTip="Vui lòng nhập địa chỉ">
-      <input nz-input id="street" formControlName="street" placeholder="Số nhà, tên đường" />
-    </nz-form-control>
-  </nz-form-item>
+      <div>
+        <label for="street" class="block text-xs font-semibold text-ink dark:text-ink-dark mb-1.5">Địa chỉ cụ thể</label>
+        <input hlmInput id="street" formControlName="street" placeholder="Số nhà, tên đường, ngõ ngách" class="w-full" />
+      </div>
 
-  <nz-form-item>
-    <nz-form-label nzFor="district" nzRequired>Quận/Huyện</nz-form-label>
-    <nz-form-control nzErrorTip="Vui lòng nhập quận/huyện">
-      <input nz-input id="district" formControlName="district" placeholder="Quận/Huyện" />
-    </nz-form-control>
-  </nz-form-item>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <label for="district" class="block text-xs font-semibold text-ink dark:text-ink-dark mb-1.5">Quận / Huyện</label>
+          <input hlmInput id="district" formControlName="district" placeholder="Quận/Huyện" class="w-full" />
+        </div>
+        <div>
+          <label for="city" class="block text-xs font-semibold text-ink dark:text-ink-dark mb-1.5">Tỉnh / Thành phố</label>
+          <input hlmInput id="city" formControlName="city" placeholder="Tỉnh/Thành phố" class="w-full" />
+        </div>
+      </div>
 
-  <nz-form-item>
-    <nz-form-label nzFor="city" nzRequired>Tỉnh/Thành phố</nz-form-label>
-    <nz-form-control nzErrorTip="Vui lòng nhập tỉnh/thành phố">
-      <input nz-input id="city" formControlName="city" placeholder="Tỉnh/Thành phố" />
-    </nz-form-control>
-  </nz-form-item>
-
-  <div class="flex justify-end gap-3 mt-6">
-    <button nz-button nzType="default" type="button" (click)="cancel()">Hủy</button>
-    <button nz-button nzType="primary" type="submit" [nzLoading]="submitting()" [disabled]="form.invalid">
-      {{ isEdit ? 'Lưu thay đổi' : 'Thêm địa chỉ' }}
-    </button>
+      <div class="flex justify-end gap-3 pt-3 border-t border-border/60 dark:border-border-dark/60 mt-6">
+        <button hlmBtn variant="outline" type="button" (click)="cancel()">Hủy</button>
+        <button hlmBtn type="submit" [disabled]="form.invalid || submitting()">
+          @if (submitting()) {
+            <lucide-angular [img]="Loader2" class="w-4 h-4 mr-2 animate-spin" />
+          }
+          {{ address() ? 'Lưu thay đổi' : 'Thêm địa chỉ' }}
+        </button>
+      </div>
+    </form>
   </div>
-</form>
+</div>

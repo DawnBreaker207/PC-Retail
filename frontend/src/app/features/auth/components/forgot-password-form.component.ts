@@ -2,19 +2,29 @@ import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
-import { NzFormModule } from 'ng-zorro-antd/form';
-import { NzInputModule } from 'ng-zorro-antd/input';
-import { NzButtonModule } from 'ng-zorro-antd/button';
+import { LucideAngularModule, Loader2, CheckCircle2 } from 'lucide-angular';
+import { HlmButtonDirective } from '@shared/ui/button';
+import { HlmInputDirective } from '@shared/ui/input';
 import { AuthService } from '@core/auth/auth.service';
 
 @Component({
   selector: 'app-forgot-password-form',
-  imports: [RouterLink, ReactiveFormsModule, NzFormModule, NzInputModule, NzButtonModule],
+  standalone: true,
+  imports: [
+    RouterLink,
+    ReactiveFormsModule,
+    LucideAngularModule,
+    HlmButtonDirective,
+    HlmInputDirective,
+  ],
   templateUrl: './forgot-password-form.component.html',
 })
 export class ForgotPasswordFormComponent {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
+
+  readonly LoaderIcon = Loader2;
+  readonly CheckCircleIcon = CheckCircle2;
 
   isLoading = signal(false);
   submitted = signal(false);

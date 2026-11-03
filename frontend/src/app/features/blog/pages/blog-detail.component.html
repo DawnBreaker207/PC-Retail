@@ -1,10 +1,12 @@
 @if (post(); as p) {
   <div class="max-w-3xl mx-auto px-4 py-6 lg:py-8">
-    <nz-breadcrumb class="mb-4">
-      <nz-breadcrumb-item><a routerLink="/">Trang chủ</a></nz-breadcrumb-item>
-      <nz-breadcrumb-item><a routerLink="/tin-tuc">Tin công nghệ</a></nz-breadcrumb-item>
-      <nz-breadcrumb-item>{{ p.title }}</nz-breadcrumb-item>
-    </nz-breadcrumb>
+    <nav class="flex items-center gap-1.5 text-xs text-muted dark:text-muted-dark mb-4 overflow-x-auto">
+      <a routerLink="/" class="hover:text-primary transition-colors whitespace-nowrap">Trang chủ</a>
+      <lucide-angular [img]="ChevronRight" class="w-3.5 h-3.5 text-muted/60 shrink-0" />
+      <a routerLink="/tin-tuc" class="hover:text-primary transition-colors whitespace-nowrap">Tin công nghệ</a>
+      <lucide-angular [img]="ChevronRight" class="w-3.5 h-3.5 text-muted/60 shrink-0" />
+      <span class="text-ink dark:text-ink-dark font-medium truncate">{{ p.title }}</span>
+    </nav>
 
     <p class="text-xs text-primary font-medium mb-2">{{ p.category }} · {{ p.date }}</p>
     <h1 class="text-xl lg:text-2xl font-bold mb-5 leading-tight">{{ p.title }}</h1>

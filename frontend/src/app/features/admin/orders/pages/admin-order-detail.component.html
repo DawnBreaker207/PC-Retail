@@ -1,45 +1,98 @@
 <div class="mb-6">
-  <button nz-button nzType="link" (click)="goBack()" class="!p-0 !mb-2">
-    <span nz-icon nzType="arrow-left"></span>
-    Quay lại
+  <button
+    hlmBtn
+    variant="ghost"
+    size="sm"
+    (click)="goBack()"
+    class="p-0 mb-3 text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 cursor-pointer text-xs"
+  >
+    <lucide-icon [img]="ArrowLeft" class="w-4 h-4"></lucide-icon>
+    Quay lại danh sách
   </button>
   @if (order(); as o) {
-    <h1 class="text-2xl font-bold tracking-tight">Đơn hàng #ORD-{{ o.id }}</h1>
+    <div class="flex flex-wrap items-center justify-between gap-3">
+      <div>
+        <h1 class="text-2xl font-bold tracking-tight text-foreground">Đơn hàng #ORD-{{ o.id }}</h1>
+        <p class="text-xs text-muted-foreground mt-0.5">Đặt lúc {{ o.createdAt }}</p>
+      </div>
+      <div>
+        <span
+          hlmBadge
+          variant="outline"
+          class="px-3 py-1 rounded-full text-xs font-semibold"
+          [ngClass]="{
+            'border-amber-400 bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400': (o.subOrders?.[0]?.status ?? '') === 'PENDING_PAYMENT',
+            'border-cyan-400 bg-cyan-50 text-cyan-700 dark:bg-cyan-950/40 dark:text-cyan-400': (o.subOrders?.[0]?.status ?? '') === 'PAID',
+            'border-blue-400 bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-400': (o.subOrders?.[0]?.status ?? '') === 'PROCESSING',
+            'border-purple-400 bg-purple-50 text-purple-700 dark:bg-purple-950/40 dark:text-purple-400': (o.subOrders?.[0]?.status ?? '') === 'SHIPPED',
+            'border-emerald-400 bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400': (o.subOrders?.[0]?.status ?? '') === 'DELIVERED',
+            'border-rose-400 bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-400': (o.subOrders?.[0]?.status ?? '') === 'CANCELLED'
+          }"
+        >
+          {{ (o.subOrders?.[0]?.status ?? '') | statusFormat:'label' }}
+        </span>
+      </div>
+    </div>
   }
 </div>
 
 @if (loading()) {
-  <div class="flex justify-center py-20"><nz-spin nzSize="large"></nz-spin></div>
+  <div class="flex flex-col items-center justify-center py-24 gap-3 text-muted-foreground">
+    <lucide-icon [img]="Loader2" class="w-8 h-8 animate-spin text-primary"></lucide-icon>
+    <p class="text-xs">Đang tải chi tiết đơn hàng...</p>
+  </div>
 } @else if (order(); as o) {
-  <!-- Status Steps -->
-  @if (o.subOrders[0]?.status !== 'CANCELLED' && o.subOrders[0]?.status !== 'EXPIRED') {
-    <nz-steps [nzCurrent]="currentStep" nzSize="small" class="mb-6 bg-surface dark:bg-surface-dark p-5 rounded-card border border-border/80 dark:border-border-dark/80 shadow-sm">
-      <nz-step nzTitle="Đặt hàng"></nz-step>
-      <nz-step nzTitle="Đã thanh toán"></nz-step>
-      <nz-step nzTitle="Đang xử lý"></nz-step>
-      <nz-step nzTitle="Đang giao"></nz-step>
-      <nz-step nzTitle="Đã giao"></nz-step>
-    </nz-steps>
+  <!-- Modern Spartan Stepper -->
+  @if (o.subOrders?.[0]?.status !== 'CANCELLED' && o.subOrders?.[0]?.status !== 'EXPIRED') {
+    <div class="mb-6 bg-card p-5 rounded-xl border border-border/80 shadow-2xs">
+      <div class="grid grid-cols-5 gap-2 relative">
+        @for (step of [
+          { title: 'Đặt hàng', icon: Package, index: 0 },
+          { title: 'Đã thanh toán', icon: CreditCard, index: 1 },
+          { title: 'Đang xử lý', icon: Clock, index: 2 },
+          { title: 'Đang giao', icon: Truck, index: 3 },
+          { title: 'Đã giao', icon: CheckCircle, index: 4 }
+        ]; track step.index) {
+          <div class="flex flex-col items-center text-center relative z-10">
+            <div
+              class="w-9 h-9 rounded-full flex items-center justify-center border-2 transition-colors duration-200"
+              [ngClass]="{
+                'border-primary bg-primary text-primary-foreground shadow-sm': currentStep >= step.index,
+                'border-muted-foreground/30 bg-muted/40 text-muted-foreground': currentStep < step.index
+              }"
+            >
+              <lucide-icon [img]="step.icon" class="w-4 h-4"></lucide-icon>
+            </div>
+            <span
+              class="text-xs mt-2 font-medium"
+              [ngClass]="currentStep >= step.index ? 'text-foreground font-semibold' : 'text-muted-foreground'"
+            >
+              {{ step.title }}
+            </span>
+          </div>
+        }
+      </div>
+    </div>
   }
 
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
     <!-- Main column -->
     <div class="lg:col-span-2 space-y-6">
       <!-- Customer info -->
-      <div class="bg-surface dark:bg-surface-dark rounded-card border border-border/80 dark:border-border-dark/80 shadow-sm p-5">
-        <h2 class="font-semibold mb-3 tracking-tight text-sm">Thông tin khách hàng</h2>
-        <div class="space-y-1.5 text-sm">
-          <div class="flex items-center gap-2">
-            <span nz-icon nzType="user" class="text-muted dark:text-muted-dark"></span>
-            <span class="font-medium">{{ o.shippingAddress?.fullName || '—' }}</span>
+      <div class="bg-card rounded-xl border border-border/80 shadow-2xs p-5">
+        <h2 class="font-semibold mb-3 tracking-tight text-sm text-foreground">Thông tin nhận hàng</h2>
+        <div class="space-y-2 text-xs">
+          <div class="flex items-center gap-2.5 text-foreground">
+            <lucide-icon [img]="User" class="w-4 h-4 text-muted-foreground shrink-0"></lucide-icon>
+            <span class="font-medium">{{ o.shippingAddress?.fullName || 'Khách vãng lai' }}</span>
           </div>
-          <div class="flex items-center gap-2">
-            <span nz-icon nzType="mail" class="text-muted dark:text-muted-dark"></span>
+          <div class="flex items-center gap-2.5 text-foreground">
+            <lucide-icon [img]="Phone" class="w-4 h-4 text-muted-foreground shrink-0"></lucide-icon>
             <span>{{ o.shippingAddress?.phone || '—' }}</span>
           </div>
           @if (o.shippingAddress) {
-            <div class="flex items-start gap-2">
-              <span nz-icon nzType="environment" class="text-muted dark:text-muted-dark mt-0.5"></span>
+            <div class="flex items-start gap-2.5 text-foreground">
+              <lucide-icon [img]="MapPin" class="w-4 h-4 text-muted-foreground shrink-0 mt-0.5"></lucide-icon>
               <span>{{ o.shippingAddress.street }}, {{ o.shippingAddress.district }}, {{ o.shippingAddress.city }}</span>
             </div>
           }
@@ -47,64 +100,77 @@
       </div>
 
       <!-- Order items -->
-      <div class="bg-surface dark:bg-surface-dark rounded-card border border-border/80 dark:border-border-dark/80 shadow-sm p-5">
-        <h2 class="font-semibold mb-4 tracking-tight text-sm">Sản phẩm</h2>
-        <nz-table [nzData]="flatItems" [nzFrontPagination]="false" [nzShowPagination]="false" nzSize="small">
-          <thead>
-            <tr>
-              <th>Sản phẩm</th>
-              <th nzWidth="80px">SL</th>
-              <th nzWidth="130px" nzRight>Đơn giá</th>
-              <th nzWidth="130px" nzRight>Thành tiền</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (item of flatItems; track item.id) {
-              <tr>
-                <td>
-                  <div class="flex items-center gap-2">
-                    <img [src]="item.imageUrl" loading="lazy" appFallbackImage [alt]="item.name" class="w-9 h-9 rounded object-contain bg-bg shrink-0" />
-                    <span class="text-sm line-clamp-2">{{ item.name }}</span>
-                  </div>
-                </td>
-                <td>{{ item.quantity }}</td>
-                <td nzRight class="text-muted dark:text-muted-dark">{{ item.unitPrice | currencyFormat }}</td>
-                <td nzRight class="font-semibold">{{ item.unitPrice * item.quantity | currencyFormat }}</td>
+      <div class="bg-card rounded-xl border border-border/80 shadow-2xs p-5">
+        <h2 class="font-semibold mb-4 tracking-tight text-sm text-foreground">Danh sách sản phẩm</h2>
+        <div class="overflow-x-auto">
+          <table hlmTable class="w-full text-xs">
+            <thead hlmTableHeader>
+              <tr hlmTableRow class="border-b border-border bg-muted/40">
+                <th hlmTableHead>Sản phẩm</th>
+                <th hlmTableHead class="w-20 text-center">SL</th>
+                <th hlmTableHead class="w-32 text-right">Đơn giá</th>
+                <th hlmTableHead class="w-32 text-right">Thành tiền</th>
               </tr>
-            }
-          </tbody>
-        </nz-table>
+            </thead>
+            <tbody hlmTableBody>
+              @for (item of flatItems; track item.skuId || $index) {
+                <tr hlmTableRow class="border-b border-border/60 hover:bg-muted/20">
+                  <td hlmTableCell>
+                    <div class="flex items-center gap-3">
+                      <img
+                        [src]="item.imageUrl || item.primaryImageUrl || 'https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=600&auto=format&fit=crop&q=80'"
+                        loading="lazy"
+                        appFallbackImage
+                        [alt]="item.name || item.skuName"
+                        class="w-10 h-10 rounded-lg object-contain bg-muted/30 p-1 border border-border/60 shrink-0"
+                      />
+                      <span class="text-xs line-clamp-2 font-medium text-foreground">{{ item.name || item.skuName }}</span>
+                    </div>
+                  </td>
+                  <td hlmTableCell class="text-center font-medium">{{ item.quantity }}</td>
+                  <td hlmTableCell class="text-right text-muted-foreground">{{ item.unitPrice | currencyFormat }}</td>
+                  <td hlmTableCell class="text-right font-semibold text-foreground">{{ item.unitPrice * item.quantity | currencyFormat }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
 
-    <!-- Sidebar -->
+    <!-- Sidebar column -->
     <div class="space-y-6">
       <!-- Payment summary -->
-      <div class="bg-surface dark:bg-surface-dark rounded-card border border-border/80 dark:border-border-dark/80 shadow-sm p-5">
-        <h2 class="font-semibold mb-4 tracking-tight text-sm">Thanh toán</h2>
-        <div class="space-y-2.5 text-sm">
+      <div class="bg-card rounded-xl border border-border/80 shadow-2xs p-5">
+        <h2 class="font-semibold mb-4 tracking-tight text-sm text-foreground">Chi tiết thanh toán</h2>
+        <div class="space-y-3 text-xs">
           <div class="flex justify-between items-center">
-            <span class="text-muted dark:text-muted-dark">Trạng thái</span>
-            <nz-tag [nzColor]="o.paymentStatus === 'PAID' ? 'success' : 'gold'" class="!rounded-full !border-0 !px-3 !font-medium">
+            <span class="text-muted-foreground">Trạng thái TT</span>
+            <span
+              hlmBadge
+              variant="outline"
+              class="px-2.5 py-0.5 rounded-full text-[11px] font-medium"
+              [ngClass]="o.paymentStatus === 'PAID' ? 'border-emerald-400 bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400' : 'border-amber-400 bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400'"
+            >
               {{ o.paymentStatus === 'PAID' ? 'Đã thanh toán' : 'Chưa thanh toán' }}
-            </nz-tag>
+            </span>
           </div>
+
           @for (sub of o.subOrders; track sub.id) {
-            <div class="flex justify-between">
-              <span class="text-muted dark:text-muted-dark">Tạm tính</span>
+            <div class="flex justify-between text-foreground">
+              <span class="text-muted-foreground">Tạm tính</span>
               <span>{{ sub.subtotal | currencyFormat }}</span>
             </div>
-            <div class="flex justify-between">
-              <span class="text-muted dark:text-muted-dark">Giảm giá</span>
-              <span class="text-success dark:text-success-dark font-medium">-{{ sub.discountAmount | currencyFormat }}</span>
+            <div class="flex justify-between text-foreground">
+              <span class="text-muted-foreground">Giảm giá</span>
+              <span class="text-emerald-600 font-medium">-{{ sub.discountAmount | currencyFormat }}</span>
             </div>
-            <div class="flex justify-between">
-              <span class="text-muted dark:text-muted-dark">Phí ship</span>
+            <div class="flex justify-between text-foreground">
+              <span class="text-muted-foreground">Phí vận chuyển</span>
               <span>{{ sub.shippingFee === 0 ? 'Miễn phí' : (sub.shippingFee | currencyFormat) }}</span>
             </div>
-            <nz-divider class="!my-2"></nz-divider>
-            <div class="flex justify-between items-baseline">
-              <span class="text-base font-semibold">Tổng</span>
+            <div class="border-t border-border pt-2.5 mt-2 flex justify-between items-baseline">
+              <span class="text-sm font-semibold text-foreground">Tổng cộng</span>
               <span class="text-primary text-xl font-bold">{{ sub.finalAmount | currencyFormat }}</span>
             </div>
           }
@@ -112,46 +178,92 @@
       </div>
 
       <!-- Actions -->
-      <div class="bg-surface dark:bg-surface-dark rounded-card border border-border/80 dark:border-border-dark/80 shadow-sm p-5">
-        <h2 class="font-semibold mb-4 tracking-tight text-sm">Thao tác</h2>
-        @if (o.subOrders[0]?.status === 'PAID') {
-          <button nz-button nzType="primary" nzBlock [nzLoading]="updating()" (click)="updateStatus('PROCESSING')" class="!mb-2">
-            Xác nhận xử lý
-          </button>
-        }
-        @if (o.subOrders[0]?.status === 'PROCESSING') {
-          <div class="space-y-3">
-            <input nz-input placeholder="Mã vận đơn (tracking code)" aria-label="Mã vận đơn" [(ngModel)]="trackingCode" />
-            <button nz-button nzType="primary" nzBlock [nzLoading]="updating()" (click)="updateStatus('SHIPPED')">
-              Đánh dấu đã giao shipper
-            </button>
-          </div>
-        }
-        @if (o.subOrders[0]?.status === 'SHIPPED') {
-          <button nz-button nzType="primary" nzBlock [nzLoading]="updating()" (click)="updateStatus('DELIVERED')">
-            Xác nhận đã giao
-          </button>
-        }
-        @if (o.subOrders[0]?.status === 'RETURN_REQUESTED') {
-          <button nz-button nzType="primary" nzBlock routerLink="/admin/orders/{{ o.id }}">
-            Xem yêu cầu đổi trả
-          </button>
-        }
-      </div>
-
-      <!-- Status history -->
-      <div class="bg-surface dark:bg-surface-dark rounded-card border border-border/80 dark:border-border-dark/80 shadow-sm p-5">
-        <h2 class="font-semibold mb-3 tracking-tight text-sm">Lịch sử trạng thái</h2>
+      <div class="bg-card rounded-xl border border-border/80 shadow-2xs p-5">
+        <h2 class="font-semibold mb-4 tracking-tight text-sm text-foreground">Thao tác xử lý</h2>
         <div class="space-y-3">
-          @for (sub of o.subOrders; track sub.id) {
-            <div class="flex items-center gap-2 text-sm">
-              <nz-tag [nzColor]="sub.status | statusFormat" class="!rounded-full !border-0 !text-xs !px-2">
-                {{ sub.status | statusFormat:'label' }}
-              </nz-tag>
-              <span class="text-xs text-muted dark:text-muted-dark">{{ sub.fulfillmentType === 'DELIVERY' ? 'Giao hàng' : 'Tự đến lấy' }}</span>
+          @if (o.subOrders?.[0]?.status === 'PAID') {
+            <button
+              hlmBtn
+              variant="default"
+              class="w-full bg-primary text-primary-foreground text-xs h-9 justify-center cursor-pointer"
+              [disabled]="updating()"
+              (click)="updateStatus('PROCESSING')"
+            >
+              Xác nhận xử lý đơn
+            </button>
+          }
+
+          @if (o.subOrders?.[0]?.status === 'PROCESSING') {
+            <div class="space-y-2.5">
+              <input
+                hlmInput
+                placeholder="Nhập mã vận đơn (tracking code)"
+                aria-label="Mã vận đơn"
+                [(ngModel)]="trackingCode"
+                class="w-full h-9 text-xs"
+              />
+              <button
+                hlmBtn
+                variant="default"
+                class="w-full bg-primary text-primary-foreground text-xs h-9 justify-center cursor-pointer"
+                [disabled]="updating()"
+                (click)="updateStatus('SHIPPED')"
+              >
+                Đánh dấu đã giao cho shipper
+              </button>
             </div>
           }
+
+          @if (o.subOrders?.[0]?.status === 'SHIPPED') {
+            <button
+              hlmBtn
+              variant="default"
+              class="w-full bg-primary text-primary-foreground text-xs h-9 justify-center cursor-pointer"
+              [disabled]="updating()"
+              (click)="updateStatus('DELIVERED')"
+            >
+              Xác nhận đã giao hàng thành công
+            </button>
+          }
+
+          @if (o.subOrders?.[0]?.status === 'RETURN_REQUESTED') {
+            <a
+              hlmBtn
+              variant="outline"
+              [routerLink]="['/admin/returns']"
+              [queryParams]="{ orderId: o.id }"
+              class="w-full text-xs h-9 justify-center"
+            >
+              Xem yêu cầu đổi trả
+            </a>
+          }
         </div>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Spartan Confirm Dialog -->
+@if (confirmModal(); as modal) {
+  <div class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div hlmDialogContent class="max-w-md w-full bg-card border border-border rounded-xl p-6 shadow-xl space-y-4">
+      <div hlmDialogHeader class="space-y-1.5">
+        <h3 hlmDialogTitle class="text-base font-semibold text-foreground flex items-center gap-2">
+          <lucide-icon [img]="AlertCircle" class="w-5 h-5 text-primary"></lucide-icon>
+          {{ modal.title }}
+        </h3>
+        <p hlmDialogDescription class="text-xs text-muted-foreground">
+          {{ modal.description }}
+        </p>
+      </div>
+
+      <div hlmDialogFooter class="flex items-center justify-end gap-2 pt-2">
+        <button hlmBtn variant="outline" size="sm" (click)="closeConfirmModal()">
+          Hủy bỏ
+        </button>
+        <button hlmBtn variant="default" size="sm" (click)="modal.action()" class="bg-primary text-primary-foreground">
+          {{ modal.confirmText }}
+        </button>
       </div>
     </div>
   </div>

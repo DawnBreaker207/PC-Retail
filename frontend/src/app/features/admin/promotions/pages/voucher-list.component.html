@@ -1,73 +1,176 @@
-<div class="mb-6 flex flex-wrap items-center justify-between gap-3">
+<div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
   <div>
-    <h1 class="text-2xl font-bold tracking-tight">Quản lý mã giảm giá</h1>
-    <p class="text-muted dark:text-muted-dark text-sm mt-1">Tạo và quản lý các chương trình khuyến mãi</p>
+    <h1 class="text-2xl font-bold tracking-tight text-foreground">Quản lý mã giảm giá</h1>
+    <p class="text-muted-foreground text-sm mt-1">Tạo và cấu hình các chương trình ưu đãi, coupon và mã voucher</p>
   </div>
-  <button type="button" nz-button nzType="primary" (click)="openCreateModal()" class="!rounded-lg">
-    <span nz-icon nzType="plus"></span>
-    Tạo voucher
+  <button
+    hlmBtn
+    variant="default"
+    size="sm"
+    (click)="openCreateModal()"
+    class="h-9 px-4 gap-1.5 text-xs bg-primary text-primary-foreground self-start sm:self-auto cursor-pointer"
+  >
+    <lucide-icon [img]="Plus" class="w-4 h-4"></lucide-icon>
+    Tạo voucher mới
   </button>
 </div>
 
 @if (loading()) {
-  <div class="flex justify-center py-20"><nz-spin nzSize="large"></nz-spin></div>
+  <div class="flex flex-col items-center justify-center py-24 gap-3 text-muted-foreground">
+    <lucide-icon [img]="Loader2" class="w-8 h-8 animate-spin text-primary"></lucide-icon>
+    <p class="text-xs">Đang tải danh sách voucher...</p>
+  </div>
 } @else {
-  <nz-table
-    [nzData]="vouchers()"
-    [nzFrontPagination]="false"
-    [nzTotal]="total()"
-    [nzPageIndex]="page"
-    [nzPageSize]="size"
-    [nzPageSizeOptions]="pageSizeOptions"
-    (nzPageIndexChange)="onPageChange($event)"
-    (nzPageSizeChange)="onPageSizeChange($event)"
-    nzShowSizeChanger
-    nzSize="middle"
-    nzScrollX="900px"
-  >
-    <thead>
-      <tr>
-        <th>Mã</th>
-        <th>Phạm vi</th>
-        <th>Loại giảm</th>
-        <th>Giá trị</th>
-        <th>Đã dùng</th>
-        <th>Hiệu lực</th>
-        <th>Trạng thái</th>
-        <th nzRight>Thao tác</th>
-      </tr>
-    </thead>
-    <tbody>
-      @for (v of vouchers(); track v.id) {
-        <tr>
-          <td class="font-mono font-semibold text-sm">{{ v.code }}</td>
-          <td>{{ SCOPE_LABEL[v.scopeType] }}</td>
-          <td>{{ DISCOUNT_LABEL[v.discountType] }}</td>
-          <td class="font-medium">{{ formatDiscount(v) }}</td>
-          <td>{{ getUsage(v) }}</td>
-          <td class="text-xs text-muted dark:text-muted-dark">
-            {{ v.validFrom | date:'dd/MM/yyyy' }} — {{ v.validTo | date:'dd/MM/yyyy' }}
-          </td>
-          <td>
-            <nz-tag [nzColor]="getStatus(v).color" class="!rounded-full !border-0 !font-medium">
-              {{ getStatus(v).label }}
-            </nz-tag>
-          </td>
-          <td nzRight>
-            <button
-              nz-button
-              nzSize="small"
-              nzDanger
-              nz-popconfirm
-              nzPopconfirmTitle="Xóa mã {{ v.code }}?"
-              (nzOnConfirm)="deleteVoucher(v.id)"
-              aria-label="Xóa voucher"
-            >
-              <span nz-icon nzType="delete"></span>
-            </button>
-          </td>
-        </tr>
-      }
-    </tbody>
-  </nz-table>
+  <div class="rounded-xl border border-border/80 bg-card overflow-hidden shadow-2xs">
+    <div class="overflow-x-auto">
+      <table hlmTable class="w-full text-xs">
+        <thead hlmTableHeader>
+          <tr hlmTableRow class="border-b border-border bg-muted/40">
+            <th hlmTableHead class="w-32">Mã voucher</th>
+            <th hlmTableHead class="w-36">Phạm vi áp dụng</th>
+            <th hlmTableHead class="w-28">Loại giảm</th>
+            <th hlmTableHead>Giá trị chiết khấu</th>
+            <th hlmTableHead class="w-28 text-center">Đã sử dụng</th>
+            <th hlmTableHead class="w-48">Thời hạn hiệu lực</th>
+            <th hlmTableHead class="w-32 text-center">Trạng thái</th>
+            <th hlmTableHead class="w-20 text-right">Thao tác</th>
+          </tr>
+        </thead>
+        <tbody hlmTableBody>
+          @for (v of vouchers(); track v.id) {
+            <tr hlmTableRow class="border-b border-border/60 hover:bg-muted/20 transition-colors">
+              <td hlmTableCell class="font-mono font-bold text-primary flex items-center gap-1.5">
+                <lucide-icon [img]="Ticket" class="w-3.5 h-3.5 text-primary"></lucide-icon>
+                <span>{{ v.code }}</span>
+              </td>
+              <td hlmTableCell class="text-foreground">{{ SCOPE_LABEL[v.scopeType] || v.scopeType }}</td>
+              <td hlmTableCell class="text-muted-foreground">{{ DISCOUNT_LABEL[v.discountType] || v.discountType }}</td>
+              <td hlmTableCell class="font-semibold text-foreground">{{ formatDiscount(v) }}</td>
+              <td hlmTableCell class="text-center font-mono text-muted-foreground">{{ getUsage(v) }}</td>
+              <td hlmTableCell class="text-muted-foreground text-[11px]">
+                {{ v.validFrom | date:'dd/MM/yyyy' }} — {{ v.validTo | date:'dd/MM/yyyy' }}
+              </td>
+              <td hlmTableCell class="text-center">
+                <span
+                  hlmBadge
+                  variant="outline"
+                  class="px-2.5 py-0.5 rounded-full text-[11px] font-medium"
+                  [ngClass]="getStatus(v).badgeClass"
+                >
+                  {{ getStatus(v).label }}
+                </span>
+              </td>
+              <td hlmTableCell class="text-right">
+                <button
+                  hlmBtn
+                  variant="ghost"
+                  size="sm"
+                  (click)="confirmDelete(v)"
+                  class="h-7 w-7 p-0 text-destructive hover:bg-destructive/10 cursor-pointer"
+                  aria-label="Xóa voucher"
+                >
+                  <lucide-icon [img]="Trash2" class="w-3.5 h-3.5"></lucide-icon>
+                </button>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="8" class="text-center py-12 text-muted-foreground italic">
+                Chưa có mã giảm giá nào
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Spartan Pagination -->
+    <div class="flex flex-col sm:flex-row items-center justify-between px-4 py-3 border-t border-border gap-3 text-xs text-muted-foreground">
+      <div class="flex items-center gap-2">
+        <span>Tổng cộng <strong>{{ total() }}</strong> voucher</span>
+        <span class="text-border">|</span>
+        <select
+          [ngModel]="size"
+          (ngModelChange)="onPageSizeChange($event)"
+          aria-label="Kích thước trang"
+          class="h-7 px-2 text-xs rounded border border-input bg-background text-foreground"
+        >
+          @for (s of pageSizeOptions; track s) {
+            <option [value]="s">{{ s }} voucher / trang</option>
+          }
+        </select>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <span>Trang {{ page }} / {{ totalPages }}</span>
+        <div class="inline-flex rounded-md border border-input p-0.5 bg-card">
+          <button
+            hlmBtn
+            variant="ghost"
+            size="sm"
+            [disabled]="page <= 1"
+            (click)="onPageChange(page - 1)"
+            class="h-7 w-7 p-0 cursor-pointer"
+          >
+            <lucide-icon [img]="ChevronLeft" class="w-4 h-4"></lucide-icon>
+          </button>
+          <button
+            hlmBtn
+            variant="ghost"
+            size="sm"
+            [disabled]="page >= totalPages"
+            (click)="onPageChange(page + 1)"
+            class="h-7 w-7 p-0 cursor-pointer"
+          >
+            <lucide-icon [img]="ChevronRight" class="w-4 h-4"></lucide-icon>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Create Voucher Spartan Dialog -->
+@if (isCreateModalOpen()) {
+  <div class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div hlmDialogContent class="max-w-xl w-full bg-card border border-border rounded-xl p-6 shadow-xl space-y-4 max-h-[90vh] overflow-y-auto">
+      <div hlmDialogHeader class="space-y-1">
+        <h3 hlmDialogTitle class="text-base font-semibold text-foreground">Tạo voucher mới</h3>
+        <p hlmDialogDescription class="text-xs text-muted-foreground">
+          Cài đặt thông số chiết khấu, thời gian và phạm vi áp dụng khuyến mãi.
+        </p>
+      </div>
+
+      <app-voucher-form
+        (saved)="onCreated()"
+        (cancelled)="closeCreateModal()"
+      ></app-voucher-form>
+    </div>
+  </div>
+}
+
+<!-- Delete Confirmation Spartan Dialog -->
+@if (deleteTarget(); as v) {
+  <div class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div hlmDialogContent class="max-w-md w-full bg-card border border-border rounded-xl p-6 shadow-xl space-y-4">
+      <div hlmDialogHeader class="space-y-1.5">
+        <h3 hlmDialogTitle class="text-base font-semibold text-foreground flex items-center gap-2">
+          <lucide-icon [img]="AlertCircle" class="w-5 h-5 text-destructive"></lucide-icon>
+          Xác nhận xóa voucher?
+        </h3>
+        <p hlmDialogDescription class="text-xs text-muted-foreground">
+          Bạn có chắc muốn xóa mã voucher <strong class="text-foreground">{{ v.code }}</strong> không? Thao tác này không thể hoàn tác.
+        </p>
+      </div>
+
+      <div hlmDialogFooter class="flex items-center justify-end gap-2 pt-2">
+        <button hlmBtn variant="outline" size="sm" (click)="cancelDelete()">
+          Hủy bỏ
+        </button>
+        <button hlmBtn variant="destructive" size="sm" (click)="executeDelete()" class="bg-destructive text-destructive-foreground">
+          Xóa voucher
+        </button>
+      </div>
+    </div>
+  </div>
 }

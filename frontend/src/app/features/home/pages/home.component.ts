@@ -1,22 +1,23 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { HeroBannerComponent } from '../components/hero-banner.component';
 import { FlashSaleSectionComponent } from '../components/flash-sale-section.component';
 import { CategoryGridComponent } from '../components/category-grid.component';
 import { ProductSectionComponent } from '../components/product-section.component';
 import { MockDataService } from '@core/services/mock-data.service';
-import { NzIconModule } from 'ng-zorro-antd/icon';
+import { ArticleService } from '@core/services/article.service';
 import { FallbackImageDirective } from '@shared/directives/fallback-image.directive';
+import { BlogPost } from '@core/models/common.model';
 
 @Component({
   selector: 'app-home',
+  standalone: true,
   imports: [
     HeroBannerComponent,
     FlashSaleSectionComponent,
     CategoryGridComponent,
     ProductSectionComponent,
     RouterLink,
-    NzIconModule,
     FallbackImageDirective,
   ],
   templateUrl: './home.component.html',
@@ -24,8 +25,17 @@ import { FallbackImageDirective } from '@shared/directives/fallback-image.direct
 })
 export class HomeComponent {
   private mock = inject(MockDataService);
+  private articleService = inject(ArticleService);
 
   homeSections = this.mock.getHomeSections();
   promoCampaigns = this.mock.getPromoCampaigns();
-  blogPosts = this.mock.getBlogPosts();
+  blogPosts = signal<BlogPost[]>(this.mock.getBlogPosts());
+
+  constructor() {
+    this.articleService.getArticles().subscribe((articles) => {
+      if (articles && articles.length > 0) {
+        this.blogPosts.set(articles);
+      }
+    });
+  }
 }

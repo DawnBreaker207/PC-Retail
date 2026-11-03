@@ -1,69 +1,98 @@
-<div class="flex flex-wrap items-center gap-2">
+<div class="flex flex-wrap items-center gap-2.5">
   <!-- Danh mục -->
-  <nz-select
-    [ngModel]="filters().category"
-    (ngModelChange)="selectCategory($event)"
-    nzPlaceHolder="Danh mục"
-    nzAllowClear
-    class="min-w-[140px]"
-  >
-    @for (cat of categories(); track cat.slug) {
-      <nz-option [nzValue]="cat.slug" [nzLabel]="cat.name" />
-    }
-  </nz-select>
+  <div class="relative">
+    <select
+      [value]="filters().category"
+      (change)="selectCategory($event)"
+      aria-label="Lọc theo danh mục"
+      class="h-9 min-w-[140px] appearance-none rounded-lg border border-border/80 bg-surface dark:bg-surface-dark px-3 pr-8 text-xs font-medium text-foreground shadow-sm transition-colors hover:border-primary/50 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+    >
+      <option value="">Tất cả danh mục</option>
+      @for (cat of categories(); track cat.slug) {
+        <option [value]="cat.slug">{{ cat.name }}</option>
+      }
+    </select>
+    <div class="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-muted dark:text-muted-dark text-[10px]">▼</div>
+  </div>
 
   <!-- Khoảng giá -->
-  <nz-select
-    nzPlaceHolder="Khoảng giá"
-    nzAllowClear
-    class="min-w-[140px]"
-    [ngModel]="selectedPriceLabel()"
-    (ngModelChange)="onPriceSelect($event)"
-  >
-    @for (range of priceRanges; track range.label) {
-      <nz-option [nzValue]="range.label" [nzLabel]="range.label" />
-    }
-  </nz-select>
+  <div class="relative">
+    <select
+      [value]="selectedPriceLabel()"
+      (change)="onPriceSelect($event)"
+      aria-label="Lọc theo khoảng giá"
+      class="h-9 min-w-[140px] appearance-none rounded-lg border border-border/80 bg-surface dark:bg-surface-dark px-3 pr-8 text-xs font-medium text-foreground shadow-sm transition-colors hover:border-primary/50 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+    >
+      <option value="">Khoảng giá</option>
+      @for (range of priceRanges; track range.label) {
+        <option [value]="range.label">{{ range.label }}</option>
+      }
+    </select>
+    <div class="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-muted dark:text-muted-dark text-[10px]">▼</div>
+  </div>
 
   <!-- Thương hiệu -->
-  <nz-select
-    nzMode="multiple"
-    nzPlaceHolder="Thương hiệu"
-    class="min-w-[140px]"
-    [ngModel]="filters().brands"
-    (ngModelChange)="selectBrand($event)"
-  >
-    @for (brand of brands(); track brand) {
-      <nz-option [nzValue]="brand" [nzLabel]="brand" />
-    }
-  </nz-select>
+  <div class="relative">
+    <select
+      (change)="selectBrand($event)"
+      aria-label="Lọc theo thương hiệu"
+      class="h-9 min-w-[140px] appearance-none rounded-lg border border-border/80 bg-surface dark:bg-surface-dark px-3 pr-8 text-xs font-medium text-foreground shadow-sm transition-colors hover:border-primary/50 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+    >
+      <option value="">+ Thêm thương hiệu</option>
+      @for (brand of brands(); track brand) {
+        <option [value]="brand">{{ brand }}</option>
+      }
+    </select>
+    <div class="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-muted dark:text-muted-dark text-[10px]">▼</div>
+  </div>
 
   <!-- Thông số kỹ thuật theo danh mục -->
   @for (spec of specOptions(); track spec.label) {
-    <nz-select
-      nzMode="multiple"
-      [nzPlaceHolder]="spec.label"
-      class="min-w-[140px]"
-      [ngModel]="filters().specs[spec.label] || []"
-      (ngModelChange)="selectSpec(spec.label, $event)"
-    >
-      @for (value of spec.values; track value) {
-        <nz-option [nzValue]="value" [nzLabel]="value" />
-      }
-    </nz-select>
+    <div class="relative">
+      <select
+        (change)="selectSpec(spec.label, $event)"
+        [attr.aria-label]="'Lọc theo ' + spec.label"
+        class="h-9 min-w-[140px] appearance-none rounded-lg border border-border/80 bg-surface dark:bg-surface-dark px-3 pr-8 text-xs font-medium text-foreground shadow-sm transition-colors hover:border-primary/50 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+      >
+        <option value="">+ {{ spec.label }}</option>
+        @for (value of spec.values; track value) {
+          <option [value]="value">{{ value }}</option>
+        }
+      </select>
+      <div class="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-muted dark:text-muted-dark text-[10px]">▼</div>
+    </div>
   }
 
   <!-- Active filters -->
   @if (hasActive()) {
-    <div class="flex flex-wrap items-center gap-1">
+    <div class="flex flex-wrap items-center gap-1.5 ml-1">
       @for (af of activeFilters; track af.type + af.value) {
-        <nz-tag nzMode="closeable" (nzOnClose)="removeFilter(af)" class="!text-xs !rounded-md">
-          {{ af.label }}
-        </nz-tag>
+        <span
+          hlmBadge
+          variant="secondary"
+          class="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium bg-secondary text-secondary-foreground border border-border/60"
+        >
+          <span>{{ af.label }}</span>
+          <button
+            type="button"
+            (click)="removeFilter(af)"
+            class="text-muted-foreground hover:text-foreground transition-colors ml-0.5 rounded-full p-0.5"
+            [attr.aria-label]="'Bỏ lọc ' + af.label"
+          >
+            <lucide-icon [img]="XIcon" class="size-3" />
+          </button>
+        </span>
       }
-      <button nz-button nzType="link" nzSize="small" class="!text-xs !p-0 !h-auto" (click)="clearAll()">
-        <span nz-icon nzType="delete" nzTheme="outline"></span>
-        Xóa
+      <button
+        type="button"
+        hlmBtn
+        variant="ghost"
+        size="sm"
+        class="h-7 px-2 text-xs text-destructive hover:text-destructive/80 hover:bg-destructive/10 rounded-md transition-colors inline-flex items-center gap-1"
+        (click)="clearAll()"
+      >
+        <lucide-icon [img]="Trash2Icon" class="size-3.5" />
+        Xóa tất cả
       </button>
     </div>
   }

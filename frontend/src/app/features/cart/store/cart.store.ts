@@ -37,10 +37,11 @@ export const CartStore = signalStore(
     const isGuest = () => !auth.isAuthenticated();
     const guestParams = () => new HttpParams().set('token', getGuestToken());
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const toItems = (res: { items: any[]; version?: number }) => {
+    const toItems = (res: any) => {
+      const list = res?.data?.items ?? res?.items ?? (Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []));
       patchState(store, {
         // API thật trả {skuId, skuName, primaryImageUrl, unitPrice}; mock trả {name, imageUrl, price} — chuẩn hoá 1 chỗ
-        items: (res.items ?? []).map((i) => ({
+        items: (list ?? []).map((i: any) => ({
           skuId: i['skuId'],
           name: (i['name'] ?? i['skuName'] ?? '') as string,
           slug: (i['slug'] ?? '') as string,
@@ -51,7 +52,7 @@ export const CartStore = signalStore(
           brandName: (i['brandName'] ?? '') as string,
           selected: true,
         })) as CartItem[],
-        version: res.version ?? null,
+        version: res?.data?.version ?? res?.version ?? null,
         isLoading: false,
       });
     };
@@ -62,25 +63,21 @@ export const CartStore = signalStore(
     };
     const loadGuest = () => {
       patchState(store, { isLoading: true, error: null });
-      http.get<{ items: CartItem[] }>(ApiEndpoints.cart.guestBase, { params: guestParams() }).pipe(
+      http.get<any>(ApiEndpoints.cart.guestBase, { params: guestParams() }).pipe(
         catchError(fail),
-      ).subscribe((res) => toItems({ items: res.items ?? [], version: undefined }));
+      ).subscribe((res) => toItems(res));
     };
     // POST returns a single item, not the cart — always reload after writing.
     const loadMember = () => {
       patchState(store, { isLoading: true, error: null });
-      http.get<{ items: CartItem[]; version?: number }>(ApiEndpoints.cart.base).pipe(
+      http.get<any>(ApiEndpoints.cart.base).pipe(
         catchError((err) => {
           const msg = (err as { error?: { message?: string } })?.error?.message || (err as Error)?.message || 'Có lỗi xảy ra';
           patchState(store, { isLoading: false, error: msg });
           return of({ items: [], version: undefined });
         }),
       ).subscribe((res) => {
-        patchState(store, {
-          items: (res.items ?? []).map((i) => ({ ...i, selected: true })),
-          version: res.version ?? null,
-          isLoading: false,
-        });
+        toItems(res);
       });
     };
 

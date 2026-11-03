@@ -1,29 +1,44 @@
-<div class="max-w-[1400px] mx-auto px-4 py-6">
-  <div class="flex items-center justify-between mb-6">
-    <h1 class="text-2xl font-bold tracking-tight">PC Custom Build</h1>
+<div class="max-w-[1400px] mx-auto px-4 pt-6 sm:pt-8 pb-12">
+  <!-- Header Bar -->
+  <div class="mb-6 pb-4 border-b border-border/70 dark:border-border-dark/70 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+    <div>
+      <div class="flex items-center gap-2">
+        <h1 class="text-xl sm:text-2xl font-black tracking-tight text-foreground">Tự Xây Dựng Cấu Hình PC</h1>
+        <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
+          Smart Compatibility
+        </span>
+      </div>
+      <p class="text-xs text-muted dark:text-muted-dark mt-1">
+        Hệ thống tự động kiểm tra tương thích giữa CPU, Mainboard, RAM, GPU và tính toán công suất nguồn tối ưu theo chuẩn 3 cấp độ SAFE / WARNING / BLOCK.
+      </p>
+    </div>
   </div>
 
-  @if (loading) {
+  @if (loading()) {
     <app-loading-spinner />
   } @else {
     <div class="flex flex-col lg:flex-row gap-6">
-      <div class="w-full lg:w-[320px] shrink-0">
+      <!-- Cột chính: Danh sách linh kiện (Chiếm phần lớn màn hình) -->
+      <div class="flex-1 min-w-0">
         <app-slot-list
-          [slots]="slots"
-          [selections]="selections"
-          [conflicts]="validation?.conflicts ?? []"
+          [slots]="slots()"
+          [selections]="selections()"
+          [conflicts]="validation()?.conflicts ?? []"
           (selectSlot)="onSlotSelected($event)"
           (removeSlot)="onSlotRemoved($event)"
         />
       </div>
-      <div class="flex-1 min-w-0">
+
+      <!-- Cột phụ: Bảng tóm tắt cấu hình & Công suất nguồn (Sticky bên phải) -->
+      <div class="w-full lg:w-[380px] xl:w-[400px] shrink-0">
         <app-build-summary
-          [selections]="selections"
-          [slots]="slots"
-          [validation]="validation"
-          [canAddToCart]="canAddToCart"
-          [missingRequired]="missingRequired"
+          [selections]="selections()"
+          [slots]="slots()"
+          [validation]="validation()"
+          [canAddToCart]="canAddToCart()"
+          [missingRequired]="missingRequired()"
           (addToCart)="onAddToCart()"
+          (clearBuild)="onClearBuild()"
         />
       </div>
     </div>

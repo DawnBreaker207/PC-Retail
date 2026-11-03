@@ -1,25 +1,25 @@
-import { Component, inject } from '@angular/core';
+import { Component, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { NzModalRef } from 'ng-zorro-antd/modal';
-import { NzInputModule } from 'ng-zorro-antd/input';
-import { NzButtonModule } from 'ng-zorro-antd/button';
+import { HlmButtonDirective } from '@shared/ui/button';
+import { HlmInputDirective } from '@shared/ui/input';
 
 @Component({
   selector: 'app-reject-reason-modal',
-  imports: [FormsModule, NzInputModule, NzButtonModule],
+  standalone: true,
+  imports: [FormsModule, HlmButtonDirective, HlmInputDirective],
   templateUrl: './reject-reason-modal.component.html',
 })
 export class RejectReasonModalComponent {
-  private modalRef = inject(NzModalRef);
+  readonly closed = output<string | null>();
 
-  reason = '';
+  reason = signal('');
 
   cancel() {
-    this.modalRef.close();
+    this.closed.emit(null);
   }
 
   submit() {
-    if (!this.reason.trim()) return;
-    this.modalRef.close(this.reason.trim());
+    if (!this.reason().trim()) return;
+    this.closed.emit(this.reason().trim());
   }
 }

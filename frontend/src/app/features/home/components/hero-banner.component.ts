@@ -1,6 +1,6 @@
 import { Component, ElementRef, effect, inject, signal, viewChild, OnDestroy } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { NzIconModule } from 'ng-zorro-antd/icon';
+import { LucideAngularModule, ChevronRight } from 'lucide-angular';
 import { FallbackImageDirective } from '@shared/directives/fallback-image.directive';
 import { MockDataService } from '@core/services/mock-data.service';
 import { CategoryMenuService } from '@core/services/category-menu.service';
@@ -13,7 +13,7 @@ import { CategoryStripComponent } from './category-strip.component';
 @Component({
   selector: 'app-hero-banner',
   imports: [
-    RouterLink, NzIconModule, FallbackImageDirective, CategorySidebarComponent,
+    RouterLink, LucideAngularModule, FallbackImageDirective, CategorySidebarComponent,
     PromoBannerGridComponent, PromoCardComponent, CategoryStripComponent,
   ],
   templateUrl: './hero-banner.component.html',
@@ -23,6 +23,7 @@ export class HeroBannerComponent implements OnDestroy {
   private mock = inject(MockDataService);
   menu = inject(CategoryMenuService);
   private categorySidebar = viewChild<ElementRef<HTMLElement>>('categorySidebar');
+  readonly ChevronRightIcon = ChevronRight;
 
   slides = this.mock.getHeroSlides().map((slide) => ({ ...slide, cta: splitLinkQuery(slide.ctaLink) }));
   sideBanners = this.mock.getPromoCampaigns().slice(0, 2).map((banner) => ({ ...banner, dest: splitLinkQuery(banner.link) }));

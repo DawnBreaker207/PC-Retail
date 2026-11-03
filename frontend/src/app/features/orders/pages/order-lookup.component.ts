@@ -1,12 +1,11 @@
-import { Component, inject, signal } from '@angular/core';
+﻿import { Component, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { finalize } from 'rxjs';
-import { NzBreadCrumbModule } from 'ng-zorro-antd/breadcrumb';
-import { NzFormModule } from 'ng-zorro-antd/form';
-import { NzInputModule } from 'ng-zorro-antd/input';
-import { NzButtonModule } from 'ng-zorro-antd/button';
-import { NzTagModule } from 'ng-zorro-antd/tag';
+import { LucideAngularModule, ChevronRight, Search, Loader2 } from 'lucide-angular';
+import { HlmButtonDirective } from '@shared/ui/button';
+import { HlmInputDirective } from '@shared/ui/input';
+import { HlmBadgeDirective } from '@shared/ui/badge';
 import { CurrencyFormatPipe } from '@shared/pipes/currency-format.pipe';
 import { FallbackImageDirective } from '@shared/directives/fallback-image.directive';
 import { OrderService } from '@core/services/order.service';
@@ -15,12 +14,22 @@ import { Order } from '@core/models/common.model';
 @Component({
   selector: 'app-order-lookup',
   imports: [
-    RouterLink, ReactiveFormsModule, NzBreadCrumbModule, NzFormModule,
-    NzInputModule, NzButtonModule, NzTagModule, CurrencyFormatPipe, FallbackImageDirective,
+    RouterLink,
+    ReactiveFormsModule,
+    LucideAngularModule,
+    HlmButtonDirective,
+    HlmInputDirective,
+    HlmBadgeDirective,
+    CurrencyFormatPipe,
+    FallbackImageDirective,
   ],
   templateUrl: './order-lookup.component.html',
 })
 export class OrderLookupComponent {
+  readonly ChevronRight = ChevronRight;
+  readonly Search = Search;
+  readonly Loader2 = Loader2;
+
   private fb = inject(FormBuilder);
   private orderService = inject(OrderService);
 
@@ -54,3 +63,4 @@ export class OrderLookupComponent {
     });
   }
 }
+

@@ -1,63 +1,77 @@
-import { Component, DestroyRef, inject, signal } from '@angular/core';
+import { Component, DestroyRef, inject, input, output, OnInit, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpClient } from '@angular/common/http';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { NzFormModule } from 'ng-zorro-antd/form';
-import { NzInputModule } from 'ng-zorro-antd/input';
-import { NzSelectModule } from 'ng-zorro-antd/select';
-import { NzButtonModule } from 'ng-zorro-antd/button';
-import { NzMessageService } from 'ng-zorro-antd/message';
-import { NZ_MODAL_DATA, NzModalRef } from 'ng-zorro-antd/modal';
+import { HlmButtonDirective } from '@shared/ui/button';
+import { HlmInputDirective } from '@shared/ui/input';
+import { ToastService } from '@core/services/toast.service';
 import { ApiEndpoints } from '@core/api/api.endpoints';
 import { User } from '@core/models/common.model';
 
-interface UserFormData {
-  user: User | null;
-}
-
 @Component({
   selector: 'app-user-form',
-  imports: [ReactiveFormsModule, NzFormModule, NzInputModule, NzSelectModule, NzButtonModule],
+  standalone: true,
+  imports: [ReactiveFormsModule, HlmButtonDirective, HlmInputDirective],
   templateUrl: './user-form.component.html',
 })
-export class UserFormComponent {
+export class UserFormComponent implements OnInit {
   private fb = inject(FormBuilder);
   private http = inject(HttpClient);
   private destroyRef = inject(DestroyRef);
-  private message = inject(NzMessageService);
-  private modalRef = inject(NzModalRef);
-  private data: UserFormData = inject(NZ_MODAL_DATA);
+  private toast = inject(ToastService);
+
+  readonly user = input<User | null>(null);
+  readonly saved = output<boolean>();
+  readonly cancelled = output<void>();
 
   submitting = signal(false);
-  isEdit = !!this.data.user;
 
   form = this.fb.nonNullable.group({
-    fullName: [this.data.user?.fullName ?? '', Validators.required],
-    email: [{ value: this.data.user?.email ?? '', disabled: this.isEdit }, [Validators.required, Validators.email]],
-    phone: [this.data.user?.phone ?? '', Validators.required],
-    systemRole: [this.data.user?.systemRole ?? 'CUSTOMER', Validators.required],
+    fullName: ['', Validators.required],
+    email: ['', [Validators.required, Validators.email]],
+    phone: ['', Validators.required],
+    systemRole: ['CUSTOMER', Validators.required],
   });
 
+  get isEdit(): boolean {
+    return !!this.user();
+  }
+
+  ngOnInit() {
+    const u = this.user();
+    if (u) {
+      this.form.patchValue({
+        fullName: u.fullName ?? '',
+        email: u.email ?? '',
+        phone: u.phone ?? '',
+        systemRole: u.systemRole ?? 'CUSTOMER',
+      });
+      this.form.controls.email.disable();
+    }
+  }
+
   cancel() {
-    this.modalRef.close();
+    this.cancelled.emit();
   }
 
   submit() {
     if (this.form.invalid) return;
     this.submitting.set(true);
     const body = this.form.getRawValue();
-    const request$ = this.isEdit
-      ? this.http.put(ApiEndpoints.admin.userDetail(this.data.user!.id), body)
+    const curUser = this.user();
+    const request$ = this.isEdit && curUser
+      ? this.http.put(ApiEndpoints.admin.userDetail(curUser.id), body)
       : this.http.post(ApiEndpoints.admin.users, body);
 
     request$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.submitting.set(false);
-        this.modalRef.close(true);
+        this.toast.success(this.isEdit ? 'Cập nhật người dùng thành công' : 'Thêm người dùng thành công');
+        this.saved.emit(true);
       },
       error: () => {
         this.submitting.set(false);
-        this.message.error('Thao tác thất bại');
+        this.toast.error('Thao tác thất bại');
       },
     });
   }

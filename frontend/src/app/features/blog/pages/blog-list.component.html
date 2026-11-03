@@ -1,8 +1,9 @@
 <div class="max-w-screen-2xl mx-auto px-4 py-6 lg:py-8">
-  <nz-breadcrumb class="mb-4">
-    <nz-breadcrumb-item><a routerLink="/">Trang chủ</a></nz-breadcrumb-item>
-    <nz-breadcrumb-item>Tin công nghệ</nz-breadcrumb-item>
-  </nz-breadcrumb>
+  <nav class="flex items-center gap-1.5 text-xs text-muted dark:text-muted-dark mb-4">
+    <a routerLink="/" class="hover:text-primary transition-colors">Trang chủ</a>
+    <lucide-angular [img]="ChevronRight" class="w-3.5 h-3.5 text-muted/60" />
+    <span class="text-ink dark:text-ink-dark font-medium">Tin công nghệ</span>
+  </nav>
 
   <h1 class="text-lg lg:text-xl font-bold mb-5">Tin công nghệ</h1>
 

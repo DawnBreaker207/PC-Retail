@@ -1,31 +1,47 @@
 <div class="max-w-screen-2xl mx-auto px-4 py-6 lg:py-8 min-h-[60vh]">
   <div class="flex items-center justify-between mb-6">
-    <h1 class="text-2xl lg:text-3xl font-bold tracking-tight">Giỏ hàng</h1>
+    <h1 class="text-2xl lg:text-3xl font-bold tracking-tight text-foreground">Giỏ hàng</h1>
     @if (items().length > 0) {
-      <span class="text-sm text-muted dark:text-muted-dark">{{ items().length }} sản phẩm</span>
+      <span class="text-xs sm:text-sm text-muted dark:text-muted-dark font-medium">{{ items().length }} sản phẩm</span>
     }
   </div>
 
   @if (isLoading()) {
-    <div class="flex justify-center py-20"><nz-spin nzSize="large"></nz-spin></div>
+    <div class="flex justify-center py-20">
+      <app-loading-spinner />
+    </div>
   } @else if (items().length === 0) {
-    <div class="flex flex-col items-center justify-center py-20 animate-fade-in-up">
-      <div class="w-24 h-24 rounded-full bg-bg dark:bg-bg-dark flex items-center justify-center mb-6">
-        <span nz-icon nzType="shopping-cart" class="text-4xl text-muted dark:text-muted-dark"></span>
+    <div class="flex flex-col items-center justify-center py-20 text-center rounded-2xl border border-dashed border-border/80 bg-surface/40 p-8">
+      <div class="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+        <lucide-icon [img]="CartIcon" class="size-9 text-primary" />
       </div>
-      <p class="text-muted dark:text-muted-dark text-lg mb-2">Giỏ hàng trống</p>
-      <p class="text-sm text-muted dark:text-muted-dark mb-6">Hãy thêm sản phẩm vào giỏ để tiếp tục mua sắm</p>
-      <button nz-button nzType="primary" routerLink="/" class="!rounded-full !px-8 !shadow-sm hover:!shadow-md !transition-shadow">
-        Mua sắm ngay
-      </button>
+      <p class="text-foreground font-semibold text-base mb-1">Giỏ hàng của bạn đang trống</p>
+      <p class="text-xs sm:text-sm text-muted dark:text-muted-dark mb-6">Hãy thêm các linh kiện, PC hoặc phụ kiện vào giỏ để tiếp tục</p>
+      <a
+        routerLink="/"
+        hlmBtn
+        variant="default"
+        class="h-10 px-6 rounded-xl font-semibold text-xs shadow-xs"
+      >
+        Khám phá sản phẩm
+      </a>
     </div>
   } @else {
-    <div class="flex items-center gap-4 mb-4 px-1">
-      <label nz-checkbox nzId="cart-select-all" for="cart-select-all" [nzChecked]="allSelected" (nzCheckedChange)="toggleAll()" class="text-sm font-medium">Chọn tất cả</label>
+    <div class="flex items-center gap-2.5 mb-4 px-1">
+      <input
+        type="checkbox"
+        id="cart-select-all"
+        [checked]="allSelected"
+        (change)="toggleAll()"
+        class="size-4.5 rounded border-border text-primary focus:ring-primary cursor-pointer accent-primary"
+      />
+      <label for="cart-select-all" class="text-xs sm:text-sm font-semibold text-foreground cursor-pointer select-none">
+        Chọn tất cả ({{ items().length }} sản phẩm)
+      </label>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
-      <div class="lg:col-span-2 space-y-4">
+      <div class="lg:col-span-2 space-y-3.5">
         @for (item of items(); track trackBySkuId($index, item)) {
           <app-cart-item [item]="item" />
         }

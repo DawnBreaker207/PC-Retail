@@ -1,19 +1,31 @@
-import { Component, inject, DestroyRef, signal } from '@angular/core';
-import { DatePipe } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { Component, inject, DestroyRef, signal, computed } from '@angular/core';
+import { DatePipe, NgClass } from '@angular/common';
+import { RouterLink, ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { NzTableModule } from 'ng-zorro-antd/table';
-import { NzIconModule } from 'ng-zorro-antd/icon';
-import { NzSpinModule } from 'ng-zorro-antd/spin';
-import { NzTagModule } from 'ng-zorro-antd/tag';
-import { NzSelectModule } from 'ng-zorro-antd/select';
+import {
+  LucideAngularModule,
+  Filter,
+  X,
+  Loader2,
+  ExternalLink,
+} from 'lucide-angular';
+import { HlmButtonDirective } from '@shared/ui/button';
+import { HlmBadgeDirective } from '@shared/ui/badge';
+import {
+  HlmTableDirective,
+  HlmTableHeaderDirective,
+  HlmTableBodyDirective,
+  HlmTableRowDirective,
+  HlmTableHeadDirective,
+  HlmTableCellDirective,
+} from '@shared/ui/table';
 import { ApiEndpoints } from '@core/api/api.endpoints';
 import { AdminReturnRequest } from '@core/models/common.model';
 
 const STATUS_OPTIONS = [
-  { value: '', label: 'Tất cả' },
+  { value: '', label: 'Tất cả trạng thái' },
   { value: 'REQUESTED', label: 'Chờ duyệt' },
   { value: 'APPROVED', label: 'Đã duyệt' },
   { value: 'REJECTED', label: 'Đã từ chối' },
@@ -21,36 +33,69 @@ const STATUS_OPTIONS = [
   { value: 'REFUNDED', label: 'Đã hoàn tiền' },
 ];
 
-const STATUS_COLOR: Record<string, string> = {
-  REQUESTED: 'gold', APPROVED: 'success', REJECTED: 'error', DISPUTED: 'orange', REFUNDED: 'blue',
-};
-
 const TYPE_LABEL: Record<string, string> = {
-  DOA: 'Đổi mới (DOA)', WARRANTY: 'Bảo hành',
+  DOA: 'Đổi mới (DOA)',
+  WARRANTY: 'Bảo hành',
 };
 
 @Component({
   selector: 'app-admin-return-list',
+  standalone: true,
   imports: [
-    DatePipe, RouterLink, FormsModule,
-    NzTableModule, NzIconModule, NzSpinModule, NzTagModule, NzSelectModule,
+    DatePipe,
+    NgClass,
+    RouterLink,
+    FormsModule,
+    LucideAngularModule,
+    HlmBadgeDirective,
+    HlmTableDirective,
+    HlmTableHeaderDirective,
+    HlmTableBodyDirective,
+    HlmTableRowDirective,
+    HlmTableHeadDirective,
+    HlmTableCellDirective,
   ],
   templateUrl: './admin-return-list.component.html',
 })
 export class AdminReturnListComponent {
   private http = inject(HttpClient);
   private destroyRef = inject(DestroyRef);
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+
+  readonly Filter = Filter;
+  readonly X = X;
+  readonly Loader2 = Loader2;
+  readonly ExternalLink = ExternalLink;
 
   returns = signal<AdminReturnRequest[]>([]);
   loading = signal(false);
   statusFilter = signal('');
+  orderIdFilter = signal<number | null>(null);
+
+  filteredReturns = computed(() => {
+    const list = this.returns();
+    const oid = this.orderIdFilter();
+    if (oid) {
+      return list.filter((r) => r.orderId === oid);
+    }
+    return list;
+  });
 
   protected readonly STATUS_OPTIONS = STATUS_OPTIONS;
-  protected readonly STATUS_COLOR = STATUS_COLOR;
   protected readonly TYPE_LABEL = TYPE_LABEL;
 
   constructor() {
+    this.route.queryParamMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
+      const oid = params.get('orderId');
+      this.orderIdFilter.set(oid ? Number(oid) : null);
+    });
     this.loadData();
+  }
+
+  clearOrderFilter() {
+    this.orderIdFilter.set(null);
+    this.router.navigate([], { queryParams: { orderId: null }, queryParamsHandling: 'merge' });
   }
 
   onStatusChange(status: string) {

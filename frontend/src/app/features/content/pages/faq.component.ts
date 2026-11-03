@@ -1,14 +1,18 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { NzBreadCrumbModule } from 'ng-zorro-antd/breadcrumb';
-import { NzCollapseModule } from 'ng-zorro-antd/collapse';
+import { LucideAngularModule, ChevronRight, ChevronDown } from 'lucide-angular';
 
 @Component({
   selector: 'app-faq',
-  imports: [RouterLink, NzBreadCrumbModule, NzCollapseModule],
+  imports: [RouterLink, LucideAngularModule],
   templateUrl: './faq.component.html',
 })
 export class FaqComponent {
+  readonly ChevronRight = ChevronRight;
+  readonly ChevronDown = ChevronDown;
+
+  openItems = signal<Set<number>>(new Set([0]));
+
   faqs = [
     {
       q: 'Tôi có thể thanh toán bằng những hình thức nào?',
@@ -31,4 +35,20 @@ export class FaqComponent {
       a: 'Bạn có thể vào mục "Tra cứu đơn hàng", nhập mã đơn hàng và số điện thoại đã đặt để xem trạng thái đơn.',
     },
   ];
+
+  toggle(index: number) {
+    this.openItems.update((set) => {
+      const next = new Set(set);
+      if (next.has(index)) {
+        next.delete(index);
+      } else {
+        next.add(index);
+      }
+      return next;
+    });
+  }
+
+  isOpen(index: number): boolean {
+    return this.openItems().has(index);
+  }
 }

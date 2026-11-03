@@ -1,32 +1,44 @@
 <div class="py-4">
-  <div class="flex gap-2 mb-5">
+  <div class="flex flex-wrap sm:flex-nowrap gap-2.5 mb-6 max-w-md">
     <input
-      nz-input
-      placeholder="Nhập mã giảm giá để kiểm tra"
-      [(ngModel)]="code"
+      hlmInput
+      placeholder="Nhập mã ưu đãi để kiểm tra"
+      [ngModel]="code()"
+      (ngModelChange)="code.set($event)"
       name="voucherCode"
-      class="max-w-xs"
+      class="flex-1"
     />
-    <button nz-button nzType="primary" [nzLoading]="checking()" [disabled]="!code.trim()" (click)="checkCode()">
+    <button hlmBtn [disabled]="!code().trim() || checking()" (click)="checkCode()" class="shrink-0">
+      @if (checking()) {
+        <lucide-angular [img]="Loader2" class="w-4 h-4 mr-1.5 animate-spin" />
+      } @else {
+        <lucide-angular [img]="Ticket" class="w-4 h-4 mr-1.5" />
+      }
       Kiểm tra mã
     </button>
   </div>
 
   @if (loading()) {
-    <div class="flex justify-center py-10"><nz-spin nzSize="large"></nz-spin></div>
+    <div class="flex justify-center py-10">
+      <app-loading-spinner [size]="36" />
+    </div>
   } @else if (vouchers().length === 0) {
-    <app-empty-state title="Chưa có voucher nào" description="Theo dõi các chương trình khuyến mãi để nhận voucher mới." />
+    <app-empty-state title="Chưa có mã ưu đãi nào" description="Theo dõi các chương trình khuyến mãi để nhận thêm voucher mới nhé." />
   } @else {
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
       @for (v of vouchers(); track v.id) {
-        <div class="rounded-xl border border-dashed border-primary/40 bg-primary/5 p-4 flex flex-col gap-1">
+        <div class="rounded-xl border border-dashed border-primary/40 bg-primary/5 dark:bg-primary/10 p-4 flex flex-col justify-between gap-2 relative overflow-hidden">
           <div class="flex items-center justify-between">
-            <span class="font-mono font-bold text-primary text-sm">{{ v.code }}</span>
-            <span nz-icon nzType="gift" class="text-primary"></span>
+            <span class="font-mono font-bold text-primary text-sm tracking-wider">{{ v.code }}</span>
+            <lucide-angular [img]="Gift" class="text-primary w-5 h-5 shrink-0" />
           </div>
-          <p class="text-sm font-medium">Giảm {{ formatDiscount(v) }}</p>
-          <p class="text-xs text-muted dark:text-muted-dark">{{ v.description }}</p>
-          <p class="text-xs text-muted dark:text-muted-dark">Đơn tối thiểu {{ v.minOrder | currencyFormat }} · HSD {{ v.expiry }}</p>
+          <div>
+            <p class="text-sm font-bold text-ink dark:text-ink-dark">Giảm {{ formatDiscount(v) }}</p>
+            <p class="text-xs text-muted dark:text-muted-dark mt-0.5 line-clamp-1">{{ v.description }}</p>
+          </div>
+          <div class="pt-2 border-t border-primary/20 text-[11px] text-muted dark:text-muted-dark">
+            Đơn tối thiểu {{ v.minOrder | currencyFormat }} · HSD: {{ v.expiry }}
+          </div>
         </div>
       }
     </div>

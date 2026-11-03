@@ -1,12 +1,15 @@
-import { Component } from '@angular/core';
+﻿import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { NzButtonModule } from 'ng-zorro-antd/button';
-import { NzResultModule } from 'ng-zorro-antd/result';
+import { LucideAngularModule, Hammer } from 'lucide-angular';
+import { HlmButtonDirective } from '@shared/ui/button';
 
 @Component({
   selector: 'app-catalog-placeholder',
-  imports: [RouterLink, NzButtonModule, NzResultModule],
+  imports: [RouterLink, LucideAngularModule, HlmButtonDirective],
   templateUrl: './catalog-placeholder.component.html',
   styleUrl: './catalog-placeholder.component.css',
 })
-export class CatalogPlaceholderComponent {}
+export class CatalogPlaceholderComponent {
+  readonly Hammer = Hammer;
+}
+

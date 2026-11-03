@@ -1,32 +1,79 @@
 import { Component, inject, DestroyRef, signal, computed } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpClient } from '@angular/common/http';
-import { NzTableModule } from 'ng-zorro-antd/table';
-import { NzButtonModule } from 'ng-zorro-antd/button';
-import { NzIconModule } from 'ng-zorro-antd/icon';
-import { NzSpinModule } from 'ng-zorro-antd/spin';
-import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
-import { NzMessageService } from 'ng-zorro-antd/message';
-import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
+import {
+  LucideAngularModule,
+  Plus,
+  Edit2,
+  Trash2,
+  Folder,
+  FolderTree,
+  AlertCircle,
+  Loader2,
+} from 'lucide-angular';
+import { HlmButtonDirective } from '@shared/ui/button';
+import {
+  HlmTableDirective,
+  HlmTableHeaderDirective,
+  HlmTableBodyDirective,
+  HlmTableRowDirective,
+  HlmTableHeadDirective,
+  HlmTableCellDirective,
+} from '@shared/ui/table';
+import {
+  HlmDialogContentDirective,
+  HlmDialogHeaderDirective,
+  HlmDialogTitleDirective,
+  HlmDialogDescriptionDirective,
+  HlmDialogFooterDirective,
+} from '@shared/ui/dialog';
+import { ToastService } from '@core/services/toast.service';
 import { ApiEndpoints } from '@core/api/api.endpoints';
 import { Category } from '@core/models/common.model';
 import { CategoryFormComponent } from '../components/category-form.component';
 
 @Component({
   selector: 'app-admin-category-list',
+  standalone: true,
   imports: [
-    NzTableModule, NzButtonModule, NzIconModule, NzSpinModule, NzPopconfirmModule, NzModalModule,
+    LucideAngularModule,
+    HlmButtonDirective,
+    HlmTableDirective,
+    HlmTableHeaderDirective,
+    HlmTableBodyDirective,
+    HlmTableRowDirective,
+    HlmTableHeadDirective,
+    HlmTableCellDirective,
+    HlmDialogContentDirective,
+    HlmDialogHeaderDirective,
+    HlmDialogTitleDirective,
+    HlmDialogDescriptionDirective,
+    HlmDialogFooterDirective,
+    CategoryFormComponent,
   ],
   templateUrl: './admin-category-list.component.html',
 })
 export class AdminCategoryListComponent {
   private http = inject(HttpClient);
   private destroyRef = inject(DestroyRef);
-  private modal = inject(NzModalService);
-  private message = inject(NzMessageService);
+  private toast = inject(ToastService);
+
+  readonly Plus = Plus;
+  readonly Edit2 = Edit2;
+  readonly Trash2 = Trash2;
+  readonly Folder = Folder;
+  readonly FolderTree = FolderTree;
+  readonly AlertCircle = AlertCircle;
+  readonly Loader2 = Loader2;
 
   categories = signal<Category[]>([]);
   loading = signal(false);
+
+  // Form Modal State
+  formModalCategory = signal<Category | null | 'create'>(null);
+
+  // Delete Confirm Dialog State
+  deleteTargetId = signal<number | null>(null);
 
   treeRows = computed<{ category: Category; depth: number }[]>(() => {
     const all = this.categories();
@@ -51,7 +98,7 @@ export class AdminCategoryListComponent {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res) => {
-          this.categories.set(res.content);
+          this.categories.set(res.content ?? []);
           this.loading.set(false);
         },
         error: () => this.loading.set(false),
@@ -59,38 +106,42 @@ export class AdminCategoryListComponent {
   }
 
   openCreateModal() {
-    this.openForm(null);
+    this.formModalCategory.set('create');
   }
 
   openEditModal(category: Category) {
-    this.openForm(category);
+    this.formModalCategory.set(category);
   }
 
-  private openForm(category: Category | null) {
-    const modalRef = this.modal.create({
-      nzTitle: category ? 'Sửa danh mục' : 'Thêm danh mục mới',
-      nzContent: CategoryFormComponent,
-      nzData: { category, allCategories: this.categories() },
-      nzFooter: null,
-      nzWidth: 480,
-    });
-    modalRef.afterClose.subscribe((success) => {
-      if (success) {
-        this.message.success(category ? 'Cập nhật danh mục thành công' : 'Thêm danh mục thành công');
-        this.loadData();
-      }
-    });
+  closeFormModal() {
+    this.formModalCategory.set(null);
   }
 
-  deleteCategory(id: number) {
+  onFormSaved() {
+    this.closeFormModal();
+    this.loadData();
+  }
+
+  confirmDelete(id: number) {
+    this.deleteTargetId.set(id);
+  }
+
+  cancelDelete() {
+    this.deleteTargetId.set(null);
+  }
+
+  executeDelete() {
+    const id = this.deleteTargetId();
+    if (!id) return;
     this.http.delete(ApiEndpoints.admin.categoryDetail(id))
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
-          this.message.success('Xóa danh mục thành công');
+          this.toast.success('Xóa danh mục thành công');
+          this.cancelDelete();
           this.loadData();
         },
-        error: () => this.message.error('Xóa danh mục thất bại'),
+        error: () => this.toast.error('Xóa danh mục thất bại'),
       });
   }
 }

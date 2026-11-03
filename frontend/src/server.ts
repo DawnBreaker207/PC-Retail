@@ -39,9 +39,33 @@ app.use(
   }),
 );
 
-// API is served by the backend via reverse proxy; reply 502 here to avoid silent 404s.
-app.use('/api/*splat', (_req, res) => {
-  res.status(502).json({ code: 502, message: 'API must go through reverse proxy' });
+// Proxy /api requests to backend API gateway (http://localhost:8080)
+const BACKEND_API = process.env['API_GATEWAY_URL'] || 'http://localhost:8080';
+app.use('/api', async (req, res) => {
+  try {
+    const targetUrl = `${BACKEND_API}${req.originalUrl}`;
+    const headers = { ...req.headers };
+    delete headers.host;
+    const fetchOptions: RequestInit = {
+      method: req.method,
+      headers: headers as any,
+    };
+    if (req.method !== 'GET' && req.method !== 'HEAD') {
+      const chunks: Buffer[] = [];
+      for await (const chunk of req) chunks.push(chunk);
+      fetchOptions.body = Buffer.concat(chunks);
+      (fetchOptions as any).duplex = 'half';
+    }
+    const backendRes = await fetch(targetUrl, fetchOptions);
+    res.status(backendRes.status);
+    backendRes.headers.forEach((val, key) => {
+      if (key !== 'transfer-encoding' && key !== 'content-encoding') res.setHeader(key, val);
+    });
+    const buf = await backendRes.arrayBuffer();
+    res.send(Buffer.from(buf));
+  } catch (err: any) {
+    res.status(502).json({ code: 502, message: err?.message || 'Gateway proxy error' });
+  }
 });
 
 app.use((req, res, next) => {

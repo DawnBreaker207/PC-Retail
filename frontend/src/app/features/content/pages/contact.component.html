@@ -1,50 +1,51 @@
 <div class="max-w-3xl mx-auto px-4 py-6 lg:py-8">
-  <nz-breadcrumb class="mb-4">
-    <nz-breadcrumb-item><a routerLink="/">Trang chủ</a></nz-breadcrumb-item>
-    <nz-breadcrumb-item>Liên hệ</nz-breadcrumb-item>
-  </nz-breadcrumb>
+  <nav class="flex items-center gap-1.5 text-xs text-muted dark:text-muted-dark mb-4">
+    <a routerLink="/" class="hover:text-primary transition-colors">Trang chủ</a>
+    <lucide-angular [img]="ChevronRight" class="w-3.5 h-3.5 text-muted/60" />
+    <span class="text-ink dark:text-ink-dark font-medium">Liên hệ</span>
+  </nav>
 
   <h1 class="text-xl lg:text-2xl font-bold mb-6">Liên hệ với DAWN PC Retail</h1>
 
   <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
     <ul class="space-y-4 text-sm">
       <li class="flex items-start gap-3">
-        <span nz-icon nzType="phone" class="mt-0.5 shrink-0 text-primary text-lg"></span>
+        <lucide-angular [img]="Phone" class="mt-0.5 shrink-0 text-primary w-5 h-5" />
         <span class="text-muted dark:text-muted-dark">Hotline: <span class="text-ink dark:text-ink-dark font-semibold">1900 5301</span></span>
       </li>
       <li class="flex items-start gap-3">
-        <span nz-icon nzType="mail" class="mt-0.5 shrink-0 text-primary text-lg"></span>
-        <span class="text-muted dark:text-muted-dark">Email: support@dawn.vn</span>
+        <lucide-angular [img]="Mail" class="mt-0.5 shrink-0 text-primary w-5 h-5" />
+        <span class="text-muted dark:text-muted-dark">Email: support&#64;dawn.vn</span>
       </li>
       <li class="flex items-start gap-3">
-        <span nz-icon nzType="environment" class="mt-0.5 shrink-0 text-primary text-lg"></span>
+        <lucide-angular [img]="MapPin" class="mt-0.5 shrink-0 text-primary w-5 h-5" />
         <span class="text-muted dark:text-muted-dark">123 Đường ABC, Quận Hà Đông, Hà Nội</span>
       </li>
     </ul>
 
     <form [formGroup]="form" (ngSubmit)="submit()" class="flex flex-col gap-4">
-      <nz-form-item class="!mb-0 !flex-col">
-        <label class="text-xs font-medium mb-1.5 leading-none">Họ và tên</label>
-        <nz-form-control>
-          <input nz-input formControlName="fullName" placeholder="Họ và tên" />
-        </nz-form-control>
-      </nz-form-item>
+      <div>
+        <label class="block text-xs font-medium text-ink dark:text-ink-dark mb-1.5">Họ và tên</label>
+        <input hlmInput formControlName="fullName" placeholder="Nhập họ và tên của bạn" class="w-full" />
+      </div>
 
-      <nz-form-item class="!mb-0 !flex-col">
-        <label class="text-xs font-medium mb-1.5 leading-none">Số điện thoại</label>
-        <nz-form-control>
-          <input nz-input formControlName="phone" placeholder="Số điện thoại" />
-        </nz-form-control>
-      </nz-form-item>
+      <div>
+        <label class="block text-xs font-medium text-ink dark:text-ink-dark mb-1.5">Số điện thoại</label>
+        <input hlmInput formControlName="phone" placeholder="Nhập số điện thoại liên hệ" class="w-full" />
+      </div>
 
-      <nz-form-item class="!mb-0 !flex-col">
-        <label class="text-xs font-medium mb-1.5 leading-none">Nội dung</label>
-        <nz-form-control>
-          <textarea nz-input formControlName="content" rows="4" placeholder="Bạn cần hỗ trợ gì?"></textarea>
-        </nz-form-control>
-      </nz-form-item>
+      <div>
+        <label class="block text-xs font-medium text-ink dark:text-ink-dark mb-1.5">Nội dung yêu cầu</label>
+        <textarea
+          formControlName="content"
+          rows="4"
+          placeholder="Bạn cần hỗ trợ gì?"
+          class="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+        ></textarea>
+      </div>
 
-      <button type="submit" nz-button nzType="primary" [disabled]="form.invalid" class="!rounded-lg !h-11 w-fit !px-6">
+      <button hlmBtn type="submit" [disabled]="form.invalid" class="w-fit px-6">
+        <lucide-angular [img]="Send" class="w-4 h-4 mr-2" />
         Gửi yêu cầu
       </button>
     </form>

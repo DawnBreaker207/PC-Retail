@@ -1,17 +1,38 @@
 import { Component, inject, DestroyRef, signal } from '@angular/core';
+import { NgClass } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { NzTableModule } from 'ng-zorro-antd/table';
-import { NzButtonModule } from 'ng-zorro-antd/button';
-import { NzIconModule } from 'ng-zorro-antd/icon';
-import { NzSpinModule } from 'ng-zorro-antd/spin';
-import { NzTagModule } from 'ng-zorro-antd/tag';
-import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
-import { NzMessageService } from 'ng-zorro-antd/message';
-import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
-import { NzInputModule } from 'ng-zorro-antd/input';
-import { NzSelectModule } from 'ng-zorro-antd/select';
 import { FormsModule } from '@angular/forms';
+import {
+  LucideAngularModule,
+  Plus,
+  Search,
+  Edit2,
+  Trash2,
+  ChevronLeft,
+  ChevronRight,
+  AlertCircle,
+  Loader2,
+} from 'lucide-angular';
+import { HlmButtonDirective } from '@shared/ui/button';
+import { HlmInputDirective } from '@shared/ui/input';
+import { HlmBadgeDirective } from '@shared/ui/badge';
+import {
+  HlmTableDirective,
+  HlmTableHeaderDirective,
+  HlmTableBodyDirective,
+  HlmTableRowDirective,
+  HlmTableHeadDirective,
+  HlmTableCellDirective,
+} from '@shared/ui/table';
+import {
+  HlmDialogContentDirective,
+  HlmDialogHeaderDirective,
+  HlmDialogTitleDirective,
+  HlmDialogDescriptionDirective,
+  HlmDialogFooterDirective,
+} from '@shared/ui/dialog';
+import { ToastService } from '@core/services/toast.service';
 import { CurrencyFormatPipe } from '@shared/pipes/currency-format.pipe';
 import { FallbackImageDirective } from '@shared/directives/fallback-image.directive';
 import { ApiEndpoints } from '@core/api/api.endpoints';
@@ -26,18 +47,45 @@ interface SkuResponse {
 
 @Component({
   selector: 'app-admin-product-list',
+  standalone: true,
   imports: [
-    FormsModule, NzTableModule, NzButtonModule, NzIconModule, NzSpinModule, NzTagModule, NzPopconfirmModule,
-    NzInputModule, NzSelectModule, NzModalModule, CurrencyFormatPipe, FallbackImageDirective,
+    NgClass,
+    FormsModule,
+    LucideAngularModule,
+    HlmButtonDirective,
+    HlmInputDirective,
+    HlmBadgeDirective,
+    HlmTableDirective,
+    HlmTableHeaderDirective,
+    HlmTableBodyDirective,
+    HlmTableRowDirective,
+    HlmTableHeadDirective,
+    HlmTableCellDirective,
+    HlmDialogContentDirective,
+    HlmDialogHeaderDirective,
+    HlmDialogTitleDirective,
+    HlmDialogDescriptionDirective,
+    HlmDialogFooterDirective,
+    CurrencyFormatPipe,
+    FallbackImageDirective,
+    ProductFormComponent,
   ],
   templateUrl: './admin-product-list.component.html',
 })
 export class AdminProductListComponent {
   private http = inject(HttpClient);
   private destroyRef = inject(DestroyRef);
-  private modal = inject(NzModalService);
-  private message = inject(NzMessageService);
+  private toast = inject(ToastService);
   private mock = inject(MockDataService);
+
+  readonly Plus = Plus;
+  readonly Search = Search;
+  readonly Edit2 = Edit2;
+  readonly Trash2 = Trash2;
+  readonly ChevronLeft = ChevronLeft;
+  readonly ChevronRight = ChevronRight;
+  readonly AlertCircle = AlertCircle;
+  readonly Loader2 = Loader2;
 
   categories = this.mock.categories;
   brands = this.mock.brands;
@@ -52,6 +100,12 @@ export class AdminProductListComponent {
   page = 1;
   size = 20;
   pageSizeOptions = [10, 20, 50];
+
+  // Spartan Form Dialog State
+  formModalProduct = signal<Sku | null | 'create'>(null);
+
+  // Spartan Delete Confirm Dialog
+  deleteTargetId = signal<number | null>(null);
 
   constructor() {
     this.loadData();
@@ -91,8 +145,8 @@ export class AdminProductListComponent {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res) => {
-          this.products.set(res.content);
-          this.total.set(res.totalElements);
+          this.products.set(res.content ?? []);
+          this.total.set(res.totalElements ?? 0);
           this.loading.set(false);
         },
         error: () => this.loading.set(false),
@@ -100,6 +154,7 @@ export class AdminProductListComponent {
   }
 
   onPageChange(page: number) {
+    if (page < 1 || page > this.totalPages) return;
     this.page = page;
     this.loadData();
   }
@@ -110,39 +165,47 @@ export class AdminProductListComponent {
     this.loadData();
   }
 
+  get totalPages(): number {
+    return Math.max(1, Math.ceil(this.total() / this.size));
+  }
+
   openCreateModal() {
-    this.openForm(null);
+    this.formModalProduct.set('create');
   }
 
   openEditModal(sku: Sku) {
-    this.openForm(sku);
+    this.formModalProduct.set(sku);
   }
 
-  private openForm(sku: Sku | null) {
-    const modalRef = this.modal.create({
-      nzTitle: sku ? 'Sửa sản phẩm' : 'Thêm sản phẩm mới',
-      nzContent: ProductFormComponent,
-      nzData: { product: sku },
-      nzFooter: null,
-      nzWidth: 600,
-    });
-    modalRef.afterClose.subscribe((success) => {
-      if (success) {
-        this.message.success(sku ? 'Cập nhật sản phẩm thành công' : 'Thêm sản phẩm thành công');
-        this.loadData();
-      }
-    });
+  closeFormModal() {
+    this.formModalProduct.set(null);
   }
 
-  deleteProduct(id: number) {
+  onFormSaved() {
+    this.closeFormModal();
+    this.loadData();
+  }
+
+  confirmDelete(id: number) {
+    this.deleteTargetId.set(id);
+  }
+
+  cancelDelete() {
+    this.deleteTargetId.set(null);
+  }
+
+  executeDelete() {
+    const id = this.deleteTargetId();
+    if (!id) return;
     this.http.delete(ApiEndpoints.admin.productDetail(id))
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
-          this.message.success('Xóa sản phẩm thành công');
+          this.toast.success('Xóa sản phẩm thành công');
+          this.cancelDelete();
           this.loadData();
         },
-        error: () => this.message.error('Xóa sản phẩm thất bại'),
+        error: () => this.toast.error('Xóa sản phẩm thất bại'),
       });
   }
 }

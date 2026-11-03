@@ -1,82 +1,195 @@
-@if (loading()) {
-  <div class="flex justify-center py-20"><nz-spin nzSize="large"></nz-spin></div>
-} @else if (request(); as r) {
-  <a routerLink="/admin/returns" class="text-sm text-muted dark:text-muted-dark hover:text-primary transition-colors">← Yêu cầu trả hàng</a>
+<div class="mb-6">
+  <a
+    routerLink="/admin/returns"
+    class="text-xs text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 transition-colors mb-3 cursor-pointer"
+  >
+    <lucide-icon [img]="ArrowLeft" class="w-3.5 h-3.5"></lucide-icon>
+    Quay lại danh sách yêu cầu trả hàng
+  </a>
 
-  <div class="flex flex-wrap items-center justify-between gap-3 mt-1 mb-6">
-    <h1 class="text-xl sm:text-2xl font-bold tracking-tight">Yêu cầu #{{ r.id }} — Đơn #ORD-{{ r.orderId }}</h1>
-    <nz-tag [nzColor]="STATUS_COLOR[r.status]" class="!text-sm !px-3">
-      {{ r.status === 'PENDING' || r.status === 'REQUESTED' ? 'Chờ duyệt' : r.status === 'APPROVED' ? 'Đã duyệt' : r.status === 'DISPUTED' ? 'Đang khiếu nại' : 'Đã từ chối' }}
-    </nz-tag>
-  </div>
+  @if (request(); as r) {
+    <div class="flex flex-wrap items-center justify-between gap-3">
+      <div>
+        <h1 class="text-2xl font-bold tracking-tight text-foreground">Yêu cầu #{{ r.id }} — Đơn #ORD-{{ r.orderId }}</h1>
+        <p class="text-xs text-muted-foreground mt-0.5">Tạo bởi {{ r.createdByName }}</p>
+      </div>
 
-  <div class="bg-surface dark:bg-surface-dark rounded-card border border-border/80 dark:border-border-dark/80 shadow-sm p-5 lg:p-6 mb-6">
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm mb-4">
       <div>
-        <p class="text-muted dark:text-muted-dark text-xs mb-1">Sản phẩm</p>
-        <p class="font-medium">{{ r.skuName }}</p>
-      </div>
-      <div>
-        <p class="text-muted dark:text-muted-dark text-xs mb-1">Loại yêu cầu</p>
-        <p class="font-medium">{{ TYPE_LABEL[r.requestType] }}</p>
-      </div>
-      <div>
-        <p class="text-muted dark:text-muted-dark text-xs mb-1">Khách hàng yêu cầu</p>
-        <p class="font-medium">{{ r.createdByName }}</p>
-      </div>
-      <div>
-        <p class="text-muted dark:text-muted-dark text-xs mb-1">Ngày tạo</p>
-        <p class="font-medium">{{ r.createdAt | date:'dd/MM/yyyy HH:mm' }}</p>
+        <span
+          hlmBadge
+          variant="outline"
+          class="px-3 py-1 rounded-full text-xs font-semibold"
+          [ngClass]="{
+            'border-amber-400 bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400': r.status === 'PENDING' || r.status === 'REQUESTED',
+            'border-emerald-400 bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400': r.status === 'APPROVED',
+            'border-rose-400 bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-400': r.status === 'REJECTED',
+            'border-orange-400 bg-orange-50 text-orange-700 dark:bg-orange-950/40 dark:text-orange-400': r.status === 'DISPUTED'
+          }"
+        >
+          {{ r.status === 'PENDING' || r.status === 'REQUESTED' ? 'Chờ duyệt' : r.status === 'APPROVED' ? 'Đã duyệt' : r.status === 'DISPUTED' ? 'Đang khiếu nại' : 'Đã từ chối' }}
+        </span>
       </div>
     </div>
-    <div>
-      <p class="text-muted dark:text-muted-dark text-xs mb-1">Lý do</p>
-      <p class="text-sm">{{ r.reason }}</p>
+  }
+</div>
+
+@if (loading()) {
+  <div class="flex flex-col items-center justify-center py-24 gap-3 text-muted-foreground">
+    <lucide-icon [img]="Loader2" class="w-8 h-8 animate-spin text-primary"></lucide-icon>
+    <p class="text-xs">Đang tải chi tiết yêu cầu...</p>
+  </div>
+} @else if (request(); as r) {
+  <div class="bg-card rounded-xl border border-border/80 shadow-2xs p-5 lg:p-6 mb-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 text-xs mb-5">
+      <div>
+        <span class="text-muted-foreground block mb-1">Sản phẩm áp dụng</span>
+        <span class="font-semibold text-foreground text-sm">{{ r.skuName }}</span>
+      </div>
+      <div>
+        <span class="text-muted-foreground block mb-1">Loại yêu cầu</span>
+        <span class="font-medium text-foreground">{{ TYPE_LABEL[r.requestType] || r.requestType }}</span>
+      </div>
+      <div>
+        <span class="text-muted-foreground block mb-1">Khách hàng gửi yêu cầu</span>
+        <span class="font-medium text-foreground">{{ r.createdByName }}</span>
+      </div>
+      <div>
+        <span class="text-muted-foreground block mb-1">Thời gian tạo</span>
+        <span class="font-medium text-foreground">{{ r.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
+      </div>
+    </div>
+
+    <div class="border-t border-border/60 pt-4">
+      <span class="text-muted-foreground block text-xs mb-1">Lý do từ phía khách hàng:</span>
+      <p class="text-xs text-foreground bg-muted/30 p-3 rounded-lg border border-border/40 leading-relaxed">{{ r.reason }}</p>
     </div>
   </div>
 
   @if (r.status === 'PENDING' || r.status === 'REQUESTED') {
     <div class="flex items-center gap-3">
       @if (isSelfCreated) {
-        <span nz-tooltip nzTooltipTitle="Bạn không thể tự duyệt yêu cầu mình tạo">
-          <button nz-button nzType="primary" [disabled]="true">
-            <span nz-icon nzType="check"></span>
-            Duyệt
-          </button>
-        </span>
+        <div class="text-xs text-muted-foreground italic flex items-center gap-1.5 bg-muted/40 px-3 py-2 rounded-lg border border-border">
+          <lucide-icon [img]="AlertTriangle" class="w-4 h-4 text-amber-500"></lucide-icon>
+          Bạn không thể tự duyệt yêu cầu do chính mình tạo
+        </div>
       } @else {
-        <button nz-button nzType="primary" [nzLoading]="processing()" (click)="approve()">
-          <span nz-icon nzType="check"></span>
-          Duyệt
+        <button
+          hlmBtn
+          variant="default"
+          size="sm"
+          [disabled]="processing()"
+          (click)="approve()"
+          class="h-9 px-4 gap-1.5 text-xs bg-primary text-primary-foreground"
+        >
+          <lucide-icon [img]="Check" class="w-4 h-4"></lucide-icon>
+          Duyệt yêu cầu
         </button>
       }
-      <button nz-button nzType="default" nzDanger [disabled]="isSelfCreated" [nzLoading]="processing()" (click)="openReject()">
-        <span nz-icon nzType="close"></span>
+
+      <button
+        hlmBtn
+        variant="destructive"
+        size="sm"
+        [disabled]="isSelfCreated || processing()"
+        (click)="openRejectDialog()"
+        class="h-9 px-4 gap-1.5 text-xs bg-destructive text-destructive-foreground"
+      >
+        <lucide-icon [img]="X" class="w-4 h-4"></lucide-icon>
         Từ chối
       </button>
     </div>
   } @else {
-    <div class="bg-bg dark:bg-bg-dark rounded-xl p-4 border border-border/60 dark:border-border-dark/60 text-sm">
-      <p><span class="text-muted dark:text-muted-dark">Người xử lý:</span> <span class="font-medium">{{ r.approvedBy }}</span></p>
-      <p class="mt-1"><span class="text-muted dark:text-muted-dark">Thời gian:</span> {{ r.approvedAt | date:'dd/MM/yyyy HH:mm' }}</p>
+    <div class="bg-card rounded-xl p-5 border border-border/80 shadow-2xs text-xs space-y-2">
+      <div class="flex items-center gap-2">
+        <span class="text-muted-foreground">Người xử lý:</span>
+        <span class="font-semibold text-foreground">{{ r.approvedBy || 'Hệ thống' }}</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="text-muted-foreground">Thời gian giải quyết:</span>
+        <span class="text-foreground">{{ r.approvedAt | date:'dd/MM/yyyy HH:mm' }}</span>
+      </div>
       @if (r.rejectReason) {
-        <p class="mt-1"><span class="text-muted dark:text-muted-dark">Lý do từ chối:</span> {{ r.rejectReason }}</p>
+        <div class="pt-2 border-t border-border/60">
+          <span class="text-rose-600 font-medium block mb-1">Lý do từ chối:</span>
+          <p class="text-foreground bg-rose-50 dark:bg-rose-950/30 p-2.5 rounded-md border border-rose-200 dark:border-rose-900/40">
+            {{ r.rejectReason }}
+          </p>
+        </div>
       }
       @if (r.status === 'DISPUTED') {
         @if (r.disputeNote) {
-          <p class="mt-1"><span class="text-muted dark:text-muted-dark">Khách khiếu nại:</span> {{ r.disputeNote }}</p>
+          <div class="pt-2 border-t border-border/60">
+            <span class="text-orange-600 font-medium block mb-1">Nội dung khiếu nại của khách:</span>
+            <p class="text-foreground bg-orange-50 dark:bg-orange-950/30 p-2.5 rounded-md border border-orange-200 dark:border-orange-900/40">
+              {{ r.disputeNote }}
+            </p>
+          </div>
         }
-        <div class="flex flex-wrap gap-3 mt-3">
-          <button nz-button nzType="primary" [nzLoading]="processing()" (click)="resolveDispute(true)">
+        <div class="flex flex-wrap gap-2.5 pt-3">
+          <button
+            hlmBtn
+            variant="default"
+            size="sm"
+            [disabled]="processing()"
+            (click)="resolveDispute(true)"
+            class="h-8 text-xs bg-primary text-primary-foreground"
+          >
             Chấp nhận khiếu nại
           </button>
-          <button nz-button nzType="default" nzDanger [nzLoading]="processing()" (click)="resolveDispute(false)">
-            Giữ nguyên từ chối
+          <button
+            hlmBtn
+            variant="destructive"
+            size="sm"
+            [disabled]="processing()"
+            (click)="resolveDispute(false)"
+            class="h-8 text-xs bg-destructive text-destructive-foreground"
+          >
+            Giữ nguyên quyết định từ chối
           </button>
         </div>
       }
     </div>
   }
 } @else {
-  <div class="text-center py-16 text-muted dark:text-muted-dark">Không tìm thấy yêu cầu trả hàng.</div>
+  <div class="text-center py-16 text-xs text-muted-foreground">Không tìm thấy yêu cầu trả hàng phù hợp.</div>
+}
+
+<!-- Reject Dialog with Spartan UI -->
+@if (isRejectDialogOpen()) {
+  <div class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div hlmDialogContent class="max-w-md w-full bg-card border border-border rounded-xl p-6 shadow-xl space-y-4">
+      <div hlmDialogHeader class="space-y-1.5">
+        <h3 hlmDialogTitle class="text-base font-semibold text-foreground">Từ chối yêu cầu trả hàng</h3>
+        <p hlmDialogDescription class="text-xs text-muted-foreground">
+          Vui lòng nhập lý do từ chối. Khách hàng sẽ nhìn thấy nội dung giải trình này trong tài khoản.
+        </p>
+      </div>
+
+      <div class="py-2">
+        <textarea
+          hlmInput
+          rows="4"
+          placeholder="Nhập lý do từ chối cụ thể..."
+          [(ngModel)]="rejectReason"
+          class="w-full text-xs p-3 rounded-md border border-input bg-background text-foreground"
+        ></textarea>
+      </div>
+
+      <div hlmDialogFooter class="flex items-center justify-end gap-2 pt-2">
+        <button hlmBtn variant="outline" size="sm" (click)="closeRejectDialog()">
+          Hủy bỏ
+        </button>
+        <button
+          hlmBtn
+          variant="destructive"
+          size="sm"
+          [disabled]="!rejectReason().trim() || processing()"
+          (click)="submitReject()"
+          class="bg-destructive text-destructive-foreground"
+        >
+          Xác nhận từ chối
+        </button>
+      </div>
+    </div>
+  </div>
 }

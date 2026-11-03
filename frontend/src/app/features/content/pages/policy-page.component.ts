@@ -1,15 +1,16 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { NzBreadCrumbModule } from 'ng-zorro-antd/breadcrumb';
+import { LucideAngularModule, ChevronRight } from 'lucide-angular';
 import { POLICY_CONTENT } from '@core/mocks/policy-content.mock';
 
 @Component({
   selector: 'app-policy-page',
-  imports: [RouterLink, NzBreadCrumbModule],
+  imports: [RouterLink, LucideAngularModule],
   templateUrl: './policy-page.component.html',
 })
 export class PolicyPageComponent {
+  readonly ChevronRight = ChevronRight;
   private route = inject(ActivatedRoute);
 
   slug = signal('');

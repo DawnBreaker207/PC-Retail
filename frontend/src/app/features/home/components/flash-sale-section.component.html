@@ -1,31 +1,44 @@
 <div class="max-w-screen-2xl mx-auto px-4 mt-8 lg:mt-10">
-  <div class="bg-surface dark:bg-surface-dark rounded-xl border border-border/80 dark:border-border-dark/80 shadow-sm overflow-hidden">
-    <div class="bg-gradient-to-r from-primary to-primary-dark px-5 py-3 flex items-center justify-between">
-      <div class="flex items-center gap-2.5">
-        <div class="bg-white/20 rounded-lg px-2.5 py-1">
-          <span class="text-white font-bold text-lg tabular-nums">⚡</span>
+  <div class="bg-surface dark:bg-surface-dark rounded-2xl border border-border/80 dark:border-border-dark/80 shadow-xs overflow-hidden">
+    <!-- Header with Fire / Zap Glow -->
+    <div class="bg-gradient-to-r from-primary via-primary-dark to-primary px-5 py-3.5 flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <div class="bg-white/20 backdrop-blur-xs rounded-xl p-2 flex items-center justify-center text-white shadow-xs">
+          <lucide-angular [img]="ZapIcon" class="w-5 h-5 fill-white animate-pulse" />
         </div>
-        <h2 class="text-white font-bold text-lg lg:text-xl tracking-tight">FLASH SALE</h2>
-        <div class="hidden sm:flex items-center gap-1.5 bg-white/20 rounded-lg px-2.5 py-1">
-          <span class="text-white/80 text-xs font-medium">Kết thúc trong</span>
-          <span class="text-white font-bold text-sm tabular-nums">{{ countdown }}</span>
+        <div>
+          <h2 class="text-white font-black text-lg lg:text-xl tracking-tight leading-none flex items-center gap-2">
+            FLASH SALE GIỜ VÀNG
+          </h2>
+          <span class="text-white/80 text-[11px] font-medium hidden sm:inline-block mt-0.5">Số lượng có hạn — Giảm sâu nhất hôm nay</span>
         </div>
       </div>
-      <a routerLink="/products" class="text-white/80 hover:text-white text-sm font-medium transition-colors">Xem tất cả →</a>
+
+      <div class="flex items-center gap-3">
+        <div class="flex items-center gap-2 bg-black/25 backdrop-blur-xs rounded-xl px-3 py-1.5 border border-white/10">
+          <span class="text-white/80 text-xs font-semibold uppercase tracking-wider">Kết thúc sau:</span>
+          <span class="text-white font-black text-sm tracking-wider tabular-nums font-mono">{{ countdown }}</span>
+        </div>
+        <a routerLink="/products" class="text-white/90 hover:text-white text-xs font-bold transition-colors hover:underline">
+          Xem tất cả →
+        </a>
+      </div>
     </div>
 
-    <div class="p-4">
-      <div class="flex flex-wrap gap-1.5 mb-4" role="tablist" aria-label="Flash sale categories">
+    <div class="p-4 sm:p-5">
+      <!-- Category Filter Pills -->
+      <div class="flex flex-wrap gap-2 mb-4" role="tablist" aria-label="Flash sale categories">
         @for (tab of flashCategories; track tab; let i = $index) {
           <button
-            class="min-h-11 px-4 text-xs font-medium rounded-full border transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-primary/60 focus-visible:outline-offset-1"
+            class="px-4 py-2 text-xs font-semibold rounded-xl border transition-all duration-200 focus-visible:outline-2 focus-visible:outline-primary/60"
             [class.bg-primary]="activeTab === i"
             [class.text-white]="activeTab === i"
             [class.border-primary]="activeTab === i"
-            [class.bg-surface-card]="activeTab !== i"
+            [class.shadow-xs]="activeTab === i"
+            [class.bg-bg]="activeTab !== i"
             [class.text-muted]="activeTab !== i"
             [class.border-border/80]="activeTab !== i"
-            [class.dark:bg-surface-card-dark]="activeTab !== i"
+            [class.dark:bg-bg-dark]="activeTab !== i"
             [class.dark:text-muted-dark]="activeTab !== i"
             [class.dark:border-border-dark/80]="activeTab !== i"
             (click)="activeTab = i"
@@ -38,18 +51,37 @@
           </button>
         }
       </div>
+
+      <!-- Flash Sale Items Horizontal Carousel -->
       <div class="flex gap-3 sm:gap-4 overflow-x-auto pb-2 -mx-1 px-1 scrollbar-none" id="flash-panel" role="tabpanel" aria-label="Flash sale items">
         @for (item of filteredItems; track item.skuId) {
-          <div class="min-w-[155px] sm:min-w-[175px] bg-surface-card dark:bg-surface-card-dark rounded-xl border border-border/60 dark:border-border-dark/60 p-3 flex flex-col items-center text-center shrink-0 hover:shadow-md hover:-translate-y-0.5 hover:border-primary/30 dark:hover:border-primary/40 transition-transform">
-            <div class="relative w-24 h-24 sm:w-28 sm:h-28 rounded-lg bg-bg dark:bg-bg-dark flex items-center justify-center mb-2.5 overflow-hidden">
-              <img [src]="item.imageUrl" loading="lazy" appFallbackImage alt="{{ item.name }}" class="w-full h-full object-contain p-2" />
-              <span class="absolute top-1 left-1 bg-error text-white text-[10px] font-bold px-1.5 py-0.5 rounded">-{{ item.discountPercent }}%</span>
+          <div class="min-w-[170px] sm:min-w-[190px] bg-bg/50 dark:bg-bg-dark/50 rounded-2xl border border-border/70 dark:border-border-dark/70 p-3.5 flex flex-col shrink-0 hover:shadow-lg hover:-translate-y-1 hover:border-primary/50 dark:hover:border-primary/50 transition-all duration-300 group">
+            <div class="relative w-full aspect-square rounded-xl bg-surface dark:bg-surface-dark flex items-center justify-center mb-3 overflow-hidden border border-border/40">
+              <img [src]="item.imageUrl" loading="lazy" appFallbackImage alt="{{ item.name }}" class="w-full h-full object-contain p-3 group-hover:scale-108 transition-transform duration-500" />
+              <span class="absolute top-1.5 left-1.5 bg-destructive text-white text-[10px] font-black px-2 py-0.5 rounded-md shadow-xs">
+                -{{ item.discountPercent }}%
+              </span>
             </div>
-            <p class="text-xs line-clamp-2 mb-2 flex-1 leading-snug">{{ item.name }}</p>
-            <p class="text-primary font-bold text-sm">{{ item.salePrice | currencyFormat }}</p>
-            <p class="text-muted dark:text-muted-dark text-xs line-through mb-2">{{ item.originalPrice | currencyFormat }}</p>
-            <nz-progress [nzPercent]="soldPercent(item)" nzSize="small" [nzStrokeColor]="'var(--color-primary)'" [nzShowInfo]="false" class="w-full [&_.ant-progress-bg]:!rounded-full"></nz-progress>
-            <p class="text-muted dark:text-muted-dark text-[11px] mt-1">Đã bán {{ item.total - item.remaining }}/{{ item.total }}</p>
+
+            <p class="text-xs font-semibold text-ink dark:text-ink-dark line-clamp-2 mb-2 flex-1 leading-snug group-hover:text-primary transition-colors">
+              {{ item.name }}
+            </p>
+
+            <div class="mb-2">
+              <p class="text-primary font-black text-sm sm:text-base leading-none">{{ item.salePrice | currencyFormat }}</p>
+              <p class="text-muted/70 dark:text-muted-dark/70 text-[11px] line-through mt-0.5">{{ item.originalPrice | currencyFormat }}</p>
+            </div>
+
+            <!-- Progress Bar with Fire Fill -->
+            <div class="w-full bg-border/60 dark:bg-border-dark/60 h-2.5 rounded-full overflow-hidden relative">
+              <div
+                class="bg-gradient-to-r from-amber-500 to-primary h-full rounded-full transition-all duration-300"
+                [style.width.%]="soldPercent(item)"
+              ></div>
+            </div>
+            <p class="text-muted dark:text-muted-dark text-[10px] font-medium mt-1 text-center">
+              🔥 Đã bán {{ item.total - item.remaining }}/{{ item.total }}
+            </p>
           </div>
         }
       </div>

@@ -1,15 +1,25 @@
-<p class="text-sm text-muted dark:text-muted-dark mb-3">Vui lòng nhập lý do từ chối, khách hàng sẽ nhìn thấy nội dung này.</p>
+<p class="text-xs text-muted-foreground mb-3">Vui lòng nhập lý do từ chối, khách hàng sẽ nhìn thấy nội dung này.</p>
 <textarea
-  nz-input
+  hlmInput
   rows="4"
   placeholder="Lý do từ chối (bắt buộc)"
-  [(ngModel)]="reason"
+  [ngModel]="reason()"
+  (ngModelChange)="reason.set($event)"
   name="reason"
+  class="w-full text-xs p-3 rounded-md border border-input bg-background"
 ></textarea>
 
-<div class="flex justify-end gap-3 mt-6">
-  <button nz-button nzType="default" type="button" (click)="cancel()">Hủy</button>
-  <button nz-button nzType="primary" nzDanger type="button" [disabled]="!reason.trim()" (click)="submit()">
+<div class="flex justify-end gap-2 mt-4">
+  <button hlmBtn variant="outline" size="sm" type="button" (click)="cancel()">Hủy</button>
+  <button
+    hlmBtn
+    variant="destructive"
+    size="sm"
+    type="button"
+    [disabled]="!reason().trim()"
+    (click)="submit()"
+    class="bg-destructive text-destructive-foreground"
+  >
     Từ chối yêu cầu
   </button>
 </div>

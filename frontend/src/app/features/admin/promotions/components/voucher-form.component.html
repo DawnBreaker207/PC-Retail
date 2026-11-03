@@ -1,97 +1,165 @@
-<form nz-form [formGroup]="form" (ngSubmit)="onSubmit()">
-  <nz-form-item>
-    <nz-form-label nzFor="code" nzRequired>Mã giảm giá</nz-form-label>
-    <nz-form-control nzErrorTip="Vui lòng nhập mã giảm giá">
-      <input nz-input id="code" formControlName="code" placeholder="NHAPLIEN" (input)="onCodeInput()" />
-    </nz-form-control>
-  </nz-form-item>
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-4 text-xs">
+  <div>
+    <label for="code" class="block font-medium text-foreground mb-1">
+      Mã giảm giá <span class="text-destructive">*</span>
+    </label>
+    <input
+      hlmInput
+      id="code"
+      formControlName="code"
+      placeholder="VD: FREESHIP50K, SALE20..."
+      (input)="onCodeInput()"
+      class="w-full h-9 text-xs font-mono uppercase"
+    />
+  </div>
 
-  <nz-form-item>
-    <nz-form-label nzFor="scopeType" nzRequired>Phạm vi áp dụng</nz-form-label>
-    <nz-form-control nzErrorTip="Vui lòng chọn phạm vi">
-      <nz-select id="scopeType" formControlName="scopeType" (ngModelChange)="isFreeship() ? form.patchValue({ discountType: 'FIXED' }) : null">
-        <nz-option nzValue="STOREWIDE" nzLabel="Toàn cửa hàng"></nz-option>
-        <nz-option nzValue="CATEGORY" nzLabel="Theo danh mục"></nz-option>
-        <nz-option nzValue="PRODUCT" nzLabel="Theo sản phẩm"></nz-option>
-        <nz-option nzValue="FREESHIP" nzLabel="Miễn phí vận chuyển"></nz-option>
-      </nz-select>
-    </nz-form-control>
-  </nz-form-item>
+  <div>
+    <label for="scopeType" class="block font-medium text-foreground mb-1">
+      Phạm vi áp dụng <span class="text-destructive">*</span>
+    </label>
+    <select
+      id="scopeType"
+      formControlName="scopeType"
+      (ngModelChange)="isFreeship() ? form.patchValue({ discountType: 'FIXED' }) : null"
+      class="w-full h-9 px-3 rounded-md border border-input bg-background text-foreground text-xs"
+    >
+      <option value="STOREWIDE">Toàn bộ cửa hàng</option>
+      <option value="CATEGORY">Theo danh mục sản phẩm</option>
+      <option value="PRODUCT">Theo sản phẩm cụ thể</option>
+      <option value="FREESHIP">Miễn phí vận chuyển</option>
+    </select>
+  </div>
 
   @if (!isFreeship()) {
-    <nz-form-item>
-      <nz-form-label>Loại giảm giá</nz-form-label>
-      <nz-form-control>
-        <nz-radio-group formControlName="discountType">
-          <label nz-radio nzValue="FIXED" nzId="discountFixed" for="discountFixed">Giảm tiền mặt</label>
-          <label nz-radio nzValue="PERCENT" nzId="discountPercent" for="discountPercent">Giảm phần trăm</label>
-        </nz-radio-group>
-      </nz-form-control>
-    </nz-form-item>
+    <div>
+      <label class="block font-medium text-foreground mb-1">Loại chiết khấu</label>
+      <div class="flex items-center gap-4 py-1">
+        <label class="inline-flex items-center gap-1.5 cursor-pointer text-foreground">
+          <input
+            type="radio"
+            value="FIXED"
+            formControlName="discountType"
+            class="text-primary focus:ring-primary h-4 w-4"
+          />
+          Giảm số tiền cố định (VNĐ)
+        </label>
+        <label class="inline-flex items-center gap-1.5 cursor-pointer text-foreground">
+          <input
+            type="radio"
+            value="PERCENT"
+            formControlName="discountType"
+            class="text-primary focus:ring-primary h-4 w-4"
+          />
+          Giảm theo phần trăm (%)
+        </label>
+      </div>
+    </div>
   }
 
-  <nz-form-item>
-    <nz-form-label nzFor="discountValue" nzRequired>Giá trị giảm</nz-form-label>
-    <nz-form-control nzErrorTip="Vui lòng nhập giá trị giảm">
-      @if (isFreeship() || form.value.discountType === 'FIXED') {
-        <nz-input-number id="discountValue" formControlName="discountValue" [nzMin]="0.01" [nzStep]="1000" [nzFormatter]="vndFormatter" style="width: 100%"></nz-input-number>
-      } @else {
-        <nz-input-number id="discountValue" formControlName="discountValue" [nzMin]="0.01" [nzMax]="100" [nzStep]="1" nzAddOnAfter="%" style="width: 100%"></nz-input-number>
-      }
-    </nz-form-control>
-  </nz-form-item>
+  <div class="grid grid-cols-2 gap-3">
+    <div>
+      <label for="discountValue" class="block font-medium text-foreground mb-1">
+        Mức giảm <span class="text-destructive">*</span>
+      </label>
+      <input
+        hlmInput
+        type="number"
+        id="discountValue"
+        formControlName="discountValue"
+        min="0.01"
+        class="w-full h-9 text-xs"
+        [placeholder]="form.value.discountType === 'PERCENT' ? 'Ví dụ: 15 (%)' : 'Ví dụ: 50000 (VNĐ)'"
+      />
+    </div>
 
-  @if (form.value.discountType === 'PERCENT' && !isFreeship()) {
-    <nz-form-item>
-      <nz-form-label nzFor="maxDiscountAmount">Giảm tối đa</nz-form-label>
-      <nz-form-control>
-        <nz-input-number id="maxDiscountAmount" formControlName="maxDiscountAmount" [nzMin]="0" [nzStep]="10000" [nzFormatter]="vndFormatter" style="width: 100%"></nz-input-number>
-      </nz-form-control>
-    </nz-form-item>
-  }
+    @if (form.value.discountType === 'PERCENT' && !isFreeship()) {
+      <div>
+        <label for="maxDiscountAmount" class="block font-medium text-foreground mb-1">
+          Giảm tối đa (VNĐ)
+        </label>
+        <input
+          hlmInput
+          type="number"
+          id="maxDiscountAmount"
+          formControlName="maxDiscountAmount"
+          min="0"
+          step="10000"
+          class="w-full h-9 text-xs"
+        />
+      </div>
+    }
+  </div>
 
-  <nz-form-item>
-    <nz-form-label nzFor="minOrderValue">Giá trị đơn tối thiểu</nz-form-label>
-    <nz-form-control>
-      <nz-input-number id="minOrderValue" formControlName="minOrderValue" [nzMin]="0" [nzStep]="10000" [nzFormatter]="vndFormatter" style="width: 100%"></nz-input-number>
-    </nz-form-control>
-  </nz-form-item>
+  <div class="grid grid-cols-2 gap-3">
+    <div>
+      <label for="minOrderValue" class="block font-medium text-foreground mb-1">
+        Đơn hàng tối thiểu (VNĐ)
+      </label>
+      <input
+        hlmInput
+        type="number"
+        id="minOrderValue"
+        formControlName="minOrderValue"
+        min="0"
+        step="10000"
+        class="w-full h-9 text-xs"
+      />
+    </div>
 
-  <nz-form-item>
-    <nz-form-label nzFor="totalQuantity" nzRequired>Số lượng</nz-form-label>
-    <nz-form-control nzErrorTip="Vui lòng nhập số lượng">
-      <nz-input-number id="totalQuantity" formControlName="totalQuantity" [nzMin]="1" [nzStep]="1" style="width: 100%"></nz-input-number>
-    </nz-form-control>
-  </nz-form-item>
+    <div>
+      <label for="totalQuantity" class="block font-medium text-foreground mb-1">
+        Số lượng mã phát hành <span class="text-destructive">*</span>
+      </label>
+      <input
+        hlmInput
+        type="number"
+        id="totalQuantity"
+        formControlName="totalQuantity"
+        min="1"
+        class="w-full h-9 text-xs"
+      />
+    </div>
+  </div>
 
-  <nz-form-item>
-    <nz-form-label nzFor="validFrom" nzRequired>Thời gian hiệu lực</nz-form-label>
-    <nz-form-control nzErrorTip="Ngày bắt đầu phải trước ngày kết thúc">
-      <nz-date-picker
+  <div class="grid grid-cols-2 gap-3">
+    <div>
+      <label for="validFrom" class="block font-medium text-foreground mb-1">
+        Hiệu lực từ ngày <span class="text-destructive">*</span>
+      </label>
+      <input
+        hlmInput
+        type="datetime-local"
         id="validFrom"
         formControlName="validFrom"
-        nzShowTime
-        nzPlaceHolder="Từ ngày"
-        class="!w-full"
-      ></nz-date-picker>
-    </nz-form-control>
-  </nz-form-item>
+        class="w-full h-9 text-xs"
+      />
+    </div>
 
-  <nz-form-item>
-    <nz-form-label nzFor="validTo" nzRequired></nz-form-label>
-    <nz-form-control nzErrorTip="Vui lòng chọn ngày kết thúc">
-      <nz-date-picker
+    <div>
+      <label for="validTo" class="block font-medium text-foreground mb-1">
+        Đến hết ngày <span class="text-destructive">*</span>
+      </label>
+      <input
+        hlmInput
+        type="datetime-local"
         id="validTo"
         formControlName="validTo"
-        nzShowTime
-        nzPlaceHolder="Đến ngày"
-        class="!w-full"
-      ></nz-date-picker>
-    </nz-form-control>
-  </nz-form-item>
+        class="w-full h-9 text-xs"
+      />
+    </div>
+  </div>
 
-  <div class="flex justify-end gap-3 mt-6">
-    <button nz-button nzType="default" (click)="close?.()" type="button">Hủy</button>
-    <button nz-button nzType="primary" type="submit" [nzLoading]="submitting()" [disabled]="!form.valid">Tạo voucher</button>
+  <div class="flex justify-end gap-2 pt-3 border-t border-border">
+    <button hlmBtn variant="outline" size="sm" type="button" (click)="cancel()">Hủy</button>
+    <button
+      hlmBtn
+      variant="default"
+      size="sm"
+      type="submit"
+      [disabled]="form.invalid || submitting()"
+      class="bg-primary text-primary-foreground"
+    >
+      Tạo voucher
+    </button>
   </div>
 </form>

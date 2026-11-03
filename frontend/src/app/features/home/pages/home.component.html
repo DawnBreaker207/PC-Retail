@@ -1,43 +1,7 @@
 <h1 class="sr-only">DAWN PC Retail - Laptop, PC, Linh Kiện Chính Hãng</h1>
 <app-hero-banner />
 
-@defer (on viewport) {
-  <!-- Blog posts -->
-  <div class="max-w-screen-2xl mx-auto px-4 mt-8 lg:mt-10">
-    <div class="flex items-center justify-between mb-5">
-      <h2 class="text-lg lg:text-xl font-bold tracking-tight">Tin công nghệ</h2>
-      <a routerLink="/tin-tuc" class="text-sm text-muted dark:text-muted-dark hover:text-primary font-medium transition-colors">
-        Xem tất cả →
-      </a>
-    </div>
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      @for (post of blogPosts; track post.id) {
-        <a
-          [routerLink]="['/tin-tuc', post.slug]"
-          class="group rounded-xl border border-border/80 dark:border-border-dark/80 overflow-hidden shadow-sm hover:shadow-md transition-shadow bg-surface dark:bg-surface-dark"
-        >
-          <div class="aspect-[16/9] bg-bg dark:bg-bg-dark overflow-hidden">
-            <img [src]="post.imageUrl" loading="lazy" appFallbackImage alt="{{ post.title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-          </div>
-          <div class="p-3.5">
-            <p class="text-xs text-primary font-medium mb-1.5">{{ post.category }} · {{ post.date }}</p>
-            <h3 class="text-sm font-semibold line-clamp-2 group-hover:text-primary transition-colors leading-snug">{{ post.title }}</h3>
-            <p class="text-xs text-muted dark:text-muted-dark mt-1.5 line-clamp-2">{{ post.excerpt }}</p>
-          </div>
-        </a>
-      }
-    </div>
-  </div>
-} @placeholder {
-  <div class="max-w-screen-2xl mx-auto px-4 mt-8 lg:mt-10">
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      @for (_ of [1,2,3,4]; track _) {
-        <div class="aspect-[16/9] bg-surface-dark/20 rounded-xl animate-pulse"></div>
-      }
-    </div>
-  </div>
-}
-
+<!-- 1. Flash Sale Deal Giờ Vàng (Ngay sau Banner như GearVN) -->
 @defer (on viewport) {
   <app-flash-sale-section />
 } @placeholder {
@@ -46,12 +10,14 @@
   </div>
 }
 
+<!-- 2. Danh mục nổi bật mua nhanh -->
 @defer (on viewport) {
   <app-category-grid />
 } @placeholder {
   <div class="h-32 animate-pulse bg-surface-dark/20 mt-8 lg:mt-10"></div>
 }
 
+<!-- 3. Các List Sản Phẩm Theo Danh Mục (PC GVN, Laptop Gaming, Laptop Văn Phòng) -->
 @for (section of homeSections; track section.title) {
   @defer (on viewport) {
     <app-product-section [section]="section" />
@@ -67,9 +33,9 @@
   }
 }
 
+<!-- 4. Chiến dịch khuyến mãi đặc biệt -->
 @defer (on viewport) {
-  <!-- Promo campaigns -->
-  <div class="max-w-screen-2xl mx-auto px-4 mt-8 lg:mt-10 mb-10 lg:mb-14">
+  <div class="max-w-screen-2xl mx-auto px-4 mt-10 lg:mt-14">
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
       @for (campaign of promoCampaigns; track campaign.id) {
         <a
@@ -90,10 +56,50 @@
     </div>
   </div>
 } @placeholder {
-  <div class="max-w-screen-2xl mx-auto px-4 mt-8 lg:mt-10 mb-10 lg:mb-14">
+  <div class="max-w-screen-2xl mx-auto px-4 mt-10 lg:mt-14">
     <div class="grid grid-cols-4 gap-3">
       @for (_ of [1,2,3,4]; track _) {
         <div class="aspect-[7/5] bg-surface-dark/20 rounded-xl animate-pulse"></div>
+      }
+    </div>
+  </div>
+}
+
+<!-- 5. Tin công nghệ / Đánh giá phần cứng (Đặt ở cuối trang trước Footer như GearVN) -->
+@defer (on viewport) {
+  <div class="max-w-screen-2xl mx-auto px-4 mt-10 lg:mt-14 mb-10 lg:mb-14">
+    <div class="flex items-center justify-between mb-5">
+      <div class="flex items-center gap-3">
+        <div class="h-6 w-1.5 bg-primary rounded-full"></div>
+        <h2 class="text-lg lg:text-xl font-bold tracking-tight uppercase text-foreground">Tin tức công nghệ & Đánh giá</h2>
+      </div>
+      <a routerLink="/tin-tuc" class="text-sm text-primary font-bold hover:underline transition-colors">
+        Xem tất cả bài viết →
+      </a>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      @for (post of blogPosts(); track post.id) {
+        <a
+          [routerLink]="['/tin-tuc', post.slug]"
+          class="group rounded-xl border border-border/80 dark:border-border-dark/80 overflow-hidden shadow-sm hover:shadow-md transition-shadow bg-surface dark:bg-surface-dark"
+        >
+          <div class="aspect-[16/9] bg-bg dark:bg-bg-dark overflow-hidden">
+            <img [src]="post.imageUrl" loading="lazy" appFallbackImage alt="{{ post.title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+          </div>
+          <div class="p-3.5">
+            <p class="text-xs text-primary font-medium mb-1.5">{{ post.category }} · {{ post.date }}</p>
+            <h3 class="text-sm font-semibold line-clamp-2 group-hover:text-primary transition-colors leading-snug">{{ post.title }}</h3>
+            <p class="text-xs text-muted dark:text-muted-dark mt-1.5 line-clamp-2">{{ post.excerpt }}</p>
+          </div>
+        </a>
+      }
+    </div>
+  </div>
+} @placeholder {
+  <div class="max-w-screen-2xl mx-auto px-4 mt-10 lg:mt-14 mb-10 lg:mb-14">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      @for (_ of [1,2,3,4]; track _) {
+        <div class="aspect-[16/9] bg-surface-dark/20 rounded-xl animate-pulse"></div>
       }
     </div>
   </div>

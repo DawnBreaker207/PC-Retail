@@ -1,49 +1,69 @@
-import { Component, HostListener, computed, inject, signal } from '@angular/core';
+﻿import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { NzBreadCrumbModule } from 'ng-zorro-antd/breadcrumb';
-import { NzTabsModule } from 'ng-zorro-antd/tabs';
-import { NzFormModule } from 'ng-zorro-antd/form';
-import { NzInputModule } from 'ng-zorro-antd/input';
-import { NzButtonModule } from 'ng-zorro-antd/button';
-import { NzIconModule } from 'ng-zorro-antd/icon';
-import { NzTagModule } from 'ng-zorro-antd/tag';
-import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
-import { NzMessageService } from 'ng-zorro-antd/message';
+import {
+  LucideAngularModule,
+  User,
+  KeyRound,
+  MapPin,
+  Ticket,
+  LogOut,
+  ChevronRight,
+  Lock,
+  Loader2,
+} from 'lucide-angular';
+import { HlmButtonDirective } from '@shared/ui/button';
+import { HlmInputDirective } from '@shared/ui/input';
+import { HlmBadgeDirective } from '@shared/ui/badge';
 import { finalize } from 'rxjs';
+import { ToastService } from '@core/services/toast.service';
 import { UserService } from '@core/services/user.service';
 import { AuthService } from '@core/auth/auth.service';
 import { AddressBookComponent } from '../components/address-book.component';
 import { MyVouchersComponent } from '../components/my-vouchers.component';
 
 const ROLE_LABEL: Record<string, string> = {
-  ADMIN: 'Quản trị viên', STAFF: 'Nhân viên', CUSTOMER: 'Khách hàng', SUPER_ADMIN: 'Quản trị viên',
+  ADMIN: 'Quản trị viên',
+  STAFF: 'Nhân viên',
+  CUSTOMER: 'Khách hàng',
+  SUPER_ADMIN: 'Quản trị viên',
 };
+
+type AccountTab = 'profile' | 'password' | 'address' | 'vouchers';
 
 @Component({
   selector: 'app-account',
   imports: [
-    RouterLink, ReactiveFormsModule, NzBreadCrumbModule, NzTabsModule,
-    NzFormModule, NzInputModule, NzButtonModule, NzIconModule, NzTagModule,
-    NzToolTipModule, AddressBookComponent, MyVouchersComponent,
+    RouterLink,
+    ReactiveFormsModule,
+    LucideAngularModule,
+    HlmButtonDirective,
+    HlmInputDirective,
+    HlmBadgeDirective,
+    AddressBookComponent,
+    MyVouchersComponent,
   ],
   templateUrl: './account.component.html',
   styleUrl: './account.component.css',
 })
 export class AccountComponent {
+  readonly User = User;
+  readonly KeyRound = KeyRound;
+  readonly MapPin = MapPin;
+  readonly Ticket = Ticket;
+  readonly LogOut = LogOut;
+  readonly ChevronRight = ChevronRight;
+  readonly Lock = Lock;
+  readonly Loader2 = Loader2;
+
   private fb = inject(FormBuilder);
   private userService = inject(UserService);
   private authService = inject(AuthService);
-  private message = inject(NzMessageService);
+  private toast = inject(ToastService);
 
+  activeTab = signal<AccountTab>('profile');
   isSavingProfile = signal(false);
   isSavingPassword = signal(false);
-  tabPosition = signal<'left' | 'top'>(typeof window !== 'undefined' && window.innerWidth < 768 ? 'top' : 'left');
-
-  @HostListener('window:resize')
-  onResize() {
-    this.tabPosition.set(window.innerWidth < 768 ? 'top' : 'left');
-  }
 
   profileForm = this.fb.nonNullable.group({
     fullName: ['', Validators.required],
@@ -88,7 +108,10 @@ export class AccountComponent {
     this.userService
       .updateMe(this.profileForm.getRawValue())
       .pipe(finalize(() => this.isSavingProfile.set(false)))
-      .subscribe(() => this.message.success('Cập nhật thông tin thành công'));
+      .subscribe({
+        next: () => this.toast.success('Cập nhật thông tin thành công'),
+        error: () => this.toast.error('Không thể cập nhật thông tin'),
+      });
   }
 
   changePassword() {
@@ -97,9 +120,12 @@ export class AccountComponent {
     this.userService
       .changePassword(this.passwordForm.getRawValue())
       .pipe(finalize(() => this.isSavingPassword.set(false)))
-      .subscribe(() => {
-        this.message.success('Đổi mật khẩu thành công');
-        this.passwordForm.reset();
+      .subscribe({
+        next: () => {
+          this.toast.success('Đổi mật khẩu thành công');
+          this.passwordForm.reset();
+        },
+        error: () => this.toast.error('Đổi mật khẩu thất bại, kiểm tra mật khẩu hiện tại'),
       });
   }
 
@@ -107,3 +133,4 @@ export class AccountComponent {
     this.authService.logout();
   }
 }
+

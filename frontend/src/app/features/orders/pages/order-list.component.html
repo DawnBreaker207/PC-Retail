@@ -1,53 +1,77 @@
 <div class="max-w-screen-2xl mx-auto px-4 py-6 lg:py-8 min-h-[60vh]">
-  <h1 class="text-2xl lg:text-3xl font-bold mb-6 tracking-tight">Đơn hàng của tôi</h1>
+  <h1 class="text-2xl lg:text-3xl font-bold mb-6 tracking-tight text-ink dark:text-ink-dark">Đơn hàng của tôi</h1>
 
-  <nz-tabset [nzSelectedIndex]="activeTabIndex()" (nzSelectedIndexChange)="onTabChange(statusTabs[$event].key)" class="[&_.ant-tabs-nav]:!mb-0">
+  <div class="flex items-center gap-1 overflow-x-auto border-b border-border/70 dark:border-border-dark/70 pb-px mb-6 scrollbar-none">
     @for (tab of statusTabs; track tab.key) {
-      <nz-tab [nzTitle]="tab.label"></nz-tab>
+      <button
+        type="button"
+        (click)="onTabChange(tab.key)"
+        class="px-4 py-2 text-sm font-medium whitespace-nowrap border-b-2 transition-colors transition-border"
+        [class.border-primary]="activeTab() === tab.key"
+        [class.text-primary]="activeTab() === tab.key"
+        [class.font-semibold]="activeTab() === tab.key"
+        [class.border-transparent]="activeTab() !== tab.key"
+        [class.text-muted]="activeTab() !== tab.key"
+        [class.dark:text-muted-dark]="activeTab() !== tab.key"
+      >
+        {{ tab.label }}
+      </button>
     }
-  </nz-tabset>
+  </div>
 
   @if (isLoading()) {
-    <div class="flex justify-center py-20"><nz-spin nzSize="large"></nz-spin></div>
+    <div class="flex justify-center py-20">
+      <app-loading-spinner [size]="36" />
+    </div>
   } @else if (orders().length === 0) {
     <div class="flex flex-col items-center justify-center py-20 animate-fade-in-up">
-      <div class="w-24 h-24 rounded-full bg-bg dark:bg-bg-dark flex items-center justify-center mb-6">
-        <span nz-icon nzType="file-text" class="text-4xl text-muted dark:text-muted-dark"></span>
+      <div class="w-20 h-20 rounded-full bg-surface dark:bg-surface-dark border border-border/60 flex items-center justify-center mb-4 text-muted dark:text-muted-dark">
+        <lucide-angular [img]="ShoppingBag" class="w-9 h-9" />
       </div>
-      <p class="text-muted dark:text-muted-dark text-lg mb-6">Không có đơn hàng nào</p>
-      <button nz-button nzType="primary" routerLink="/" class="!rounded-full !px-8 !shadow-sm hover:!shadow-md !transition-shadow min-h-[44px]">Mua sắm ngay</button>
+      <p class="text-muted dark:text-muted-dark text-base mb-6">Không có đơn hàng nào trong mục này</p>
+      <a hlmBtn routerLink="/" class="rounded-full px-8">Mua sắm ngay</a>
     </div>
   } @else {
-    <div class="space-y-4 mt-6">
+    <div class="space-y-4">
       @for (order of orders(); track order.id) {
         <div class="bg-surface dark:bg-surface-dark rounded-card border border-border/80 dark:border-border-dark/80 shadow-sm hover:shadow-md transition-shadow duration-300 p-4 lg:p-5">
           <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
             <div class="flex items-center gap-2 sm:gap-3 min-w-0">
-              <span class="font-mono text-xs sm:text-sm font-semibold">#ORD-{{ order.id }}</span>
+              <span class="font-mono text-xs sm:text-sm font-bold text-ink dark:text-ink-dark">#ORD-{{ order.id }}</span>
               <span class="text-xs text-muted dark:text-muted-dark truncate">{{ DateHelper.formatDate(order.createdAt) }}</span>
             </div>
-            <nz-tag [nzColor]="(order.subOrders[0]?.status ?? '') | statusFormat" class="!text-xs !px-2.5 !py-0.5 !rounded-full !border-0 !font-medium">
+            <span
+              hlmBadge
+              variant="secondary"
+              class="text-xs px-2.5 py-0.5 rounded-full font-medium"
+            >
               {{ (order.subOrders[0]?.status ?? '') | statusFormat:'label' }}
-            </nz-tag>
+            </span>
           </div>
 
           <div class="space-y-2">
             @for (sub of order.subOrders; track sub.id) {
               @for (item of sub.items; track item.skuId) {
                 <div class="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm">
-                  <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-bg dark:bg-bg-dark flex items-center justify-center overflow-hidden shrink-0">
+                  <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-bg dark:bg-bg-dark flex items-center justify-center overflow-hidden shrink-0 border border-border/40">
                     <img [src]="item.imageUrl" loading="lazy" appFallbackImage alt="{{ item.name }}" class="w-full h-full object-contain p-0.5" />
                   </div>
-                  <span class="flex-1 min-w-0 line-clamp-2">{{ item.name }} × {{ item.quantity }}</span>
-                  <span class="font-medium shrink-0">{{ item.unitPrice | currencyFormat }}</span>
+                  <span class="flex-1 min-w-0 line-clamp-2 text-ink dark:text-ink-dark">{{ item.name }} × {{ item.quantity }}</span>
+                  <span class="font-medium shrink-0 text-ink dark:text-ink-dark">{{ item.unitPrice | currencyFormat }}</span>
                 </div>
               }
             }
           </div>
 
-          <div class="flex items-center justify-between mt-3 pt-3 border-t border-border/60 dark:border-border-dark/60">
-            <span class="font-bold text-primary text-base lg:text-lg">{{ order.totalAmount | currencyFormat }}</span>
-            <a nz-button nzType="link" [routerLink]="['/orders', order.id]" class="!text-xs sm:!text-sm !font-medium min-h-[44px] inline-flex items-center">Xem chi tiết →</a>
+          <div class="flex items-center justify-between mt-4 pt-3 border-t border-border/60 dark:border-border-dark/60">
+            <div>
+              <span class="text-xs text-muted dark:text-muted-dark block">Tổng thanh toán:</span>
+              <span class="font-bold text-primary text-base lg:text-lg">{{ order.totalAmount | currencyFormat }}</span>
+            </div>
+            <a [routerLink]="['/orders', order.id]" class="text-xs sm:text-sm font-semibold text-primary hover:underline inline-flex items-center gap-1">
+              Xem chi tiết
+              <lucide-angular [img]="ArrowRight" class="w-3.5 h-3.5" />
+            </a>
           </div>
         </div>
       }

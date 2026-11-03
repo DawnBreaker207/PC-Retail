@@ -1,49 +1,70 @@
 import { Component, inject, DestroyRef, signal } from '@angular/core';
-import { DatePipe } from '@angular/common';
+import { DatePipe, NgClass } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { NzTableModule } from 'ng-zorro-antd/table';
-import { NzButtonModule } from 'ng-zorro-antd/button';
-import { NzIconModule } from 'ng-zorro-antd/icon';
-import { NzSpinModule } from 'ng-zorro-antd/spin';
-import { NzTagModule } from 'ng-zorro-antd/tag';
-import { NzRateModule } from 'ng-zorro-antd/rate';
-import { NzSelectModule } from 'ng-zorro-antd/select';
-import { NzMessageService } from 'ng-zorro-antd/message';
+import {
+  LucideAngularModule,
+  Star,
+  Check,
+  EyeOff,
+  Loader2,
+} from 'lucide-angular';
+import { HlmButtonDirective } from '@shared/ui/button';
+import { HlmBadgeDirective } from '@shared/ui/badge';
+import {
+  HlmTableDirective,
+  HlmTableHeaderDirective,
+  HlmTableBodyDirective,
+  HlmTableRowDirective,
+  HlmTableHeadDirective,
+  HlmTableCellDirective,
+} from '@shared/ui/table';
+import { ToastService } from '@core/services/toast.service';
 import { ApiEndpoints } from '@core/api/api.endpoints';
 import { Review } from '@core/models/common.model';
 
 const STATUS_OPTIONS = [
-  { value: '', label: 'Tất cả' },
+  { value: '', label: 'Tất cả trạng thái' },
   { value: 'PENDING', label: 'Chờ duyệt' },
   { value: 'APPROVED', label: 'Đã duyệt' },
   { value: 'HIDDEN', label: 'Đã ẩn' },
 ];
 
-const STATUS_COLOR: Record<string, string> = {
-  PENDING: 'gold', APPROVED: 'success', HIDDEN: 'default',
-};
-
 @Component({
   selector: 'app-admin-review-list',
+  standalone: true,
   imports: [
-    DatePipe, FormsModule, NzTableModule, NzButtonModule, NzIconModule, NzSpinModule,
-    NzTagModule, NzRateModule, NzSelectModule,
+    DatePipe,
+    NgClass,
+    FormsModule,
+    LucideAngularModule,
+    HlmButtonDirective,
+    HlmBadgeDirective,
+    HlmTableDirective,
+    HlmTableHeaderDirective,
+    HlmTableBodyDirective,
+    HlmTableRowDirective,
+    HlmTableHeadDirective,
+    HlmTableCellDirective,
   ],
   templateUrl: './admin-review-list.component.html',
 })
 export class AdminReviewListComponent {
   private http = inject(HttpClient);
   private destroyRef = inject(DestroyRef);
-  private message = inject(NzMessageService);
+  private toast = inject(ToastService);
+
+  readonly Star = Star;
+  readonly Check = Check;
+  readonly EyeOff = EyeOff;
+  readonly Loader2 = Loader2;
 
   reviews = signal<Review[]>([]);
   loading = signal(false);
   statusFilter = signal('');
 
   protected readonly STATUS_OPTIONS = STATUS_OPTIONS;
-  protected readonly STATUS_COLOR = STATUS_COLOR;
 
   constructor() {
     this.loadData();
@@ -66,7 +87,7 @@ export class AdminReviewListComponent {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res) => {
-          this.reviews.set(res.content);
+          this.reviews.set(res.content ?? []);
           this.loading.set(false);
         },
         error: () => this.loading.set(false),
@@ -78,10 +99,10 @@ export class AdminReviewListComponent {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
-          this.message.success(status === 'APPROVED' ? 'Đã duyệt đánh giá' : 'Đã ẩn đánh giá');
+          this.toast.success(status === 'APPROVED' ? 'Đã duyệt đánh giá' : 'Đã ẩn đánh giá');
           this.loadData();
         },
-        error: () => this.message.error('Thao tác thất bại'),
+        error: () => this.toast.error('Thao tác thất bại'),
       });
   }
 }

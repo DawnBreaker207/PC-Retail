@@ -1,14 +1,18 @@
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { NzBreadCrumbModule } from 'ng-zorro-antd/breadcrumb';
-import { NzIconModule } from 'ng-zorro-antd/icon';
+import { LucideAngularModule, ChevronRight, MapPin, Phone, Clock } from 'lucide-angular';
 
 @Component({
   selector: 'app-showroom',
-  imports: [RouterLink, NzBreadCrumbModule, NzIconModule],
+  imports: [RouterLink, LucideAngularModule],
   templateUrl: './showroom.component.html',
 })
 export class ShowroomComponent {
+  readonly ChevronRight = ChevronRight;
+  readonly MapPin = MapPin;
+  readonly Phone = Phone;
+  readonly Clock = Clock;
+
   showrooms = [
     { name: 'DAWN Hà Đông', address: '123 Đường ABC, Quận Hà Đông, Hà Nội', phone: '1900 5301', hours: '8:30 - 21:00 (T2 - CN)' },
     { name: 'DAWN Cầu Giấy', address: '45 Đường Xuân Thủy, Quận Cầu Giấy, Hà Nội', phone: '1900 5301', hours: '8:30 - 21:00 (T2 - CN)' },

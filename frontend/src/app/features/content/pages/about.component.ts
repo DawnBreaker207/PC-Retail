@@ -1,10 +1,12 @@
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { NzBreadCrumbModule } from 'ng-zorro-antd/breadcrumb';
+import { LucideAngularModule, ChevronRight } from 'lucide-angular';
 
 @Component({
   selector: 'app-about',
-  imports: [RouterLink, NzBreadCrumbModule],
+  imports: [RouterLink, LucideAngularModule],
   templateUrl: './about.component.html',
 })
-export class AboutComponent {}
+export class AboutComponent {
+  readonly ChevronRight = ChevronRight;
+}

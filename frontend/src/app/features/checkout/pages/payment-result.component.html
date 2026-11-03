@@ -1,34 +1,91 @@
-@if (isSuccess()) {
-  <nz-result
-    nzStatus="success"
-    nzTitle="Đặt hàng thành công!"
-    [nzSubTitle]="'Mã đơn hàng: #ORD-' + orderId()"
-  >
-    <div nz-result-extra>
-      <button nz-button nzType="primary" [routerLink]="['/orders', orderId()]" class="!rounded-lg">Xem đơn hàng</button>
-      <button type="button" nz-button routerLink="/" class="!rounded-lg">Tiếp tục mua sắm</button>
+<div class="max-w-xl mx-auto px-4 py-16 text-center">
+  @if (isSuccess()) {
+    <div class="bg-surface dark:bg-surface-dark rounded-2xl border border-border/80 dark:border-border-dark/80 p-8 sm:p-10 shadow-xs">
+      <div class="w-20 h-20 rounded-full bg-emerald-500/10 flex items-center justify-center mx-auto mb-5 text-emerald-500">
+        <lucide-icon [img]="CheckCircleIcon" class="size-10" />
+      </div>
+      <h1 class="text-2xl font-bold tracking-tight text-foreground mb-2">Đặt hàng thành công!</h1>
+      <p class="text-sm text-muted dark:text-muted-dark mb-6">
+        Mã đơn hàng: <span class="font-bold text-foreground">#ORD-{{ orderId() }}</span>. Cảm ơn bạn đã tin tưởng mua sắm tại DAWN PC Retail.
+      </p>
+
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
+        <a
+          [routerLink]="['/orders', orderId()]"
+          hlmBtn
+          variant="default"
+          class="h-11 px-6 rounded-xl font-bold text-sm w-full sm:w-auto inline-flex items-center justify-center gap-2"
+        >
+          <span>Xem chi tiết đơn hàng</span>
+          <lucide-icon [img]="ArrowRightIcon" class="size-4" />
+        </a>
+        <a
+          routerLink="/"
+          hlmBtn
+          variant="outline"
+          class="h-11 px-6 rounded-xl font-semibold text-sm w-full sm:w-auto"
+        >
+          Tiếp tục mua sắm
+        </a>
+      </div>
     </div>
-  </nz-result>
-} @else if (isPlaced()) {
-  <nz-result
-    nzStatus="info"
-    nzTitle="Đã nhận đơn hàng!"
-    [nzSubTitle]="'Mã đơn hàng: #ORD-' + orderId() + ' — đang chờ thanh toán. Bạn có thể tra cứu trạng thái bất cứ lúc nào.'"
-  >
-    <div nz-result-extra>
-      <button nz-button nzType="primary" routerLink="/tra-cuu-don-hang" class="!rounded-lg">Tra cứu đơn hàng</button>
-      <button type="button" nz-button routerLink="/" class="!rounded-lg">Tiếp tục mua sắm</button>
+  } @else if (isPlaced()) {
+    <div class="bg-surface dark:bg-surface-dark rounded-2xl border border-border/80 dark:border-border-dark/80 p-8 sm:p-10 shadow-xs">
+      <div class="w-20 h-20 rounded-full bg-amber-500/10 flex items-center justify-center mx-auto mb-5 text-amber-500">
+        <lucide-icon [img]="ClockIcon" class="size-10" />
+      </div>
+      <h1 class="text-2xl font-bold tracking-tight text-foreground mb-2">Đã nhận đơn hàng!</h1>
+      <p class="text-sm text-muted dark:text-muted-dark mb-6">
+        Mã đơn hàng: <span class="font-bold text-foreground">#ORD-{{ orderId() }}</span> đang chờ hoàn tất thanh toán. Bạn có thể tra cứu trạng thái đơn bất cứ lúc nào.
+      </p>
+
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
+        <a
+          routerLink="/tra-cuu-don-hang"
+          hlmBtn
+          variant="default"
+          class="h-11 px-6 rounded-xl font-bold text-sm w-full sm:w-auto"
+        >
+          Tra cứu đơn hàng
+        </a>
+        <a
+          routerLink="/"
+          hlmBtn
+          variant="outline"
+          class="h-11 px-6 rounded-xl font-semibold text-sm w-full sm:w-auto"
+        >
+          Về trang chủ
+        </a>
+      </div>
     </div>
-  </nz-result>
-} @else {
-  <nz-result
-    nzStatus="error"
-    nzTitle="Thanh toán thất bại"
-    nzSubTitle="Vui lòng thử lại hoặc liên hệ hỗ trợ."
-  >
-    <div nz-result-extra>
-      <button nz-button nzType="primary" routerLink="/checkout" class="!rounded-lg">Thử lại</button>
-      <button type="button" nz-button routerLink="/orders" class="!rounded-lg">Hủy đơn</button>
+  } @else {
+    <div class="bg-surface dark:bg-surface-dark rounded-2xl border border-border/80 dark:border-border-dark/80 p-8 sm:p-10 shadow-xs">
+      <div class="w-20 h-20 rounded-full bg-destructive/10 flex items-center justify-center mx-auto mb-5 text-destructive">
+        <lucide-icon [img]="XCircleIcon" class="size-10" />
+      </div>
+      <h1 class="text-2xl font-bold tracking-tight text-foreground mb-2">Thanh toán không thành công</h1>
+      <p class="text-sm text-muted dark:text-muted-dark mb-6">
+        Giao dịch đã bị hủy hoặc có lỗi xảy ra trong quá trình thanh toán. Vui lòng kiểm tra lại phương thức thanh toán.
+      </p>
+
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
+        <a
+          routerLink="/checkout"
+          hlmBtn
+          variant="default"
+          class="h-11 px-6 rounded-xl font-bold text-sm w-full sm:w-auto"
+        >
+          Thử lại
+        </a>
+        <a
+          routerLink="/orders"
+          hlmBtn
+          variant="outline"
+          class="h-11 px-6 rounded-xl font-semibold text-sm w-full sm:w-auto"
+        >
+          Danh sách đơn hàng
+        </a>
+      </div>
     </div>
-  </nz-result>
-}
+  }
+</div>

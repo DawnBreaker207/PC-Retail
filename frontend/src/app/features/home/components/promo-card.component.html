@@ -1,19 +1,35 @@
-<div class="relative rounded-xl overflow-hidden h-full group cursor-pointer border border-border/80 dark:border-border-dark/80 shadow-sm transition-shadow hover:shadow-md"
-     [style.background]="bgColor() || undefined">
-  <div class="absolute inset-0 opacity-15 bg-gradient-to-br from-white/40 to-transparent"></div>
-  <a [routerLink]="dest().path" [queryParams]="dest().queryParams" class="block w-full h-full p-4 flex flex-col justify-between relative z-10">
-    @if (badgeText()) {
-      <span class="self-start inline-flex items-center justify-center w-9 h-9 rounded-full bg-primary text-white text-xs font-bold shadow-lg">
-        {{ badgeText() }}
-      </span>
-    }
-    <div class="mt-auto">
-      @if (priceText()) {
-        <span class="inline-block bg-primary text-white text-xs font-bold px-2 py-0.5 rounded mb-1.5">{{ priceText() }}</span>
+<div
+  class="relative rounded-2xl overflow-hidden h-full group cursor-pointer border border-border/80 dark:border-border-dark/80 bg-surface dark:bg-surface-dark transition-all duration-300 hover:border-primary/50 dark:hover:border-primary/50 hover:shadow-xl hover:shadow-primary/5 shadow-2xs"
+>
+  <a [routerLink]="dest().path" [queryParams]="dest().queryParams" class="block w-full h-full p-4 sm:p-5 flex flex-col justify-between relative z-10">
+    <div class="flex items-center justify-between gap-2">
+      @if (badgeText()) {
+        <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-primary text-white text-[10px] font-black uppercase tracking-wider shadow-xs">
+          {{ badgeText() }}
+        </span>
       }
-      <h3 class="text-sm font-bold leading-tight text-white drop-shadow-sm">{{ title() }}</h3>
+      @if (priceText()) {
+        <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-primary/10 text-primary border border-primary/20 text-xs font-bold">
+          {{ priceText() }}
+        </span>
+      }
+    </div>
+
+    <div class="mt-auto max-w-[65%]">
+      <h3 class="text-sm sm:text-base font-bold leading-snug text-ink dark:text-ink-dark group-hover:text-primary transition-colors">{{ title() }}</h3>
+      <span class="text-xs text-muted dark:text-muted-dark group-hover:text-primary inline-flex items-center gap-1 mt-1 font-medium transition-colors">
+        Khám phá ngay →
+      </span>
     </div>
   </a>
-  <img [src]="image()" alt="" aria-hidden="true" loading="lazy" class="absolute right-0 bottom-0 w-2/3 h-full object-contain opacity-35 pointer-events-none" />
-  <div class="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/50 to-transparent pointer-events-none"></div>
+
+  <!-- Product hardware image preview -->
+  <img
+    [src]="image()"
+    alt=""
+    aria-hidden="true"
+    loading="lazy"
+    class="absolute right-1 bottom-1 w-1/2 h-4/5 object-contain opacity-80 group-hover:opacity-100 group-hover:scale-108 transition-all duration-500 pointer-events-none"
+  />
+  <div class="absolute inset-0 bg-gradient-to-r from-surface/80 via-transparent to-transparent dark:from-surface-dark/90 pointer-events-none"></div>
 </div>

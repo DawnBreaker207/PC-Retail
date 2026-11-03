@@ -1,14 +1,27 @@
 import { Component, inject, DestroyRef, signal } from '@angular/core';
-import { DatePipe } from '@angular/common';
+import { DatePipe, NgClass } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { NzTableModule } from 'ng-zorro-antd/table';
-import { NzIconModule } from 'ng-zorro-antd/icon';
-import { NzSpinModule } from 'ng-zorro-antd/spin';
-import { NzTagModule } from 'ng-zorro-antd/tag';
-import { NzInputModule } from 'ng-zorro-antd/input';
-import { NzSelectModule } from 'ng-zorro-antd/select';
+import {
+  LucideAngularModule,
+  ChevronDown,
+  ChevronRight,
+  Search,
+  ShieldAlert,
+  Loader2,
+} from 'lucide-angular';
+import { HlmButtonDirective } from '@shared/ui/button';
+import { HlmInputDirective } from '@shared/ui/input';
+import { HlmBadgeDirective } from '@shared/ui/badge';
+import {
+  HlmTableDirective,
+  HlmTableHeaderDirective,
+  HlmTableBodyDirective,
+  HlmTableRowDirective,
+  HlmTableHeadDirective,
+  HlmTableCellDirective,
+} from '@shared/ui/table';
 import { ApiEndpoints } from '@core/api/api.endpoints';
 import { AuditLogEntry } from '@core/models/common.model';
 
@@ -28,15 +41,32 @@ interface DiffField {
 
 @Component({
   selector: 'app-audit-log-list',
+  standalone: true,
   imports: [
-    DatePipe, FormsModule, NzTableModule, NzIconModule, NzSpinModule, NzTagModule,
-    NzInputModule, NzSelectModule,
+    DatePipe,
+    NgClass,
+    FormsModule,
+    LucideAngularModule,
+    HlmInputDirective,
+    HlmBadgeDirective,
+    HlmTableDirective,
+    HlmTableHeaderDirective,
+    HlmTableBodyDirective,
+    HlmTableRowDirective,
+    HlmTableHeadDirective,
+    HlmTableCellDirective,
   ],
   templateUrl: './audit-log-list.component.html',
 })
 export class AuditLogListComponent {
   private http = inject(HttpClient);
   private destroyRef = inject(DestroyRef);
+
+  readonly ChevronDown = ChevronDown;
+  readonly ChevronRight = ChevronRight;
+  readonly Search = Search;
+  readonly ShieldAlert = ShieldAlert;
+  readonly Loader2 = Loader2;
 
   logs = signal<AuditLogEntry[]>([]);
   loading = signal(false);
@@ -68,7 +98,7 @@ export class AuditLogListComponent {
       .subscribe({
         next: (res) => {
           const search = this.actorSearch().trim().toLowerCase();
-          this.logs.set(search ? res.content.filter((l) => l.actorName.toLowerCase().includes(search)) : res.content);
+          this.logs.set(search ? res.content.filter((l) => l.actorName.toLowerCase().includes(search)) : res.content ?? []);
           this.loading.set(false);
         },
         error: () => this.loading.set(false),

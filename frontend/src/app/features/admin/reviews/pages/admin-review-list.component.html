@@ -1,50 +1,111 @@
 <div class="mb-6">
-  <h1 class="text-2xl font-bold text-ink dark:text-ink-dark">Đánh giá sản phẩm</h1>
-  <p class="text-muted dark:text-muted-dark text-sm">Duyệt/ẩn đánh giá của khách hàng (mock, chưa nối backend thật)</p>
+  <h1 class="text-2xl font-bold tracking-tight text-foreground">Quản lý đánh giá sản phẩm</h1>
+  <p class="text-muted-foreground text-sm mt-1">Duyệt hoặc ẩn nhận xét, đánh giá từ khách hàng</p>
 </div>
 
-<div class="mb-4">
-  <nz-select [ngModel]="statusFilter()" (ngModelChange)="onStatusChange($event)" class="min-w-[160px]">
+<div class="mb-5 flex items-center gap-3">
+  <select
+    [ngModel]="statusFilter()"
+    (ngModelChange)="onStatusChange($event)"
+    aria-label="Lọc trạng thái đánh giá"
+    class="h-9 px-3 text-xs rounded-md border border-input bg-background text-foreground"
+  >
     @for (opt of STATUS_OPTIONS; track opt.value) {
-      <nz-option [nzValue]="opt.value" [nzLabel]="opt.label" />
+      <option [value]="opt.value">{{ opt.label }}</option>
     }
-  </nz-select>
+  </select>
 </div>
 
-<nz-table [nzData]="reviews()" [nzLoading]="loading()" [nzFrontPagination]="false" [nzShowPagination]="false">
-  <thead>
-    <tr>
-      <th>Sản phẩm</th>
-      <th>Khách hàng</th>
-      <th>Đánh giá</th>
-      <th>Nội dung</th>
-      <th>Trạng thái</th>
-      <th>Ngày</th>
-      <th class="text-right">Thao tác</th>
-    </tr>
-  </thead>
-  <tbody>
-    @for (r of reviews(); track r.id) {
-      <tr>
-        <td class="max-w-40 truncate">{{ r.productName }}</td>
-        <td>{{ r.fullName }}</td>
-        <td><nz-rate [ngModel]="r.rating" nzDisabled class="!text-xs" /></td>
-        <td class="max-w-72 truncate">{{ r.comment }}</td>
-        <td><nz-tag [nzColor]="STATUS_COLOR[r.status || 'PENDING']">{{ getStatusLabel(r.status) }}</nz-tag></td>
-        <td>{{ r.createdAt | date:'dd/MM/yyyy' }}</td>
-        <td class="text-right">
-          @if (r.status !== 'APPROVED') {
-            <button nz-button nzType="text" nzSize="small" (click)="moderate(r, 'APPROVED')" aria-label="Duyệt">
-              <span nz-icon nzType="check" class="text-success"></span>
-            </button>
+@if (loading()) {
+  <div class="flex flex-col items-center justify-center py-24 gap-3 text-muted-foreground">
+    <lucide-icon [img]="Loader2" class="w-8 h-8 animate-spin text-primary"></lucide-icon>
+    <p class="text-xs">Đang tải danh sách đánh giá...</p>
+  </div>
+} @else {
+  <div class="rounded-xl border border-border/80 bg-card overflow-hidden shadow-2xs">
+    <div class="overflow-x-auto">
+      <table hlmTable class="w-full text-xs">
+        <thead hlmTableHeader>
+          <tr hlmTableRow class="border-b border-border bg-muted/40">
+            <th hlmTableHead class="w-48">Sản phẩm</th>
+            <th hlmTableHead class="w-36">Khách hàng</th>
+            <th hlmTableHead class="w-28 text-center">Đánh giá</th>
+            <th hlmTableHead>Nội dung nhận xét</th>
+            <th hlmTableHead class="w-32 text-center">Trạng thái</th>
+            <th hlmTableHead class="w-28">Ngày tạo</th>
+            <th hlmTableHead class="w-24 text-right">Thao tác</th>
+          </tr>
+        </thead>
+        <tbody hlmTableBody>
+          @for (r of reviews(); track r.id) {
+            <tr hlmTableRow class="border-b border-border/60 hover:bg-muted/20 transition-colors">
+              <td hlmTableCell class="font-medium text-foreground max-w-44 truncate">{{ r.productName }}</td>
+              <td hlmTableCell class="text-foreground">{{ r.fullName }}</td>
+              <td hlmTableCell class="text-center">
+                <div class="inline-flex items-center gap-0.5 text-amber-500">
+                  @for (s of [1,2,3,4,5]; track s) {
+                    <lucide-icon
+                      [img]="Star"
+                      class="w-3.5 h-3.5"
+                      [ngClass]="s <= r.rating ? 'fill-amber-400 text-amber-400' : 'text-muted-foreground/30'"
+                    ></lucide-icon>
+                  }
+                </div>
+              </td>
+              <td hlmTableCell class="text-foreground max-w-xs truncate">{{ r.comment }}</td>
+              <td hlmTableCell class="text-center">
+                <span
+                  hlmBadge
+                  variant="outline"
+                  class="px-2.5 py-0.5 rounded-full text-[11px] font-medium"
+                  [ngClass]="{
+                    'border-amber-400 bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400': (r.status || 'PENDING') === 'PENDING',
+                    'border-emerald-400 bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400': r.status === 'APPROVED',
+                    'border-slate-300 bg-slate-50 text-slate-700 dark:bg-slate-900/40 dark:text-slate-400': r.status === 'HIDDEN'
+                  }"
+                >
+                  {{ getStatusLabel(r.status) }}
+                </span>
+              </td>
+              <td hlmTableCell class="text-muted-foreground">{{ r.createdAt | date:'dd/MM/yyyy' }}</td>
+              <td hlmTableCell class="text-right">
+                <div class="flex items-center justify-end gap-1">
+                  @if (r.status !== 'APPROVED') {
+                    <button
+                      hlmBtn
+                      variant="ghost"
+                      size="sm"
+                      (click)="moderate(r, 'APPROVED')"
+                      class="h-7 w-7 p-0 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 cursor-pointer"
+                      title="Duyệt đánh giá"
+                    >
+                      <lucide-icon [img]="Check" class="w-3.5 h-3.5"></lucide-icon>
+                    </button>
+                  }
+                  @if (r.status !== 'HIDDEN') {
+                    <button
+                      hlmBtn
+                      variant="ghost"
+                      size="sm"
+                      (click)="moderate(r, 'HIDDEN')"
+                      class="h-7 w-7 p-0 text-muted-foreground hover:text-destructive hover:bg-destructive/10 cursor-pointer"
+                      title="Ẩn đánh giá"
+                    >
+                      <lucide-icon [img]="EyeOff" class="w-3.5 h-3.5"></lucide-icon>
+                    </button>
+                  }
+                </div>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="7" class="text-center py-12 text-muted-foreground italic">
+                Chưa có đánh giá nào
+              </td>
+            </tr>
           }
-          @if (r.status !== 'HIDDEN') {
-            <button nz-button nzType="text" nzSize="small" nzDanger (click)="moderate(r, 'HIDDEN')" aria-label="Ẩn">
-              <span nz-icon nzType="eye-invisible"></span>
-            </button>
-          }
-        </td>
-      </tr>
-    }
-  </tbody>
-</nz-table>
+        </tbody>
+      </table>
+    </div>
+  </div>
+}

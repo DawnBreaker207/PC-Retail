@@ -1,78 +1,129 @@
 <div class="mb-6">
-  <h1 class="text-2xl font-bold text-ink dark:text-ink-dark">Audit Log</h1>
-  <p class="text-muted dark:text-muted-dark text-sm">Lịch sử thao tác trong hệ thống (mock, chưa nối backend thật)</p>
+  <h1 class="text-2xl font-bold tracking-tight text-foreground">Nhật ký kiểm toán (Audit Log)</h1>
+  <p class="text-muted-foreground text-sm mt-1">Lịch sử và dấu vết thao tác của người dùng trên toàn hệ thống</p>
 </div>
 
-<div class="flex flex-wrap items-center gap-3 mb-4">
-  <input
-    nz-input
-    placeholder="Tìm theo người thực hiện"
-    [(ngModel)]="actorSearch"
-    (ngModelChange)="onSearch()"
-    class="max-w-xs"
-  />
-  <nz-select [ngModel]="outcomeFilter()" (ngModelChange)="onOutcomeChange($event)" class="min-w-[160px]">
+<div class="flex flex-wrap items-center gap-3 mb-5">
+  <div class="relative w-full sm:w-64">
+    <input
+      hlmInput
+      placeholder="Tìm theo người thực hiện..."
+      [(ngModel)]="actorSearch"
+      (ngModelChange)="onSearch()"
+      class="w-full pl-9 h-9 text-xs"
+    />
+    <lucide-icon [img]="Search" class="w-4 h-4 text-muted-foreground absolute left-3 top-2.5 pointer-events-none"></lucide-icon>
+  </div>
+
+  <select
+    [ngModel]="outcomeFilter()"
+    (ngModelChange)="onOutcomeChange($event)"
+    aria-label="Lọc kết quả thực hiện"
+    class="h-9 px-3 text-xs rounded-md border border-input bg-background text-foreground"
+  >
     @for (opt of OUTCOME_OPTIONS; track opt.value) {
-      <nz-option [nzValue]="opt.value" [nzLabel]="opt.label" />
+      <option [value]="opt.value">{{ opt.label }}</option>
     }
-  </nz-select>
+  </select>
 </div>
 
-<nz-table [nzData]="logs()" [nzLoading]="loading()" [nzFrontPagination]="false" [nzShowPagination]="false">
-  <thead>
-    <tr>
-      <th></th>
-      <th>Hành động</th>
-      <th>Đối tượng</th>
-      <th>Người thực hiện</th>
-      <th>Kết quả</th>
-      <th>Thời gian</th>
-    </tr>
-  </thead>
-  <tbody>
-    @for (log of logs(); track log.id) {
-      <tr class="cursor-pointer" (click)="toggleExpand(log.id)">
-        <td>
-          <span nz-icon [nzType]="expandedId() === log.id ? 'down' : 'right'" class="text-xs text-muted"></span>
-        </td>
-        <td>
-          <span class="font-medium" [class.text-error]="isRisky(log.action)">{{ log.action }}</span>
-        </td>
-        <td class="text-muted dark:text-muted-dark">{{ log.entityType }} #{{ log.entityId }}</td>
-        <td>{{ log.actorName }} <span class="text-xs text-muted dark:text-muted-dark">({{ log.actorRole }})</span></td>
-        <td>
-          <nz-tag [nzColor]="log.outcome === 'SUCCESS' ? 'success' : 'error'">{{ log.outcome === 'SUCCESS' ? 'Thành công' : 'Thất bại' }}</nz-tag>
-        </td>
-        <td>{{ log.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
-      </tr>
-      @if (expandedId() === log.id) {
-        <tr>
-          <td colspan="6" class="bg-bg dark:bg-bg-dark !p-4">
-            @if (getDiff(log).length > 0) {
-              <table class="w-full text-xs">
-                <thead>
-                  <tr class="text-muted dark:text-muted-dark">
-                    <th class="text-left font-medium pb-2">Trường</th>
-                    <th class="text-left font-medium pb-2">Giá trị cũ</th>
-                    <th class="text-left font-medium pb-2">Giá trị mới</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @for (field of getDiff(log); track field.key) {
-                    <tr class="border-t border-border/60 dark:border-border-dark/60">
-                      <td class="py-1.5 font-medium">{{ field.key }}</td>
-                      <td class="py-1.5 text-error line-through">{{ field.oldValue }}</td>
-                      <td class="py-1.5 text-success">{{ field.newValue }}</td>
-                    </tr>
+@if (loading()) {
+  <div class="flex flex-col items-center justify-center py-24 gap-3 text-muted-foreground">
+    <lucide-icon [img]="Loader2" class="w-8 h-8 animate-spin text-primary"></lucide-icon>
+    <p class="text-xs">Đang tải lịch sử kiểm toán...</p>
+  </div>
+} @else {
+  <div class="rounded-xl border border-border/80 bg-card overflow-hidden shadow-2xs">
+    <div class="overflow-x-auto">
+      <table hlmTable class="w-full text-xs">
+        <thead hlmTableHeader>
+          <tr hlmTableRow class="border-b border-border bg-muted/40">
+            <th hlmTableHead class="w-10"></th>
+            <th hlmTableHead>Hành động</th>
+            <th hlmTableHead class="w-44">Đối tượng</th>
+            <th hlmTableHead class="w-48">Người thực hiện</th>
+            <th hlmTableHead class="w-28 text-center">Kết quả</th>
+            <th hlmTableHead class="w-36">Thời gian</th>
+          </tr>
+        </thead>
+        <tbody hlmTableBody>
+          @for (log of logs(); track log.id) {
+            <tr
+              hlmTableRow
+              class="border-b border-border/60 hover:bg-muted/20 transition-colors cursor-pointer select-none"
+              (click)="toggleExpand(log.id)"
+            >
+              <td hlmTableCell class="text-center text-muted-foreground">
+                <lucide-icon [img]="expandedId() === log.id ? ChevronDown : ChevronRight" class="w-3.5 h-3.5"></lucide-icon>
+              </td>
+              <td hlmTableCell>
+                <div class="flex items-center gap-1.5">
+                  @if (isRisky(log.action)) {
+                    <lucide-icon [img]="ShieldAlert" class="w-3.5 h-3.5 text-rose-500"></lucide-icon>
                   }
-                </tbody>
-              </table>
-            } @else {
-              <p class="text-xs text-muted dark:text-muted-dark">Không có dữ liệu thay đổi chi tiết.</p>
+                  <span class="font-medium" [class.text-rose-600]="isRisky(log.action)" [class.text-foreground]="!isRisky(log.action)">
+                    {{ log.action }}
+                  </span>
+                </div>
+              </td>
+              <td hlmTableCell class="text-muted-foreground font-mono text-[11px]">{{ log.entityType }} #{{ log.entityId }}</td>
+              <td hlmTableCell>
+                <div class="font-medium text-foreground">{{ log.actorName }}</div>
+                <div class="text-[10px] text-muted-foreground">Role: {{ log.actorRole }}</div>
+              </td>
+              <td hlmTableCell class="text-center">
+                <span
+                  hlmBadge
+                  variant="outline"
+                  class="px-2 py-0.5 rounded-full text-[10px] font-medium"
+                  [ngClass]="log.outcome === 'SUCCESS' ? 'border-emerald-400 bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400' : 'border-rose-400 bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-400'"
+                >
+                  {{ log.outcome === 'SUCCESS' ? 'Thành công' : 'Thất bại' }}
+                </span>
+              </td>
+              <td hlmTableCell class="text-muted-foreground text-[11px]">{{ log.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
+            </tr>
+
+            @if (expandedId() === log.id) {
+              <tr class="bg-muted/30 border-b border-border">
+                <td colspan="6" class="p-4">
+                  @if (getDiff(log).length > 0) {
+                    <div class="rounded-lg border border-border/80 bg-card p-3 shadow-2xs">
+                      <h4 class="font-semibold text-xs text-foreground mb-2">Chi tiết thay đổi dữ liệu:</h4>
+                      <table class="w-full text-xs">
+                        <thead>
+                          <tr class="text-muted-foreground border-b border-border/60">
+                            <th class="text-left font-medium pb-1.5 w-1/4">Trường dữ liệu</th>
+                            <th class="text-left font-medium pb-1.5 w-3/8">Giá trị cũ</th>
+                            <th class="text-left font-medium pb-1.5 w-3/8">Giá trị mới</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          @for (field of getDiff(log); track field.key) {
+                            <tr class="border-b border-border/40">
+                              <td class="py-1.5 font-mono text-[11px] text-foreground">{{ field.key }}</td>
+                              <td class="py-1.5 text-rose-600 line-through font-mono text-[11px]">{{ field.oldValue }}</td>
+                              <td class="py-1.5 text-emerald-600 font-semibold font-mono text-[11px]">{{ field.newValue }}</td>
+                            </tr>
+                          }
+                        </tbody>
+                      </table>
+                    </div>
+                  } @else {
+                    <p class="text-xs text-muted-foreground italic">Không có dữ liệu thay đổi chi tiết được lưu lại.</p>
+                  }
+                </td>
+              </tr>
             }
-          </td>
-        </tr>
-      }
-    }
-  </tbody>
-</nz-table>
+          } @empty {
+            <tr>
+              <td colspan="6" class="text-center py-12 text-muted-foreground italic">
+                Chưa có dữ liệu nhật ký kiểm toán nào
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+}

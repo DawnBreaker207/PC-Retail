@@ -1,46 +1,86 @@
-import { Component, inject, DestroyRef, signal } from '@angular/core';
-import { DatePipe } from '@angular/common';
+import { Component, inject, DestroyRef, signal, model } from '@angular/core';
+import { DatePipe, NgClass } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpClient } from '@angular/common/http';
-import { NzTagModule } from 'ng-zorro-antd/tag';
-import { NzButtonModule } from 'ng-zorro-antd/button';
-import { NzIconModule } from 'ng-zorro-antd/icon';
-import { NzSpinModule } from 'ng-zorro-antd/spin';
-import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
-import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
-import { NzMessageService } from 'ng-zorro-antd/message';
+import {
+  LucideAngularModule,
+  ArrowLeft,
+  Check,
+  X,
+  AlertTriangle,
+  Loader2,
+  Calendar,
+  User,
+  Layers,
+  HelpCircle
+} from 'lucide-angular';
+import { HlmButtonDirective } from '@shared/ui/button';
+import { HlmInputDirective } from '@shared/ui/input';
+import { HlmBadgeDirective } from '@shared/ui/badge';
+import {
+  HlmDialogContentDirective,
+  HlmDialogHeaderDirective,
+  HlmDialogTitleDirective,
+  HlmDialogDescriptionDirective,
+  HlmDialogFooterDirective,
+} from '@shared/ui/dialog';
+import { ToastService } from '@core/services/toast.service';
 import { ApiEndpoints } from '@core/api/api.endpoints';
 import { AdminReturnRequest } from '@core/models/common.model';
 import { AuthService } from '@core/auth/auth.service';
-import { RejectReasonModalComponent } from '../components/reject-reason-modal.component';
-
-const STATUS_COLOR: Record<string, string> = {
-  PENDING: 'gold', REQUESTED: 'gold', APPROVED: 'success', REJECTED: 'error', DISPUTED: 'processing',
-};
 
 const TYPE_LABEL: Record<string, string> = {
-  DOA: 'Đổi mới (DOA)', WARRANTY: 'Bảo hành',
+  DOA: 'Đổi mới (DOA)',
+  WARRANTY: 'Bảo hành',
 };
 
 @Component({
   selector: 'app-admin-return-detail',
-  imports: [DatePipe, RouterLink, NzTagModule, NzButtonModule, NzIconModule, NzSpinModule, NzToolTipModule, NzModalModule],
+  standalone: true,
+  imports: [
+    DatePipe,
+    NgClass,
+    RouterLink,
+    FormsModule,
+    LucideAngularModule,
+    HlmButtonDirective,
+    HlmInputDirective,
+    HlmBadgeDirective,
+    HlmDialogContentDirective,
+    HlmDialogHeaderDirective,
+    HlmDialogTitleDirective,
+    HlmDialogDescriptionDirective,
+    HlmDialogFooterDirective,
+  ],
   templateUrl: './admin-return-detail.component.html',
 })
 export class AdminReturnDetailComponent {
   private route = inject(ActivatedRoute);
   private http = inject(HttpClient);
   private destroyRef = inject(DestroyRef);
-  private modal = inject(NzModalService);
-  private message = inject(NzMessageService);
+  private toast = inject(ToastService);
   private authService = inject(AuthService);
+
+  readonly ArrowLeft = ArrowLeft;
+  readonly Check = Check;
+  readonly X = X;
+  readonly AlertTriangle = AlertTriangle;
+  readonly Loader2 = Loader2;
+  readonly Calendar = Calendar;
+  readonly User = User;
+  readonly Layers = Layers;
+  readonly HelpCircle = HelpCircle;
 
   request = signal<AdminReturnRequest | null>(null);
   loading = signal(true);
   processing = signal(false);
 
-  protected readonly STATUS_COLOR = STATUS_COLOR;
+  // Reject dialog
+  isRejectDialogOpen = signal(false);
+  rejectReason = model('');
+
   protected readonly TYPE_LABEL = TYPE_LABEL;
 
   constructor() {
@@ -77,42 +117,41 @@ export class AdminReturnDetailComponent {
         next: (updated) => {
           this.request.set(updated);
           this.processing.set(false);
-          this.message.success('Đã duyệt yêu cầu trả hàng');
+          this.toast.success('Đã duyệt yêu cầu trả hàng thành công');
         },
         error: () => {
           this.processing.set(false);
-          this.message.error('Duyệt yêu cầu thất bại');
+          this.toast.error('Duyệt yêu cầu thất bại');
         },
       });
   }
 
-  openReject() {
-    const r = this.request();
-    if (!r) return;
-    const modalRef = this.modal.create({
-      nzTitle: 'Từ chối yêu cầu trả hàng',
-      nzContent: RejectReasonModalComponent,
-      nzFooter: null,
-      nzWidth: 480,
-    });
-    modalRef.afterClose.subscribe((reason: string | undefined) => {
-      if (reason) this.reject(r.id, reason);
-    });
+  openRejectDialog() {
+    this.rejectReason.set('');
+    this.isRejectDialogOpen.set(true);
   }
 
-  private reject(id: number, reason: string) {
+  closeRejectDialog() {
+    this.isRejectDialogOpen.set(false);
+  }
+
+  submitReject() {
+    const r = this.request();
+    if (!r || !this.rejectReason().trim()) return;
+
     this.processing.set(true);
-    this.http.put<AdminReturnRequest>(ApiEndpoints.admin.returnReject(id), { reason })
+    this.http.put<AdminReturnRequest>(ApiEndpoints.admin.returnReject(r.id), { reason: this.rejectReason().trim() })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (updated) => {
           this.request.set(updated);
           this.processing.set(false);
-          this.message.success('Đã từ chối yêu cầu trả hàng');
+          this.closeRejectDialog();
+          this.toast.success('Đã từ chối yêu cầu trả hàng');
         },
         error: () => {
           this.processing.set(false);
-          this.message.error('Từ chối yêu cầu thất bại');
+          this.toast.error('Từ chối yêu cầu thất bại');
         },
       });
   }
@@ -127,11 +166,11 @@ export class AdminReturnDetailComponent {
         next: (updated) => {
           this.request.set(updated);
           this.processing.set(false);
-          this.message.success(overturn ? 'Đã chấp nhận khiếu nại' : 'Đã giữ nguyên quyết định');
+          this.toast.success(overturn ? 'Đã chấp nhận khiếu nại của khách hàng' : 'Đã giữ nguyên quyết định từ chối');
         },
         error: () => {
           this.processing.set(false);
-          this.message.error('Xử lý khiếu nại thất bại');
+          this.toast.error('Xử lý khiếu nại thất bại');
         },
       });
   }

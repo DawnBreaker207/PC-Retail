@@ -1,40 +1,70 @@
-<form nz-form [formGroup]="form" (ngSubmit)="submit()">
-  <nz-form-item>
-    <nz-form-label nzFor="fullName" nzRequired>Họ và tên</nz-form-label>
-    <nz-form-control nzErrorTip="Vui lòng nhập họ tên">
-      <input nz-input id="fullName" formControlName="fullName" placeholder="Họ và tên" />
-    </nz-form-control>
-  </nz-form-item>
+<form [formGroup]="form" (ngSubmit)="submit()" class="space-y-4 text-xs">
+  <div>
+    <label for="fullName" class="block font-medium text-foreground mb-1">
+      Họ và tên <span class="text-destructive">*</span>
+    </label>
+    <input
+      hlmInput
+      id="fullName"
+      formControlName="fullName"
+      placeholder="Nguyễn Văn A..."
+      class="w-full h-9 text-xs"
+    />
+  </div>
 
-  <nz-form-item>
-    <nz-form-label nzFor="email" nzRequired>Email</nz-form-label>
-    <nz-form-control nzErrorTip="Email không hợp lệ">
-      <input nz-input id="email" formControlName="email" placeholder="Email" />
-    </nz-form-control>
-  </nz-form-item>
+  <div>
+    <label for="email" class="block font-medium text-foreground mb-1">
+      Địa chỉ Email <span class="text-destructive">*</span>
+    </label>
+    <input
+      hlmInput
+      type="email"
+      id="email"
+      formControlName="email"
+      placeholder="email@example.com"
+      class="w-full h-9 text-xs"
+    />
+  </div>
 
-  <nz-form-item>
-    <nz-form-label nzFor="phone" nzRequired>Số điện thoại</nz-form-label>
-    <nz-form-control nzErrorTip="Vui lòng nhập số điện thoại">
-      <input nz-input id="phone" formControlName="phone" placeholder="Số điện thoại" />
-    </nz-form-control>
-  </nz-form-item>
+  <div>
+    <label for="phone" class="block font-medium text-foreground mb-1">
+      Số điện thoại <span class="text-destructive">*</span>
+    </label>
+    <input
+      hlmInput
+      id="phone"
+      formControlName="phone"
+      placeholder="0912345678"
+      class="w-full h-9 text-xs"
+    />
+  </div>
 
-  <nz-form-item>
-    <nz-form-label nzFor="systemRole" nzRequired>Vai trò</nz-form-label>
-    <nz-form-control>
-      <nz-select id="systemRole" formControlName="systemRole">
-        <nz-option nzValue="CUSTOMER" nzLabel="Khách hàng" />
-        <nz-option nzValue="STAFF" nzLabel="Staff" />
-        <nz-option nzValue="ADMIN" nzLabel="Admin" />
-        <nz-option nzValue="SUPER_ADMIN" nzLabel="Super Admin" />
-      </nz-select>
-    </nz-form-control>
-  </nz-form-item>
+  <div>
+    <label for="systemRole" class="block font-medium text-foreground mb-1">
+      Phân quyền hệ thống <span class="text-destructive">*</span>
+    </label>
+    <select
+      id="systemRole"
+      formControlName="systemRole"
+      class="w-full h-9 px-3 rounded-md border border-input bg-background text-foreground text-xs"
+    >
+      <option value="CUSTOMER">Khách hàng (Customer)</option>
+      <option value="STAFF">Nhân viên kho/vận hành (Staff)</option>
+      <option value="ADMIN">Quản trị viên (Admin)</option>
+      <option value="SUPER_ADMIN">Quản trị tối cao (Super Admin)</option>
+    </select>
+  </div>
 
-  <div class="flex justify-end gap-3 mt-6">
-    <button nz-button nzType="default" type="button" (click)="cancel()">Hủy</button>
-    <button nz-button nzType="primary" type="submit" [nzLoading]="submitting()" [disabled]="form.invalid">
+  <div class="flex justify-end gap-2 pt-3 border-t border-border">
+    <button hlmBtn variant="outline" size="sm" type="button" (click)="cancel()">Hủy</button>
+    <button
+      hlmBtn
+      variant="default"
+      size="sm"
+      type="submit"
+      [disabled]="form.invalid || submitting()"
+      class="bg-primary text-primary-foreground"
+    >
       {{ isEdit ? 'Lưu thay đổi' : 'Thêm người dùng' }}
     </button>
   </div>

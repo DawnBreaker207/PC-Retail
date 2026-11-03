@@ -1,12 +1,10 @@
-import { Component, inject, OnInit, signal, computed, DestroyRef } from '@angular/core';
+﻿import { Component, inject, OnInit, signal, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink, ActivatedRoute, Router } from '@angular/router';
-import { NzTableModule } from 'ng-zorro-antd/table';
-import { NzTagModule } from 'ng-zorro-antd/tag';
-import { NzButtonModule } from 'ng-zorro-antd/button';
-import { NzSpinModule } from 'ng-zorro-antd/spin';
-import { NzEmptyModule } from 'ng-zorro-antd/empty';
-import { NzTabsModule } from 'ng-zorro-antd/tabs';
+import { LucideAngularModule, ShoppingBag, ArrowRight } from 'lucide-angular';
+import { HlmButtonDirective } from '@shared/ui/button';
+import { HlmBadgeDirective } from '@shared/ui/badge';
+import { LoadingSpinnerComponent } from '@shared/components/loading-spinner.component';
 import { CurrencyFormatPipe } from '@shared/pipes/currency-format.pipe';
 import { StatusFormatPipe } from '@shared/pipes/status-format.pipe';
 import { FallbackImageDirective } from '@shared/directives/fallback-image.directive';
@@ -26,18 +24,21 @@ const STATUS_TABS = [
 @Component({
   selector: 'app-order-list',
   imports: [
-    RouterLink, FallbackImageDirective,
-    NzTableModule,
-    NzTagModule,
-    NzButtonModule,
-    NzSpinModule,
-    NzEmptyModule,
-    NzTabsModule,
-    CurrencyFormatPipe, StatusFormatPipe,
+    RouterLink,
+    FallbackImageDirective,
+    LucideAngularModule,
+    HlmButtonDirective,
+    HlmBadgeDirective,
+    LoadingSpinnerComponent,
+    CurrencyFormatPipe,
+    StatusFormatPipe,
   ],
   templateUrl: './order-list.component.html',
 })
 export class OrderListComponent implements OnInit {
+  readonly ShoppingBag = ShoppingBag;
+  readonly ArrowRight = ArrowRight;
+
   private orderService = inject(OrderService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
@@ -47,11 +48,6 @@ export class OrderListComponent implements OnInit {
   isLoading = signal(false);
   activeTab = signal('');
   statusTabs = STATUS_TABS;
-
-  activeTabIndex = computed(() => {
-    const idx = this.statusTabs.findIndex((t) => t.key === this.activeTab());
-    return Math.max(0, idx);
-  });
 
   ngOnInit() {
     this.route.queryParams.pipe(
@@ -68,9 +64,12 @@ export class OrderListComponent implements OnInit {
       .getMyOrders({ status: this.activeTab() || undefined }).pipe(
         takeUntilDestroyed(this.destroyRef),
       )
-      .subscribe((res) => {
-        this.orders.set(res.content);
-        this.isLoading.set(false);
+      .subscribe({
+        next: (res) => {
+          this.orders.set(res.content);
+          this.isLoading.set(false);
+        },
+        error: () => this.isLoading.set(false),
       });
   }
 
@@ -83,3 +82,4 @@ export class OrderListComponent implements OnInit {
 
   protected readonly DateHelper = DateHelper;
 }
+

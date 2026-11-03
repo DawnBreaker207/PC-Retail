@@ -1,11 +1,12 @@
-<div class="animate-fade-in-up text-center bg-bg dark:bg-bg-dark">
-  <nz-result
-    nzStatus="403"
-    nzTitle="403"
-    nzSubTitle="Bạn không có quyền truy cập trang này."
-  >
-    <div nz-result-extra>
-      <button nz-button nzType="primary" routerLink="/" class="!rounded-full !px-8 !shadow-sm hover:!shadow-md !transition-shadow">Về trang chủ</button>
-    </div>
-  </nz-result>
+<div class="min-h-[60vh] flex flex-col items-center justify-center text-center px-4 py-12 animate-fade-in-up">
+  <div class="w-20 h-20 rounded-full bg-amber-500/10 text-amber-500 flex items-center justify-center mb-6">
+    <lucide-angular [img]="ShieldAlert" class="w-10 h-10" />
+  </div>
+  <h1 class="text-6xl font-black text-ink dark:text-ink-dark tracking-tight mb-2">403</h1>
+  <h2 class="text-lg font-semibold text-ink dark:text-ink-dark mb-2">Truy cập bị từ chối</h2>
+  <p class="text-sm text-muted dark:text-muted-dark max-w-sm mb-6">Bạn không có quyền truy cập vào trang này.</p>
+  <a hlmBtn routerLink="/" class="rounded-full px-6">
+    <lucide-angular [img]="Home" class="w-4 h-4 mr-2" />
+    Về trang chủ
+  </a>
 </div>

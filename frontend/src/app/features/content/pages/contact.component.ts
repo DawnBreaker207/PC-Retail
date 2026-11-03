@@ -1,24 +1,31 @@
-import { Component, inject } from '@angular/core';
+﻿import { Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { NzBreadCrumbModule } from 'ng-zorro-antd/breadcrumb';
-import { NzFormModule } from 'ng-zorro-antd/form';
-import { NzInputModule } from 'ng-zorro-antd/input';
-import { NzButtonModule } from 'ng-zorro-antd/button';
-import { NzIconModule } from 'ng-zorro-antd/icon';
-import { NzMessageService } from 'ng-zorro-antd/message';
+import { LucideAngularModule, ChevronRight, Phone, Mail, MapPin, Send } from 'lucide-angular';
+import { HlmButtonDirective } from '@shared/ui/button';
+import { HlmInputDirective } from '@shared/ui/input';
+import { ToastService } from '@core/services/toast.service';
 
 @Component({
   selector: 'app-contact',
   imports: [
-    RouterLink, ReactiveFormsModule, NzBreadCrumbModule,
-    NzFormModule, NzInputModule, NzButtonModule, NzIconModule,
+    RouterLink,
+    ReactiveFormsModule,
+    LucideAngularModule,
+    HlmButtonDirective,
+    HlmInputDirective,
   ],
   templateUrl: './contact.component.html',
 })
 export class ContactComponent {
+  readonly ChevronRight = ChevronRight;
+  readonly Phone = Phone;
+  readonly Mail = Mail;
+  readonly MapPin = MapPin;
+  readonly Send = Send;
+
   private fb = inject(FormBuilder);
-  private message = inject(NzMessageService);
+  private toast = inject(ToastService);
 
   form = this.fb.nonNullable.group({
     fullName: ['', Validators.required],
@@ -28,7 +35,8 @@ export class ContactComponent {
 
   submit() {
     if (this.form.invalid) return;
-    this.message.success('Đã gửi yêu cầu, DAWN PC Retail sẽ liên hệ lại trong thời gian sớm nhất');
+    this.toast.success('Đã gửi yêu cầu, DAWN PC Retail sẽ liên hệ lại trong thời gian sớm nhất');
     this.form.reset();
   }
 }
+

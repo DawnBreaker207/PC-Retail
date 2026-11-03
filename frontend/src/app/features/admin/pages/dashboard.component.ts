@@ -1,17 +1,10 @@
 import { Component, inject, DestroyRef, signal, computed } from '@angular/core';
-import { DatePipe } from '@angular/common';
+import { DatePipe, CommonModule } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpClient } from '@angular/common/http';
 import { RouterLink } from '@angular/router';
-import { NzCardModule } from 'ng-zorro-antd/card';
-import { NzStatisticModule } from 'ng-zorro-antd/statistic';
-import { NzGridModule } from 'ng-zorro-antd/grid';
-import { NzIconModule } from 'ng-zorro-antd/icon';
-import { NzTableModule } from 'ng-zorro-antd/table';
-import { NzTagModule } from 'ng-zorro-antd/tag';
-import { NzSpinModule } from 'ng-zorro-antd/spin';
-import { NzTabsModule } from 'ng-zorro-antd/tabs';
 import { CurrencyFormatPipe } from '@shared/pipes/currency-format.pipe';
+import { StatusFormatPipe } from '@shared/pipes/status-format.pipe';
 import { ApiEndpoints } from '@core/api/api.endpoints';
 import { ThemeService } from '@core/services/theme.service';
 import { AuthService } from '@core/auth/auth.service';
@@ -23,6 +16,33 @@ import { GridComponent, TooltipComponent } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
 import type { EChartsCoreOption } from 'echarts/core';
 import { use, init } from 'echarts/core';
+import {
+  HlmCardDirective,
+  HlmCardHeaderDirective,
+  HlmCardTitleDirective,
+  HlmCardContentDirective
+} from '@shared/ui/card';
+import { HlmBadgeDirective } from '@shared/ui/badge';
+import { HlmButtonDirective } from '@shared/ui/button';
+import {
+  HlmTableDirective,
+  HlmTableHeaderDirective,
+  HlmTableBodyDirective,
+  HlmTableRowDirective,
+  HlmTableHeadDirective,
+  HlmTableCellDirective
+} from '@shared/ui/table';
+import {
+  LucideAngularModule,
+  TrendingUp,
+  ShoppingCart,
+  Users,
+  AlertTriangle,
+  Loader2,
+  Calendar,
+  Layers,
+  ArrowRight
+} from 'lucide-angular';
 
 use([BarChart, GridComponent, TooltipComponent, CanvasRenderer]);
 
@@ -43,9 +63,24 @@ interface LowStockItem { skuId: number; name: string; stock: number; imageUrl: s
 
 @Component({
   selector: 'app-dashboard',
+  standalone: true,
   imports: [
-    RouterLink, DatePipe, NzCardModule, NzStatisticModule, NzGridModule, NzIconModule,
-    NzTableModule, NzTagModule, NzSpinModule, NzTabsModule, CurrencyFormatPipe, NgxEchartsDirective,
+    CommonModule,
+    RouterLink,
+    DatePipe,
+    CurrencyFormatPipe,
+    StatusFormatPipe,
+    NgxEchartsDirective,
+    HlmCardDirective,
+    HlmBadgeDirective,
+    HlmButtonDirective,
+    HlmTableDirective,
+    HlmTableHeaderDirective,
+    HlmTableBodyDirective,
+    HlmTableRowDirective,
+    HlmTableHeadDirective,
+    HlmTableCellDirective,
+    LucideAngularModule
   ],
   providers: [{
     provide: NGX_ECHARTS_CONFIG,
@@ -55,6 +90,15 @@ interface LowStockItem { skuId: number; name: string; stock: number; imageUrl: s
   styleUrl: './dashboard.component.css',
 })
 export class DashboardComponent {
+  readonly TrendingUp = TrendingUp;
+  readonly ShoppingCart = ShoppingCart;
+  readonly Users = Users;
+  readonly AlertTriangle = AlertTriangle;
+  readonly Loader2 = Loader2;
+  readonly Calendar = Calendar;
+  readonly Layers = Layers;
+  readonly ArrowRight = ArrowRight;
+
   private http = inject(HttpClient);
   private destroyRef = inject(DestroyRef);
   private themeService = inject(ThemeService);
@@ -64,13 +108,9 @@ export class DashboardComponent {
   summary: DashboardSummary | null = null;
   revenue7 = signal<RevenuePoint[]>([]);
   lowStock: LowStockItem[] = [];
-  statusColor: Record<string, string> = {
-    PENDING: 'orange', CONFIRMED: 'blue', SHIPPING: 'cyan',
-    COMPLETED: 'green', CANCELLED: 'red',
-  };
 
   isAdmin = this.authService.currentUser()?.systemRole === 'ADMIN';
-  defaultTabIndex = this.isAdmin ? 0 : 1;
+  activeTab = signal<'analytics' | 'queue'>('analytics');
 
   pendingReturns = signal<AdminReturnRequest[]>([]);
   pendingOrders = signal<Order[]>([]);

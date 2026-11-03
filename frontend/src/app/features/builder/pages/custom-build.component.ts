@@ -1,4 +1,4 @@
-import { Component, inject, DestroyRef } from '@angular/core';
+import { Component, inject, DestroyRef, signal, computed } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { BuilderService } from '../services/builder.service';
@@ -17,59 +17,73 @@ export class CustomBuildComponent {
   private builderService = inject(BuilderService);
   private destroyRef = inject(DestroyRef);
 
-  slots: BuilderSlot[] = [];
-  selections = new Map<string, BuilderSelection>();
-  validation: BuilderValidation | null = null;
-  loading = true;
+  slots = signal<BuilderSlot[]>([]);
+  selections = signal<Map<string, BuilderSelection>>(new Map());
+  validation = signal<BuilderValidation | null>(null);
+  loading = signal(true);
 
   constructor() {
     this.loadSlots();
   }
 
   private loadSlots() {
-    this.loading = true;
+    this.loading.set(true);
     this.builderService.getSlots().pipe(
       takeUntilDestroyed(this.destroyRef),
     ).subscribe(res => {
-      this.slots = res.content;
-      this.loading = false;
+      this.slots.set(res.content);
+      this.loading.set(false);
     });
   }
 
   onSlotSelected(selection: BuilderSelection) {
-    this.selections.set(selection.slotType, selection);
+    this.selections.update(map => {
+      const next = new Map(map);
+      next.set(selection.slotType, selection);
+      return next;
+    });
     this.revalidate();
   }
 
   onSlotRemoved(slotType: string) {
-    this.selections.delete(slotType);
+    this.selections.update(map => {
+      const next = new Map(map);
+      next.delete(slotType);
+      return next;
+    });
+    this.revalidate();
+  }
+
+  onClearBuild() {
+    this.selections.set(new Map());
     this.revalidate();
   }
 
   private revalidate() {
-    const items = Array.from(this.selections.values());
+    const items = Array.from(this.selections().values());
     this.builderService.validate(items).pipe(
       takeUntilDestroyed(this.destroyRef),
     ).subscribe(v => {
-      this.validation = v;
+      this.validation.set(v);
     });
   }
 
   getSlotSelection(slotType: string): BuilderSelection | undefined {
-    return this.selections.get(slotType);
+    return this.selections().get(slotType);
   }
 
-  get hasConflict(): boolean {
-    return this.validation ? !this.validation.valid : false;
-  }
+  hasConflict = computed(() => {
+    const v = this.validation();
+    return v ? !v.valid : false;
+  });
 
-  get missingRequired(): boolean {
-    return this.slots.filter(s => s.isRequired).some(s => !this.selections.has(s.slotType));
-  }
+  missingRequired = computed(() => {
+    return this.slots().filter(s => s.isRequired).some(s => !this.selections().has(s.slotType));
+  });
 
-  get canAddToCart(): boolean {
-    return !this.missingRequired && !this.hasConflict;
-  }
+  canAddToCart = computed(() => {
+    return !this.missingRequired() && !this.hasConflict();
+  });
 
   onAddToCart() {}
 }

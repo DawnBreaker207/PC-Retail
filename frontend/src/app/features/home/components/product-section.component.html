@@ -1,41 +1,80 @@
-<div class="max-w-screen-2xl mx-auto px-4 mt-8 lg:mt-10">
-  <div class="flex items-center justify-between mb-5">
-    <h2 class="text-lg lg:text-xl font-bold tracking-tight">{{ section().title }}</h2>
-    <a [routerLink]="linkPath()" [queryParams]="linkQueryParams()" class="text-sm text-muted dark:text-muted-dark hover:text-primary font-medium transition-colors">
-      Xem tất cả →
-    </a>
+<div class="max-w-screen-2xl mx-auto px-4 mt-8 lg:mt-12">
+  <!-- GearVN-Style Header Bar with Pills SubNav -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5 pb-3 border-b border-border/60 dark:border-border-dark/60">
+    <div class="flex items-center gap-3">
+      <div class="h-6 w-1.5 bg-primary rounded-full"></div>
+      <h2 class="text-lg lg:text-xl font-black uppercase tracking-tight text-slate-900 dark:!text-white">
+        {{ section().title }}
+      </h2>
+    </div>
+
+    <div class="flex items-center gap-4">
+      <!-- SubNav Tabs (Quick Filter Pills) -->
+      @if (section().subNav && section().subNav.length > 0) {
+        <div class="flex items-center gap-1.5 overflow-x-auto scrollbar-none py-1 max-w-full" role="tablist">
+          <!-- All Tab -->
+          <button
+            type="button"
+            (click)="resetFilter()"
+            class="h-8 px-3.5 text-xs font-bold rounded-xl transition-all whitespace-nowrap shrink-0 border"
+            [class.bg-primary]="activeSubNav() === ''"
+            [class.text-white]="activeSubNav() === ''"
+            [class.border-primary]="activeSubNav() === ''"
+            [class.shadow-xs]="activeSubNav() === ''"
+            [class.bg-surface]="activeSubNav() !== ''"
+            [class.dark:bg-surface-dark]="activeSubNav() !== ''"
+            [class.text-muted]="activeSubNav() !== ''"
+            [class.dark:text-muted-dark]="activeSubNav() !== ''"
+            [class.border-border/80]="activeSubNav() !== ''"
+            [class.dark:border-border-dark/80]="activeSubNav() !== ''"
+            [class.hover:border-primary]="activeSubNav() !== ''"
+            [class.hover:text-primary]="activeSubNav() !== ''"
+          >
+            Tất cả
+          </button>
+
+          @for (nav of section().subNav; track nav.slug) {
+            <button
+              type="button"
+              (click)="filterBy(nav.slug)"
+              class="h-8 px-3.5 text-xs font-semibold rounded-xl transition-all whitespace-nowrap shrink-0 border"
+              [class.bg-primary]="activeSubNav() === nav.slug"
+              [class.text-white]="activeSubNav() === nav.slug"
+              [class.border-primary]="activeSubNav() === nav.slug"
+              [class.shadow-xs]="activeSubNav() === nav.slug"
+              [class.bg-surface]="activeSubNav() !== nav.slug"
+              [class.dark:bg-surface-dark]="activeSubNav() !== nav.slug"
+              [class.text-muted]="activeSubNav() !== nav.slug"
+              [class.dark:text-muted-dark]="activeSubNav() !== nav.slug"
+              [class.border-border/80]="activeSubNav() !== nav.slug"
+              [class.dark:border-border-dark/80]="activeSubNav() !== nav.slug"
+              [class.hover:border-primary]="activeSubNav() !== nav.slug"
+              [class.hover:text-primary]="activeSubNav() !== nav.slug"
+            >
+              {{ nav.label }}
+            </button>
+          }
+        </div>
+      }
+
+      <!-- View All Link Header -->
+      <a
+        [routerLink]="linkPath()"
+        [queryParams]="linkQueryParams()"
+        class="hidden sm:inline-flex items-center gap-1 text-xs text-primary dark:!text-red-400 font-bold hover:underline transition-all whitespace-nowrap shrink-0"
+      >
+        <span>Xem tất cả</span>
+        <lucide-angular [img]="ChevronRight" class="w-3.5 h-3.5" />
+      </a>
+    </div>
   </div>
 
-  @if (section().subNav && section().subNav.length > 0) {
-    <div class="flex flex-wrap gap-1.5 mb-5" role="tablist" [attr.aria-label]="'Danh mục ' + section().title">
-      @for (nav of section().subNav; track nav.slug; let i = $index) {
-        <button
-          class="min-h-11 px-4 text-xs font-medium rounded-full border transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-primary/60 focus-visible:outline-offset-1"
-          [class.bg-surface-card]="activeSubNav() !== nav.slug"
-          [class.text-muted]="activeSubNav() !== nav.slug"
-          [class.border-border/80]="activeSubNav() !== nav.slug"
-          [class.dark:bg-surface-card-dark]="activeSubNav() !== nav.slug"
-          [class.dark:text-muted-dark]="activeSubNav() !== nav.slug"
-          [class.dark:border-border-dark/80]="activeSubNav() !== nav.slug"
-          [class.bg-primary]="activeSubNav() === nav.slug"
-          [class.text-white]="activeSubNav() === nav.slug"
-          [class.border-primary]="activeSubNav() === nav.slug"
-          (click)="filterBy(nav.slug)"
-          role="tab"
-          [attr.aria-selected]="activeSubNav() === nav.slug"
-          [attr.aria-controls]="'section-panel-' + section().title"
-          [id]="'section-tab-' + section().title + '-' + i"
-        >
-          {{ nav.label }}
-        </button>
-      }
-    </div>
-  }
-
-  <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4"
-       role="tabpanel"
-       [attr.aria-label]="'Sản phẩm ' + section().title"
-       [id]="'section-panel-' + section().title">
+  <!-- Product Grid -->
+  <div
+    class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4"
+    role="tabpanel"
+    [attr.aria-label]="'Sản phẩm ' + section().title"
+  >
     @for (product of filteredProducts(); track product.id) {
       <app-product-card
         [product]="product"
@@ -43,5 +82,17 @@
         (addToCart)="cartStore.addItem(product.id, 1)"
       />
     }
+  </div>
+
+  <!-- Bottom CTA: View More (GearVN Style) -->
+  <div class="mt-6 flex justify-center">
+    <a
+      [routerLink]="linkPath()"
+      [queryParams]="linkQueryParams()"
+      class="h-10 px-8 rounded-xl border border-border/80 dark:border-border-dark/80 bg-surface dark:bg-surface-dark hover:border-primary hover:text-primary text-xs font-bold inline-flex items-center gap-2 transition-all shadow-2xs hover:shadow-sm group text-slate-800 dark:!text-slate-100"
+    >
+      <span>Xem tất cả {{ section().title }}</span>
+      <lucide-angular [img]="ArrowRight" class="w-3.5 h-3.5 text-primary group-hover:translate-x-1 transition-transform" />
+    </a>
   </div>
 </div>

@@ -1,9 +1,14 @@
 import { Component, inject, output, signal } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
-import { NzFormModule } from 'ng-zorro-antd/form';
-import { NzInputModule } from 'ng-zorro-antd/input';
-import { NzButtonModule } from 'ng-zorro-antd/button';
-import { NzIconModule } from 'ng-zorro-antd/icon';
+import {
+  FormBuilder,
+  ReactiveFormsModule,
+  Validators,
+  AbstractControl,
+  ValidationErrors,
+} from '@angular/forms';
+import { LucideAngularModule, Eye, EyeOff, Loader2 } from 'lucide-angular';
+import { HlmButtonDirective } from '@shared/ui/button';
+import { HlmInputDirective } from '@shared/ui/input';
 import { AuthService } from '@core/auth/auth.service';
 import { finalize, switchMap } from 'rxjs';
 
@@ -15,12 +20,22 @@ function passwordMatchValidator(control: AbstractControl): ValidationErrors | nu
 
 @Component({
   selector: 'app-register-form',
-  imports: [ReactiveFormsModule, NzFormModule, NzInputModule, NzButtonModule, NzIconModule],
+  standalone: true,
+  imports: [
+    ReactiveFormsModule,
+    LucideAngularModule,
+    HlmButtonDirective,
+    HlmInputDirective,
+  ],
   templateUrl: './register-form.component.html',
 })
 export class RegisterFormComponent {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
+
+  readonly EyeIcon = Eye;
+  readonly EyeOffIcon = EyeOff;
+  readonly LoaderIcon = Loader2;
 
   registerSuccess = output();
   isLoading = signal(false);
@@ -35,7 +50,7 @@ export class RegisterFormComponent {
       password: ['', [Validators.required, Validators.minLength(6)]],
       confirmPassword: ['', [Validators.required]],
     },
-    { validators: passwordMatchValidator },
+    { validators: passwordMatchValidator }
   );
 
   submit() {
@@ -43,15 +58,20 @@ export class RegisterFormComponent {
 
     this.isLoading.set(true);
     const raw = this.form.getRawValue();
-    const data = { fullName: raw.fullName, email: raw.email, phone: raw.phone, password: raw.password };
+    const data = {
+      fullName: raw.fullName,
+      email: raw.email,
+      phone: raw.phone,
+      password: raw.password,
+    };
 
     this.authService
       .register(data)
       .pipe(
         switchMap(() =>
-          this.authService.login({ email: data.email, password: data.password }),
+          this.authService.login({ email: data.email, password: data.password })
         ),
-        finalize(() => this.isLoading.set(false)),
+        finalize(() => this.isLoading.set(false))
       )
       .subscribe(() => this.registerSuccess.emit());
   }

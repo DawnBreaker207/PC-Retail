@@ -2,10 +2,7 @@ import { Component, inject, input, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { NzCheckboxModule } from 'ng-zorro-antd/checkbox';
-import { NzInputNumberModule } from 'ng-zorro-antd/input-number';
-import { NzButtonModule } from 'ng-zorro-antd/button';
-import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
+import { LucideAngularModule, Trash2, Minus, Plus } from 'lucide-angular';
 import { CurrencyFormatPipe } from '@shared/pipes/currency-format.pipe';
 import { CartItem } from '@core/models/common.model';
 import { CartStore } from '@features/cart/store/cart.store';
@@ -13,13 +10,11 @@ import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
 
 @Component({
   selector: 'app-cart-item',
+  standalone: true,
   imports: [
     RouterLink,
     FormsModule,
-    NzCheckboxModule,
-    NzInputNumberModule,
-    NzButtonModule,
-    NzPopconfirmModule,
+    LucideAngularModule,
     CurrencyFormatPipe,
   ],
   templateUrl: './cart-item.component.html',
@@ -28,6 +23,10 @@ export class CartItemComponent {
   private store = inject(CartStore);
   private destroyRef = inject(DestroyRef);
   item = input.required<CartItem>();
+
+  readonly Trash2Icon = Trash2;
+  readonly MinusIcon = Minus;
+  readonly PlusIcon = Plus;
 
   private qtySubject = new Subject<number>();
 
@@ -40,7 +39,22 @@ export class CartItemComponent {
   }
 
   onQtyChange(qty: number) {
+    if (qty < 1) return;
     this.qtySubject.next(qty);
+  }
+
+  decrementQty() {
+    const current = this.item().quantity;
+    if (current > 1) {
+      this.onQtyChange(current - 1);
+    }
+  }
+
+  incrementQty() {
+    const current = this.item().quantity;
+    if (current < this.item().stock) {
+      this.onQtyChange(current + 1);
+    }
   }
 
   toggleSelect() {

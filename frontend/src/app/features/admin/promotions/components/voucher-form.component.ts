@@ -1,35 +1,33 @@
-import { Component, inject, DestroyRef, signal, OnInit } from '@angular/core';
+import { Component, inject, DestroyRef, signal, OnInit, output } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpClient } from '@angular/common/http';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { NzFormModule } from 'ng-zorro-antd/form';
-import { NzInputModule } from 'ng-zorro-antd/input';
-import { NzSelectModule } from 'ng-zorro-antd/select';
-import { NzRadioModule } from 'ng-zorro-antd/radio';
-import { NzInputNumberModule } from 'ng-zorro-antd/input-number';
-import { NzDatePickerModule } from 'ng-zorro-antd/date-picker';
-import { NzButtonModule } from 'ng-zorro-antd/button';
-import { NzMessageService } from 'ng-zorro-antd/message';
+import { HlmButtonDirective } from '@shared/ui/button';
+import { HlmInputDirective } from '@shared/ui/input';
+import { ToastService } from '@core/services/toast.service';
 import { ApiEndpoints } from '@core/api/api.endpoints';
 
 @Component({
   selector: 'app-voucher-form',
+  standalone: true,
   imports: [
-    FormsModule, ReactiveFormsModule,
-    NzFormModule, NzInputModule, NzSelectModule, NzRadioModule, NzInputNumberModule,
-    NzDatePickerModule, NzButtonModule,
+    FormsModule,
+    ReactiveFormsModule,
+    HlmButtonDirective,
+    HlmInputDirective,
   ],
   templateUrl: './voucher-form.component.html',
-  styleUrl: './voucher-form.component.css',
 })
 export class VoucherFormComponent implements OnInit {
   private fb = inject(FormBuilder);
   private http = inject(HttpClient);
   private destroyRef = inject(DestroyRef);
-  private message = inject(NzMessageService);
+  private toast = inject(ToastService);
+
+  readonly saved = output<boolean>();
+  readonly cancelled = output<void>();
 
   submitting = signal(false);
-  close?: () => void;
 
   form = this.fb.nonNullable.group({
     code: ['', [Validators.required]],
@@ -39,8 +37,8 @@ export class VoucherFormComponent implements OnInit {
     maxDiscountAmount: [0],
     minOrderValue: [0],
     totalQuantity: [1, [Validators.required, Validators.min(1)]],
-    validFrom: [null as Date | null, [Validators.required]],
-    validTo: [null as Date | null, [Validators.required]],
+    validFrom: ['', [Validators.required]],
+    validTo: ['', [Validators.required]],
   });
 
   ngOnInit() {
@@ -62,16 +60,16 @@ export class VoucherFormComponent implements OnInit {
   private validateDates() {
     const from = this.form.get('validFrom')?.value;
     const to = this.form.get('validTo')?.value;
-    if (from && to && from >= to) {
+    if (from && to && new Date(from) >= new Date(to)) {
       this.form.get('validTo')?.setErrors({ dateOrder: true });
     } else {
-      this.form.get('validTo')?.updateValueAndValidity({ onlySelf: true });
+      this.form.get('validTo')?.setErrors(null);
     }
   }
 
-  vndFormatter = (value: number) => {
-    return value?.toLocaleString('vi-VN') + '₫' || '0₫';
-  };
+  cancel() {
+    this.cancelled.emit();
+  }
 
   onSubmit() {
     if (this.form.invalid) return;
@@ -87,11 +85,12 @@ export class VoucherFormComponent implements OnInit {
       .subscribe({
         next: () => {
           this.submitting.set(false);
-          this.close?.();
+          this.toast.success('Tạo voucher thành công');
+          this.saved.emit(true);
         },
         error: () => {
           this.submitting.set(false);
-          this.message.error('Tạo voucher thất bại');
+          this.toast.error('Tạo voucher thất bại');
         },
       });
   }

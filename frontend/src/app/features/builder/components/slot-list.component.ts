@@ -1,18 +1,39 @@
 import { Component, input, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { NzButtonModule } from 'ng-zorro-antd/button';
-import { NzIconModule } from 'ng-zorro-antd/icon';
-import { NzAlertModule } from 'ng-zorro-antd/alert';
-import { BuilderSlot, BuilderSelection, BuilderConflict, Sku } from '@core/models/common.model';
+import {
+  LucideAngularModule,
+  Cpu,
+  Layers,
+  Zap,
+  HardDrive,
+  Monitor,
+  Box,
+  Fan,
+  Keyboard,
+  Mouse,
+  Headphones,
+  Pencil,
+  Trash2,
+  Plus,
+  AlertCircle,
+  LucideIconData,
+} from 'lucide-angular';
+import { HlmButtonDirective } from '@shared/ui/button';
+import { BuilderSlot, BuilderSelection, BuilderConflict, Sku, BuilderSlotType } from '@core/models/common.model';
 import { CurrencyFormatPipe } from '@shared/pipes/currency-format.pipe';
 import { FallbackImageDirective } from '@shared/directives/fallback-image.directive';
 import { ProductPickerModalComponent } from './product-picker-modal.component';
 
 @Component({
   selector: 'app-slot-list',
+  standalone: true,
   imports: [
-    CommonModule, FallbackImageDirective, NzButtonModule, NzIconModule, NzAlertModule,
-    CurrencyFormatPipe, ProductPickerModalComponent,
+    CommonModule,
+    FallbackImageDirective,
+    LucideAngularModule,
+    HlmButtonDirective,
+    CurrencyFormatPipe,
+    ProductPickerModalComponent,
   ],
   templateUrl: './slot-list.component.html',
   styleUrl: './slot-list.component.css',
@@ -28,14 +49,32 @@ export class SlotListComponent {
   showPicker = false;
   pickerSlotType: string | null = null;
 
-  slotIcons: Record<string, string> = {
-    CPU: 'tool', Mainboard: 'layout', RAM: 'database', GPU: 'thunderbolt',
-    PSU: 'thunderbolt', Case: 'build', Storage: 'folder', Cooler: 'fire',
-    Monitor: 'monitor', Keyboard: 'tool', Mouse: 'scan', Headphone: 'audio',
+  readonly PencilIcon = Pencil;
+  readonly Trash2Icon = Trash2;
+  readonly PlusIcon = Plus;
+  readonly AlertCircleIcon = AlertCircle;
+
+  private iconMap: Record<string, LucideIconData> = {
+    CPU: Cpu,
+    MAINBOARD: Layers,
+    RAM: Cpu,
+    VGA: Monitor,
+    PSU: Zap,
+    CASE: Box,
+    STORAGE: HardDrive,
+    COOLER: Fan,
+    MONITOR: Monitor,
+    KEYBOARD: Keyboard,
+    MOUSE: Mouse,
+    HEADPHONE: Headphones,
   };
 
+  getSlotIcon(slotType: string): LucideIconData {
+    return this.iconMap[slotType.toUpperCase()] || Cpu;
+  }
+
   getConflict(slotType: string): BuilderConflict | undefined {
-    return this.conflicts().find(c => c.slotType === slotType);
+    return this.conflicts().find((c) => c.slotType === slotType);
   }
 
   getSelection(slotType: string): BuilderSelection | undefined {
@@ -55,12 +94,12 @@ export class SlotListComponent {
   onProductPicked(sku: Sku) {
     if (this.pickerSlotType) {
       this.selectSlot.emit({
-        slotType: this.pickerSlotType as BuilderSlot['slotType'],
-        slotName: this.slots().find(s => s.slotType === this.pickerSlotType)?.slotName ?? '',
+        slotType: this.pickerSlotType as BuilderSlotType,
+        slotName: this.slots().find((s) => s.slotType === this.pickerSlotType)?.slotName ?? '',
         sku,
       });
+      this.closePicker();
     }
-    this.closePicker();
   }
 
   confirmRemove(slotType: string) {

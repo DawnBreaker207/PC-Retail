@@ -1,20 +1,30 @@
 import { Component, input, output } from '@angular/core';
-import { NzButtonModule } from 'ng-zorro-antd/button';
-import { NzRadioModule } from 'ng-zorro-antd/radio';
+import { LucideAngularModule, MapPin, Loader2, Store, Truck, Building2 } from 'lucide-angular';
+import { HlmButtonDirective } from '@shared/ui/button';
 import { CurrencyFormatPipe } from '@shared/pipes/currency-format.pipe';
-import { CartItem, ShippingAddress } from '@core/models/common.model';
+import { CartItem, ShippingAddress, TaxInfo, FulfillmentType } from '@core/models/common.model';
 
 @Component({
   selector: 'app-order-review',
-  imports: [NzButtonModule, NzRadioModule, CurrencyFormatPipe],
+  standalone: true,
+  imports: [LucideAngularModule, HlmButtonDirective, CurrencyFormatPipe],
   templateUrl: './order-review.component.html',
 })
 export class OrderReviewComponent {
   shippingAddress = input<ShippingAddress | null>(null);
+  fulfillmentType = input<FulfillmentType>('DELIVERY');
+  taxInfo = input<TaxInfo | undefined>(undefined);
+  invoiceRequested = input(false);
   items = input<CartItem[]>([]);
   total = input(0);
   isPlacing = input(false);
 
   back = output();
   placeOrder = output();
+
+  readonly MapPinIcon = MapPin;
+  readonly LoaderIcon = Loader2;
+  readonly StoreIcon = Store;
+  readonly TruckIcon = Truck;
+  readonly BuildingIcon = Building2;
 }

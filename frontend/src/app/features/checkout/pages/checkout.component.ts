@@ -1,13 +1,19 @@
-import { Component, effect, inject, signal, DestroyRef, PLATFORM_ID,
-  OnDestroy } from '@angular/core';
+import {
+  Component,
+  effect,
+  inject,
+  signal,
+  DestroyRef,
+  PLATFORM_ID,
+  OnDestroy,
+} from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
-import { NzStepsModule } from 'ng-zorro-antd/steps';
-import { NzButtonModule } from 'ng-zorro-antd/button';
+import { LucideAngularModule, Check, Truck, ShieldCheck, CreditCard } from 'lucide-angular';
 import { CurrencyFormatPipe } from '@shared/pipes/currency-format.pipe';
 import { FallbackImageDirective } from '@shared/directives/fallback-image.directive';
-import { ShippingFormComponent } from '../components/shipping-form.component';
+import { ShippingFormComponent, ShippingStepResult } from '../components/shipping-form.component';
 import { OrderReviewComponent } from '../components/order-review.component';
 import { CheckoutService } from '@core/services/checkout.service';
 import { AuthService } from '@core/auth/auth.service';
@@ -18,10 +24,11 @@ import { switchMap, finalize } from 'rxjs';
 
 @Component({
   selector: 'app-checkout',
+  standalone: true,
   imports: [
-    NzStepsModule,
-    NzButtonModule,
-    CurrencyFormatPipe, FallbackImageDirective,
+    LucideAngularModule,
+    CurrencyFormatPipe,
+    FallbackImageDirective,
     ShippingFormComponent,
     OrderReviewComponent,
   ],
@@ -35,60 +42,64 @@ export class CheckoutComponent implements OnDestroy {
   private destroyRef = inject(DestroyRef);
   private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
 
+  readonly CheckIcon = Check;
+  readonly TruckIcon = Truck;
+  readonly ShieldCheckIcon = ShieldCheck;
+  readonly CreditCardIcon = CreditCard;
+
   currentStep = signal(0);
-  shippingData = signal<ShippingAddress | null>(null);
+  shippingData = signal<ShippingStepResult | null>(null);
   isPlacing = signal(false);
-  windowWidth = signal(0);
   private createdOrderId = 0;
-  private onResize = () => this.windowWidth.set(window.innerWidth);
+  private orderPlaced = false;
 
   constructor() {
-    if (typeof window !== 'undefined') {
-      this.windowWidth.set(window.innerWidth);
-      window.addEventListener('resize', this.onResize);
-    }
-    // Reload first: landing mid-flow on /checkout must not bounce to /cart on stale state.
     this.store.loadCart();
     effect(() => {
-      // Browser-only: the server has no session, so its cart is always empty.
       if (!this.isBrowser) return;
-      if (!this.store.isLoading() && this.selectedItems().length === 0) {
+      if (!this.orderPlaced && !this.isPlacing() && !this.store.isLoading() && this.selectedItems().length === 0) {
         this.router?.navigate(['/cart']);
       }
     });
   }
 
   ngOnDestroy() {
-    if (typeof window !== 'undefined') {
-      window.removeEventListener('resize', this.onResize);
-    }
+    // cleanup
   }
 
   selectedItems = this.store.selectedItems;
   selectedAmount = this.store.selectedAmount;
 
-  onShippingComplete(data: ShippingAddress) {
+  onShippingComplete(data: ShippingStepResult) {
     this.shippingData.set(data);
     this.currentStep.set(1);
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   }
 
   backToShipping() {
     this.currentStep.set(0);
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   }
 
   placeOrder() {
-    const addr = this.shippingData();
-    if (!addr || this.isPlacing()) return;
+    const sData = this.shippingData();
+    if (!sData || this.isPlacing()) return;
 
     this.isPlacing.set(true);
     if (!this.auth.isAuthenticated()) {
-      this.placeGuestOrder(addr);
+      this.placeGuestOrder(sData);
       return;
     }
     const req: CheckoutRequest = {
       idempotencyKey: crypto.randomUUID(),
-      fulfillmentType: 'DELIVERY',
-      shippingAddress: addr,
+      fulfillmentType: sData.fulfillmentType,
+      shippingAddress: sData.address,
+      taxInfo: sData.taxInfo,
+      invoiceRequested: sData.invoiceRequested,
     };
 
     this.checkoutService
@@ -99,11 +110,13 @@ export class CheckoutComponent implements OnDestroy {
           return this.checkoutService.initiatePayment(res.id);
         }),
         finalize(() => this.isPlacing.set(false)),
-        takeUntilDestroyed(this.destroyRef),
+        takeUntilDestroyed(this.destroyRef)
       )
       .subscribe({
         next: () => {
-          const ok = window.confirm('Mô phỏng thanh toán VNPay\n\nOK = Thành công\nHuỷ = Thất bại');
+          const ok = window.confirm(
+            'Mô phỏng thanh toán VNPay\n\nOK = Thành công\nHuỷ = Thất bại'
+          );
           const code = ok ? '00' : '01';
           window.location.href = `/checkout/result?orderId=${this.createdOrderId}&vnp_ResponseCode=${code}&vnp_TransactionNo=MOCK${Date.now()}`;
         },
@@ -114,22 +127,23 @@ export class CheckoutComponent implements OnDestroy {
       });
   }
 
-  private placeGuestOrder(addr: ShippingAddress) {
+  private placeGuestOrder(sData: ShippingStepResult) {
     this.isPlacing.set(true);
     this.checkoutService
       .guestCheckout({
         idempotencyKey: crypto.randomUUID(),
-        fulfillmentType: 'DELIVERY',
-        shippingAddress: addr,
+        fulfillmentType: sData.fulfillmentType,
+        shippingAddress: sData.address,
         guestToken: getGuestToken(),
-        guestPhone: addr.phone,
+        guestPhone: sData.address.phone,
       })
       .pipe(
         finalize(() => this.isPlacing.set(false)),
-        takeUntilDestroyed(this.destroyRef),
+        takeUntilDestroyed(this.destroyRef)
       )
       .subscribe({
         next: (res) => {
+          this.orderPlaced = true;
           this.store.clearCart();
           this.router?.navigate(['/checkout/result'], {
             queryParams: { orderId: res.id, guest: 1 },

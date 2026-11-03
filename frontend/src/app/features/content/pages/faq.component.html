@@ -1,16 +1,33 @@
 <div class="max-w-3xl mx-auto px-4 py-6 lg:py-8">
-  <nz-breadcrumb class="mb-4">
-    <nz-breadcrumb-item><a routerLink="/">Trang chủ</a></nz-breadcrumb-item>
-    <nz-breadcrumb-item>Câu hỏi thường gặp</nz-breadcrumb-item>
-  </nz-breadcrumb>
+  <nav class="flex items-center gap-1.5 text-xs text-muted dark:text-muted-dark mb-4">
+    <a routerLink="/" class="hover:text-primary transition-colors">Trang chủ</a>
+    <lucide-angular [img]="ChevronRight" class="w-3.5 h-3.5 text-muted/60" />
+    <span class="text-ink dark:text-ink-dark font-medium">Câu hỏi thường gặp</span>
+  </nav>
 
   <h1 class="text-xl lg:text-2xl font-bold mb-6">Câu hỏi thường gặp</h1>
 
-  <nz-collapse>
+  <div class="space-y-3">
     @for (item of faqs; track item.q) {
-      <nz-collapse-panel [nzHeader]="item.q">
-        <p class="text-sm text-muted dark:text-muted-dark leading-relaxed">{{ item.a }}</p>
-      </nz-collapse-panel>
+      <div class="rounded-card border border-border/80 dark:border-border-dark/80 bg-surface dark:bg-surface-dark overflow-hidden transition-colors">
+        <button
+          type="button"
+          (click)="toggle($index)"
+          class="w-full flex items-center justify-between p-4 text-left font-medium text-sm text-ink dark:text-ink-dark hover:text-primary transition-colors focus:outline-none"
+        >
+          <span>{{ item.q }}</span>
+          <lucide-angular
+            [img]="ChevronDown"
+            class="w-4 h-4 text-muted shrink-0 transition-transform duration-200"
+            [class.rotate-180]="isOpen($index)"
+          />
+        </button>
+        @if (isOpen($index)) {
+          <div class="px-4 pb-4 pt-1 text-sm text-muted dark:text-muted-dark border-t border-border/40 dark:border-border-dark/40 leading-relaxed animate-fade-in">
+            {{ item.a }}
+          </div>
+        }
+      </div>
     }
-  </nz-collapse>
+  </div>
 </div>

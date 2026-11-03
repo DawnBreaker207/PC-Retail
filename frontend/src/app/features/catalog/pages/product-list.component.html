@@ -1,17 +1,20 @@
 <div class="max-w-screen-2xl mx-auto px-4 py-6 lg:py-8">
   <h1 class="sr-only">{{ headerTitle() }}</h1>
-  <nz-breadcrumb class="mb-4">
-    <nz-breadcrumb-item><a routerLink="/">Trang chủ</a></nz-breadcrumb-item>
-    <nz-breadcrumb-item>{{ headerTitle() }}</nz-breadcrumb-item>
-  </nz-breadcrumb>
+
+  <!-- Breadcrumb -->
+  <nav aria-label="Breadcrumb" class="mb-4 flex items-center gap-1.5 text-xs text-muted dark:text-muted-dark">
+    <a routerLink="/" class="hover:text-primary transition-colors">Trang chủ</a>
+    <lucide-icon [img]="ChevronRightIcon" class="size-3.5 text-muted/60" />
+    <span class="text-foreground font-medium">{{ headerTitle() }}</span>
+  </nav>
 
   @if (activeCategory(); as cat) {
-    <div class="flex items-center gap-4 mb-5 p-5 rounded-card bg-primary-light dark:bg-primary/10 border border-primary/20">
-      <div class="w-12 h-12 shrink-0 rounded-full flex items-center justify-center bg-primary text-white">
-        <span nz-icon [nzType]="cat.icon" nzTheme="outline" class="text-xl"></span>
+    <div class="flex items-center gap-4 mb-5 p-5 rounded-xl bg-primary/10 border border-primary/20">
+      <div class="w-12 h-12 shrink-0 rounded-xl flex items-center justify-center bg-primary text-white shadow-sm font-bold text-lg">
+        {{ cat.name.charAt(0) }}
       </div>
       <div class="min-w-0">
-        <h2 class="text-lg font-bold text-ink dark:text-ink-dark">{{ cat.name }}</h2>
+        <h2 class="text-lg font-bold text-foreground">{{ cat.name }}</h2>
         <p class="text-sm text-muted dark:text-muted-dark mt-0.5">
           Khám phá {{ totalElements }} sản phẩm {{ cat.name }} chính hãng, giá tốt nhất tại DAWN
         </p>
@@ -19,7 +22,7 @@
     </div>
   }
 
-  <!-- Horizontal filter bar (desktop) — mobile dùng nút "Bộ lọc" mở drawer -->
+  <!-- Horizontal filter bar (desktop) -->
   <div class="mb-5 hidden lg:block">
     <app-filter-sidebar
       [(filters)]="filters"
@@ -32,41 +35,58 @@
   </div>
 
   <!-- Header row -->
-  <div class="flex flex-wrap items-center gap-3 mb-5">
+  <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
     <span class="text-sm text-muted dark:text-muted-dark font-medium">{{ totalElements }} sản phẩm</span>
 
-    <nz-select
-      [ngModel]="filters().sort"
-      (ngModelChange)="setSort($event)"
-      nzPlaceHolder="Sắp xếp"
-      aria-label="Sắp xếp sản phẩm"
-      class="min-w-[160px] ml-auto"
-    >
-      @for (opt of sortOptions; track opt.value) {
-        <nz-option [nzValue]="opt.value" [nzLabel]="opt.label" />
-      }
-    </nz-select>
+    <div class="flex items-center gap-2.5 ml-auto">
+      <!-- Sort Select -->
+      <div class="relative">
+        <select
+          [value]="filters().sort"
+          (change)="onSortChange($event)"
+          aria-label="Sắp xếp sản phẩm"
+          class="h-9 min-w-[160px] appearance-none rounded-lg border border-border/80 bg-surface dark:bg-surface-dark px-3 pr-8 text-xs font-medium text-foreground shadow-sm transition-colors hover:border-primary/50 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+        >
+          @for (opt of sortOptions; track opt.value) {
+            <option [value]="opt.value">{{ opt.label }}</option>
+          }
+        </select>
+        <div class="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-muted dark:text-muted-dark text-[10px]">▼</div>
+      </div>
 
-    <button
-      nz-button
-      nzType="default"
-      class="lg:!hidden"
-      (click)="drawerOpen.set(true)"
-    >
-      <span nz-icon nzType="filter" nzTheme="outline"></span>
-      <!-- Pre-wrapped: nz-button wraps bare text in ngAfterViewInit, which breaks SSR hydration. -->
-      <span>Bộ lọc</span>
-    </button>
+      <!-- Mobile Filter Toggle Button -->
+      <button
+        type="button"
+        hlmBtn
+        variant="outline"
+        size="sm"
+        class="lg:hidden h-9 px-3 text-xs font-medium flex items-center gap-1.5 rounded-lg border-border/80"
+        (click)="drawerOpen.set(true)"
+      >
+        <lucide-icon [img]="FilterIcon" class="size-3.5" />
+        <span>Bộ lọc</span>
+      </button>
+    </div>
   </div>
 
   <!-- Product grid -->
   @if (isLoading) {
     <app-loading-spinner />
   } @else if (products.length === 0) {
-    <div class="flex flex-col items-center justify-center py-20 text-center">
-      <span nz-icon nzType="frown" nzTheme="outline" class="text-5xl text-muted/30 dark:text-muted-dark/30 mb-4"></span>
-      <h2 class="text-lg font-semibold text-muted dark:text-muted-dark mb-1">Không tìm thấy sản phẩm</h2>
-      <p class="text-sm text-muted/60 dark:text-muted-dark/60">Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm</p>
+    <div class="flex flex-col items-center justify-center py-20 text-center rounded-2xl border border-dashed border-border/80 bg-surface/50 dark:bg-surface-dark/50 p-8">
+      <lucide-icon [img]="FrownIcon" class="size-14 text-muted/40 mb-3" />
+      <h2 class="text-base font-semibold text-foreground mb-1">Không tìm thấy sản phẩm</h2>
+      <p class="text-sm text-muted dark:text-muted-dark">Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm</p>
+      <button
+        type="button"
+        hlmBtn
+        variant="secondary"
+        size="sm"
+        class="mt-4 text-xs"
+        (click)="onClearFilters()"
+      >
+        Đặt lại bộ lọc
+      </button>
     </div>
   } @else {
     <div class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-4">
@@ -79,41 +99,75 @@
       }
     </div>
 
+    <!-- Pagination -->
     @if (totalPages > 1) {
-      <div class="flex justify-center mt-8">
-        <nz-pagination
-          [nzPageIndex]="filters().page"
-          [nzTotal]="totalElements"
-          [nzPageSize]="filters().size"
-          [nzShowSizeChanger]="false"
-          nzAriaPrevious="Trang trước"
-          nzAriaNext="Trang kế"
-          (nzPageIndexChange)="onPageChange($event)"
-        />
+      <div class="flex items-center justify-center gap-1.5 mt-8">
+        <button
+          type="button"
+          hlmBtn
+          variant="outline"
+          size="sm"
+          class="h-9 px-3 rounded-lg text-xs font-medium disabled:opacity-40"
+          [disabled]="filters().page <= 1"
+          (click)="onPageChange(filters().page - 1)"
+          aria-label="Trang trước"
+        >
+          <lucide-icon [img]="ChevronLeftIcon" class="size-3.5 mr-1" />
+          Trước
+        </button>
+
+        <span class="text-xs text-muted dark:text-muted-dark px-3 py-1 font-medium">
+          Trang {{ filters().page }} / {{ totalPages }}
+        </span>
+
+        <button
+          type="button"
+          hlmBtn
+          variant="outline"
+          size="sm"
+          class="h-9 px-3 rounded-lg text-xs font-medium disabled:opacity-40"
+          [disabled]="filters().page >= totalPages"
+          (click)="onPageChange(filters().page + 1)"
+          aria-label="Trang kế"
+        >
+          Sau
+          <lucide-icon [img]="ChevronRightIcon" class="size-3.5 ml-1" />
+        </button>
       </div>
     }
   }
 
-  <!-- Mobile filter panel (plain fixed overlay: nz-drawer breaks SSR hydration) -->
+  <!-- Mobile filter modal / overlay -->
   @if (drawerOpen()) {
     <div class="fixed inset-0 z-[1000] lg:hidden" role="dialog" aria-modal="true" aria-label="Bộ lọc">
-      <div class="absolute inset-0 bg-black/45" (click)="drawerOpen.set(false)"></div>
-      <aside class="absolute left-0 top-0 h-full w-[300px] max-w-[85vw] overflow-y-auto bg-surface dark:bg-surface-dark p-4 shadow-xl">
-        <div class="flex items-center justify-between mb-4">
-          <h2 class="text-base font-semibold text-ink dark:text-ink-dark">Bộ lọc</h2>
-          <button nz-button nzType="text" aria-label="Đóng bộ lọc" (click)="drawerOpen.set(false)">
-            <span nz-icon nzType="close" nzTheme="outline"></span>
+      <div class="absolute inset-0 bg-black/50 backdrop-blur-xs transition-opacity" (click)="drawerOpen.set(false)"></div>
+      <div class="absolute right-0 top-0 bottom-0 w-[300px] max-w-[85vw] bg-surface dark:bg-surface-dark p-5 overflow-y-auto shadow-2xl flex flex-col">
+        <div class="flex items-center justify-between pb-3 border-b border-border/80 mb-4">
+          <h3 class="font-bold text-sm">Bộ lọc sản phẩm</h3>
+          <button type="button" class="text-muted hover:text-foreground p-1" (click)="drawerOpen.set(false)">
+            <lucide-icon [img]="XIcon" class="size-4" />
           </button>
         </div>
-        <app-filter-sidebar
-          [(filters)]="filters"
-          [categories]="categories"
-          [brands]="brands"
-          [specOptions]="specOptions()"
-          (filterChange)="onFiltersChanged()"
-          (clear)="onClearFilters()"
-        />
-      </aside>
+        <div class="flex-1">
+          <app-filter-sidebar
+            [(filters)]="filters"
+            [categories]="categories"
+            [brands]="brands"
+            [specOptions]="specOptions()"
+            (filterChange)="onFiltersChanged()"
+            (clear)="onClearFilters()"
+          />
+        </div>
+        <button
+          type="button"
+          hlmBtn
+          variant="default"
+          class="w-full mt-4"
+          (click)="drawerOpen.set(false)"
+        >
+          Áp dụng
+        </button>
+      </div>
     </div>
   }
 </div>

@@ -1,31 +1,35 @@
 import { Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { LucideAngularModule, ShoppingCart } from 'lucide-angular';
+import { HlmButtonDirective } from '@shared/ui/button';
+import { LoadingSpinnerComponent } from '@shared/components/loading-spinner.component';
 import { CartStore } from '@features/cart/store/cart.store';
 import { CartItemComponent } from '../components/cart-item.component';
 import { OrderSummaryComponent } from '../components/order-summary.component';
-import { NzButtonModule } from 'ng-zorro-antd/button';
-import { NzCheckboxModule } from 'ng-zorro-antd/checkbox';
-import { NzSpinModule } from 'ng-zorro-antd/spin';
-import { NzIconModule } from 'ng-zorro-antd/icon';
 
 @Component({
   selector: 'app-cart',
+  standalone: true,
   imports: [
     RouterLink,
+    LucideAngularModule,
+    HlmButtonDirective,
+    LoadingSpinnerComponent,
     CartItemComponent,
     OrderSummaryComponent,
-    NzButtonModule,
-    NzCheckboxModule,
-    NzSpinModule,
-    NzIconModule,
   ],
   templateUrl: './cart.component.html',
 })
 export class CartComponent {
   readonly store = inject(CartStore);
+  readonly CartIcon = ShoppingCart;
 
-  get items() { return this.store.items; }
-  get isLoading() { return this.store.isLoading; }
+  get items() {
+    return this.store.items;
+  }
+  get isLoading() {
+    return this.store.isLoading;
+  }
 
   get allSelected(): boolean {
     return this.store.items().length > 0 && this.store.items().every((i) => i.selected);

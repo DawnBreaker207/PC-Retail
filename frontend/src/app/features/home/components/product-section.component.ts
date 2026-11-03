@@ -1,5 +1,6 @@
 import { Component, computed, inject, input, signal, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { LucideAngularModule, ChevronRight, Sparkles, Flame, ArrowRight } from 'lucide-angular';
 import { MockDataService } from '@core/services/mock-data.service';
 import { ProductCardComponent } from '@shared/components/product-card.component';
 import { CartStore } from '@features/cart/store/cart.store';
@@ -8,11 +9,16 @@ import { splitLinkQuery } from '@shared/utils/link-query.util';
 
 @Component({
   selector: 'app-product-section',
-  imports: [RouterLink, ProductCardComponent],
+  imports: [RouterLink, ProductCardComponent, LucideAngularModule],
   templateUrl: './product-section.component.html',
   styleUrl: './product-section.component.css',
 })
 export class ProductSectionComponent implements OnInit {
+  readonly ChevronRight = ChevronRight;
+  readonly Sparkles = Sparkles;
+  readonly Flame = Flame;
+  readonly ArrowRight = ArrowRight;
+
   private mock = inject(MockDataService);
   readonly cartStore = inject(CartStore);
 
@@ -30,6 +36,11 @@ export class ProductSectionComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.resetFilter();
+  }
+
+  resetFilter() {
+    this.activeSubNav.set('');
     const cat = this.sectionCategory();
     if (cat) {
       this.filteredProducts.set(this.mock.getProductsByCategory(cat));
@@ -39,7 +50,17 @@ export class ProductSectionComponent implements OnInit {
   }
 
   filterBy(slug: string) {
+    if (this.activeSubNav() === slug) {
+      this.resetFilter();
+      return;
+    }
     this.activeSubNav.set(slug);
-    this.filteredProducts.set(this.mock.getSectionProducts(slug));
+    const res = this.mock.getSectionProducts(slug);
+    if (res.length > 0) {
+      this.filteredProducts.set(res);
+    } else {
+      const cat = this.sectionCategory();
+      this.filteredProducts.set(cat ? this.mock.getProductsByCategory(cat) : this.mock.getSectionProducts());
+    }
   }
 }
