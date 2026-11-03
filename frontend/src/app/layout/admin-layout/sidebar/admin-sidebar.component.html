@@ -1,69 +1,74 @@
-<nz-sider
-  nzCollapsible
-  [nzCollapsed]="isCollapsed()"
-  [nzTrigger]="triggerTemplate"
-  (nzCollapsedChange)="triggerCollapsed.emit($event)"
-  nzWidth="260px"
-  nzBreakpoint="lg"
-  [nzCollapsedWidth]="72"
-  nzTheme="light"
-  class="shadow-[4px_0_24px_rgba(0,0,0,0.02)] z-20 h-full border-r border-border/60 dark:border-border-dark/60 hidden md:block !bg-surface dark:!bg-surface-dark flex flex-col"
+<aside
+  class="h-full border-r border-border/80 dark:border-border-dark bg-surface dark:bg-surface-dark flex flex-col transition-all duration-300 z-20 shrink-0 select-none shadow-2xs"
+  [class.w-64]="!isCollapsed()"
+  [class.w-20]="isCollapsed()"
 >
-  <div class="h-16 shrink-0 flex items-center justify-center border-b border-border/60 dark:border-border-dark/60 sticky top-0 !bg-surface dark:!bg-surface-dark z-10">
-    <a routerLink="/admin" class="flex items-center gap-3 text-decoration-none">
-      <div class="w-9 h-9 rounded-xl bg-primary flex items-center justify-center shadow-md shadow-primary/30">
-        <span nz-icon nzType="thunderbolt" nzTheme="fill" class="text-base text-white"></span>
+  <!-- Brand Logo & Header -->
+  <div class="h-16 shrink-0 flex items-center justify-between px-4 border-b border-border/80 dark:border-border-dark">
+    <a routerLink="/admin" class="flex items-center gap-3 overflow-hidden">
+      <div class="w-9 h-9 rounded-xl bg-primary flex items-center justify-center shadow-sm shadow-primary/30 shrink-0">
+        <lucide-angular [img]="Zap" class="w-5 h-5 text-white" />
       </div>
-      <h1
-        class="text-lg font-black tracking-tight text-ink dark:text-ink-dark m-0 overflow-hidden whitespace-nowrap transition-[max-width,opacity] duration-200 ease-out"
-        [class]="isCollapsed() ? 'max-w-0 opacity-0' : 'max-w-[180px] opacity-100'"
-      >
-        PC <span class="text-primary">ADMIN</span>
-      </h1>
+      @if (!isCollapsed()) {
+        <h1 class="text-base font-black tracking-tight text-ink dark:text-ink-dark m-0 whitespace-nowrap transition-opacity duration-200">
+          PC <span class="text-primary">ADMIN</span>
+        </h1>
+      }
     </a>
   </div>
 
-  <div class="p-3 flex-1 min-h-0 overflow-y-auto custom-scrollbar">
-    <ul nz-menu nzTheme="light" nzMode="inline" [nzInlineCollapsed]="isCollapsed()" class="border-r-0 !bg-transparent space-y-1">
-      @for (section of navSections; track section.title) {
-        <li class="sidebar-section relative h-7 mt-3 mx-1 pointer-events-none select-none overflow-hidden">
-          <span
-            class="absolute inset-0 flex items-center px-3 text-[11px] font-bold uppercase tracking-wider text-muted dark:text-muted-dark whitespace-nowrap transition-opacity duration-200"
-            [class.opacity-0]="isCollapsed()"
-          >
+  <!-- Navigation Sections List -->
+  <div class="p-3 flex-1 min-h-0 overflow-y-auto space-y-4">
+    @for (section of navSections; track section.title) {
+      <div class="space-y-1">
+        @if (!isCollapsed()) {
+          <div class="px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-muted dark:text-muted-dark">
             {{ section.title }}
-          </span>
-          <span
-            class="absolute inset-y-0 left-2 right-2 my-auto h-px bg-border dark:bg-border-dark transition-opacity duration-200"
-            [class.opacity-0]="!isCollapsed()"
-          ></span>
-        </li>
-        @for (item of section.items; track item.route) {
-          <li
-            nz-menu-item
-            [nzSelected]="isActive(item.route)"
-            [routerLink]="[item.route]"
-            class="rounded-xl font-medium text-ink/70 dark:text-ink-dark/70 hover:text-primary hover:bg-primary-light/50 transition-colors"
-          >
-            <span nz-icon [nzType]="item.icon" nzTheme="outline" class="text-lg"></span>
-            <span>{{ item.label }}</span>
-            @if (badgeCount(item) > 0) {
-              <nz-badge [nzCount]="badgeCount(item)" class="!ml-2"></nz-badge>
-            }
-          </li>
+          </div>
+        } @else {
+          <div class="my-2 h-px bg-border/60 dark:border-border-dark/60"></div>
         }
-      }
-    </ul>
-  </div>
-</nz-sider>
 
-<ng-template #triggerTemplate>
-  <span
-    nz-icon
-    [nzType]="isCollapsed() ? 'double-right' : 'double-left'"
-    class="text-lg"
-    nz-tooltip
-    [nzTooltipTitle]="isCollapsed() ? 'Mở rộng menu' : 'Thu gọn menu'"
-    [@iconFade]="isCollapsed() ? 'closed' : 'open'"
-  ></span>
-</ng-template>
+        @for (item of section.items; track item.route) {
+          <a
+            [routerLink]="[item.route]"
+            class="flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-semibold transition-all group"
+            [ngClass]="isActive(item.route)
+              ? 'bg-primary text-white shadow-2xs'
+              : 'text-ink/80 dark:text-ink-dark/80 hover:bg-bg dark:hover:bg-white/5 hover:text-primary'"
+            [title]="isCollapsed() ? item.label : ''"
+          >
+            <lucide-angular [img]="item.icon" class="w-4.5 h-4.5 shrink-0" />
+            @if (!isCollapsed()) {
+              <span class="truncate flex-1">{{ item.label }}</span>
+              @if (badgeCount(item) > 0) {
+                <span
+                  hlmBadge
+                  [variant]="isActive(item.route) ? 'secondary' : 'destructive'"
+                  class="ml-auto text-[10px] font-bold px-1.5 py-0 h-4.5 min-w-[18px] flex items-center justify-center rounded-full"
+                >
+                  {{ badgeCount(item) }}
+                </span>
+              }
+            }
+          </a>
+        }
+      </div>
+    }
+  </div>
+
+  <!-- Bottom Collapse Toggle Bar -->
+  <div class="p-3 border-t border-border/80 dark:border-border-dark flex items-center justify-center shrink-0">
+    <button
+      type="button"
+      (click)="toggleCollapse()"
+      class="w-full flex items-center justify-center gap-2 p-2 rounded-xl border border-border/60 dark:border-border-dark/60 hover:bg-bg dark:hover:bg-bg-dark text-muted dark:text-muted-dark hover:text-ink transition-colors cursor-pointer text-xs font-semibold"
+      [title]="isCollapsed() ? 'Mở rộng sidebar' : 'Thu gọn sidebar'"
+    >
+      <lucide-angular [img]="isCollapsed() ? ChevronRight : ChevronLeft" class="w-4 h-4" />
+      @if (!isCollapsed()) {
+        <span>Thu gọn sidebar</span>
+      }
+    </button>
+  </div>
+</aside>

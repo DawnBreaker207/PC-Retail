@@ -2,13 +2,13 @@ import { Component, ChangeDetectionStrategy, DestroyRef, inject, OnInit, signal 
 import { ActivatedRoute, NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { NzContentComponent, NzLayoutModule } from 'ng-zorro-antd/layout';
 import { AdminSidebarComponent } from './sidebar/admin-sidebar.component';
 import { AdminNavbarComponent } from './navbar/admin-navbar.component';
 
 @Component({
   selector: 'app-admin-layout',
-  imports: [NzContentComponent, NzLayoutModule, RouterOutlet, AdminSidebarComponent, AdminNavbarComponent],
+  standalone: true,
+  imports: [RouterOutlet, AdminSidebarComponent, AdminNavbarComponent],
   templateUrl: './admin-layout.html',
   styleUrl: './admin-layout.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -33,6 +33,9 @@ export class AdminLayout implements OnInit {
     reviews: 'Đánh giá',
     users: 'Người dùng',
     'audit-log': 'Audit Log',
+    reports: 'Báo cáo doanh thu',
+    purchasing: 'Mua hàng',
+    stocktake: 'Kiểm kê kho',
   };
 
   ngOnInit() {
@@ -50,7 +53,11 @@ export class AdminLayout implements OnInit {
   }
 
   private updatePageLabel() {
-    const segment = this.activatedRoute.snapshot.firstChild?.url[0]?.path ?? '';
-    this.pageLabel.set(AdminLayout.LABELS[segment] ?? 'Dashboard');
+    let route = this.activatedRoute.firstChild;
+    while (route?.firstChild) {
+      route = route.firstChild;
+    }
+    const path = route?.snapshot.routeConfig?.path ?? '';
+    this.pageLabel.set(AdminLayout.LABELS[path] ?? 'Admin');
   }
 }

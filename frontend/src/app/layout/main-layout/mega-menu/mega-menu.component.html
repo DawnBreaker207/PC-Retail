@@ -1,71 +1,89 @@
-<nav class="hidden lg:block fixed top-24 left-0 right-0 z-40 bg-primary shadow-sm">
+<nav class="hidden lg:block fixed top-24 left-0 right-0 z-30 bg-surface/95 dark:bg-surface-dark/95 backdrop-blur-md border-b border-border/80 dark:border-border-dark/80 transition-colors duration-200 shadow-2xs">
   <div class="max-w-screen-2xl mx-auto flex items-center h-10 px-4">
+    <!-- Category Trigger -->
     <div class="relative">
       <button
         type="button"
         (click)="onCategoryClick()"
         (mouseenter)="onCategoryHoverEnter()"
         (mouseleave)="onCategoryHoverLeave()"
-        class="relative z-50 flex items-center gap-1.5 text-white/90 hover:text-white px-3 py-1.5 rounded hover:bg-white/10 transition-colors text-sm font-medium mr-2"
+        class="relative z-50 flex items-center gap-2 text-ink dark:text-ink-dark hover:text-primary dark:hover:text-primary px-3 py-1.5 rounded-lg border border-border/80 dark:border-border-dark/80 bg-bg/80 dark:bg-bg-dark/80 hover:border-primary/40 transition-all text-xs font-semibold mr-3 shadow-2xs"
       >
-        <span nz-icon nzType="appstore" nzTheme="fill" class="text-sm"></span>
-        <span>Danh mục</span>
-        <span nz-icon nzType="down" nzTheme="outline" class="text-[11px] transition-transform" [class.rotate-180]="menu.isOpen()"></span>
+        <lucide-angular [img]="LayoutGrid" class="w-3.5 h-3.5 text-primary" />
+        <span>Danh mục sản phẩm</span>
+        <lucide-angular
+          [img]="ChevronDown"
+          class="w-3.5 h-3.5 text-muted transition-transform duration-200"
+          [class.rotate-180]="menu.isOpen()"
+        />
       </button>
 
       @if (menu.isOpen()) {
-        <div class="fixed inset-0 z-40 bg-black/40" (click)="menu.close()"></div>
+        <div class="fixed inset-0 z-40 bg-black/40 backdrop-blur-2xs" (click)="menu.close()"></div>
         @if (!isHomeRoute()) {
-          <div class="absolute top-full left-0 mt-1 z-50">
+          <div class="absolute top-full left-0 mt-2 z-50 animate-scale-in">
             <app-category-sidebar />
           </div>
         }
       }
     </div>
 
-    <a routerLink="/pc-builder" class="flex items-center gap-1.5 text-white px-3 py-1.5 rounded bg-white/15 hover:bg-white/25 transition-colors text-sm font-semibold mr-6">
-      <span nz-icon nzType="build" nzTheme="fill" class="text-sm"></span>
-      <span>Build PC</span>
+    <!-- PC Builder Link -->
+    <a
+      routerLink="/pc-builder"
+      class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 hover:bg-primary/15 dark:bg-primary/20 dark:hover:bg-primary/25 text-primary border border-primary/25 dark:border-primary/35 text-xs font-bold transition-all mr-4 shadow-2xs group shrink-0"
+    >
+      <lucide-angular [img]="Wrench" class="w-3.5 h-3.5 group-hover:rotate-45 transition-transform duration-300" />
+      <span>Build Cấu Hình PC</span>
     </a>
 
-    @for (cat of categories(); track cat.slug) {
-      <div class="group relative h-full flex items-center">
-        <a
-          [routerLink]="['/products']"
-          [queryParams]="{ category: cat.slug }"
-          class="flex items-center gap-1.5 text-white/85 hover:text-white px-3 py-2.5 text-sm font-medium hover:bg-white/10 transition-colors whitespace-nowrap h-full"
-        >
-          <span nz-icon [nzType]="cat.icon" nzTheme="outline" class="text-sm"></span>
-          <span>{{ cat.label }}</span>
-        </a>
+    <div class="w-px h-4 bg-border dark:bg-border-dark mr-4 shrink-0"></div>
 
-        @if (cat.children) {
-          <div class="absolute top-full left-0 hidden group-hover:block pt-1 z-50">
-            <div class="bg-surface dark:bg-surface-dark rounded-xl shadow-2xl border border-border/80 dark:border-border-dark/80 p-6 min-w-[500px] max-w-[90vw] animate-slide-down">
-              <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-                @for (col of cat.children; track col.title) {
-                  <div>
-                    <p class="font-semibold text-xs text-primary uppercase tracking-wider mb-3">{{ col.title }}</p>
-                    <ul class="space-y-2">
-                      @for (item of col.items; track item.label) {
-                        <li>
-                          <a
-                            [routerLink]="['/products']"
-                            [queryParams]="item.queryParams"
-                            class="text-sm text-muted dark:text-muted-dark hover:text-primary transition-[color,transform] inline-block hover:translate-x-0.5 duration-200"
-                          >
-                            {{ item.label }}
-                          </a>
-                        </li>
-                      }
-                    </ul>
-                  </div>
-                }
+    <!-- Category horizontal list (visible overflow so mega-menus never get clipped) -->
+    <div class="flex items-center gap-1 h-full">
+      @for (cat of categories(); track cat.slug) {
+        <div class="group relative h-full flex items-center">
+          <a
+            [routerLink]="['/products']"
+            [queryParams]="{ category: cat.slug }"
+            class="flex items-center gap-1.5 text-muted dark:text-muted-dark hover:text-ink dark:hover:text-ink-dark group-hover:text-primary group-hover:bg-bg/80 dark:group-hover:bg-bg-dark/80 px-3 py-2 text-xs font-medium rounded-lg transition-colors whitespace-nowrap"
+          >
+            <lucide-angular [img]="cat.icon" class="w-3.5 h-3.5 opacity-70 group-hover:opacity-100 group-hover:text-primary transition-opacity" />
+            <span>{{ cat.label }}</span>
+            @if (cat.children && cat.children.length > 0) {
+              <lucide-angular [img]="ChevronDown" class="w-3 h-3 text-muted/60 group-hover:text-primary transition-transform group-hover:rotate-180" />
+            }
+          </a>
+
+          @if (cat.children && cat.children.length > 0) {
+            <!-- Mouse bridge pad: extends 8px up to ensure mouse movement never loses hover -->
+            <div class="absolute top-full left-0 hidden group-hover:block pt-1 z-50 pointer-events-auto">
+              <div class="bg-surface dark:bg-surface-dark rounded-2xl shadow-2xl border border-border/80 dark:border-border-dark/80 p-6 w-[760px] max-w-[90vw] animate-in fade-in slide-in-from-top-1 duration-150">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                  @for (col of cat.children; track col.title) {
+                    <div>
+                      <p class="font-bold text-[11px] text-primary uppercase tracking-wider mb-3 pb-1 border-b border-primary/20">{{ col.title }}</p>
+                      <ul class="space-y-2">
+                        @for (item of col.items; track item.label) {
+                          <li>
+                            <a
+                              [routerLink]="['/products']"
+                              [queryParams]="item.queryParams"
+                              class="text-xs text-muted dark:text-muted-dark hover:text-primary dark:hover:text-ink-dark transition-colors inline-block hover:translate-x-1 duration-150"
+                            >
+                              {{ item.label }}
+                            </a>
+                          </li>
+                        }
+                      </ul>
+                    </div>
+                  }
+                </div>
               </div>
             </div>
-          </div>
-        }
-      </div>
-    }
+          }
+        </div>
+      }
+    </div>
   </div>
 </nav>

@@ -1,11 +1,28 @@
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { NzIconModule } from 'ng-zorro-antd/icon';
+import {
+  LucideAngularModule,
+  Truck,
+  RotateCcw,
+  ShieldCheck,
+  CreditCard,
+  Phone,
+  Mail,
+  MapPin,
+} from 'lucide-angular';
 
 @Component({
   selector: 'app-footer',
-  imports: [RouterLink, NzIconModule],
+  imports: [RouterLink, LucideAngularModule],
   templateUrl: './footer.component.html',
   styleUrl: './footer.component.css',
 })
-export class FooterComponent {}
+export class FooterComponent {
+  readonly Truck = Truck;
+  readonly RotateCcw = RotateCcw;
+  readonly ShieldCheck = ShieldCheck;
+  readonly CreditCard = CreditCard;
+  readonly Phone = Phone;
+  readonly Mail = Mail;
+  readonly MapPin = MapPin;
+}

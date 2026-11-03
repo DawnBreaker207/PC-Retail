@@ -3,6 +3,7 @@ import { RouterOutlet } from '@angular/router';
 import { HeaderComponent } from './header/header.component';
 import { MegaMenuComponent } from './mega-menu/mega-menu.component';
 import { FooterComponent } from './footer/footer.component';
+import { FloatingSupportComponent } from './floating-support/floating-support.component';
 
 @Component({
   selector: 'app-main-layout',
@@ -12,6 +13,7 @@ import { FooterComponent } from './footer/footer.component';
     HeaderComponent,
     MegaMenuComponent,
     FooterComponent,
+    FloatingSupportComponent,
   ],
   templateUrl: './main-layout.html',
   styleUrl: './main-layout.css',

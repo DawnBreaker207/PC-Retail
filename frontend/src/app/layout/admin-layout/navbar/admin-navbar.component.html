@@ -1,62 +1,91 @@
-<nz-header class="!bg-surface/80 dark:!bg-surface-dark/80 backdrop-blur-md border-b border-border/60 dark:border-border-dark/60 shadow-sm transition-[background-color,backdrop-filter] duration-300 w-full">
-  <div class="h-16 flex items-center justify-between px-6 gap-6 w-full">
-    <!-- LEFT SIDE: Breadcrumb -->
-    <div class="flex items-center gap-6 flex-1 min-w-0">
-      <div class="hidden md:block">
-        <nz-breadcrumb [nzSeparator]="iconTemplate">
-          <ng-template #iconTemplate>
-            <span nz-icon nzType="right" class="text-xs text-muted dark:text-muted-dark"></span>
-          </ng-template>
-          <nz-breadcrumb-item>
-            <a routerLink="/admin" class="text-muted dark:text-muted-dark hover:text-primary transition-colors">Admin</a>
-          </nz-breadcrumb-item>
-          <nz-breadcrumb-item>
-            <span class="font-semibold text-ink dark:text-ink-dark">{{ pageLabel() }}</span>
-          </nz-breadcrumb-item>
-        </nz-breadcrumb>
-      </div>
-    </div>
+<header class="h-16 bg-surface dark:bg-surface-dark border-b border-border/80 dark:border-border-dark shadow-2xs transition-colors duration-200 w-full flex items-center justify-between px-6 gap-6">
+  <!-- LEFT SIDE: Breadcrumb (Pure Tailwind + Lucide) -->
+  <div class="flex items-center gap-6 flex-1 min-w-0">
+    <nav aria-label="Breadcrumb" class="hidden md:flex items-center gap-2 text-xs">
+      <a routerLink="/admin" class="text-muted dark:text-muted-dark hover:text-primary transition-colors font-medium">Admin</a>
+      <lucide-angular [img]="ChevronRight" class="w-3.5 h-3.5 text-muted dark:text-muted-dark" />
+      <span class="font-bold text-ink dark:text-ink-dark">{{ pageLabel() }}</span>
+    </nav>
+  </div>
 
-    <!-- RIGHT SIDE: Notify - Theme - Profile -->
-    <div class="flex items-center gap-3 sm:gap-4 shrink-0">
-      <a
-        routerLink="/admin"
-        class="relative w-10 h-10 rounded-full bg-bg dark:bg-bg-dark border border-border/60 dark:border-border-dark/60 flex items-center justify-center cursor-pointer text-muted dark:text-muted-dark hover:text-primary hover:bg-primary-light transition-colors shadow-sm"
-        aria-label="Việc cần xử lý"
-        nz-tooltip
-        nzTooltipTitle="Xem Work Queue"
-      >
-        <nz-badge [nzCount]="notificationCount()" [nzShowZero]="false" nzSize="small">
-          <span nz-icon nzType="bell" class="text-xl text-muted dark:text-muted-dark"></span>
-        </nz-badge>
-      </a>
+  <!-- RIGHT SIDE: Notify - Theme - Profile -->
+  <div class="flex items-center gap-3 sm:gap-4 shrink-0">
+    <!-- Work Queue Bell -->
+    <a
+      routerLink="/admin"
+      class="relative w-10 h-10 rounded-full bg-bg dark:bg-bg-dark border border-border/80 dark:border-border-dark flex items-center justify-center cursor-pointer text-muted dark:text-muted-dark hover:text-primary dark:hover:text-primary hover:bg-primary-light/40 dark:hover:bg-white/10 transition-colors shadow-2xs"
+      aria-label="Việc cần xử lý"
+      title="Xem Work Queue"
+    >
+      <lucide-angular [img]="Bell" class="w-4.5 h-4.5" />
+      @if (notificationCount() > 0) {
+        <span
+          hlmBadge
+          variant="destructive"
+          class="absolute -top-1 -right-1 text-[10px] font-bold px-1.5 py-0 h-4.5 min-w-[18px] flex items-center justify-center rounded-full"
+        >
+          {{ notificationCount() }}
+        </span>
+      }
+    </a>
 
+    <!-- Theme Toggle -->
+    <button
+      type="button"
+      (click)="toggleTheme()"
+      aria-label="Chuyển giao diện sáng/tối"
+      title="Chuyển giao diện sáng/tối"
+      class="w-10 h-10 rounded-full bg-bg dark:bg-bg-dark border border-border/80 dark:border-border-dark flex items-center justify-center text-muted dark:text-muted-dark hover:text-primary dark:hover:text-primary hover:bg-primary-light/40 dark:hover:bg-white/10 transition-colors shadow-2xs cursor-pointer"
+    >
+      <lucide-angular [img]="isDark() ? Sun : Moon" class="w-4.5 h-4.5" />
+    </button>
+
+    <!-- Divider -->
+    <div class="h-8 w-px bg-border/80 dark:border-border-dark hidden sm:block"></div>
+
+    <!-- User Profile Dropdown Menu (Spartan UI Style) -->
+    <div class="relative">
       <button
         type="button"
-        (click)="toggleTheme()"
-        aria-label="Chuyển giao diện"
-        class="w-10 h-10 rounded-full bg-bg dark:bg-bg-dark border border-border/60 dark:border-border-dark/60 flex items-center justify-center text-muted dark:text-muted-dark hover:text-primary hover:bg-primary-light transition-colors shadow-sm"
+        (click)="toggleUserMenu()"
+        class="flex items-center gap-2.5 p-1 rounded-xl hover:bg-bg dark:hover:bg-bg-dark transition-colors cursor-pointer"
       >
-        <span nz-icon [nzType]="isDark() ? 'sun' : 'moon'"></span>
+        <div class="w-8 h-8 rounded-full bg-primary/10 text-primary font-bold text-xs flex items-center justify-center border border-primary/25">
+          {{ userInitials }}
+        </div>
+        <span class="text-sm font-semibold hidden sm:inline text-ink dark:text-ink-dark">{{ userName }}</span>
       </button>
 
-      <!-- Divider -->
-      <div class="h-8 w-px bg-border dark:bg-border-dark hidden sm:block"></div>
-
-      <div nz-dropdown [nzDropdownMenu]="userMenu" nzPlacement="bottomRight">
-        <div class="flex items-center gap-2 cursor-pointer">
-          <nz-avatar [nzText]="userInitials" nzSize="small" class="!bg-primary"></nz-avatar>
-          <span class="text-sm font-medium hidden sm:inline">{{ userName }}</span>
+      @if (userMenuOpen()) {
+        <div class="fixed inset-0 z-40" (click)="userMenuOpen.set(false)"></div>
+        <div class="absolute right-0 mt-2 w-52 bg-surface dark:bg-surface-dark border border-border/80 dark:border-border-dark rounded-xl shadow-xl p-1.5 z-50 animate-scale-in">
+          <a
+            routerLink="/admin"
+            (click)="userMenuOpen.set(false)"
+            class="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium text-ink dark:text-ink-dark hover:bg-bg dark:hover:bg-white/5 transition-colors"
+          >
+            <lucide-angular [img]="LayoutDashboard" class="w-4 h-4 text-muted dark:text-muted-dark" />
+            <span>Bảng tin quản trị</span>
+          </a>
+          <a
+            routerLink="/admin/account"
+            (click)="userMenuOpen.set(false)"
+            class="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium text-ink dark:text-ink-dark hover:bg-bg dark:hover:bg-white/5 transition-colors"
+          >
+            <lucide-angular [img]="User" class="w-4 h-4 text-muted dark:text-muted-dark" />
+            <span>Tài khoản của tôi</span>
+          </a>
+          <div class="h-px bg-border/60 dark:border-border-dark/60 my-1"></div>
+          <button
+            type="button"
+            (click)="logout(); userMenuOpen.set(false)"
+            class="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium text-error hover:bg-error/10 transition-colors cursor-pointer text-left"
+          >
+            <lucide-angular [img]="LogOut" class="w-4 h-4" />
+            <span>Đăng xuất</span>
+          </button>
         </div>
-      </div>
-      <nz-dropdown-menu #userMenu="nzDropdownMenu">
-        <ul nz-menu class="!bg-surface dark:!bg-surface-dark !border !border-border dark:!border-border-dark">
-          <li nz-menu-item routerLink="/admin" class="!text-ink dark:!text-ink-dark hover:!bg-bg dark:hover:!bg-white/5"><span nz-icon nzType="dashboard"></span> Dashboard</li>
-          <li nz-menu-item routerLink="/admin/account" class="!text-ink dark:!text-ink-dark hover:!bg-bg dark:hover:!bg-white/5"><span nz-icon nzType="user"></span> Tài khoản của tôi</li>
-          <li nz-menu-divider class="!border-border/60 dark:!border-border-dark/60"></li>
-          <li nz-menu-item (click)="logout()" (keydown.enter)="logout()" tabindex="0" class="!text-error hover:!bg-bg dark:hover:!bg-white/5"><span nz-icon nzType="logout"></span> Đăng xuất</li>
-        </ul>
-      </nz-dropdown-menu>
+      }
     </div>
   </div>
-</nz-header>
+</header>

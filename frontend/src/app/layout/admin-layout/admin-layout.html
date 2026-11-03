@@ -1,17 +1,17 @@
-<nz-layout class="ant-layout-has-sider h-screen w-full overflow-hidden">
+<div class="flex h-screen w-full overflow-hidden bg-bg dark:bg-bg-dark">
   <!-- SIDER -->
   <app-admin-sidebar [isCollapsed]="isCollapsed" (triggerCollapsed)="toggleCollapse($event)" />
 
-  <!-- LAYOUT RIGHT -->
-  <nz-layout class="flex flex-col overflow-hidden">
+  <!-- MAIN RIGHT AREA -->
+  <div class="flex flex-1 flex-col overflow-hidden min-w-0">
     <!-- NAVBAR -->
-    <nz-header class="!p-0 shrink-0 z-40">
+    <div class="shrink-0 z-40">
       <app-admin-navbar [pageLabel]="pageLabel()" />
-    </nz-header>
+    </div>
 
     <!-- CONTENT AREA -->
-    <nz-content class="flex-1 overflow-y-auto overflow-x-hidden !bg-bg dark:!bg-bg-dark p-6">
+    <main class="flex-1 overflow-y-auto overflow-x-hidden p-6 bg-bg dark:bg-bg-dark">
       <router-outlet />
-    </nz-content>
-  </nz-layout>
-</nz-layout>
+    </main>
+  </div>
+</div>
