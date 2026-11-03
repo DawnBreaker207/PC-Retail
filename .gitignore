@@ -13,3 +13,13 @@ blob-report/
 dist/
 *.jtl
 orders_export_1m.csv
+
+# Local scripts
+scripts/
+
+# JMeter reports & logs
+jmeter/report/
+jmeter/report_optimized/
+jmeter/html-report/
+jmeter/*.jtl
+
