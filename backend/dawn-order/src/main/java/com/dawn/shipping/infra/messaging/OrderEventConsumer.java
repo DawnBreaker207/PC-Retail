@@ -11,7 +11,7 @@ import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
 @Slf4j
-@Component
+@Component("shippingOrderEventConsumer")
 @RequiredArgsConstructor
 public class OrderEventConsumer {
 

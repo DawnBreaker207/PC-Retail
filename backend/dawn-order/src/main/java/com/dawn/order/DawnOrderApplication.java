@@ -12,17 +12,17 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 /** dawn-order: order + cart + promotion + engagement + return + reporting. */
-@SpringBootApplication(scanBasePackages = "com.dawn.order")
+@SpringBootApplication
 @ComponentScan(
         basePackages = {"com.dawn.common", "com.dawn.order", "com.dawn.cart", "com.dawn.promotion",
-                "com.dawn.engagement", "com.dawn.return", "com.dawn.reporting"},
+                "com.dawn.engagement", "com.dawn.rma", "com.dawn.shipping", "com.dawn.reporting"},
         excludeFilters = @ComponentScan.Filter(
                 type = FilterType.ANNOTATION, classes = SpringBootApplication.class))
 @EnableFeignClients(basePackages = "com.dawn")
 @EntityScan(basePackages = {"com.dawn.common", "com.dawn.order", "com.dawn.cart", "com.dawn.promotion",
-        "com.dawn.engagement", "com.dawn.return", "com.dawn.reporting"})
+        "com.dawn.engagement", "com.dawn.rma", "com.dawn.shipping", "com.dawn.reporting"})
 @EnableJpaRepositories(basePackages = {"com.dawn.common", "com.dawn.order", "com.dawn.cart", "com.dawn.promotion",
-        "com.dawn.engagement", "com.dawn.return", "com.dawn.reporting"})
+        "com.dawn.engagement", "com.dawn.rma", "com.dawn.shipping", "com.dawn.reporting"})
 @EnableJpaAuditing
 @EnableScheduling
 @EnableAsync

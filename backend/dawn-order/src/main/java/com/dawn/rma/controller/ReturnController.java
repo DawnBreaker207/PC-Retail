@@ -46,7 +46,7 @@ public class ReturnController {
     }
 
     @GetMapping("/return-requests/{requestId}")
-    @PreAuthorize(AuthorizationConstants.CUSTOMER_ONLY)
+    @PreAuthorize("isAuthenticated()")
     public ReturnRequest get(@PathVariable Long requestId) {
         return returnQueryService.get(requestId);
     }
