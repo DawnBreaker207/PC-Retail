@@ -131,8 +131,8 @@ export const ApiEndpoints = {
   },
   admin: {
     orders: `${API}/api/v1/staff/orders`,
-    dashboard: `${API}/api/v1/admin/dashboard/summary`,
-    revenue: `${API}/api/v1/admin/dashboard/revenue`,
+    dashboard: `${API}/api/v1/admin/reports/revenue`,
+    revenue: `${API}/api/v1/admin/reports/revenue`,
     products: `${API}/api/v1/admin/products`,
     productDetail: (id: number) => `${API}/api/v1/admin/products/${id}`,
     categories: `${API}/api/v1/admin/categories`,
