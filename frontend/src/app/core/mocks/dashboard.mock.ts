@@ -1,5 +1,3 @@
-const baseUrl = 'https://dummyimage.com';
-
 export const MOCK_DASHBOARD_SUMMARY = {
   todayRevenue: 256900000,
   yesterdayRevenue: 235000000,
@@ -20,7 +18,7 @@ export const MOCK_REVENUE_7_DAYS = Array.from({ length: 7 }, (_, i) => ({
 }));
 
 export const MOCK_LOW_STOCK_ITEMS = [
-  { skuId: 17, name: 'Samsung Odyssey OLED G8 34"', stock: 3, imageUrl: `${baseUrl}/400x400/1e293b/white?text=Odyssey`, price: 25990000 },
-  { skuId: 1, name: 'Gigabyte A16 i5-13420H', stock: 2, imageUrl: `${baseUrl}/400x400/1e293b/white?text=Gigabyte`, price: 28790000 },
-  { skuId: 5, name: 'DELL XPS 15 9530', stock: 4, imageUrl: `${baseUrl}/400x400/1e293b/white?text=XPS+15`, price: 32990000 },
+  { skuId: 17, name: 'Samsung Odyssey OLED G8 34"', stock: 3, imageUrl: 'https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?w=400&auto=format&fit=crop&q=80', price: 25990000 },
+  { skuId: 1, name: 'Gigabyte A16 i5-13420H', stock: 2, imageUrl: 'https://images.unsplash.com/photo-1603302576837-37561b2e2302?w=400&auto=format&fit=crop&q=80', price: 28790000 },
+  { skuId: 5, name: 'DELL XPS 15 9530', stock: 4, imageUrl: 'https://images.unsplash.com/photo-1593642632823-8f785ba67e45?w=400&auto=format&fit=crop&q=80', price: 32990000 },
 ];

@@ -68,6 +68,9 @@ export const ApiEndpoints = {
     webhook: (provider: string) => `${API}/api/v1/payments/webhook/${provider}`,
     reCheck: (provider: string, id: number) => `${API}/api/v1/payments/re-check/${provider}/${id}`,
   },
+  tax: {
+    calculate: `${API}/api/v1/tax/calculate`,
+  },
   promotion: {
     vouchers: `${API}/api/v1/vouchers`,
     voucherDetail: (id: number) => `${API}/api/v1/vouchers/${id}`,
@@ -86,6 +89,11 @@ export const ApiEndpoints = {
   articles: {
     base: `${API}/api/v1/articles`,
     detail: (slug: string) => `${API}/api/v1/articles/${slug}`,
+  },
+  ratings: {
+    submit: `${API}/api/v1/ratings`,
+    bySku: (skuId: number, page = 0, size = 10) => `${API}/api/v1/ratings/sku/${skuId}?page=${page}&size=${size}`,
+    summary: (skuId: number) => `${API}/api/v1/ratings/sku/${skuId}/summary`,
   },
   aiSimilar: `${API}/api/v1/ai/similar`,
   returns: {
@@ -112,7 +120,7 @@ export const ApiEndpoints = {
     variances: (id: number) => `${API}/api/v1/admin/stock-takes/${id}/variances`,
   },
   reviews: {
-    create: `${API}/api/v1/reviews`,
+    create: `${API}/api/v1/ratings`,
   },
   inventory: {
     base: `${API}/api/v1/inventory`,

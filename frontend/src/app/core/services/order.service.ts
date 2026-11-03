@@ -27,7 +27,14 @@ export class OrderService {
   }
 
   createReview(data: CreateReviewRequest): Observable<Review> {
-    return this.http.post<Review>(ApiEndpoints.reviews.create, data);
+    const payload = {
+      skuId: data.skuId ?? data.orderItemId,
+      orderId: data.orderId,
+      score: data.score ?? data.rating ?? 5,
+      comment: data.comment,
+      imageUrls: data.imageUrls ?? data.images ?? [],
+    };
+    return this.http.post<Review>(ApiEndpoints.reviews.create, payload);
   }
 
   requestReturn(orderId: number, subOrderId: number, reason: string) {

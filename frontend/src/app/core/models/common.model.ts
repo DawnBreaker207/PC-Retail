@@ -84,18 +84,40 @@ export interface VoucherValidationResult {
   valid: boolean;
   code?: string;
   discount?: number;
+  discountAmount?: number;
   type?: 'FIXED' | 'PERCENT';
   minOrder?: number;
   message?: string;
+  errorMessage?: string;
 }
 
 export type FulfillmentType = 'DELIVERY' | 'PICKUP';
+
+export interface TaxInfo {
+  companyName: string;
+  taxCode: string;
+  companyAddress: string;
+  invoiceEmail: string;
+}
+
+export interface SkuRatingSummary {
+  skuId: number;
+  averageScore: number;
+  totalRatings: number;
+  fiveStarCount: number;
+  fourStarCount: number;
+  threeStarCount: number;
+  twoStarCount: number;
+  oneStarCount: number;
+}
 
 export interface CheckoutRequest {
   idempotencyKey: string;
   fulfillmentType: FulfillmentType;
   shippingAddress?: ShippingAddress;
   voucherCode?: string;
+  taxInfo?: TaxInfo;
+  invoiceRequested?: boolean;
 }
 
 export interface CheckoutResponse {
@@ -106,10 +128,12 @@ export interface CheckoutResponse {
 }
 
 export interface OrderItem {
-  id: number;
+  id?: number;
   skuId: number;
-  name: string;
-  imageUrl: string;
+  name?: string;
+  skuName?: string;
+  imageUrl?: string;
+  primaryImageUrl?: string;
   quantity: number;
   unitPrice: number;
 }
@@ -246,10 +270,13 @@ export interface AuditLogEntry {
 
 export interface CreateReviewRequest {
   orderId: number;
-  orderItemId: number;
-  rating: number;
+  orderItemId?: number;
+  skuId?: number;
+  score?: number;
+  rating?: number;
   comment: string;
   images?: string[];
+  imageUrls?: string[];
 }
 
 export type BuilderSlotType =

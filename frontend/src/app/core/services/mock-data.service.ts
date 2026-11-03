@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { of, Observable, delay, map, catchError } from 'rxjs';
+import { of, Observable, delay, map, catchError, switchMap } from 'rxjs';
 import { ApiEndpoints } from '@core/api/api.endpoints';
 import { Sku, Review, ResponsePage, BlogPost, PromoBanner, HomeSection, SpecChip } from '@core/models/common.model';
 import { PRODUCT_TEMPLATES, ProductTemplate } from '@core/mocks/product-template.mock';
@@ -252,10 +252,11 @@ export class MockDataService {
   }
 
   getCategories(): Observable<typeof MOCK_CATEGORIES> {
-    return this.http.get<any[]>(ApiEndpoints.catalog.categories).pipe(
-      map(list => {
+    return this.http.get<any>(ApiEndpoints.catalog.categories).pipe(
+      map(res => {
+        const list = res?.data ?? (Array.isArray(res) ? res : []);
         if (list && list.length > 0) {
-          const mapped = list.map(c => ({
+          const mapped = list.map((c: any) => ({
             id: c.id,
             name: c.name,
             slug: c.slug,
@@ -273,10 +274,11 @@ export class MockDataService {
   }
 
   getBrands(): Observable<typeof MOCK_BRANDS> {
-    return this.http.get<any[]>(ApiEndpoints.catalog.brands).pipe(
-      map(list => {
+    return this.http.get<any>(ApiEndpoints.catalog.brands).pipe(
+      map(res => {
+        const list = res?.data ?? (Array.isArray(res) ? res : []);
         if (list && list.length > 0) {
-          const mapped = list.map(b => ({
+          const mapped = list.map((b: any) => ({
             id: b.id,
             name: b.name,
             slug: b.name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
@@ -301,14 +303,14 @@ export class MockDataService {
     }
     return this.http.get<any>(ApiEndpoints.catalog.skus, { params: httpParams }).pipe(
       map(res => {
-        const rawList = res?.content || (Array.isArray(res) ? res : []);
+        const rawList = res?.data?.content || res?.content || (Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []));
         if (rawList.length > 0) {
           const mapped: Sku[] = rawList.map((raw: any) => ({
             id: raw.id,
             name: raw.name,
             slug: raw.slug || (raw.name ? raw.name.toLowerCase().replace(/[^a-z0-9]+/g, '-') : String(raw.id)),
-            price: raw.price || 0,
-            originalPrice: raw.originalPrice,
+            price: Number(raw.price || 0),
+            originalPrice: raw.originalPrice ? Number(raw.originalPrice) : undefined,
             imageUrls: raw.imageUrls && raw.imageUrls.length > 0 ? raw.imageUrls : [raw.primaryImageUrl || 'https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=600&auto=format&fit=crop&q=80'],
             brandName: raw.brandName || 'ASUS',
             status: raw.status || 'ACTIVE',
@@ -321,9 +323,12 @@ export class MockDataService {
             rating: raw.rating ?? 5.0,
             reviewCount: raw.reviewCount ?? 1,
           }));
+          const totalElements = res?.data?.totalElements ?? res?.totalElements ?? mapped.length;
+          const pageSize = res?.data?.size ?? res?.size ?? mapped.length;
+          const pageNumber = res?.data?.number ?? res?.number ?? 1;
           return {
             content: mapped,
-            pagination: res.pagination || { pageNumber: 0, pageSize: mapped.length, totalElements: mapped.length }
+            pagination: { pageNumber, pageSize, totalElements }
           };
         }
         return this.getMockProducts(params, specFilters);
@@ -361,36 +366,55 @@ export class MockDataService {
     return { content: paged, pagination: { pageNumber: page, pageSize: size, totalElements: filtered.length } };
   }
 
+  private mapRawToSku(raw: any, fallbackSlug: string): Sku {
+    return {
+      id: raw.id,
+      name: raw.name,
+      slug: raw.slug || fallbackSlug,
+      price: Number(raw.price || 0),
+      originalPrice: raw.originalPrice ? Number(raw.originalPrice) : undefined,
+      imageUrls: raw.imageUrls && raw.imageUrls.length > 0 ? raw.imageUrls : [raw.primaryImageUrl || 'https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=600&auto=format&fit=crop&q=80'],
+      brandName: raw.brandName || 'ASUS',
+      status: raw.status || 'ACTIVE',
+      soldCount: raw.soldCount || 0,
+      categoryName: raw.categoryName || 'pc',
+      specs: raw.specs || {},
+      specChips: raw.specChips || [],
+      description: raw.description || `${raw.name} — Sản phẩm chính hãng.`,
+      stockAvailable: raw.stockAvailable ?? 10,
+      rating: raw.rating ?? 5.0,
+      reviewCount: raw.reviewCount ?? 1,
+    };
+  }
+
   getProduct(slug: string): Observable<Sku | null> {
     const isNum = /^\d+$/.test(slug);
-    const url = isNum ? ApiEndpoints.catalog.skuDetail(Number(slug)) : `${ApiEndpoints.catalog.skus}/${slug}`;
-    return this.http.get<any>(url).pipe(
-      map(raw => {
-        if (!raw) return null;
-        return {
-          id: raw.id,
-          name: raw.name,
-          slug: raw.slug || slug,
-          price: raw.price || 0,
-          originalPrice: raw.originalPrice,
-          imageUrls: raw.imageUrls && raw.imageUrls.length > 0 ? raw.imageUrls : [raw.primaryImageUrl || 'https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=600&auto=format&fit=crop&q=80'],
-          brandName: raw.brandName || 'ASUS',
-          status: raw.status || 'ACTIVE',
-          soldCount: raw.soldCount || 0,
-          categoryName: raw.categoryName || 'pc',
-          specs: raw.specs || {},
-          specChips: raw.specChips || [],
-          description: raw.description || `${raw.name} — Sản phẩm chính hãng.`,
-          stockAvailable: raw.stockAvailable ?? 10,
-          rating: raw.rating ?? 5.0,
-          reviewCount: raw.reviewCount ?? 1,
-        };
+    if (isNum) {
+      return this.http.get<any>(ApiEndpoints.catalog.skuDetail(Number(slug))).pipe(
+        map(res => {
+          const raw = res?.data ?? res;
+          if (!raw || !raw.id) return null;
+          return this.mapRawToSku(raw, slug);
+        }),
+        catchError(() => of(this.generateProducts().find(p => String(p.id) === slug) || null))
+      );
+    }
+    return this.getProducts({ size: '100' }).pipe(
+      map(res => res.content.find(p => p.slug === slug || String(p.id) === slug)),
+      switchMap(found => {
+        if (!found) {
+          const fallback = this.generateProducts().find(p => p.slug === slug || String(p.id) === slug);
+          return of(fallback || null);
+        }
+        return this.http.get<any>(ApiEndpoints.catalog.skuDetail(found.id)).pipe(
+          map(res => {
+            const raw = res?.data ?? res;
+            return raw && raw.id ? this.mapRawToSku(raw, slug) : found;
+          }),
+          catchError(() => of(found))
+        );
       }),
-      catchError(() => {
-        const products = this.generateProducts();
-        const p = products.find(pr => pr.slug === slug || String(pr.id) === slug) || null;
-        return of(p);
-      })
+      catchError(() => of(this.generateProducts().find(p => p.slug === slug || String(p.id) === slug) || null))
     );
   }
 

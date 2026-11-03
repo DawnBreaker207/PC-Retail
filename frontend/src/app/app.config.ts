@@ -4,8 +4,6 @@ import { registerLocaleData } from '@angular/common';
 import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
 import { provideClientHydration, withHttpTransferCacheOptions } from '@angular/platform-browser';
 import { provideAnimations } from '@angular/platform-browser/animations';
-import { provideNzI18n, vi_VN } from 'ng-zorro-antd/i18n';
-import { provideNzConfig } from 'ng-zorro-antd/core/config';
 import vi from '@angular/common/locales/vi';
 import { routes } from './app.routes';
 import { authInterceptor } from '@core/interceptors/auth.interceptor';
@@ -22,12 +20,6 @@ export const appConfig: ApplicationConfig = {
     provideClientHydration(withHttpTransferCacheOptions({})),
     provideHttpClient(withFetch(), withInterceptors([authInterceptor, errorInterceptor, apiResInterceptor])),
     provideAnimations(),
-    provideNzI18n(vi_VN),
-    provideNzConfig({
-      theme: {
-        primaryColor: '#e53935',
-      },
-    }),
     { provide: LOCALE_ID, useValue: 'vi' },
   ],
 };

@@ -1,12 +1,12 @@
 import { HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { NzMessageService } from 'ng-zorro-antd/message';
+import { ToastService } from '@core/services/toast.service';
 import { catchError, throwError } from 'rxjs';
 
 export const errorInterceptor: HttpInterceptorFn = (req, next) => {
   const router = inject(Router);
-  const msg = inject(NzMessageService);
+  const toast = inject(ToastService);
 
   return next(req).pipe(
     catchError((error) => {
@@ -17,7 +17,7 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
       } else if (error.status === 401) {
         // auth.interceptor lo silent refresh; không toast để tránh báo lỗi oan
       } else if (error.error?.message) {
-        msg.error(error.error.message);
+        toast.error(error.error.message);
       }
       return throwError(() => error);
     }),

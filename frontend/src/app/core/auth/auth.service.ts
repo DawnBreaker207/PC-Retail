@@ -26,7 +26,9 @@ function decodeJwtUser(token: string): User | null {
   try {
     const parts = token.split('.');
     if (parts.length !== 3) return null;
-    const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+    let b64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+    while (b64.length % 4) b64 += '=';
+    const payload = JSON.parse(atob(b64));
     const rawRole: string = payload.role || '';
     let systemRole: User['systemRole'] = 'CUSTOMER';
     if (rawRole.includes('ROLE_ADMIN') || rawRole.includes('ADMIN')) systemRole = 'ADMIN';

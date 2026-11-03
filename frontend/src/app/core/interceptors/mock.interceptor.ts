@@ -23,7 +23,33 @@ interface CartItem {
   brandName: string; selected: boolean;
 }
 
-const baseUrl = 'https://dummyimage.com';
+const CATEGORY_IMAGES: Record<string, string[]> = {
+  'laptop-gaming': [
+    'https://images.unsplash.com/photo-1603302576837-37561b2e2302?w=600&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1593642632823-8f785ba67e45?w=600&auto=format&fit=crop&q=80',
+  ],
+  'laptop': [
+    'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=600&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=600&auto=format&fit=crop&q=80',
+  ],
+  'pc': [
+    'https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=600&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1587202372634-32705e3bf49c?w=600&auto=format&fit=crop&q=80',
+  ],
+  'man-hinh': [
+    'https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?w=600&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1551645120-d70bfe84c826?w=600&auto=format&fit=crop&q=80',
+  ],
+  'linh-kien': [
+    'https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?w=600&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1555680202-c86f0e12f086?w=600&auto=format&fit=crop&q=80',
+  ],
+};
+
+function getCategoryImgs(cat: string, index: number): [string, string] {
+  const pool = CATEGORY_IMAGES[cat] || CATEGORY_IMAGES['linh-kien'];
+  return [pool[index % pool.length], pool[(index + 1) % pool.length]];
+}
 
 // ponytail: mutable local copy so imports aren't mutated across requests
 let cartItems: CartItem[] = [];
@@ -44,7 +70,7 @@ function generateAdminProducts(): Sku[] {
     slug: t.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '').substring(0, 120),
     price: t.price,
     originalPrice: t.origPrice || undefined,
-    imageUrls: [`${baseUrl}/400x400/1e293b/white?text=${encodeURIComponent(t.name.substring(0, 20))}`],
+    imageUrls: [getCategoryImgs(t.cat, i)[0]],
     brandName: t.brand,
     status: 'ACTIVE',
     soldCount: t.sold,
@@ -88,7 +114,7 @@ function generateProducts() {
     slug: t.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '').substring(0, 120),
     price: t.price,
     originalPrice: t.origPrice || undefined,
-    imageUrls: [`${baseUrl}/400x400/1e293b/white?text=${encodeURIComponent(t.name.substring(0, 20))}`, `${baseUrl}/400x400/e53935/white?text=${encodeURIComponent(t.name.substring(0, 20))}`],
+    imageUrls: [getCategoryImgs(t.cat, i)[0], getCategoryImgs(t.cat, i)[1]],
     brandName: t.brand,
     status: 'ACTIVE',
     soldCount: t.sold,
@@ -110,7 +136,8 @@ export const mockInterceptor: HttpInterceptorFn = (req, next) => {
   // nửa mock nửa thật: token mock + API thật = 401 -> refresh loop -> logout oan
   // ngay sau login. Mock chỉ phục vụ token mock-* và khách vãng lai.
   const authz = req.headers.get('Authorization') ?? '';
-  if (/^Bearer eyJ/.test(authz)) {
+  const currentToken = authService.getToken() ?? '';
+  if (/^Bearer eyJ/.test(authz) || /^eyJ/.test(currentToken)) {
     return next(req);
   }
 
@@ -120,8 +147,15 @@ export const mockInterceptor: HttpInterceptorFn = (req, next) => {
   }
   if (url.includes('/api/v1/auth/login') && method === 'POST') {
     const { email, password } = body as any;
-    if (email === 'admin@dawn.vn' && password === 'admin123') {
+    if (
+      (email === 'admin@dawn.vn' && password === 'admin123') ||
+      (email === 'admin@pc-retail.com' && password === 'AdminPassword123!') ||
+      email?.toLowerCase().includes('admin')
+    ) {
       return ok(mockUserSession(email, 'Admin', 'ADMIN'));
+    }
+    if (email?.toLowerCase().includes('staff')) {
+      return ok(mockUserSession(email, 'Staff', 'STAFF'));
     }
     return ok(mockUserSession(email, email.split('@')[0], 'CUSTOMER'));
   }
@@ -282,7 +316,7 @@ export const mockInterceptor: HttpInterceptorFn = (req, next) => {
         shippingFee: 0,
         discountAmount: 0,
         finalAmount: 25990000,
-        items: [{ id: newId + 2, skuId: 1, name: 'Đơn hàng mới', imageUrl: `${baseUrl}/400x400/1e293b/white?text=Order`, quantity: 1, unitPrice: 25990000 }],
+        items: [{ id: newId + 2, skuId: 1, name: 'Đơn hàng mới', imageUrl: 'https://images.unsplash.com/photo-1603302576837-37561b2e2302?w=400&auto=format&fit=crop&q=80', quantity: 1, unitPrice: 25990000 }],
       }],
     };
     localOrders.unshift(newOrder);
@@ -420,7 +454,7 @@ export const mockInterceptor: HttpInterceptorFn = (req, next) => {
     const created: Sku = {
       id: ++nextAdminId, name: d.name || '', slug: (d.name || '').toLowerCase().replace(/[^a-z0-9]+/g, '-'),
       price: d.price || 0, originalPrice: d.originalPrice || undefined,
-      imageUrls: d.imageUrls?.length ? d.imageUrls : [`${baseUrl}/400x400/1e293b/white?text=New`],
+      imageUrls: d.imageUrls?.length ? d.imageUrls : ['https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=600&auto=format&fit=crop&q=80'],
       description: d.description || undefined,
       brandName: d.brandName || '', status: d.status || 'ACTIVE', soldCount: 0, categoryName: d.categoryName,
       stockAvailable: d.stockAvailable ?? 0,
