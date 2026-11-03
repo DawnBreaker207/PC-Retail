@@ -1,90 +1,328 @@
-<div class="mb-6">
-  <h1 class="text-2xl font-bold tracking-tight">Quản lý tồn kho</h1>
-  <p class="text-muted dark:text-muted-dark text-sm mt-1">Theo dõi và nhập hàng cho các sản phẩm</p>
+<div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+  <div>
+    <h1 class="text-2xl font-bold tracking-tight text-ink dark:text-ink-dark">Quản lý kho & Tồn kho</h1>
+    <p class="text-muted dark:text-muted-dark text-sm mt-1">Theo dõi tồn kho, nhập hàng và trực quan hóa sơ đồ mặt bằng kho</p>
+  </div>
+
+  <!-- View Mode Switcher (Spartan UI Button) -->
+  <div class="flex items-center gap-1 p-1 bg-bg dark:bg-bg-dark rounded-xl border border-border/80 dark:border-border-dark">
+    <button
+      type="button"
+      (click)="viewMode.set('table')"
+      class="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer"
+      [class.bg-surface]="viewMode() === 'table'"
+      [class.dark:bg-surface-dark]="viewMode() === 'table'"
+      [class.text-primary]="viewMode() === 'table'"
+      [class.shadow-xs]="viewMode() === 'table'"
+      [class.text-muted]="viewMode() !== 'table'"
+    >
+      <lucide-angular [img]="Table" class="w-4 h-4" />
+      <span>Bảng danh sách</span>
+    </button>
+    <button
+      type="button"
+      (click)="viewMode.set('map')"
+      class="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer"
+      [class.bg-surface]="viewMode() === 'map'"
+      [class.dark:bg-surface-dark]="viewMode() === 'map'"
+      [class.text-primary]="viewMode() === 'map'"
+      [class.shadow-xs]="viewMode() === 'map'"
+      [class.text-muted]="viewMode() !== 'map'"
+    >
+      <lucide-angular [img]="Warehouse" class="w-4 h-4" />
+      <span>Bản đồ kho trực quan</span>
+      <span class="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-primary/10 text-primary">Map</span>
+    </button>
+  </div>
 </div>
 
-<!-- Filters -->
-<div class="flex flex-wrap items-center gap-3 mb-5">
-  <input
-    nz-input
-    placeholder="Tìm kiếm sản phẩm..."
-    aria-label="Tìm kiếm sản phẩm"
-    [(ngModel)]="search"
-    (keydown.enter)="onSearch()"
-    class="!w-full sm:!w-64"
-  />
-  <button nz-button nzType="default" (click)="onSearch()" class="!rounded-lg">
-    <span nz-icon nzType="search"></span>
-    Tìm kiếm
-  </button>
-  <button nz-button [nzType]="lowStockOnly() ? 'primary' : 'default'" (click)="onLowStockToggle()" class="!rounded-lg !ml-2">
-    <span nz-icon [nzType]="lowStockOnly() ? 'check-square' : 'border'"></span>
-    Chỉ hiện tồn kho thấp (&lt; 5)
-  </button>
-  <nz-select [ngModel]="brandFilter()" (ngModelChange)="onBrandChange($event)" nzPlaceHolder="Thương hiệu" nzAllowClear class="min-w-[160px]">
-    @for (b of brands; track b) {
-      <nz-option [nzValue]="b" [nzLabel]="b" />
-    }
-  </nz-select>
-</div>
-
-<!-- Table -->
-@if (loading()) {
-  <div class="flex justify-center py-20"><nz-spin nzSize="large"></nz-spin></div>
+@if (viewMode() === 'map') {
+  <app-warehouse-map></app-warehouse-map>
 } @else {
-  <nz-table
-    [nzData]="items()"
-    [nzFrontPagination]="false"
-    [nzTotal]="total()"
-    [(nzPageIndex)]="page"
-    [nzPageSize]="size"
-    [nzPageSizeOptions]="pageSizeOptions"
-    (nzPageIndexChange)="onPageChange($event)"
-    (nzPageSizeChange)="onPageSizeChange($event)"
-    nzShowSizeChanger
-    nzSize="middle"
-    nzScrollX="750px"
-  >
-    <thead>
-      <tr>
-        <th nzWidth="80px">SKU</th>
-        <th>Sản phẩm</th>
-        <th nzWidth="120px" nzRight>Tồn kho</th>
-        <th nzWidth="120px" nzRight>Đã đặt</th>
-        <th nzWidth="120px" nzRight>Có thể bán</th>
-        <th nzWidth="140px" nzRight>Thao tác</th>
-      </tr>
-    </thead>
-    <tbody>
-      @for (item of items(); track item.skuId) {
-        <tr [class]="item.availableQuantity < 5 ? '!bg-red-50 dark:!bg-red-900' : ''">
-          <td class="font-mono text-xs font-semibold">#{{ item.skuId }}</td>
-          <td>
-            <div class="flex items-center gap-2">
-              @if (item.imageUrl) {
-                <img [src]="item.imageUrl" loading="lazy" appFallbackImage [alt]="item.skuName" class="w-9 h-9 rounded object-contain bg-bg shrink-0" />
-              }
-              <span class="text-sm line-clamp-2">{{ item.skuName }}</span>
-            </div>
-          </td>
-          <td nzRight class="font-medium">{{ item.stockQuantity }}</td>
-          <td nzRight class="font-medium text-muted dark:text-muted-dark">{{ item.reservedQuantity }}</td>
-          <td nzRight>
-            <span class="font-semibold" [class]="item.availableQuantity < 5 ? '!text-error' : '!text-success'">
-              {{ item.availableQuantity }}
-            </span>
-          </td>
-          <td nzRight>
-            <button nz-button nzSize="small" nzType="primary" (click)="openRestockModal(item)" class="!rounded-lg !text-xs !shadow-sm">
-              <span nz-icon nzType="plus-circle"></span>
-              Nhập thêm
-            </button>
-            <button nz-button nzSize="small" nzType="text" (click)="openHistoryModal(item)" class="!rounded-lg !text-xs" aria-label="Lịch sử giao dịch">
-              <span nz-icon nzType="history"></span>
-            </button>
-          </td>
-        </tr>
+  <!-- Filters Bar (Spartan Input & Button) -->
+  <div class="flex flex-wrap items-center gap-3 mb-5">
+    <div class="relative w-full sm:w-64">
+      <input
+        hlmInput
+        size="sm"
+        placeholder="Tìm kiếm sản phẩm..."
+        aria-label="Tìm kiếm sản phẩm"
+        [(ngModel)]="search"
+        (keydown.enter)="onSearch()"
+        class="!pl-8 !h-9 !text-xs !rounded-lg"
+      />
+      <lucide-angular [img]="Search" class="w-3.5 h-3.5 text-muted dark:text-muted-dark absolute left-2.5 top-3" />
+    </div>
+
+    <button
+      type="button"
+      hlmBtn
+      variant="outline"
+      size="sm"
+      (click)="onSearch()"
+      class="!h-9 !rounded-lg !text-xs !flex !items-center !gap-1.5 cursor-pointer"
+    >
+      <lucide-angular [img]="Search" class="w-3.5 h-3.5" />
+      <span>Tìm kiếm</span>
+    </button>
+
+    <button
+      type="button"
+      hlmBtn
+      [variant]="lowStockOnly() ? 'default' : 'outline'"
+      size="sm"
+      (click)="onLowStockToggle()"
+      class="!h-9 !rounded-lg !text-xs !flex !items-center !gap-1.5 cursor-pointer"
+    >
+      <lucide-angular [img]="lowStockOnly() ? CheckSquare : Square" class="w-3.5 h-3.5" />
+      <span>Chỉ hiện tồn kho thấp (&lt; 5)</span>
+    </button>
+
+    <select
+      [ngModel]="brandFilter()"
+      (ngModelChange)="onBrandChange($event)"
+      class="h-9 px-3 rounded-lg border border-border/80 dark:border-border-dark bg-surface dark:bg-surface-dark text-xs font-medium text-ink dark:text-ink-dark focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer min-w-[160px]"
+    >
+      <option value="">Tất cả thương hiệu</option>
+      @for (b of brands; track b) {
+        <option [value]="b">{{ b }}</option>
       }
-    </tbody>
-  </nz-table>
+    </select>
+  </div>
+
+  <!-- Spartan Table -->
+  @if (loading()) {
+    <div class="flex items-center justify-center py-20 text-muted dark:text-muted-dark">
+      <lucide-angular [img]="Loader2" class="w-8 h-8 animate-spin text-primary" />
+    </div>
+  } @else {
+    <div class="rounded-xl border border-border/80 dark:border-border-dark bg-surface dark:bg-surface-dark overflow-hidden shadow-2xs">
+      <div class="overflow-x-auto">
+        <table hlmTable class="w-full">
+          <thead hlmTableHeader class="bg-bg/60 dark:bg-bg-dark/60">
+            <tr hlmTableRow>
+              <th hlmTableHead class="w-20">SKU</th>
+              <th hlmTableHead>Sản phẩm</th>
+              <th hlmTableHead class="text-right w-28">Tồn kho</th>
+              <th hlmTableHead class="text-right w-28">Đã đặt</th>
+              <th hlmTableHead class="text-right w-32">Có thể bán</th>
+              <th hlmTableHead class="text-right w-36">Thao tác</th>
+            </tr>
+          </thead>
+          <tbody hlmTableBody>
+            @for (item of items(); track item.skuId) {
+              <tr hlmTableRow [class.bg-rose-500/5]="item.availableQuantity < 5">
+                <td hlmTableCell class="font-mono text-xs font-bold text-muted dark:text-muted-dark">
+                  #{{ item.skuId }}
+                </td>
+                <td hlmTableCell>
+                  <div class="flex items-center gap-2.5">
+                    @if (item.imageUrl) {
+                      <img
+                        [src]="item.imageUrl"
+                        loading="lazy"
+                        appFallbackImage
+                        [alt]="item.skuName"
+                        class="w-9 h-9 rounded-lg object-contain bg-bg dark:bg-bg-dark p-0.5 border border-border/60 shrink-0"
+                      />
+                    }
+                    <span class="text-xs font-semibold text-ink dark:text-ink-dark line-clamp-2">{{ item.skuName }}</span>
+                  </div>
+                </td>
+                <td hlmTableCell class="text-right font-mono font-bold text-ink dark:text-ink-dark">
+                  {{ item.stockQuantity }}
+                </td>
+                <td hlmTableCell class="text-right font-mono text-muted dark:text-muted-dark">
+                  {{ item.reservedQuantity }}
+                </td>
+                <td hlmTableCell class="text-right">
+                  <span
+                    hlmBadge
+                    [variant]="item.availableQuantity < 5 ? 'destructive' : 'default'"
+                    class="font-mono font-bold"
+                  >
+                    {{ item.availableQuantity }}
+                  </span>
+                </td>
+                <td hlmTableCell class="text-right">
+                  <div class="flex items-center justify-end gap-1.5">
+                    <button
+                      type="button"
+                      hlmBtn
+                      variant="default"
+                      size="sm"
+                      (click)="openRestockModal(item)"
+                      class="!h-7.5 !px-2.5 !text-xs !rounded-lg cursor-pointer flex items-center gap-1 shadow-2xs"
+                    >
+                      <lucide-angular [img]="PlusCircle" class="w-3.5 h-3.5" />
+                      <span>Nhập thêm</span>
+                    </button>
+                    <button
+                      type="button"
+                      hlmBtn
+                      variant="ghost"
+                      size="icon"
+                      (click)="openHistoryModal(item)"
+                      title="Xem lịch sử biến động kho"
+                      class="!w-7.5 !h-7.5 !min-h-[30px] !min-w-[30px] !rounded-lg text-muted hover:text-ink cursor-pointer"
+                    >
+                      <lucide-angular [img]="History" class="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination Strip -->
+      <div class="flex items-center justify-between px-4 py-3 border-t border-border/80 dark:border-border-dark text-xs text-muted dark:text-muted-dark">
+        <span>Tổng cộng: <strong class="text-ink dark:text-ink-dark">{{ total() }}</strong> sản phẩm</span>
+        <div class="flex items-center gap-2">
+          <button
+            type="button"
+            hlmBtn
+            variant="outline"
+            size="sm"
+            [disabled]="page === 0"
+            (click)="onPageChange(page - 1)"
+            class="!h-8 !px-2.5 !rounded-lg cursor-pointer"
+          >
+            <lucide-angular [img]="ChevronLeft" class="w-3.5 h-3.5" />
+            <span>Trang trước</span>
+          </button>
+          <span class="font-mono font-semibold text-ink dark:text-ink-dark px-2">Trang {{ page + 1 }}</span>
+          <button
+            type="button"
+            hlmBtn
+            variant="outline"
+            size="sm"
+            [disabled]="(page + 1) * size >= total()"
+            (click)="onPageChange(page + 1)"
+            class="!h-8 !px-2.5 !rounded-lg cursor-pointer"
+          >
+            <span>Trang sau</span>
+            <lucide-angular [img]="ChevronRight" class="w-3.5 h-3.5" />
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+}
+
+<!-- SPARTAN DIALOG: RESTOCK MODAL (100% Spartan UI) -->
+@if (restockItem(); as item) {
+  <div hlmDialogOverlay (click)="closeRestockModal()"></div>
+  <div hlmDialogContent class="max-w-md bg-surface dark:bg-surface-dark border-border/80 dark:border-border-dark p-6">
+    <div hlmDialogHeader class="mb-4">
+      <h3 hlmDialogTitle class="text-base font-bold text-ink dark:text-ink-dark">Nhập kho bổ sung</h3>
+      <p hlmDialogDescription class="text-xs text-muted dark:text-muted-dark">
+        Nhập thêm số lượng hàng hóa vào tồn kho cho: <strong class="text-ink dark:text-ink-dark">{{ item.skuName }}</strong>
+      </p>
+    </div>
+
+    <div class="space-y-4 py-1">
+      <div>
+        <label for="restock-quantity" class="text-xs font-semibold text-ink dark:text-ink-dark block mb-1">Số lượng nhập thêm:</label>
+        <input
+          hlmInput
+          id="restock-quantity"
+          type="number"
+          min="1"
+          [(ngModel)]="restockQuantity"
+          class="!h-9 !text-sm !font-mono font-bold"
+        />
+      </div>
+
+      <div>
+        <label for="restock-note" class="text-xs font-semibold text-ink dark:text-ink-dark block mb-1">Ghi chú phiếu nhập:</label>
+        <textarea
+          hlmInput
+          id="restock-note"
+          rows="3"
+          [(ngModel)]="restockNote"
+          placeholder="Ví dụ: Nhập hàng đợt 2 từ NPP ASUS Việt Nam..."
+          class="!h-auto !text-xs py-2"
+        ></textarea>
+      </div>
+    </div>
+
+    <div hlmDialogFooter class="flex items-center justify-end gap-2 mt-5 pt-3 border-t border-border/60 dark:border-border-dark/60">
+      <button type="button" hlmBtn variant="outline" size="sm" (click)="closeRestockModal()">Hủy</button>
+      <button
+        type="button"
+        hlmBtn
+        variant="default"
+        size="sm"
+        [disabled]="restockQuantity < 1 || restockSubmitting()"
+        (click)="submitRestock()"
+      >
+        @if (restockSubmitting()) {
+          <lucide-angular [img]="Loader2" class="w-3.5 h-3.5 animate-spin mr-1" />
+        }
+        <span>Xác nhận nhập kho</span>
+      </button>
+    </div>
+  </div>
+}
+
+<!-- SPARTAN DIALOG: TRANSACTION HISTORY MODAL (100% Spartan UI) -->
+@if (historyItem(); as item) {
+  <div hlmDialogOverlay (click)="closeHistoryModal()"></div>
+  <div hlmDialogContent class="max-w-xl bg-surface dark:bg-surface-dark border-border/80 dark:border-border-dark p-6">
+    <div hlmDialogHeader class="mb-4">
+      <h3 hlmDialogTitle class="text-base font-bold text-ink dark:text-ink-dark">Lịch sử giao dịch kho</h3>
+      <p hlmDialogDescription class="text-xs text-muted dark:text-muted-dark">
+        Biến động tồn kho của: <strong class="text-ink dark:text-ink-dark">{{ item.skuName }}</strong>
+      </p>
+    </div>
+
+    <div class="py-2 max-h-96 overflow-y-auto">
+      @if (historyLoading()) {
+        <div class="flex justify-center py-10">
+          <lucide-angular [img]="Loader2" class="w-6 h-6 animate-spin text-primary" />
+        </div>
+      } @else if (historyTransactions().length === 0) {
+        <p class="text-xs text-muted dark:text-muted-dark text-center py-8">Chưa có lịch sử giao dịch nào.</p>
+      } @else {
+        <table hlmTable class="w-full text-xs">
+          <thead hlmTableHeader class="bg-bg/60 dark:bg-bg-dark/60">
+            <tr hlmTableRow>
+              <th hlmTableHead>Thời gian</th>
+              <th hlmTableHead>Loại</th>
+              <th hlmTableHead class="text-right">Số lượng</th>
+              <th hlmTableHead>Người thực hiện</th>
+              <th hlmTableHead>Ghi chú</th>
+            </tr>
+          </thead>
+          <tbody hlmTableBody>
+            @for (tx of historyTransactions(); track tx.id) {
+              <tr hlmTableRow>
+                <td hlmTableCell class="font-mono text-[11px]">{{ tx.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
+                <td hlmTableCell>
+                  <span
+                    hlmBadge
+                    [variant]="tx.type === 'IN' ? 'default' : 'secondary'"
+                    class="text-[10px] font-bold"
+                  >
+                    {{ tx.type === 'IN' ? 'NHẬP' : 'XUẤT' }}
+                  </span>
+                </td>
+                <td hlmTableCell class="text-right font-mono font-bold" [class.text-success]="tx.type === 'IN'" [class.text-error]="tx.type === 'OUT'">
+                  {{ tx.type === 'IN' ? '+' : '-' }}{{ tx.quantity }}
+                </td>
+                <td hlmTableCell>{{ tx.actorName || 'Hệ thống' }}</td>
+                <td hlmTableCell class="text-muted dark:text-muted-dark truncate max-w-xs">{{ tx.note || '—' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </div>
+
+    <div hlmDialogFooter class="flex items-center justify-end mt-4 pt-3 border-t border-border/60 dark:border-border-dark/60">
+      <button type="button" hlmBtn variant="outline" size="sm" (click)="closeHistoryModal()">Đóng</button>
+    </div>
+  </div>
 }

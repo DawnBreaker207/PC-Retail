@@ -1,22 +1,46 @@
 import { Component, inject, DestroyRef, signal } from '@angular/core';
+import { DatePipe, CommonModule } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
-import { NzTableModule } from 'ng-zorro-antd/table';
-import { NzInputModule } from 'ng-zorro-antd/input';
-import { NzButtonModule } from 'ng-zorro-antd/button';
-import { NzIconModule } from 'ng-zorro-antd/icon';
-import { NzSpinModule } from 'ng-zorro-antd/spin';
-import { NzTagModule } from 'ng-zorro-antd/tag';
-import { NzCheckboxModule } from 'ng-zorro-antd/checkbox';
-import { NzSelectModule } from 'ng-zorro-antd/select';
-import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
-import { NzMessageService } from 'ng-zorro-antd/message';
 import { ApiEndpoints } from '@core/api/api.endpoints';
 import { FallbackImageDirective } from '@shared/directives/fallback-image.directive';
 import { MockDataService } from '@core/services/mock-data.service';
-import { RestockModalComponent } from '../components/restock-modal.component';
-import { TransactionHistoryModalComponent } from '../components/transaction-history-modal.component';
+import { ToastService } from '@core/services/toast.service';
+import { WarehouseMapComponent } from '../components/warehouse-map.component';
+import { HlmButtonDirective } from '@shared/ui/button';
+import { HlmInputDirective } from '@shared/ui/input';
+import { HlmBadgeDirective } from '@shared/ui/badge';
+import {
+  HlmTableDirective,
+  HlmTableHeaderDirective,
+  HlmTableBodyDirective,
+  HlmTableRowDirective,
+  HlmTableHeadDirective,
+  HlmTableCellDirective
+} from '@shared/ui/table';
+import {
+  HlmDialogOverlayDirective,
+  HlmDialogContentDirective,
+  HlmDialogHeaderDirective,
+  HlmDialogTitleDirective,
+  HlmDialogDescriptionDirective,
+  HlmDialogFooterDirective
+} from '@shared/ui/dialog';
+import {
+  LucideAngularModule,
+  Table,
+  Warehouse,
+  Search,
+  PlusCircle,
+  History,
+  CheckSquare,
+  Square,
+  X,
+  Loader2,
+  ChevronLeft,
+  ChevronRight
+} from 'lucide-angular';
 
 interface InventoryItem {
   skuId: number;
@@ -33,33 +57,84 @@ interface InventoryResponse {
   totalPages: number;
 }
 
+interface InventoryTransaction {
+  id: number;
+  type: 'IN' | 'OUT';
+  quantity: number;
+  note: string;
+  createdAt: string;
+  actorName: string;
+}
+
 @Component({
   selector: 'app-inventory-list',
+  standalone: true,
   imports: [
-    FormsModule, FallbackImageDirective,
-    NzTableModule, NzInputModule, NzButtonModule, NzIconModule, NzSpinModule, NzTagModule, NzCheckboxModule,
-    NzSelectModule, NzModalModule,
+    CommonModule,
+    DatePipe,
+    FormsModule,
+    FallbackImageDirective,
+    WarehouseMapComponent,
+    HlmButtonDirective,
+    HlmInputDirective,
+    HlmBadgeDirective,
+    HlmTableDirective,
+    HlmTableHeaderDirective,
+    HlmTableBodyDirective,
+    HlmTableRowDirective,
+    HlmTableHeadDirective,
+    HlmTableCellDirective,
+    HlmDialogOverlayDirective,
+    HlmDialogContentDirective,
+    HlmDialogHeaderDirective,
+    HlmDialogTitleDirective,
+    HlmDialogDescriptionDirective,
+    HlmDialogFooterDirective,
+    LucideAngularModule
   ],
   templateUrl: './inventory-list.component.html',
 })
 export class InventoryListComponent {
+  readonly Table = Table;
+  readonly Warehouse = Warehouse;
+  readonly Search = Search;
+  readonly PlusCircle = PlusCircle;
+  readonly History = History;
+  readonly CheckSquare = CheckSquare;
+  readonly Square = Square;
+  readonly X = X;
+  readonly Loader2 = Loader2;
+  readonly ChevronLeft = ChevronLeft;
+  readonly ChevronRight = ChevronRight;
+
+  viewMode = signal<'table' | 'map'>('map');
+
   private http = inject(HttpClient);
   private destroyRef = inject(DestroyRef);
-  private modal = inject(NzModalService);
-  private message = inject(NzMessageService);
+  private toast = inject(ToastService);
   private mock = inject(MockDataService);
 
   brands = this.mock.brands.map((b) => b.name);
 
   items = signal<InventoryItem[]>([]);
   loading = signal(false);
-  search = signal('');
+  search = '';
   brandFilter = signal('');
   lowStockOnly = signal(false);
   total = signal(0);
   page = 0;
   size = 20;
-  pageSizeOptions = [10, 20, 50];
+
+  // Restock Dialog State (100% Spartan UI)
+  restockItem = signal<InventoryItem | null>(null);
+  restockQuantity = 1;
+  restockNote = '';
+  restockSubmitting = signal(false);
+
+  // History Dialog State (100% Spartan UI)
+  historyItem = signal<InventoryItem | null>(null);
+  historyTransactions = signal<InventoryTransaction[]>([]);
+  historyLoading = signal(false);
 
   constructor() {
     this.loadData();
@@ -83,13 +158,7 @@ export class InventoryListComponent {
   }
 
   onPageChange(page: number) {
-    this.page = page - 1;
-    this.loadData();
-  }
-
-  onPageSizeChange(size: number) {
-    this.size = size;
-    this.page = 0;
+    this.page = page;
     this.loadData();
   }
 
@@ -98,7 +167,7 @@ export class InventoryListComponent {
     let params = new HttpParams()
       .set('page', this.page)
       .set('size', this.size);
-    if (this.search()) params = params.set('q', this.search());
+    if (this.search.trim()) params = params.set('q', this.search.trim());
     if (this.brandFilter()) params = params.set('brand', this.brandFilter());
     if (this.lowStockOnly()) params = params.set('lowStock', 'true');
 
@@ -115,36 +184,59 @@ export class InventoryListComponent {
   }
 
   openRestockModal(item: InventoryItem) {
-    const modalRef = this.modal.create({
-      nzTitle: `Nhập thêm — ${item.skuName}`,
-      nzContent: RestockModalComponent,
-      nzData: { skuId: item.skuId, skuName: item.skuName },
-      nzFooter: null,
-      nzWidth: 480,
-      nzOnOk: () => {
-        const instance = modalRef.getContentComponent() as RestockModalComponent;
-        return instance.submit();
-      },
-    });
-    const instance = modalRef.getContentComponent() as RestockModalComponent;
-    // The modal has its own submit button (no footer), so wire close explicitly.
-    instance.close = () => modalRef.destroy(true);
+    this.restockItem.set(item);
+    this.restockQuantity = 1;
+    this.restockNote = '';
+    this.restockSubmitting.set(false);
+  }
 
-    modalRef.afterClose.subscribe((success) => {
-      if (success) {
-        this.message.success('Nhập kho thành công');
-        this.loadData();
-      }
-    });
+  closeRestockModal() {
+    this.restockItem.set(null);
+  }
+
+  submitRestock() {
+    const item = this.restockItem();
+    const qty = Number(this.restockQuantity);
+    if (!item || isNaN(qty) || qty < 1) return;
+
+    this.restockSubmitting.set(true);
+    this.http.put(ApiEndpoints.inventory.restock(item.skuId), {
+      quantity: qty,
+      unitCost: 100000,
+      note: this.restockNote,
+    })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.toast.success(`Nhập kho thành công ${qty} sản phẩm.`);
+          this.restockSubmitting.set(false);
+          this.closeRestockModal();
+          this.loadData();
+        },
+        error: () => {
+          this.restockSubmitting.set(false);
+          this.toast.error('Nhập kho thất bại, vui lòng thử lại.');
+        },
+      });
   }
 
   openHistoryModal(item: InventoryItem) {
-    this.modal.create({
-      nzTitle: `Lịch sử giao dịch — ${item.skuName}`,
-      nzContent: TransactionHistoryModalComponent,
-      nzData: { skuId: item.skuId, skuName: item.skuName },
-      nzFooter: null,
-      nzWidth: 640,
-    });
+    this.historyItem.set(item);
+    this.historyLoading.set(true);
+    this.historyTransactions.set([]);
+
+    this.http.get<{ content: InventoryTransaction[] }>(ApiEndpoints.inventory.transactions(item.skuId))
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res) => {
+          this.historyTransactions.set(res.content || []);
+          this.historyLoading.set(false);
+        },
+        error: () => this.historyLoading.set(false),
+      });
+  }
+
+  closeHistoryModal() {
+    this.historyItem.set(null);
   }
 }

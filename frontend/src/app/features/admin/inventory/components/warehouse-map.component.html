@@ -1,0 +1,804 @@
+<div class="space-y-4 animate-fade-in">
+  <!-- Top Summary Strip -->
+  <div class="bg-surface dark:bg-surface-dark border border-border/80 dark:border-border-dark px-4 py-3 rounded-xl shadow-2xs flex flex-wrap items-center justify-between gap-4">
+    <div class="flex flex-wrap items-center gap-5 text-xs">
+      <div class="flex items-center gap-2">
+        <span class="text-muted dark:text-muted-dark">Tổng vị trí ô ngăn:</span>
+        <span class="font-bold text-ink dark:text-ink-dark font-mono text-sm">{{ totalBinsCount() }} ô</span>
+        <span class="text-[11px] text-muted dark:text-muted-dark">({{ zones().length }} Phân khu)</span>
+      </div>
+
+      <div class="h-4 w-px bg-border/80 dark:border-border-dark"></div>
+
+      <div class="flex items-center gap-2">
+        <span class="text-muted dark:text-muted-dark">Tỷ lệ lấp đầy kho:</span>
+        <div class="flex items-center gap-1.5">
+          <span class="font-bold font-mono text-sm" [ngClass]="overallCapacityPercent() >= 90 ? 'text-rose-600' : overallCapacityPercent() >= 50 ? 'text-amber-600' : 'text-blue-600'">
+            {{ overallCapacityPercent() }}%
+          </span>
+          <span class="text-[11px] text-muted dark:text-muted-dark">({{ totalProductsCount() }} linh kiện)</span>
+        </div>
+      </div>
+
+      <div class="h-4 w-px bg-border/80 dark:border-border-dark"></div>
+
+      <div class="flex items-center gap-4">
+        <span class="flex items-center gap-1.5">
+          <span class="w-2.5 h-2.5 rounded-full border border-dashed border-border bg-bg dark:bg-bg-dark"></span>
+          <span class="text-muted dark:text-muted-dark">Ô còn trống:</span>
+          <strong class="font-mono text-ink dark:text-ink-dark">{{ emptyBinsCount() }}</strong>
+        </span>
+
+        <span class="flex items-center gap-1.5">
+          <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
+          <span class="text-muted dark:text-muted-dark">Ô đã đầy (≥90%):</span>
+          <strong class="font-mono text-rose-600 dark:text-rose-400">{{ fullBinsCount() }}</strong>
+        </span>
+      </div>
+    </div>
+
+    <!-- Actions: Managing Mode & Reset (Spartan UI Button) -->
+    <div class="flex items-center gap-2">
+      <button
+        type="button"
+        hlmBtn
+        [variant]="managingMode() ? 'default' : 'outline'"
+        size="sm"
+        (click)="toggleManagingMode()"
+        class="!text-xs font-semibold !flex !items-center !gap-1.5 cursor-pointer shadow-2xs"
+      >
+        <lucide-angular [img]="Settings2" class="w-3.5 h-3.5" />
+        <span>{{ managingMode() ? 'Hoàn tất quản lý' : 'Quản lý vị trí kho' }}</span>
+      </button>
+
+      @if (managingMode()) {
+        <button
+          type="button"
+          hlmBtn
+          variant="outline"
+          size="sm"
+          (click)="handleAddZone()"
+          class="!text-xs !text-primary !border-primary/50 hover:!border-primary !flex !items-center !gap-1"
+        >
+          <lucide-angular [img]="Plus" class="w-3.5 h-3.5" />
+          <span>+ Thêm phân khu</span>
+        </button>
+      }
+
+      <button
+        type="button"
+        hlmBtn
+        variant="ghost"
+        size="sm"
+        (click)="resetLayout()"
+        title="Hoàn nguyên cấu hình vị trí mặc định"
+        class="!text-xs !text-muted dark:!text-muted-dark hover:!text-ink dark:hover:!text-ink-dark !px-2 cursor-pointer"
+      >
+        <lucide-angular [img]="RotateCcw" class="w-3.5 h-3.5 inline mr-1" />
+        Mặc định
+      </button>
+    </div>
+  </div>
+
+  <!-- View Mode Selector & Zone Switcher (Chuẩn D:\Code\Projects) -->
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <div class="flex items-center gap-3">
+      <!-- Switcher: Theo Phân khu vs Toàn cảnh -->
+      <div class="flex items-center p-0.5 rounded-lg border border-border/80 dark:border-border-dark bg-bg/80 dark:bg-bg-dark/80 text-xs shadow-2xs">
+        <button
+          type="button"
+          (click)="switchView('zone')"
+          class="px-3 py-1.5 rounded-md font-medium transition-all cursor-pointer flex items-center gap-1.5"
+          [ngClass]="viewMode() === 'zone' && !zoomedShelf() ? 'bg-surface dark:bg-surface-dark text-ink dark:text-ink-dark shadow-xs font-semibold' : 'text-muted dark:text-muted-dark hover:text-ink'"
+        >
+          <lucide-angular [img]="Layers" class="w-3.5 h-3.5" />
+          <span>Xem theo Phân khu</span>
+        </button>
+        <button
+          type="button"
+          (click)="switchView('overview')"
+          class="px-3 py-1.5 rounded-md font-medium transition-all cursor-pointer flex items-center gap-1.5"
+          [ngClass]="viewMode() === 'overview' && !zoomedShelf() ? 'bg-surface dark:bg-surface-dark text-ink dark:text-ink-dark shadow-xs font-semibold' : 'text-muted dark:text-muted-dark hover:text-ink'"
+        >
+          <lucide-angular [img]="Warehouse" class="w-3.5 h-3.5" />
+          <span>Toàn cảnh kho</span>
+        </button>
+      </div>
+
+      <!-- Styled Select Zone (Khi ở viewMode 'zone') -->
+      @if (viewMode() === 'zone' && !zoomedShelf()) {
+        <div class="flex items-center gap-1.5">
+          <select
+            [ngModel]="selectedZoneCode()"
+            (ngModelChange)="selectedZoneCode.set($event)"
+            class="h-8.5 px-3 rounded-lg border border-border/80 dark:border-border-dark bg-surface dark:bg-surface-dark text-xs font-semibold text-ink dark:text-ink-dark focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer shadow-2xs"
+          >
+            @for (z of zones(); track z.zoneCode) {
+              <option [value]="z.zoneCode">Khu {{ z.zoneCode }} — {{ z.category }}</option>
+            }
+          </select>
+        </div>
+      }
+    </div>
+
+    <!-- Heatmap Legend -->
+    <div class="flex items-center gap-3 text-[11px] text-muted dark:text-muted-dark bg-surface dark:bg-surface-dark px-3 py-1.5 rounded-lg border border-border/70 dark:border-border-dark/70">
+      <div class="flex items-center gap-1">
+        <span class="w-3 h-3 rounded-xs border border-dashed border-border bg-bg dark:bg-bg-dark"></span>
+        <span>Trống (0%)</span>
+      </div>
+      <div class="flex items-center gap-1">
+        <span class="w-3 h-3 rounded-xs bg-blue-100 border border-blue-300 dark:bg-blue-950/70"></span>
+        <span>&lt;50%</span>
+      </div>
+      <div class="flex items-center gap-1">
+        <span class="w-3 h-3 rounded-xs bg-amber-100 border border-amber-300 dark:bg-amber-950/70"></span>
+        <span>50-89%</span>
+      </div>
+      <div class="flex items-center gap-1">
+        <span class="w-3 h-3 rounded-xs bg-rose-500 border border-rose-600 text-white"></span>
+        <span>≥90% Đầy</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filter & Search Toolbar -->
+  <div class="bg-surface dark:bg-surface-dark border border-border/80 dark:border-border-dark p-3 rounded-xl shadow-2xs flex flex-wrap items-center justify-between gap-3">
+    <!-- Tìm kiếm nhanh có Auto-Highlight (Spartan Input) -->
+    <div class="relative w-full sm:w-80">
+      <input
+        hlmInput
+        size="sm"
+        [(ngModel)]="searchQuery"
+        placeholder="Tìm theo mã ô (vd: 01A), SKU, linh kiện, Serial..."
+        class="!pl-8 !text-xs !rounded-lg !h-8.5"
+      />
+      <lucide-angular [img]="Search" class="w-3.5 h-3.5 text-muted dark:text-muted-dark absolute left-2.5 top-2.5" />
+      @if (searchQuery()) {
+        <button (click)="searchQuery.set('')" class="absolute right-2.5 top-2 text-muted dark:text-muted-dark hover:text-ink text-xs font-bold cursor-pointer">✕</button>
+      }
+    </div>
+
+    <!-- Filter Mode Pills -->
+    <div class="flex items-center gap-1">
+      <button
+        (click)="filterStatus.set('all')"
+        class="px-2.5 py-1 rounded-md text-xs font-medium transition-colors cursor-pointer"
+        [ngClass]="filterStatus() === 'all' ? 'bg-primary text-white shadow-2xs' : 'bg-bg dark:bg-bg-dark text-muted dark:text-muted-dark hover:text-ink'"
+      >
+        Tất cả
+      </button>
+      <button
+        (click)="filterStatus.set('empty')"
+        class="px-2.5 py-1 rounded-md text-xs font-medium transition-colors cursor-pointer"
+        [ngClass]="filterStatus() === 'empty' ? 'bg-primary text-white shadow-2xs' : 'bg-bg dark:bg-bg-dark text-muted dark:text-muted-dark hover:text-ink'"
+      >
+        Ô trống ({{ emptyBinsCount() }})
+      </button>
+      <button
+        (click)="filterStatus.set('stocked')"
+        class="px-2.5 py-1 rounded-md text-xs font-medium transition-colors cursor-pointer"
+        [ngClass]="filterStatus() === 'stocked' ? 'bg-primary text-white shadow-2xs' : 'bg-bg dark:bg-bg-dark text-muted dark:text-muted-dark hover:text-ink'"
+      >
+        Có hàng
+      </button>
+      <button
+        (click)="filterStatus.set('full')"
+        class="px-2.5 py-1 rounded-md text-xs font-medium transition-colors cursor-pointer"
+        [ngClass]="filterStatus() === 'full' ? 'bg-primary text-white shadow-2xs' : 'bg-bg dark:bg-bg-dark text-muted dark:text-muted-dark hover:text-ink'"
+      >
+        Đã đầy ({{ fullBinsCount() }})
+      </button>
+    </div>
+  </div>
+
+  <!-- VIEW 1: SHELF ZOOM VIEW (Khi click vào 1 Kệ để xem cận cảnh) -->
+  @if (zoomedShelf() && activeZoomedShelf(); as zoomData) {
+    <div class="space-y-3 animate-fade-in">
+      <div class="flex items-center justify-between">
+        <button
+          type="button"
+          hlmBtn
+          variant="outline"
+          size="sm"
+          (click)="closeShelfZoom()"
+          class="!rounded-lg !text-xs !flex !items-center !gap-1.5 cursor-pointer font-medium"
+        >
+          <lucide-angular [img]="ArrowLeft" class="w-3.5 h-3.5" />
+          <span>Quay lại toàn cảnh kho (Esc)</span>
+        </button>
+        <div class="text-xs text-muted dark:text-muted-dark">
+          Đang xem cận cảnh: <strong class="text-ink dark:text-ink-dark">Khu {{ zoomData.zone.zoneCode }} — {{ zoomData.shelf.shelfName }}</strong>
+        </div>
+      </div>
+
+      <div class="rounded-2xl border border-border/80 dark:border-border-dark bg-surface dark:bg-surface-dark p-5 space-y-4 shadow-xs">
+        <div class="flex items-center justify-between border-b border-border/60 dark:border-border-dark/60 pb-3">
+          <div class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-bold text-sm">
+              {{ zoomData.shelf.shelfCode }}
+            </div>
+            <div>
+              <h2 class="text-sm font-bold text-ink dark:text-ink-dark">{{ zoomData.shelf.shelfName }}</h2>
+              <p class="text-xs text-muted dark:text-muted-dark">Phân khu {{ zoomData.zone.zoneCode }} — {{ zoomData.zone.category }}</p>
+            </div>
+          </div>
+          <span class="text-xs font-mono font-semibold px-2.5 py-1 rounded-full bg-bg dark:bg-bg-dark border border-border/70 dark:border-border-dark/70 text-ink dark:text-ink-dark">
+            {{ zoomData.shelf.bins.length }} ô lưu trữ
+          </span>
+        </div>
+
+        <!-- Shelf Bins Grid (Kích thước to, thoáng mắt) -->
+        <div class="flex flex-wrap items-center gap-4">
+          @for (bin of zoomData.shelf.bins; track bin.id) {
+            @if (isBinVisible(bin)) {
+              <div
+                class="relative transition-all"
+                [ngClass]="{
+                  'ring-2 ring-blue-500 shadow-md animate-pulse': isBinHighlighted(bin),
+                  'opacity-40': !bin.isActive
+                }"
+              >
+                <!-- Bin Box Card -->
+                <button
+                  type="button"
+                  (click)="openBinDetail(bin)"
+                  class="flex flex-col items-center justify-center rounded-xl p-3 transition-all hover:shadow-md hover:ring-2 hover:ring-primary/40 cursor-pointer text-center select-none"
+                  [ngClass]="getBinBgClass(bin)"
+                  style="min-width: 6.5rem; min-height: 5rem;"
+                >
+                  <div class="flex items-center gap-1.5 mb-1">
+                    <span class="text-sm font-mono font-bold leading-tight">{{ bin.binCode }}</span>
+                    @if (bin.boxCount > 0) {
+                      <span class="text-[10px] font-bold px-1.5 py-0.2 rounded bg-primary/15 text-primary border border-primary/20">
+                        📦x{{ bin.boxCount }}
+                      </span>
+                    }
+                  </div>
+                  <div class="text-base font-bold font-mono leading-none my-0.5">
+                    {{ bin.productCount }}
+                  </div>
+                  <div class="text-[11px] opacity-80 leading-tight">
+                    {{ getCapacityPercent(bin) }}% (Max: {{ bin.maxCapacity }})
+                  </div>
+                </button>
+
+                <!-- Managing Mode Controls (Corner buttons) -->
+                @if (managingMode()) {
+                  <!-- Relocate Grip -->
+                  @if (bin.isActive && bin.productCount > 0) {
+                    <button
+                      type="button"
+                      (click)="openRelocateModal(bin)"
+                      title="Điều chuyển hàng hóa từ ô này"
+                      class="absolute -top-1.5 -left-1.5 w-5 h-5 rounded-full bg-surface dark:bg-surface-dark border border-border shadow-xs hover:bg-bg dark:hover:bg-bg-dark flex items-center justify-center cursor-pointer text-muted hover:text-primary transition-colors"
+                    >
+                      <lucide-angular [img]="GripVertical" class="w-3 h-3" />
+                    </button>
+                  }
+
+                  <!-- Deactivate / Delete / Reactivate -->
+                  @if (bin.isActive && bin.productCount === 0) {
+                    <button
+                      type="button"
+                      (click)="deactivateBin(bin)"
+                      title="Ngưng hoạt động ô này"
+                      class="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-surface dark:bg-surface-dark border border-border shadow-xs hover:bg-bg dark:hover:bg-bg-dark flex items-center justify-center cursor-pointer text-muted hover:text-error transition-colors"
+                    >
+                      <lucide-angular [img]="X" class="w-3 h-3" />
+                    </button>
+                  } @else if (!bin.isActive && bin.productCount === 0) {
+                    <div class="absolute -top-1.5 -right-1.5 flex items-center gap-0.5">
+                      <button
+                        type="button"
+                        (click)="reactivateBin(bin)"
+                        title="Kích hoạt lại ô này"
+                        class="w-5 h-5 rounded-full bg-surface dark:bg-surface-dark border border-border shadow-xs hover:bg-bg dark:hover:bg-bg-dark flex items-center justify-center cursor-pointer text-success hover:scale-110 transition-all"
+                      >
+                        <lucide-angular [img]="Undo2" class="w-3 h-3" />
+                      </button>
+                      <button
+                        type="button"
+                        (click)="deleteBin(bin)"
+                        title="Xóa vĩnh viễn ô trống"
+                        class="w-5 h-5 rounded-full bg-surface dark:bg-surface-dark border border-border shadow-xs hover:bg-bg dark:hover:bg-bg-dark flex items-center justify-center cursor-pointer text-error hover:scale-110 transition-all"
+                      >
+                        <lucide-angular [img]="Trash2" class="w-2.5 h-2.5" />
+                      </button>
+                    </div>
+                  }
+                }
+              </div>
+            }
+          }
+
+          <!-- Add Bin Button in Managing Mode -->
+          @if (managingMode()) {
+            <button
+              type="button"
+              (click)="autoAddBin(zoomData.zone.zoneCode, zoomData.shelf.shelfCode)"
+              title="Thêm ô lưu trữ mới vào kệ này"
+              class="flex flex-col items-center justify-center rounded-xl border border-dashed border-primary/40 bg-primary/5 hover:bg-primary/10 transition-colors cursor-pointer text-primary"
+              style="min-width: 6.5rem; min-height: 5rem;"
+            >
+              <lucide-angular [img]="Plus" class="w-5 h-5 mb-1" />
+              <span class="text-xs font-semibold">+ Thêm ô</span>
+            </button>
+          }
+        </div>
+      </div>
+    </div>
+  } @else {
+    <!-- VIEW 2: ZONE VIEW & OVERVIEW (Mặt bằng trực quan chuẩn D:\Code\Projects) -->
+    <div class="rounded-2xl border border-border/80 dark:border-border-dark bg-surface dark:bg-surface-dark overflow-hidden shadow-xs">
+      <div class="flex flex-col lg:flex-row">
+        <!-- Entrance / Cổng kho chính (Hiển thị trực quan ở cạnh trái như D:\Code\Projects) -->
+        <div class="lg:w-12 shrink-0 bg-bg/70 dark:bg-bg-dark/70 border-b lg:border-b-0 lg:border-r border-dashed border-border/80 dark:border-border-dark/80 flex lg:flex-col items-center justify-center gap-2 py-3 px-4 lg:py-6 select-none">
+          <lucide-angular [img]="DoorOpen" class="w-5 h-5 text-muted dark:text-muted-dark" />
+          <span
+            class="text-[11px] font-bold tracking-wider text-muted dark:text-muted-dark uppercase"
+            style="writing-mode: horizontal-tb;"
+          >
+            CỔNG CHÍNH / LỐI VÀO (CỬA NHẬP / XUẤT KHO TRUNG TÂM)
+          </span>
+        </div>
+
+        <!-- Warehouse Zones Grid -->
+        <div class="flex-1 p-5 space-y-6">
+          <div
+            class="grid gap-6"
+            [ngClass]="viewMode() === 'overview' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'"
+          >
+            @for (zone of filteredZones(); track zone.zoneCode) {
+              <div class="rounded-xl border border-border/80 dark:border-border-dark bg-bg/40 dark:bg-bg-dark/40 p-4 space-y-4">
+                <!-- Zone Header -->
+                <div class="flex items-center justify-between border-b border-border/60 dark:border-border-dark/60 pb-2.5">
+                  <div class="flex items-center gap-2">
+                    <span class="w-6 h-6 rounded-md bg-primary text-white font-bold text-xs flex items-center justify-center shadow-xs">
+                      {{ zone.zoneCode }}
+                    </span>
+                    <div>
+                      <h2 class="text-xs font-bold text-ink dark:text-ink-dark flex items-center gap-1.5">
+                        <span>{{ zone.zoneName }}</span>
+                      </h2>
+                      <p class="text-[11px] text-muted dark:text-muted-dark truncate max-w-xs">{{ zone.description }}</p>
+                    </div>
+                  </div>
+
+                  <!-- Zone Managing Actions -->
+                  <div class="flex items-center gap-1.5">
+                    @if (managingMode()) {
+                      <button
+                        type="button"
+                        hlmBtn
+                        variant="secondary"
+                        size="sm"
+                        (click)="autoAddShelf(zone.zoneCode)"
+                        title="Thêm kệ lưu trữ mới"
+                        class="!px-2 !py-1 !rounded-md !text-[11px] !font-semibold text-primary hover:bg-primary/20 transition-colors flex items-center gap-1 cursor-pointer !h-7"
+                      >
+                        <lucide-angular [img]="Plus" class="w-3 h-3" />
+                        <span>Kệ</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        hlmBtn
+                        variant="ghost"
+                        size="icon"
+                        (click)="deleteZone(zone.zoneCode)"
+                        title="Xóa phân khu"
+                        class="!w-7 !h-7 !rounded-md text-muted hover:text-error flex items-center justify-center transition-colors cursor-pointer"
+                      >
+                        <lucide-angular [img]="Trash2" class="w-3 h-3" />
+                      </button>
+                    }
+                  </div>
+                </div>
+
+                <!-- Shelves within Zone -->
+                <div class="space-y-4">
+                  @for (shelf of zone.shelves; track shelf.shelfCode) {
+                    <div class="bg-surface dark:bg-surface-dark border border-border/70 dark:border-border-dark/70 rounded-xl p-3 space-y-2.5 shadow-2xs">
+                      <div class="flex items-center justify-between">
+                        <button
+                          type="button"
+                          (click)="openShelfZoom(zone.zoneCode, shelf.shelfCode)"
+                          title="Click để phóng to chi tiết Kệ này"
+                          class="text-xs font-bold text-ink dark:text-ink-dark hover:text-primary transition-colors flex items-center gap-1 cursor-pointer group"
+                        >
+                          <span>{{ shelf.shelfName }}</span>
+                          <span class="text-[10px] text-primary opacity-0 group-hover:opacity-100 transition-opacity">🔍 Phóng to</span>
+                        </button>
+                        <span class="text-[11px] text-muted dark:text-muted-dark font-mono">
+                          {{ shelf.bins.length }} ô
+                        </span>
+                      </div>
+
+                      <!-- Bins Row with CDK Drag & Drop support -->
+                      <div
+                        cdkDropList
+                        [cdkDropListData]="shelf.bins"
+                        (cdkDropListDropped)="onDropBin($event)"
+                        class="flex flex-wrap items-center gap-2.5"
+                      >
+                        @for (bin of shelf.bins; track bin.id) {
+                          @if (isBinVisible(bin)) {
+                            <div
+                              cdkDrag
+                              [cdkDragData]="bin"
+                              [cdkDragDisabled]="!managingMode() || bin.productCount === 0"
+                              class="relative transition-all"
+                              [ngClass]="{
+                                'ring-2 ring-blue-500 shadow-md animate-pulse': isBinHighlighted(bin),
+                                'opacity-40': !bin.isActive
+                              }"
+                            >
+                              <!-- Bin Box Button -->
+                              <button
+                                type="button"
+                                (click)="openBinDetail(bin)"
+                                class="flex flex-col items-center justify-center rounded-lg p-2 transition-all hover:shadow-xs hover:ring-1 hover:ring-primary/40 cursor-pointer select-none"
+                                [ngClass]="getBinBgClass(bin)"
+                                style="min-width: 5rem; min-height: 4rem;"
+                              >
+                                <div class="flex items-center gap-1 mb-0.5">
+                                  <span class="text-xs font-mono font-bold leading-tight">{{ bin.binCode }}</span>
+                                  @if (bin.boxCount > 0) {
+                                    <span class="text-[9px] font-bold px-1 rounded bg-primary/15 text-primary border border-primary/20">
+                                      📦{{ bin.boxCount }}
+                                    </span>
+                                  }
+                                </div>
+                                <span class="text-sm font-bold font-mono leading-none my-0.5">
+                                  {{ bin.productCount }}
+                                </span>
+                                <span class="text-[10px] opacity-75 leading-tight">
+                                  {{ getCapacityPercent(bin) }}%
+                                </span>
+                              </button>
+
+                              <!-- Managing Overlay Controls -->
+                              @if (managingMode()) {
+                                @if (bin.isActive && bin.productCount > 0) {
+                                  <button
+                                    type="button"
+                                    (click)="openRelocateModal(bin)"
+                                    title="Kéo hoặc nhấn để chuyển hàng"
+                                    class="absolute -top-1.5 -left-1.5 w-4.5 h-4.5 rounded-full bg-surface dark:bg-surface-dark border border-border shadow-xs hover:bg-bg dark:hover:bg-bg-dark flex items-center justify-center cursor-grab text-muted hover:text-primary transition-colors"
+                                  >
+                                    <lucide-angular [img]="GripVertical" class="w-2.5 h-2.5" />
+                                  </button>
+                                }
+
+                                @if (bin.isActive && bin.productCount === 0) {
+                                  <button
+                                    type="button"
+                                    (click)="deactivateBin(bin)"
+                                    title="Ngưng hoạt động ô này"
+                                    class="absolute -top-1.5 -right-1.5 w-4.5 h-4.5 rounded-full bg-surface dark:bg-surface-dark border border-border shadow-xs hover:bg-bg dark:hover:bg-bg-dark flex items-center justify-center cursor-pointer text-muted hover:text-error transition-colors"
+                                  >
+                                    <lucide-angular [img]="X" class="w-2.5 h-2.5" />
+                                  </button>
+                                } @else if (!bin.isActive && bin.productCount === 0) {
+                                  <div class="absolute -top-1.5 -right-1.5 flex items-center gap-0.5">
+                                    <button
+                                      type="button"
+                                      (click)="reactivateBin(bin)"
+                                      title="Kích hoạt lại"
+                                      class="w-4.5 h-4.5 rounded-full bg-surface dark:bg-surface-dark border border-border shadow-xs text-success flex items-center justify-center cursor-pointer"
+                                    >
+                                      <lucide-angular [img]="Undo2" class="w-2.5 h-2.5" />
+                                    </button>
+                                    <button
+                                      type="button"
+                                      (click)="deleteBin(bin)"
+                                      title="Xóa vĩnh viễn"
+                                      class="w-4.5 h-4.5 rounded-full bg-surface dark:bg-surface-dark border border-border shadow-xs text-error flex items-center justify-center cursor-pointer"
+                                    >
+                                      <lucide-angular [img]="Trash2" class="w-2 h-2" />
+                                    </button>
+                                  </div>
+                                }
+                              }
+                            </div>
+                          }
+                        }
+
+                        <!-- Add Bin Button in Managing Mode -->
+                        @if (managingMode()) {
+                          <button
+                            type="button"
+                            (click)="autoAddBin(zone.zoneCode, shelf.shelfCode)"
+                            title="Thêm ô mới vào kệ này"
+                            class="flex flex-col items-center justify-center rounded-lg border border-dashed border-primary/40 bg-primary/5 hover:bg-primary/10 transition-colors cursor-pointer text-primary"
+                            style="min-width: 5rem; min-height: 4rem;"
+                          >
+                            <lucide-angular [img]="Plus" class="w-4 h-4 mb-0.5" />
+                            <span class="text-[10px] font-semibold">+ Thêm ô</span>
+                          </button>
+                        }
+                      </div>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- RELOCATION SPARTAN DIALOG WITH 20s COUNTDOWN (100% Spartan UI) -->
+  @if (relocateModalVisible()) {
+    <div hlmDialogOverlay class="z-[60]" (click)="handleRelocateCancel()"></div>
+    <div hlmDialogContent class="z-[70] max-w-md bg-surface dark:bg-surface-dark border-border/80 dark:border-border-dark p-6">
+      <div hlmDialogHeader class="mb-4">
+        <h3 hlmDialogTitle class="text-base font-bold text-ink dark:text-ink-dark">Điều chuyển vị trí hàng hóa (Relocation)</h3>
+        <p hlmDialogDescription class="text-xs text-muted dark:text-muted-dark">Di dời linh kiện giữa 2 ô lưu trữ trong hệ thống kho.</p>
+      </div>
+
+      @if (relocateSource() && relocateTarget(); as rData) {
+        <div class="space-y-4">
+          <!-- Source & Dest Route Visual -->
+          <div class="bg-bg dark:bg-bg-dark p-3.5 rounded-xl border border-border/80 dark:border-border-dark flex items-center justify-between gap-3 text-xs">
+            <div class="flex-1 text-center">
+              <span class="text-[11px] text-muted dark:text-muted-dark block mb-1">Ô nguồn</span>
+              <strong class="font-mono text-sm text-ink dark:text-ink-dark block">{{ relocateSource()?.fullCode }}</strong>
+              <span class="text-primary font-semibold">({{ relocateSource()?.productCount }} món)</span>
+            </div>
+
+            <div class="flex flex-col items-center shrink-0 text-muted">
+              <lucide-angular [img]="ArrowRight" class="w-5 h-5 text-primary" />
+              <span class="text-[10px] font-mono">DỜI HÀNG</span>
+            </div>
+
+            <div class="flex-1 text-center">
+              <span class="text-[11px] text-muted dark:text-muted-dark block mb-1">Ô đích đến</span>
+              <strong class="font-mono text-sm text-ink dark:text-ink-dark block">{{ relocateTarget()?.fullCode }}</strong>
+              <span class="text-success font-semibold">({{ relocateTarget()?.productCount }}/{{ relocateTarget()?.maxCapacity }} món)</span>
+            </div>
+          </div>
+
+          <!-- Quantity Stepper -->
+          <div class="space-y-2">
+            <label class="text-xs font-semibold text-ink dark:text-ink-dark block">Số lượng cần chuyển:</label>
+            <div class="flex items-center gap-2">
+              <button
+                type="button"
+                hlmBtn
+                variant="outline"
+                size="sm"
+                (click)="stepRelocateQty(-1)"
+                [disabled]="relocateQuantity() <= 1"
+                class="!w-8 !h-8 !p-0 !min-h-[32px] !min-w-[32px] !rounded-lg"
+              >
+                <lucide-angular [img]="Minus" class="w-3.5 h-3.5" />
+              </button>
+
+              <input
+                hlmInput
+                type="number"
+                size="sm"
+                [ngModel]="relocateQuantity()"
+                (ngModelChange)="relocateQuantity.set($event)"
+                class="!w-24 !h-8 !text-center !font-mono !font-bold !text-sm !rounded-lg"
+              />
+
+              <button
+                type="button"
+                hlmBtn
+                variant="outline"
+                size="sm"
+                (click)="stepRelocateQty(1)"
+                class="!w-8 !h-8 !p-0 !min-h-[32px] !min-w-[32px] !rounded-lg"
+              >
+                <lucide-angular [img]="Plus" class="w-3.5 h-3.5" />
+              </button>
+
+              <button
+                type="button"
+                hlmBtn
+                variant="secondary"
+                size="sm"
+                (click)="setMaxRelocateQty()"
+                class="!h-8 !rounded-lg !text-xs !text-primary !border-primary/40 font-semibold"
+              >
+                Tối đa
+              </button>
+            </div>
+          </div>
+
+          <!-- Remaining Summary -->
+          <div class="p-3 bg-primary/5 border border-primary/20 rounded-xl text-xs space-y-1">
+            <div class="flex justify-between text-ink dark:text-ink-dark">
+              <span>Sau điều chuyển ô nguồn còn:</span>
+              <strong class="font-mono text-primary">{{ (relocateSource()?.productCount ?? 0) - relocateQuantity() }} linh kiện</strong>
+            </div>
+            <div class="flex justify-between text-ink dark:text-ink-dark">
+              <span>Sau điều chuyển ô đích sẽ có:</span>
+              <strong class="font-mono text-success">{{ (relocateTarget()?.productCount ?? 0) + relocateQuantity() }} linh kiện</strong>
+            </div>
+          </div>
+
+          <!-- Countdown Warning Strip -->
+          <div class="flex items-center justify-center gap-2 text-xs text-muted dark:text-muted-dark pt-1">
+            <lucide-angular [img]="Clock" class="w-3.5 h-3.5 text-amber-500 animate-spin" />
+            <span>Tự động hủy an toàn sau:</span>
+            <strong class="text-rose-600 dark:text-rose-400 font-mono text-sm">{{ relocateCountdown() }}s</strong>
+          </div>
+        </div>
+      }
+
+      <div hlmDialogFooter class="flex items-center justify-end gap-2 mt-5 pt-3 border-t border-border/60 dark:border-border-dark/60">
+        <button type="button" hlmBtn variant="outline" size="sm" (click)="handleRelocateCancel()">Hủy bỏ</button>
+        <button type="button" hlmBtn variant="default" size="sm" (click)="handleRelocateConfirm()">Xác nhận điều chuyển</button>
+      </div>
+    </div>
+  }
+
+  <!-- SPARTAN SHEET CHI TIẾT Ô LƯU TRỮ (100% Spartan UI Sheet Primitive) -->
+  @if (drawerVisible() && selectedBin(); as bin) {
+    <div hlmSheetOverlay (click)="closeDrawer()"></div>
+    <div hlmSheetContent side="right" class="flex flex-col">
+      <!-- Sheet Header -->
+      <div hlmSheetHeader>
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <lucide-angular [img]="Boxes" class="w-4 h-4 text-primary" />
+            <h3 hlmSheetTitle class="font-mono">{{ bin.fullCode }}</h3>
+            <span
+              hlmBadge
+              [variant]="bin.isActive ? 'default' : 'destructive'"
+              class="text-[10px] font-bold"
+            >
+              {{ bin.isActive ? 'HOẠT ĐỘNG' : 'TẠM NGƯNG' }}
+            </span>
+          </div>
+          <button
+            type="button"
+            hlmBtn
+            variant="ghost"
+            size="icon"
+            (click)="closeDrawer()"
+            class="!h-8 !w-8 !min-h-[32px] !min-w-[32px] !rounded-full hover:bg-bg dark:hover:bg-bg-dark"
+          >
+            <lucide-angular [img]="X" class="w-4 h-4" />
+          </button>
+        </div>
+        <p hlmSheetDescription>Chi tiết vị trí ô ngăn, linh kiện, số thùng và sức chứa ô lưu trữ</p>
+      </div>
+
+      <!-- Sheet Body -->
+      <div class="flex-1 overflow-y-auto py-4 space-y-5 text-xs text-ink dark:text-ink-dark pr-1">
+        <!-- Capacity Editing Section -->
+        <div class="bg-bg/60 dark:bg-bg-dark/60 p-3.5 rounded-xl border border-border/80 dark:border-border-dark space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="font-semibold text-muted dark:text-muted-dark">Sức chứa tối đa (Max Capacity):</span>
+            <span class="font-mono font-bold text-sm">{{ bin.productCount }} / {{ bin.maxCapacity }} món</span>
+          </div>
+
+          <hlm-progress [value]="bin.productCount" [max]="bin.maxCapacity" />
+
+          <div class="flex items-center gap-2 pt-1">
+            <input
+              hlmInput
+              size="sm"
+              type="number"
+              [(ngModel)]="editingCapacity"
+              min="1"
+              placeholder="Nhập sức chứa"
+              class="!text-xs !rounded-lg !h-8"
+            />
+            <button
+              type="button"
+              hlmBtn
+              variant="default"
+              size="sm"
+              (click)="saveCapacity()"
+              class="!rounded-lg !text-xs !h-8 shrink-0 cursor-pointer"
+            >
+              Lưu sức chứa
+            </button>
+          </div>
+        </div>
+
+        <!-- Quick Relocate Action Button -->
+        @if (bin.productCount > 0) {
+          <button
+            type="button"
+            hlmBtn
+            variant="outline"
+            (click)="openRelocateModal(bin)"
+            class="w-full !rounded-xl !h-9 !text-xs !font-semibold !flex !items-center !justify-center !gap-1.5 cursor-pointer hover:!border-primary hover:!text-primary"
+          >
+            <lucide-angular [img]="Move" class="w-3.5 h-3.5" />
+            <span>Điều chuyển hàng hóa từ ô này</span>
+          </button>
+        }
+
+        <!-- Products in Bin Section -->
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <h3 class="font-bold text-xs uppercase tracking-wider text-muted dark:text-muted-dark flex items-center gap-1.5">
+              <lucide-angular [img]="Package" class="w-3.5 h-3.5 text-primary" />
+              <span>Danh sách linh kiện trong ô ({{ bin.products.length }})</span>
+            </h3>
+          </div>
+
+          @if (bin.products.length === 0) {
+            <div class="p-6 text-center text-muted dark:text-muted-dark border border-dashed border-border dark:border-border-dark rounded-xl bg-bg/40">
+              <lucide-angular [img]="Info" class="w-6 h-6 mx-auto mb-1.5 opacity-50" />
+              <p>Ô lưu trữ hiện đang trống, sẵn sàng tiếp nhận hàng nhập kho.</p>
+            </div>
+          } @else {
+            <div class="space-y-2.5">
+              @for (prod of bin.products; track prod.skuId) {
+                <div class="bg-surface dark:bg-surface-dark border border-border/80 dark:border-border-dark p-3 rounded-xl shadow-2xs space-y-2">
+                  <div class="flex items-start justify-between gap-2">
+                    <div class="flex-1 min-w-0">
+                      <h4 class="font-bold text-xs text-ink dark:text-ink-dark line-clamp-2">{{ prod.name }}</h4>
+                      <div class="flex items-center gap-2 mt-1">
+                        <span class="font-mono text-[11px] text-muted dark:text-muted-dark bg-bg dark:bg-bg-dark px-1.5 py-0.5 rounded border border-border/60">
+                          {{ prod.skuCode }}
+                        </span>
+                        <span
+                          hlmBadge
+                          [variant]="prod.trackingType === 'SERIALIZED' ? 'secondary' : 'outline'"
+                          class="text-[10px] font-bold"
+                        >
+                          {{ prod.trackingType === 'SERIALIZED' ? 'Quản lý Serial' : 'Hàng kiện (Bulk)' }}
+                        </span>
+                      </div>
+                    </div>
+                    <div class="text-right shrink-0">
+                      <span class="font-mono font-bold text-sm text-primary">{{ prod.quantity }}</span>
+                      <span class="text-[11px] text-muted dark:text-muted-dark block">món</span>
+                    </div>
+                  </div>
+
+                  <!-- Serial Numbers Dropdown (if SERIALIZED) -->
+                  @if (prod.trackingType === 'SERIALIZED' && prod.serials.length > 0) {
+                    <div class="border-t border-border/60 dark:border-border-dark/60 pt-2">
+                      <button
+                        type="button"
+                        (click)="toggleProductExpand(prod.skuCode)"
+                        class="w-full flex items-center justify-between text-[11px] text-muted dark:text-muted-dark hover:text-ink dark:hover:text-ink-dark transition-colors cursor-pointer py-0.5"
+                      >
+                        <span class="flex items-center gap-1">
+                          <lucide-angular
+                            [img]="expandedProductKeys().has(prod.skuCode) ? ChevronDown : ChevronRight"
+                            class="w-3 h-3"
+                          />
+                          <span>Mã Serial chi tiết ({{ prod.serials.length }})</span>
+                        </span>
+                        <span class="font-mono text-[10px]">Xem</span>
+                      </button>
+
+                      @if (expandedProductKeys().has(prod.skuCode)) {
+                        <div class="mt-1.5 space-y-1 bg-bg dark:bg-bg-dark p-2 rounded-lg border border-border/60 max-h-32 overflow-y-auto">
+                          @for (s of prod.serials; track s) {
+                            <div class="flex items-center justify-between text-[11px] font-mono text-muted dark:text-muted-dark hover:text-ink">
+                              <span>{{ s }}</span>
+                              <span class="text-[10px] text-success font-sans">Sẵn sàng</span>
+                            </div>
+                          }
+                        </div>
+                      }
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Sheet Footer -->
+      <div hlmSheetFooter>
+        <button type="button" hlmBtn variant="outline" class="w-full" (click)="closeDrawer()">Đóng</button>
+      </div>
+    </div>
+  }
+</div>
