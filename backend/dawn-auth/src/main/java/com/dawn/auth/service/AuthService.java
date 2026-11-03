@@ -6,6 +6,7 @@ import com.dawn.auth.dto.TokenResponse;
 import com.dawn.auth.entity.UserCredential;
 import com.dawn.auth.repository.UserCredentialRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +22,7 @@ public class AuthService {
     private final UserCredentialRepository userCredentialRepository;
     private final PasswordEncoder passwordEncoder;
     private final TokenService tokenService;
+    private final JdbcTemplate jdbcTemplate;
 
     @Transactional
     public TokenResponse register(RegisterRequest req) {
@@ -29,6 +31,16 @@ public class AuthService {
         }
         Long userId = Optional.ofNullable(req.userId())
                 .orElseGet(() -> userCredentialRepository.findMaxUserId() + 1);
+
+        String displayName = (req.fullName() != null && !req.fullName().isBlank())
+                ? req.fullName()
+                : req.email().split("@")[0];
+
+        jdbcTemplate.update("""
+                INSERT INTO users (id, email, password_hash, full_name, phone, system_role, status, addresses)
+                VALUES (?, ?, ?, ?, ?, 'CUSTOMER', 'ACTIVE', '[]')
+                ON CONFLICT (id) DO NOTHING
+                """, userId, req.email().toLowerCase(), "auth-managed", displayName, req.phone());
 
         UserCredential cred = UserCredential.builder()
                 .userId(userId)
