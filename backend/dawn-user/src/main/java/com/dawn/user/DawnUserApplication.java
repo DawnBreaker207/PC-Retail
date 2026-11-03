@@ -14,12 +14,12 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 /** dawn-user: authentication, user profile, address. */
 @SpringBootApplication(scanBasePackages = "com.dawn.user")
 @ComponentScan(
-        basePackages = {"com.dawn.common", "com.dawn.user"},
+        basePackages = {"com.dawn.common", "com.dawn.user", "com.dawn.wishlist"},
         excludeFilters = @ComponentScan.Filter(
                 type = FilterType.ANNOTATION, classes = SpringBootApplication.class))
 @EnableFeignClients(basePackages = "com.dawn")
-@EntityScan(basePackages = {"com.dawn.common", "com.dawn.user"})
-@EnableJpaRepositories(basePackages = {"com.dawn.common", "com.dawn.user"})
+@EntityScan(basePackages = {"com.dawn.common", "com.dawn.user", "com.dawn.wishlist"})
+@EnableJpaRepositories(basePackages = {"com.dawn.common", "com.dawn.user", "com.dawn.wishlist"})
 @EnableJpaAuditing
 @EnableScheduling
 @EnableAsync
