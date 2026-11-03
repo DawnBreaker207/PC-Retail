@@ -24,14 +24,12 @@ import java.util.List;
 /**
  * Edge policy: block internal/actuator paths, verify the Bearer token on
  * protected routes, and forward the identity to downstream services.
- * Services still verify the token themselves (defense in depth).
  */
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class JwtAuthFilter implements GlobalFilter, Ordered {
 
-    // Mirrors dawn-common SecurityConfig.PUBLIC_URL.
     private static final List<String> PUBLIC_PATHS = List.of(
             "/api/v1/auth/**",
             "/api/v1/brands", "/api/v1/brands/**",
@@ -41,6 +39,7 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
             "/api/v1/articles", "/api/v1/articles/**",
             "/api/v1/ai/build-suggestions",
             "/api/v1/promotion/**",
+            "/api/v1/cart/guest",
             "/api/v1/cart/guest/**",
             "/api/v1/orders/guest-checkout",
             "/api/v1/payments/callback/**",
@@ -64,9 +63,9 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
 
         ServerHttpRequest.Builder request = exchange.getRequest().mutate()
                 .headers(headers -> {
-                    // Never trust identity headers supplied by the client.
                     headers.remove("X-User-Id");
                     headers.remove("X-User-Role");
+                    headers.remove("Origin");
                 });
 
         boolean preflight = HttpMethod.OPTIONS.equals(exchange.getRequest().getMethod());

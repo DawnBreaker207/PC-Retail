@@ -16,6 +16,15 @@ spring:
       server:
         webflux:
           routes:
+            - id: dawn-user-otp
+              uri: ${USER_SERVICE_URL:http://localhost:8086}
+              predicates:
+                - Path=/api/v1/auth/otp/**
+              filters:
+                - name: RequestRateLimiter
+                  args:
+                    rate-limiter: "#{@strictRateLimiter}"
+                    key-resolver: "#{@userKeyResolver}"
             - id: dawn-auth
               uri: ${AUTH_SERVICE_URL:http://localhost:8085}
               predicates:
@@ -46,7 +55,7 @@ spring:
             - id: dawn-order
               uri: ${ORDER_SERVICE_URL:http://localhost:8081}
               predicates:
-                - Path=/api/v1/orders/**,/api/v1/cart/**,/api/v1/promotion/**
+                - Path=/api/v1/orders/**,/api/v1/cart/**,/api/v1/promotion/**,/api/v1/articles/**,/api/v1/articles,/api/v1/vouchers/**,/api/v1/staff/**,/api/v1/sub-orders/**,/api/v1/return-requests/**,/api/v1/reviews/**,/api/v1/shipping/**,/api/v1/admin/**
               filters:
                 - name: RequestRateLimiter
                   args:
@@ -64,7 +73,7 @@ spring:
             - id: dawn-payment
               uri: ${PAYMENT_SERVICE_URL:http://localhost:8083}
               predicates:
-                - Path=/api/v1/payments/**
+                - Path=/api/v1/payments/**,/api/v1/tax/**
               filters:
                 - name: RequestRateLimiter
                   args:
@@ -88,17 +97,8 @@ spring:
                   args:
                     rate-limiter: "#{@standardRateLimiter}"
                     key-resolver: "#{@userKeyResolver}"
-            - id: dawn-shipping
-              uri: ${SHIPPING_SERVICE_URL:http://localhost:8092}
-              predicates:
-                - Path=/api/v1/shipping/**
-              filters:
-                - name: RequestRateLimiter
-                  args:
-                    rate-limiter: "#{@standardRateLimiter}"
-                    key-resolver: "#{@userKeyResolver}"
             - id: dawn-rating
-              uri: ${RATING_SERVICE_URL:http://localhost:8093}
+              uri: ${CATALOG_SERVICE_URL:http://localhost:8084}
               predicates:
                 - Path=/api/v1/ratings/**
               filters:
@@ -106,23 +106,14 @@ spring:
                   args:
                     rate-limiter: "#{@standardRateLimiter}"
                     key-resolver: "#{@userKeyResolver}"
-            - id: dawn-tax
-              uri: ${TAX_SERVICE_URL:http://localhost:8094}
-              predicates:
-                - Path=/api/v1/tax/**
-              filters:
-                - name: RequestRateLimiter
-                  args:
-                    rate-limiter: "#{@standardRateLimiter}"
-                    key-resolver: "#{@userKeyResolver}"
             - id: dawn-wishlist
-              uri: ${WISHLIST_SERVICE_URL:http://localhost:8095}
+              uri: ${USER_SERVICE_URL:http://localhost:8086}
               predicates:
                 - Path=/api/v1/wishlist/**
               filters:
                 - name: RequestRateLimiter
                   args:
-                    rate-limiter: "#{@standardRateLimiter}"
+                    rate-limiter: "#{@strictRateLimiter}"
                     key-resolver: "#{@userKeyResolver}"
             - id: dawn-catalog
               uri: ${CATALOG_SERVICE_URL:http://localhost:8084}

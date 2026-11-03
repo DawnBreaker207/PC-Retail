@@ -47,6 +47,7 @@ public class SecurityConfig {
             // read-only build suggestions by preference/budget
             "/api/v1/ai/build-suggestions",
             "/api/v1/promotion/**",
+            "/api/v1/cart/guest",
             "/api/v1/cart/guest/**",
             "/api/v1/orders/guest-checkout",
             "/api/v1/payments/callback/**",

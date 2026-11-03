@@ -1,6 +1,5 @@
 package com.dawn.common.security;
 
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 import org.springframework.web.cors.CorsConfiguration;
@@ -13,8 +12,11 @@ import java.util.List;
 public class CorsConfig {
     public final List<String> ALLOWED_ORIGINS = Arrays.asList(
             "http://localhost:3000",
+            "http://localhost:4000",
             "http://localhost:4200",
-            "http://localhost:5173");
+            "http://localhost:5173",
+            "http://127.0.0.1:4000",
+            "http://127.0.0.1:4200");
 
     private final List<String> ALLOWED_HEADERS = Arrays.asList(
             "Authorization",
@@ -36,8 +38,8 @@ public class CorsConfig {
     public UrlBasedCorsConfigurationSource config() {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
-        config.setAllowedOrigins(ALLOWED_ORIGINS);
-        config.setAllowedHeaders(ALLOWED_HEADERS);
+        config.setAllowedOriginPatterns(List.of("*"));
+        config.setAllowedHeaders(List.of("*"));
         config.setAllowedMethods(ALLOWED_METHODS);
         config.setMaxAge(3600L);
 
