@@ -14,7 +14,7 @@ import { LucideAngularModule, Search, X, PackageOpen } from 'lucide-angular';
 import { HlmButtonDirective } from '@shared/ui/button';
 import { HlmInputDirective } from '@shared/ui/input';
 import { HlmBadgeDirective } from '@shared/ui/badge';
-import { LoadingSpinnerComponent } from '@shared/components/loading-spinner.component';
+import { HlmSkeletonComponent } from '@shared/ui/skeleton';
 import { CurrencyFormatPipe } from '@shared/pipes/currency-format.pipe';
 import { FallbackImageDirective } from '@shared/directives/fallback-image.directive';
 import { Sku, ResponsePage } from '@core/models/common.model';
@@ -32,7 +32,7 @@ import { MockDataService } from '@core/services/mock-data.service';
     HlmButtonDirective,
     HlmInputDirective,
     HlmBadgeDirective,
-    LoadingSpinnerComponent,
+    HlmSkeletonComponent,
     CurrencyFormatPipe,
   ],
   templateUrl: './product-picker-modal.component.html',

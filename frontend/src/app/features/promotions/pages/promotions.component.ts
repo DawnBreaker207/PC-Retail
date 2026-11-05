@@ -4,6 +4,7 @@ import { catchError, of } from 'rxjs';
 import { ApiEndpoints } from '@core/api/api.endpoints';
 import { RouterLink } from '@angular/router';
 import { LucideAngularModule, ChevronRight, Ticket, Copy, Check } from 'lucide-angular';
+import { HlmBreadcrumbDirective, HlmBreadcrumbLinkDirective, HlmBreadcrumbCurrentDirective } from '@shared/ui/breadcrumb';
 import { FlashSaleSectionComponent } from '@features/home/components/flash-sale-section.component';
 import { FallbackImageDirective } from '@shared/directives/fallback-image.directive';
 import { MockDataService } from '@core/services/mock-data.service';
@@ -22,7 +23,7 @@ interface VoucherItem {
 @Component({
   selector: 'app-promotions',
   standalone: true,
-  imports: [RouterLink, LucideAngularModule, FlashSaleSectionComponent, FallbackImageDirective, HlmButtonDirective],
+  imports: [RouterLink, LucideAngularModule, FlashSaleSectionComponent, FallbackImageDirective, HlmButtonDirective, HlmBreadcrumbDirective, HlmBreadcrumbLinkDirective, HlmBreadcrumbCurrentDirective],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './promotions.component.html',
 })

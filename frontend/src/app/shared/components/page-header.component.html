@@ -1,11 +1,11 @@
 @if (breadcrumbs().length > 0) {
-  <nav class="flex items-center gap-1.5 text-xs text-muted dark:text-muted-dark mb-2">
+  <nav hlmBreadcrumb class="mb-2">
     @for (crumb of breadcrumbs(); track crumb.label; let last = $last) {
       @if (crumb.url && !last) {
-        <a [routerLink]="crumb.url" class="hover:text-primary transition-colors">{{ crumb.label }}</a>
+        <a [routerLink]="crumb.url" hlmBreadcrumbLink>{{ crumb.label }}</a>
         <lucide-angular [img]="ChevronRight" class="w-3.5 h-3.5 text-muted/60" />
       } @else {
-        <span class="text-ink dark:text-ink-dark font-medium">{{ crumb.label }}</span>
+        <span hlmBreadcrumbCurrent class="text-ink dark:text-ink-dark">{{ crumb.label }}</span>
       }
     }
   </nav>

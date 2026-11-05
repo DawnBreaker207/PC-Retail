@@ -11,6 +11,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule, Filter, Frown, ChevronLeft, ChevronRight, X } from 'lucide-angular';
 import { HlmButtonDirective } from '@shared/ui/button';
+import { HlmBreadcrumbDirective, HlmBreadcrumbLinkDirective, HlmBreadcrumbCurrentDirective } from '@shared/ui/breadcrumb';
 import { ProductCardComponent } from '@shared/components/product-card.component';
 import { HlmSkeletonComponent } from '@shared/ui/skeleton';
 import { MockDataService } from '@core/services/mock-data.service';
@@ -64,6 +65,9 @@ function parseSpecParam(raw: string | string[] | undefined): Record<string, stri
     LucideAngularModule,
     HlmButtonDirective,
     HlmSkeletonComponent,
+    HlmBreadcrumbDirective,
+    HlmBreadcrumbLinkDirective,
+    HlmBreadcrumbCurrentDirective,
     ProductCardComponent,
     FilterSidebarComponent,
   ],

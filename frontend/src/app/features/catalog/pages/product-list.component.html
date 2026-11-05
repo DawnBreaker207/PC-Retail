@@ -2,10 +2,10 @@
   <h1 class="sr-only">{{ headerTitle() }}</h1>
 
   <!-- Breadcrumb -->
-  <nav aria-label="Breadcrumb" class="mb-4 flex items-center gap-1.5 text-xs text-muted dark:text-muted-dark">
-    <a routerLink="/" class="hover:text-primary transition-colors">Trang chủ</a>
+  <nav hlmBreadcrumb class="mb-4">
+    <a routerLink="/" hlmBreadcrumbLink>Trang chủ</a>
     <lucide-icon [img]="ChevronRightIcon" class="size-3.5 text-muted/60" />
-    <span class="text-foreground font-medium">{{ headerTitle() }}</span>
+    <span hlmBreadcrumbCurrent>{{ headerTitle() }}</span>
   </nav>
 
   @if (activeCategory(); as cat) {

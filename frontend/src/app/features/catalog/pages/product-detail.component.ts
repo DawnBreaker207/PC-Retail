@@ -35,6 +35,7 @@ import {
   X,
 } from 'lucide-angular';
 import { HlmBadgeDirective } from '@shared/ui/badge';
+import { HlmBreadcrumbDirective, HlmBreadcrumbLinkDirective, HlmBreadcrumbCurrentDirective } from '@shared/ui/breadcrumb';
 import { HlmButtonDirective } from '@shared/ui/button';
 import { CurrencyFormatPipe } from '@shared/pipes/currency-format.pipe';
 import { FallbackImageDirective } from '@shared/directives/fallback-image.directive';
@@ -66,6 +67,9 @@ import { SkuRatingSummary } from '@core/models/common.model';
     FallbackImageDirective,
     ProductCardComponent,
     HlmSkeletonComponent,
+    HlmBreadcrumbDirective,
+    HlmBreadcrumbLinkDirective,
+    HlmBreadcrumbCurrentDirective,
     HlmTabsListDirective,
     HlmTabsTriggerDirective,
   ],

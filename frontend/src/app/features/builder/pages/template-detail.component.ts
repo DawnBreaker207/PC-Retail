@@ -13,7 +13,8 @@ import {
   AlertTriangle,
 } from 'lucide-angular';
 import { HlmButtonDirective } from '@shared/ui/button';
-import { LoadingSpinnerComponent } from '@shared/components/loading-spinner.component';
+import { HlmSkeletonComponent } from '@shared/ui/skeleton';
+import { HlmBreadcrumbDirective, HlmBreadcrumbLinkDirective, HlmBreadcrumbCurrentDirective } from '@shared/ui/breadcrumb';
 import { ToastService } from '@core/services/toast.service';
 import { CurrencyFormatPipe } from '@shared/pipes/currency-format.pipe';
 import { FallbackImageDirective } from '@shared/directives/fallback-image.directive';
@@ -31,7 +32,10 @@ import { ProductPickerModalComponent } from '../components/product-picker-modal.
     RouterLink,
     LucideAngularModule,
     HlmButtonDirective,
-    LoadingSpinnerComponent,
+    HlmSkeletonComponent,
+    HlmBreadcrumbDirective,
+    HlmBreadcrumbLinkDirective,
+    HlmBreadcrumbCurrentDirective,
     CurrencyFormatPipe,
     ProductPickerModalComponent,
   ],

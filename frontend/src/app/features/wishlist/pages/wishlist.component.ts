@@ -1,6 +1,7 @@
 import { Component, computed, inject, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { LucideAngularModule, ChevronRight } from 'lucide-angular';
+import { HlmBreadcrumbDirective, HlmBreadcrumbLinkDirective, HlmBreadcrumbCurrentDirective } from '@shared/ui/breadcrumb';
 import { ProductCardComponent } from '@shared/components/product-card.component';
 import { EmptyStateComponent } from '@shared/components/empty-state.component';
 import { MockDataService } from '@core/services/mock-data.service';
@@ -10,7 +11,7 @@ import { WishlistStore } from '@features/wishlist/store/wishlist.store';
 @Component({
   selector: 'app-wishlist',
   standalone: true,
-  imports: [RouterLink, LucideAngularModule, ProductCardComponent, EmptyStateComponent],
+  imports: [RouterLink, LucideAngularModule, ProductCardComponent, EmptyStateComponent, HlmBreadcrumbDirective, HlmBreadcrumbLinkDirective, HlmBreadcrumbCurrentDirective],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './wishlist.component.html',
 })
