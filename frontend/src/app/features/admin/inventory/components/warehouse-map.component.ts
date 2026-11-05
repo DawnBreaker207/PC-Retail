@@ -1,4 +1,11 @@
-import { Component, signal, computed, inject, OnDestroy } from '@angular/core';
+import {
+  Component,
+  signal,
+  computed,
+  inject,
+  OnDestroy,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DragDropModule, CdkDragDrop } from '@angular/cdk/drag-drop';
@@ -11,7 +18,7 @@ import {
   HlmDialogHeaderDirective,
   HlmDialogTitleDirective,
   HlmDialogDescriptionDirective,
-  HlmDialogFooterDirective
+  HlmDialogFooterDirective,
 } from '@shared/ui/dialog';
 import {
   HlmSheetOverlayDirective,
@@ -19,7 +26,7 @@ import {
   HlmSheetHeaderDirective,
   HlmSheetTitleDirective,
   HlmSheetDescriptionDirective,
-  HlmSheetFooterDirective
+  HlmSheetFooterDirective,
 } from '@shared/ui/sheet';
 import { HlmProgressComponent } from '@shared/ui/progress';
 import { ToastService } from '@core/services/toast.service';
@@ -51,7 +58,7 @@ import {
   ChevronDown,
   Trash2,
   Clock,
-  ArrowRight
+  ArrowRight,
 } from 'lucide-angular';
 
 export interface ProductInBin {
@@ -118,9 +125,15 @@ const INITIAL_ZONES: ZoneItem[] = [
                 skuCode: 'VGA-ROG-4090',
                 quantity: 12,
                 trackingType: 'SERIALIZED',
-                serials: ['SN4090-ROG-0811', 'SN4090-ROG-0812', 'SN4090-ROG-0813', 'SN4090-ROG-0814', 'SN4090-ROG-0815']
-              }
-            ]
+                serials: [
+                  'SN4090-ROG-0811',
+                  'SN4090-ROG-0812',
+                  'SN4090-ROG-0813',
+                  'SN4090-ROG-0814',
+                  'SN4090-ROG-0815',
+                ],
+              },
+            ],
           },
           {
             id: 'A-01-01B',
@@ -139,9 +152,9 @@ const INITIAL_ZONES: ZoneItem[] = [
                 skuCode: 'VGA-GIGA-4080S',
                 quantity: 8,
                 trackingType: 'SERIALIZED',
-                serials: ['SN4080-GB-1021', 'SN4080-GB-1022', 'SN4080-GB-1023']
-              }
-            ]
+                serials: ['SN4080-GB-1021', 'SN4080-GB-1022', 'SN4080-GB-1023'],
+              },
+            ],
           },
           {
             id: 'A-01-02A',
@@ -160,9 +173,9 @@ const INITIAL_ZONES: ZoneItem[] = [
                 skuCode: 'VGA-MSI-4070TIS',
                 quantity: 15,
                 trackingType: 'SERIALIZED',
-                serials: ['SN4070-MSI-3301', 'SN4070-MSI-3302', 'SN4070-MSI-3303']
-              }
-            ]
+                serials: ['SN4070-MSI-3301', 'SN4070-MSI-3302', 'SN4070-MSI-3303'],
+              },
+            ],
           },
           {
             id: 'A-01-02B',
@@ -181,11 +194,11 @@ const INITIAL_ZONES: ZoneItem[] = [
                 skuCode: 'VGA-ASUS-4060',
                 quantity: 18,
                 trackingType: 'SERIALIZED',
-                serials: ['SN4060-AS-991', 'SN4060-AS-992']
-              }
-            ]
-          }
-        ]
+                serials: ['SN4060-AS-991', 'SN4060-AS-992'],
+              },
+            ],
+          },
+        ],
       },
       {
         shelfCode: '02',
@@ -208,9 +221,9 @@ const INITIAL_ZONES: ZoneItem[] = [
                 skuCode: 'VGA-SAP-7900XTX',
                 quantity: 4,
                 trackingType: 'SERIALIZED',
-                serials: ['SN7900-SP-501', 'SN7900-SP-502']
-              }
-            ]
+                serials: ['SN7900-SP-501', 'SN7900-SP-502'],
+              },
+            ],
           },
           {
             id: 'A-02-01B',
@@ -222,7 +235,7 @@ const INITIAL_ZONES: ZoneItem[] = [
             maxCapacity: 10,
             isActive: true,
             boxCount: 0,
-            products: []
+            products: [],
           },
           {
             id: 'A-02-02A',
@@ -241,9 +254,9 @@ const INITIAL_ZONES: ZoneItem[] = [
                 skuCode: 'VGA-ASUS-7600',
                 quantity: 18,
                 trackingType: 'SERIALIZED',
-                serials: ['SN7600-AS-11', 'SN7600-AS-12']
-              }
-            ]
+                serials: ['SN7600-AS-11', 'SN7600-AS-12'],
+              },
+            ],
           },
           {
             id: 'A-02-02B',
@@ -262,13 +275,13 @@ const INITIAL_ZONES: ZoneItem[] = [
                 skuCode: 'ACC-VGA-HOLDER',
                 quantity: 45,
                 trackingType: 'BULK',
-                serials: []
-              }
-            ]
-          }
-        ]
-      }
-    ]
+                serials: [],
+              },
+            ],
+          },
+        ],
+      },
+    ],
   },
   {
     zoneCode: 'B',
@@ -297,9 +310,9 @@ const INITIAL_ZONES: ZoneItem[] = [
                 skuCode: 'MB-ASUS-Z790H',
                 quantity: 6,
                 trackingType: 'SERIALIZED',
-                serials: ['SN-Z790H-01', 'SN-Z790H-02']
-              }
-            ]
+                serials: ['SN-Z790H-01', 'SN-Z790H-02'],
+              },
+            ],
           },
           {
             id: 'B-01-01B',
@@ -318,9 +331,9 @@ const INITIAL_ZONES: ZoneItem[] = [
                 skuCode: 'MB-MSI-B760M',
                 quantity: 14,
                 trackingType: 'SERIALIZED',
-                serials: ['SN-B760M-11', 'SN-B760M-12']
-              }
-            ]
+                serials: ['SN-B760M-11', 'SN-B760M-12'],
+              },
+            ],
           },
           {
             id: 'B-01-02A',
@@ -332,9 +345,9 @@ const INITIAL_ZONES: ZoneItem[] = [
             maxCapacity: 12,
             isActive: true,
             boxCount: 0,
-            products: []
-          }
-        ]
+            products: [],
+          },
+        ],
       },
       {
         shelfCode: '02',
@@ -357,9 +370,9 @@ const INITIAL_ZONES: ZoneItem[] = [
                 skuCode: 'MB-GIGA-B650',
                 quantity: 9,
                 trackingType: 'SERIALIZED',
-                serials: ['SN-B650-881', 'SN-B650-882']
-              }
-            ]
+                serials: ['SN-B650-881', 'SN-B650-882'],
+              },
+            ],
           },
           {
             id: 'B-02-01B',
@@ -378,13 +391,13 @@ const INITIAL_ZONES: ZoneItem[] = [
                 skuCode: 'ACC-MB-SCREWS',
                 quantity: 85,
                 trackingType: 'BULK',
-                serials: []
-              }
-            ]
-          }
-        ]
-      }
-    ]
+                serials: [],
+              },
+            ],
+          },
+        ],
+      },
+    ],
   },
   {
     zoneCode: 'C',
@@ -413,9 +426,9 @@ const INITIAL_ZONES: ZoneItem[] = [
                 skuCode: 'CPU-INTEL-14900K',
                 quantity: 18,
                 trackingType: 'SERIALIZED',
-                serials: ['SN149K-001', 'SN149K-002', 'SN149K-003']
-              }
-            ]
+                serials: ['SN149K-001', 'SN149K-002', 'SN149K-003'],
+              },
+            ],
           },
           {
             id: 'C-01-01B',
@@ -434,9 +447,9 @@ const INITIAL_ZONES: ZoneItem[] = [
                 skuCode: 'CPU-INTEL-14700K',
                 quantity: 25,
                 trackingType: 'SERIALIZED',
-                serials: ['SN147K-101', 'SN147K-102']
-              }
-            ]
+                serials: ['SN147K-101', 'SN147K-102'],
+              },
+            ],
           },
           {
             id: 'C-01-02A',
@@ -455,11 +468,11 @@ const INITIAL_ZONES: ZoneItem[] = [
                 skuCode: 'CPU-INTEL-14600K',
                 quantity: 11,
                 trackingType: 'SERIALIZED',
-                serials: ['SN146K-55', 'SN146K-56']
-              }
-            ]
-          }
-        ]
+                serials: ['SN146K-55', 'SN146K-56'],
+              },
+            ],
+          },
+        ],
       },
       {
         shelfCode: '02',
@@ -482,9 +495,9 @@ const INITIAL_ZONES: ZoneItem[] = [
                 skuCode: 'CPU-AMD-7800X3D',
                 quantity: 19,
                 trackingType: 'SERIALIZED',
-                serials: ['SN783D-88', 'SN783D-89']
-              }
-            ]
+                serials: ['SN783D-88', 'SN783D-89'],
+              },
+            ],
           },
           {
             id: 'C-02-01B',
@@ -503,9 +516,9 @@ const INITIAL_ZONES: ZoneItem[] = [
                 skuCode: 'CPU-AMD-7600X',
                 quantity: 7,
                 trackingType: 'SERIALIZED',
-                serials: ['SN760X-12', 'SN760X-13']
-              }
-            ]
+                serials: ['SN760X-12', 'SN760X-13'],
+              },
+            ],
           },
           {
             id: 'C-02-02A',
@@ -524,13 +537,13 @@ const INITIAL_ZONES: ZoneItem[] = [
                 skuCode: 'ACC-ARCTIC-MX6',
                 quantity: 65,
                 trackingType: 'BULK',
-                serials: []
-              }
-            ]
-          }
-        ]
-      }
-    ]
+                serials: [],
+              },
+            ],
+          },
+        ],
+      },
+    ],
   },
   {
     zoneCode: 'D',
@@ -559,9 +572,9 @@ const INITIAL_ZONES: ZoneItem[] = [
                 skuCode: 'RAM-COR-DDR5-32',
                 quantity: 22,
                 trackingType: 'SERIALIZED',
-                serials: ['SN-RAM-6001', 'SN-RAM-6002']
-              }
-            ]
+                serials: ['SN-RAM-6001', 'SN-RAM-6002'],
+              },
+            ],
           },
           {
             id: 'D-01-01B',
@@ -580,11 +593,11 @@ const INITIAL_ZONES: ZoneItem[] = [
                 skuCode: 'RAM-KING-DDR4-16',
                 quantity: 35,
                 trackingType: 'SERIALIZED',
-                serials: ['SN-FURY-321', 'SN-FURY-322']
-              }
-            ]
-          }
-        ]
+                serials: ['SN-FURY-321', 'SN-FURY-322'],
+              },
+            ],
+          },
+        ],
       },
       {
         shelfCode: '02',
@@ -607,9 +620,9 @@ const INITIAL_ZONES: ZoneItem[] = [
                 skuCode: 'SSD-SAM-990P-2T',
                 quantity: 28,
                 trackingType: 'SERIALIZED',
-                serials: ['SN-990P-201', 'SN-990P-202']
-              }
-            ]
+                serials: ['SN-990P-201', 'SN-990P-202'],
+              },
+            ],
           },
           {
             id: 'D-02-01B',
@@ -628,9 +641,9 @@ const INITIAL_ZONES: ZoneItem[] = [
                 skuCode: 'SSD-KING-NV2-1T',
                 quantity: 40,
                 trackingType: 'SERIALIZED',
-                serials: ['SN-NV2-101', 'SN-NV2-102']
-              }
-            ]
+                serials: ['SN-NV2-101', 'SN-NV2-102'],
+              },
+            ],
           },
           {
             id: 'D-02-02A',
@@ -642,11 +655,11 @@ const INITIAL_ZONES: ZoneItem[] = [
             maxCapacity: 20,
             isActive: true,
             boxCount: 0,
-            products: []
-          }
-        ]
-      }
-    ]
+            products: [],
+          },
+        ],
+      },
+    ],
   },
   {
     zoneCode: 'E',
@@ -675,9 +688,9 @@ const INITIAL_ZONES: ZoneItem[] = [
                 skuCode: 'PSU-COR-RM850E',
                 quantity: 8,
                 trackingType: 'SERIALIZED',
-                serials: ['SN-RM85-801', 'SN-RM85-802']
-              }
-            ]
+                serials: ['SN-RM85-801', 'SN-RM85-802'],
+              },
+            ],
           },
           {
             id: 'E-01-01B',
@@ -696,11 +709,11 @@ const INITIAL_ZONES: ZoneItem[] = [
                 skuCode: 'PSU-MSI-A750GL',
                 quantity: 10,
                 trackingType: 'SERIALIZED',
-                serials: ['SN-A750-101', 'SN-A750-102']
-              }
-            ]
-          }
-        ]
+                serials: ['SN-A750-101', 'SN-A750-102'],
+              },
+            ],
+          },
+        ],
       },
       {
         shelfCode: '02',
@@ -723,9 +736,9 @@ const INITIAL_ZONES: ZoneItem[] = [
                 skuCode: 'COOL-NZXT-360',
                 quantity: 4,
                 trackingType: 'SERIALIZED',
-                serials: ['SN-NZXT-3601', 'SN-NZXT-3602']
-              }
-            ]
+                serials: ['SN-NZXT-3601', 'SN-NZXT-3602'],
+              },
+            ],
           },
           {
             id: 'E-02-01B',
@@ -744,14 +757,14 @@ const INITIAL_ZONES: ZoneItem[] = [
                 skuCode: 'ACC-CABLEMOD-EXT',
                 quantity: 30,
                 trackingType: 'BULK',
-                serials: []
-              }
-            ]
-          }
-        ]
-      }
-    ]
-  }
+                serials: [],
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  },
 ];
 
 @Component({
@@ -777,9 +790,10 @@ const INITIAL_ZONES: ZoneItem[] = [
     HlmSheetDescriptionDirective,
     HlmSheetFooterDirective,
     HlmProgressComponent,
-    LucideAngularModule
+    LucideAngularModule,
   ],
-  templateUrl: './warehouse-map.component.html'
+  changeDetection: ChangeDetectionStrategy.Eager,
+  templateUrl: './warehouse-map.component.html',
 })
 export class WarehouseMapComponent implements OnDestroy {
   private toast = inject(ToastService);
@@ -845,12 +859,14 @@ export class WarehouseMapComponent implements OnDestroy {
 
   // Computed metrics
   allBins = computed(() => {
-    return this.zones().flatMap(z => z.shelves.flatMap(s => s.bins));
+    return this.zones().flatMap((z) => z.shelves.flatMap((s) => s.bins));
   });
 
   totalBinsCount = computed(() => this.allBins().length);
-  emptyBinsCount = computed(() => this.allBins().filter(b => b.productCount === 0).length);
-  fullBinsCount = computed(() => this.allBins().filter(b => b.productCount >= b.maxCapacity).length);
+  emptyBinsCount = computed(() => this.allBins().filter((b) => b.productCount === 0).length);
+  fullBinsCount = computed(
+    () => this.allBins().filter((b) => b.productCount >= b.maxCapacity).length,
+  );
   totalProductsCount = computed(() => this.allBins().reduce((sum, b) => sum + b.productCount, 0));
   overallCapacityPercent = computed(() => {
     const totalMax = this.allBins().reduce((sum, b) => sum + b.maxCapacity, 0);
@@ -859,16 +875,18 @@ export class WarehouseMapComponent implements OnDestroy {
 
   // Current zone in zone view
   activeZone = computed(() => {
-    return this.zones().find(z => z.zoneCode === this.selectedZoneCode()) || this.zones()[0] || null;
+    return (
+      this.zones().find((z) => z.zoneCode === this.selectedZoneCode()) || this.zones()[0] || null
+    );
   });
 
   // Current shelf in zoomed shelf view
   activeZoomedShelf = computed(() => {
     const target = this.zoomedShelf();
     if (!target) return null;
-    const zone = this.zones().find(z => z.zoneCode === target.zoneCode);
+    const zone = this.zones().find((z) => z.zoneCode === target.zoneCode);
     if (!zone) return null;
-    const shelf = zone.shelves.find(s => s.shelfCode === target.shelfCode);
+    const shelf = zone.shelves.find((s) => s.shelfCode === target.shelfCode);
     return shelf ? { zone, shelf } : null;
   });
 
@@ -899,14 +917,16 @@ export class WarehouseMapComponent implements OnDestroy {
     const next = !this.managingMode();
     this.managingMode.set(next);
     if (next) {
-      this.toast.info('Đã bật chế độ Quản lý vị trí: Bạn có thể thêm ô, thêm kệ, dời hàng hoặc vô hiệu hóa ô.');
+      this.toast.info(
+        'Đã bật chế độ Quản lý vị trí: Bạn có thể thêm ô, thêm kệ, dời hàng hoặc vô hiệu hóa ô.',
+      );
     } else {
       this.toast.success('Đã hoàn tất cấu hình vị trí kho.');
     }
   }
 
   toggleProductExpand(key: string) {
-    this.expandedProductKeys.update(set => {
+    this.expandedProductKeys.update((set) => {
       const next = new Set(set);
       if (next.has(key)) next.delete(key);
       else next.add(key);
@@ -918,7 +938,8 @@ export class WarehouseMapComponent implements OnDestroy {
   isBinVisible(bin: BinItem): boolean {
     const filter = this.filterStatus();
     if (filter === 'empty' && bin.productCount > 0) return false;
-    if (filter === 'stocked' && (bin.productCount === 0 || bin.productCount >= bin.maxCapacity)) return false;
+    if (filter === 'stocked' && (bin.productCount === 0 || bin.productCount >= bin.maxCapacity))
+      return false;
     if (filter === 'full' && bin.productCount < bin.maxCapacity) return false;
     return true;
   }
@@ -927,10 +948,11 @@ export class WarehouseMapComponent implements OnDestroy {
     const q = this.searchQuery().trim().toLowerCase();
     if (!q) return false;
     if (bin.fullCode.toLowerCase().includes(q)) return true;
-    return bin.products.some(p =>
-      p.name.toLowerCase().includes(q) ||
-      p.skuCode.toLowerCase().includes(q) ||
-      p.serials.some(s => s.toLowerCase().includes(q))
+    return bin.products.some(
+      (p) =>
+        p.name.toLowerCase().includes(q) ||
+        p.skuCode.toLowerCase().includes(q) ||
+        p.serials.some((s) => s.toLowerCase().includes(q)),
     );
   }
 
@@ -960,7 +982,9 @@ export class WarehouseMapComponent implements OnDestroy {
   }
 
   getCapacityPercent(bin: BinItem): number {
-    return bin.maxCapacity > 0 ? Math.min(100, Math.round((bin.productCount / bin.maxCapacity) * 100)) : 0;
+    return bin.maxCapacity > 0
+      ? Math.min(100, Math.round((bin.productCount / bin.maxCapacity) * 100))
+      : 0;
   }
 
   openBinDetail(bin: BinItem) {
@@ -980,31 +1004,35 @@ export class WarehouseMapComponent implements OnDestroy {
     if (!bin) return;
     const newCap = Number(this.editingCapacity());
     if (newCap < bin.productCount) {
-      this.toast.error(`Sức chứa tối đa (${newCap}) không được nhỏ hơn số lượng hiện có (${bin.productCount})!`);
+      this.toast.error(
+        `Sức chứa tối đa (${newCap}) không được nhỏ hơn số lượng hiện có (${bin.productCount})!`,
+      );
       return;
     }
 
-    this.zones.update(zones =>
-      zones.map(z => ({
+    this.zones.update((zones) =>
+      zones.map((z) => ({
         ...z,
-        shelves: z.shelves.map(s => ({
+        shelves: z.shelves.map((s) => ({
           ...s,
-          bins: s.bins.map(b => b.id === bin.id ? { ...b, maxCapacity: newCap } : b)
-        }))
-      }))
+          bins: s.bins.map((b) => (b.id === bin.id ? { ...b, maxCapacity: newCap } : b)),
+        })),
+      })),
     );
 
-    this.selectedBin.update(b => b ? { ...b, maxCapacity: newCap } : null);
+    this.selectedBin.update((b) => (b ? { ...b, maxCapacity: newCap } : null));
     this.toast.success(`Đã cập nhật sức chứa ô ${bin.fullCode} thành ${newCap} đơn vị!`);
   }
 
   // --- Managing Actions (From D:\Code\Projects) ---
 
   autoAddShelf(zoneCode: string) {
-    this.zones.update(zones =>
-      zones.map(z => {
+    this.zones.update((zones) =>
+      zones.map((z) => {
         if (z.zoneCode !== zoneCode) return z;
-        const currentCodes = z.shelves.map(s => parseInt(s.shelfCode, 10)).filter(n => !isNaN(n));
+        const currentCodes = z.shelves
+          .map((s) => parseInt(s.shelfCode, 10))
+          .filter((n) => !isNaN(n));
         const nextNum = (currentCodes.length > 0 ? Math.max(...currentCodes) : 0) + 1;
         const nextShelfCode = nextNum < 10 ? `0${nextNum}` : `${nextNum}`;
 
@@ -1022,7 +1050,7 @@ export class WarehouseMapComponent implements OnDestroy {
               maxCapacity: 15,
               isActive: true,
               boxCount: 0,
-              products: []
+              products: [],
             },
             {
               id: `${zoneCode}-${nextShelfCode}-01B`,
@@ -1034,23 +1062,23 @@ export class WarehouseMapComponent implements OnDestroy {
               maxCapacity: 15,
               isActive: true,
               boxCount: 0,
-              products: []
-            }
-          ]
+              products: [],
+            },
+          ],
         };
         return { ...z, shelves: [...z.shelves, newShelf] };
-      })
+      }),
     );
     this.toast.success(`Đã thêm Kệ mới vào Phân khu ${zoneCode}!`);
   }
 
   autoAddBin(zoneCode: string, shelfCode: string) {
-    this.zones.update(zones =>
-      zones.map(z => {
+    this.zones.update((zones) =>
+      zones.map((z) => {
         if (z.zoneCode !== zoneCode) return z;
         return {
           ...z,
-          shelves: z.shelves.map(s => {
+          shelves: z.shelves.map((s) => {
             if (s.shelfCode !== shelfCode) return s;
             // Generate next binCode
             const count = s.bins.length + 1;
@@ -1070,12 +1098,12 @@ export class WarehouseMapComponent implements OnDestroy {
               maxCapacity: 15,
               isActive: true,
               boxCount: 0,
-              products: []
+              products: [],
             };
             return { ...s, bins: [...s.bins, newBin] };
-          })
+          }),
         };
-      })
+      }),
     );
     this.toast.success(`Đã thêm Ô mới vào Kệ ${shelfCode} (Khu ${zoneCode})!`);
   }
@@ -1099,22 +1127,22 @@ export class WarehouseMapComponent implements OnDestroy {
       this.toast.error(`Không thể xóa ô ${bin.fullCode} vì vẫn còn ${bin.productCount} sản phẩm.`);
       return;
     }
-    this.zones.update(zones =>
-      zones.map(z => ({
+    this.zones.update((zones) =>
+      zones.map((z) => ({
         ...z,
-        shelves: z.shelves.map(s => ({
+        shelves: z.shelves.map((s) => ({
           ...s,
-          bins: s.bins.filter(b => b.id !== bin.id)
-        }))
-      }))
+          bins: s.bins.filter((b) => b.id !== bin.id),
+        })),
+      })),
     );
     this.toast.success(`Đã xóa ô vị trí ${bin.fullCode}.`);
   }
 
   handleAddZone() {
-    const currentCodes = this.zones().map(z => z.zoneCode);
+    const currentCodes = this.zones().map((z) => z.zoneCode);
     const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    const nextChar = alphabet.split('').find(ch => !currentCodes.includes(ch)) || 'Z';
+    const nextChar = alphabet.split('').find((ch) => !currentCodes.includes(ch)) || 'Z';
 
     const newZone: ZoneItem = {
       zoneCode: nextChar,
@@ -1136,7 +1164,7 @@ export class WarehouseMapComponent implements OnDestroy {
               maxCapacity: 20,
               isActive: true,
               boxCount: 0,
-              products: []
+              products: [],
             },
             {
               id: `${nextChar}-01-01B`,
@@ -1148,27 +1176,27 @@ export class WarehouseMapComponent implements OnDestroy {
               maxCapacity: 20,
               isActive: true,
               boxCount: 0,
-              products: []
-            }
-          ]
-        }
-      ]
+              products: [],
+            },
+          ],
+        },
+      ],
     };
 
-    this.zones.update(list => [...list, newZone]);
+    this.zones.update((list) => [...list, newZone]);
     this.selectedZoneCode.set(nextChar);
     this.toast.success(`Đã tạo mới Phân khu ${nextChar} thành công!`);
   }
 
   deleteZone(zoneCode: string) {
-    const zone = this.zones().find(z => z.zoneCode === zoneCode);
+    const zone = this.zones().find((z) => z.zoneCode === zoneCode);
     if (!zone) return;
-    const hasProducts = zone.shelves.some(s => s.bins.some(b => b.productCount > 0));
+    const hasProducts = zone.shelves.some((s) => s.bins.some((b) => b.productCount > 0));
     if (hasProducts) {
       this.toast.error(`Không thể xóa Khu ${zoneCode} vì vẫn còn hàng tồn kho bên trong!`);
       return;
     }
-    this.zones.update(list => list.filter(z => z.zoneCode !== zoneCode));
+    this.zones.update((list) => list.filter((z) => z.zoneCode !== zoneCode));
     const remaining = this.zones();
     if (remaining.length > 0) {
       this.selectedZoneCode.set(remaining[0].zoneCode);
@@ -1177,17 +1205,17 @@ export class WarehouseMapComponent implements OnDestroy {
   }
 
   private updateBinProperty(binId: string, patch: Partial<BinItem>) {
-    this.zones.update(zones =>
-      zones.map(z => ({
+    this.zones.update((zones) =>
+      zones.map((z) => ({
         ...z,
-        shelves: z.shelves.map(s => ({
+        shelves: z.shelves.map((s) => ({
           ...s,
-          bins: s.bins.map(b => b.id === binId ? { ...b, ...patch } : b)
-        }))
-      }))
+          bins: s.bins.map((b) => (b.id === binId ? { ...b, ...patch } : b)),
+        })),
+      })),
     );
     if (this.selectedBin()?.id === binId) {
-      this.selectedBin.update(b => b ? { ...b, ...patch } : null);
+      this.selectedBin.update((b) => (b ? { ...b, ...patch } : null));
     }
   }
 
@@ -1196,7 +1224,9 @@ export class WarehouseMapComponent implements OnDestroy {
   onDropBin(event: CdkDragDrop<any>) {
     const sourceBin = event.item.data as BinItem;
     const containerData = event.container.data;
-    const targetBin = (Array.isArray(containerData) ? containerData[event.currentIndex] : containerData) as BinItem;
+    const targetBin = (
+      Array.isArray(containerData) ? containerData[event.currentIndex] : containerData
+    ) as BinItem;
     if (!sourceBin || !targetBin || sourceBin.id === targetBin.id) return;
     this.openRelocateModal(sourceBin, targetBin);
   }
@@ -1209,9 +1239,9 @@ export class WarehouseMapComponent implements OnDestroy {
 
     if (!target) {
       // Find candidate in the same shelf or zone
-      const zone = this.zones().find(z => z.zoneCode === source.zoneCode);
-      const candidates = (zone?.shelves.flatMap(s => s.bins) || []).filter(
-        b => b.id !== source.id && b.isActive && b.productCount < b.maxCapacity
+      const zone = this.zones().find((z) => z.zoneCode === source.zoneCode);
+      const candidates = (zone?.shelves.flatMap((s) => s.bins) || []).filter(
+        (b) => b.id !== source.id && b.isActive && b.productCount < b.maxCapacity,
       );
       if (candidates.length === 0) {
         this.toast.warning('Không tìm thấy ô trống khả dụng trong phân khu để điều chuyển tới.');
@@ -1221,7 +1251,9 @@ export class WarehouseMapComponent implements OnDestroy {
     }
 
     if (source.zoneCode !== target.zoneCode) {
-      this.toast.warning(`Lưu ý: Bạn đang điều chuyển giữa 2 Phân khu khác nhau (${source.zoneCode} ➔ ${target.zoneCode}).`);
+      this.toast.warning(
+        `Lưu ý: Bạn đang điều chuyển giữa 2 Phân khu khác nhau (${source.zoneCode} ➔ ${target.zoneCode}).`,
+      );
     }
 
     if (target.productCount >= target.maxCapacity) {
@@ -1300,52 +1332,52 @@ export class WarehouseMapComponent implements OnDestroy {
       return;
     }
 
-    this.zones.update(zones => {
-      return zones.map(z => ({
+    this.zones.update((zones) => {
+      return zones.map((z) => ({
         ...z,
-        shelves: z.shelves.map(s => ({
+        shelves: z.shelves.map((s) => ({
           ...s,
-          bins: s.bins.map(b => {
+          bins: s.bins.map((b) => {
             if (b.id === sourceBin.id) {
               const updatedProducts = b.products
-                .map((p, idx) => idx === 0 ? { ...p, quantity: p.quantity - qty } : p)
-                .filter(p => p.quantity > 0);
+                .map((p, idx) => (idx === 0 ? { ...p, quantity: p.quantity - qty } : p))
+                .filter((p) => p.quantity > 0);
               return {
                 ...b,
                 productCount: b.productCount - qty,
-                products: updatedProducts
+                products: updatedProducts,
               };
             }
             if (b.id === targetBin.id) {
-              const existing = b.products.find(p => p.skuId === productToMove.skuId);
+              const existing = b.products.find((p) => p.skuId === productToMove.skuId);
               let updatedProducts = [...b.products];
               if (existing) {
-                updatedProducts = updatedProducts.map(p =>
-                  p.skuId === productToMove.skuId ? { ...p, quantity: p.quantity + qty } : p
+                updatedProducts = updatedProducts.map((p) =>
+                  p.skuId === productToMove.skuId ? { ...p, quantity: p.quantity + qty } : p,
                 );
               } else {
                 updatedProducts.push({
                   ...productToMove,
                   quantity: qty,
-                  serials: productToMove.serials.slice(0, qty)
+                  serials: productToMove.serials.slice(0, qty),
                 });
               }
               return {
                 ...b,
                 productCount: b.productCount + qty,
-                products: updatedProducts
+                products: updatedProducts,
               };
             }
             return b;
-          })
-        }))
+          }),
+        })),
       }));
     });
 
     this.clearCountdown();
     this.relocateModalVisible.set(false);
     this.toast.success(
-      `Đã chuyển ${qty} linh kiện "${productToMove.name}" từ ${sourceBin.fullCode} sang ${targetBin.fullCode} (Ghi log kiểm toán RELOCATE thành công)!`
+      `Đã chuyển ${qty} linh kiện "${productToMove.name}" từ ${sourceBin.fullCode} sang ${targetBin.fullCode} (Ghi log kiểm toán RELOCATE thành công)!`,
     );
   }
 

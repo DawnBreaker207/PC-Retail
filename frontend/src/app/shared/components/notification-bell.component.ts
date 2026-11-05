@@ -1,4 +1,11 @@
-import { Component, inject, signal, HostListener, ElementRef } from '@angular/core';
+import {
+  Component,
+  inject,
+  signal,
+  HostListener,
+  ElementRef,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { LucideAngularModule, Bell, CheckCheck, Inbox } from 'lucide-angular';
 import { NotificationService } from '@core/services/notification.service';
 import { AuthService } from '@core/auth/auth.service';
@@ -6,6 +13,7 @@ import { AuthService } from '@core/auth/auth.service';
 @Component({
   selector: 'app-notification-bell',
   imports: [LucideAngularModule],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <div class="relative inline-block">
       <button
@@ -16,15 +24,21 @@ import { AuthService } from '@core/auth/auth.service';
       >
         <lucide-angular [img]="Bell" class="w-5 h-5" />
         @if (notif.unreadCount() > 0) {
-          <span class="absolute top-1 right-1 min-w-[18px] h-[18px] px-1 bg-destructive text-white text-[10px] font-bold rounded-full flex items-center justify-center ring-2 ring-primary">
+          <span
+            class="absolute top-1 right-1 min-w-[18px] h-[18px] px-1 bg-destructive text-white text-[10px] font-bold rounded-full flex items-center justify-center ring-2 ring-primary"
+          >
             {{ notif.unreadCount() > 99 ? '99+' : notif.unreadCount() }}
           </span>
         }
       </button>
 
       @if (isOpen()) {
-        <div class="absolute right-0 mt-2 w-80 max-h-96 overflow-y-auto bg-surface dark:bg-surface-dark border border-border/80 dark:border-border-dark/80 rounded-xl shadow-xl z-50 p-2 animate-scale-in">
-          <div class="flex items-center justify-between px-3 py-2 border-b border-border/60 dark:border-border-dark/60 mb-1">
+        <div
+          class="absolute right-0 mt-2 w-80 max-h-96 overflow-y-auto bg-surface dark:bg-surface-dark border border-border/80 dark:border-border-dark/80 rounded-xl shadow-xl z-50 p-2 animate-scale-in"
+        >
+          <div
+            class="flex items-center justify-between px-3 py-2 border-b border-border/60 dark:border-border-dark/60 mb-1"
+          >
             <span class="font-bold text-sm text-ink dark:text-ink-dark">Thông báo</span>
             @if (notif.items().length > 0) {
               <button
@@ -50,8 +64,12 @@ import { AuthService } from '@core/auth/auth.service';
                   (click)="markRead(n.id)"
                   class="p-2.5 hover:bg-bg/60 dark:hover:bg-bg-dark/60 rounded-lg cursor-pointer transition-colors"
                 >
-                  <p class="text-xs font-semibold text-ink dark:text-ink-dark line-clamp-1">{{ n.title }}</p>
-                  <p class="text-xs text-muted dark:text-muted-dark line-clamp-2 mt-0.5">{{ n.body || n.type }}</p>
+                  <p class="text-xs font-semibold text-ink dark:text-ink-dark line-clamp-1">
+                    {{ n.title }}
+                  </p>
+                  <p class="text-xs text-muted dark:text-muted-dark line-clamp-2 mt-0.5">
+                    {{ n.body || n.type }}
+                  </p>
                 </div>
               }
             </div>

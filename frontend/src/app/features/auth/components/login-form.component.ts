@@ -1,4 +1,4 @@
-import { Component, inject, output, signal } from '@angular/core';
+import { Component, inject, output, signal, ChangeDetectionStrategy } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { LucideAngularModule, Eye, EyeOff, Loader2 } from 'lucide-angular';
@@ -22,6 +22,7 @@ import { catchError, finalize, of, switchMap } from 'rxjs';
     HlmButtonDirective,
     HlmInputDirective,
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './login-form.component.html',
 })
 export class LoginFormComponent {
@@ -69,11 +70,11 @@ export class LoginFormComponent {
               {
                 params,
                 context: new HttpContext().set(SKIP_AUTH_LOGOUT, true),
-              }
+              },
             )
             .pipe(catchError(() => of(null)));
         }),
-        finalize(() => this.isLoading.set(false))
+        finalize(() => this.isLoading.set(false)),
       )
       .subscribe(() => {
         clearGuestToken();

@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withXhr } from '@angular/common/http';
 import { MainLayout } from './main-layout';
 
 describe('MainLayout', () => {
@@ -12,7 +12,12 @@ describe('MainLayout', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [MainLayout],
-      providers: [provideRouter([]), provideHttpClient(), provideHttpClientTesting(), provideNoopAnimations()],
+      providers: [
+        provideRouter([]),
+        provideHttpClient(withXhr()),
+        provideHttpClientTesting(),
+        provideNoopAnimations(),
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(MainLayout);

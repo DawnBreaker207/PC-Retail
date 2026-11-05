@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withXhr } from '@angular/common/http';
 import { AuthService } from './auth.service';
 import { ApiEndpoints } from '@core/api/api.endpoints';
 import { AuthResponse, LoginRequest, RegisterRequest } from '@core/models/common.model';
@@ -11,7 +11,7 @@ describe('AuthService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [provideHttpClient(), provideHttpClientTesting(), AuthService],
+      providers: [provideHttpClient(withXhr()), provideHttpClientTesting(), AuthService],
     });
     service = TestBed.inject(AuthService);
     httpMock = TestBed.inject(HttpTestingController);
@@ -26,7 +26,13 @@ describe('AuthService', () => {
     const mockResponse: AuthResponse = {
       accessToken: 'token123',
       refreshToken: 'refresh456',
-      user: { id: 1, fullName: 'Test', email: 'test@test.com', phone: '0123456789', systemRole: 'CUSTOMER' },
+      user: {
+        id: 1,
+        fullName: 'Test',
+        email: 'test@test.com',
+        phone: '0123456789',
+        systemRole: 'CUSTOMER',
+      },
     };
 
     service.login(credentials).subscribe((res) => {
@@ -54,7 +60,12 @@ describe('AuthService', () => {
   });
 
   it('should register a new user', () => {
-    const data: RegisterRequest = { fullName: 'New', email: 'new@t.com', phone: '0123456789', password: 'pass' };
+    const data: RegisterRequest = {
+      fullName: 'New',
+      email: 'new@t.com',
+      phone: '0123456789',
+      password: 'pass',
+    };
 
     service.register(data).subscribe((res) => {
       expect(res).toBeTruthy();

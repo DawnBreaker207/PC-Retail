@@ -1,4 +1,4 @@
-import { Component, inject, signal, DestroyRef } from '@angular/core';
+import { Component, inject, signal, DestroyRef, ChangeDetectionStrategy } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -36,6 +36,7 @@ import { ProductPickerModalComponent } from '../components/product-picker-modal.
     ProductPickerModalComponent,
   ],
   templateUrl: './template-detail.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './template-detail.component.css',
 })
 export class TemplateDetailComponent {

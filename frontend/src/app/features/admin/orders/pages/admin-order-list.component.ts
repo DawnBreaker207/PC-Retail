@@ -1,10 +1,15 @@
-import { Component, inject, DestroyRef, signal } from '@angular/core';
+import { Component, inject, DestroyRef, signal, ChangeDetectionStrategy } from '@angular/core';
 import { DatePipe, NgClass } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { DragDropModule, CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
+import {
+  DragDropModule,
+  CdkDragDrop,
+  moveItemInArray,
+  transferArrayItem,
+} from '@angular/cdk/drag-drop';
 import {
   LucideAngularModule,
   Table as TableIcon,
@@ -15,7 +20,7 @@ import {
   ChevronRight,
   ExternalLink,
   Loader2,
-  AlertCircle
+  AlertCircle,
 } from 'lucide-angular';
 import { HlmButtonDirective } from '@shared/ui/button';
 import { HlmInputDirective } from '@shared/ui/input';
@@ -105,6 +110,7 @@ const STATUS_OPTIONS = [
     CurrencyFormatPipe,
     StatusFormatPipe,
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './admin-order-list.component.html',
 })
 export class AdminOrderListComponent {
@@ -144,11 +150,46 @@ export class AdminOrderListComponent {
   } | null>(null);
 
   kanbanColumns: KanbanCol[] = [
-    { id: 'kb-pending', status: 'PENDING_PAYMENT', title: 'Chờ thanh toán', dotClass: 'bg-amber-500', badgeClass: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400', orders: [] },
-    { id: 'kb-paid', status: 'PAID', title: 'Đã thanh toán', dotClass: 'bg-cyan-500', badgeClass: 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900/30 dark:text-cyan-400', orders: [] },
-    { id: 'kb-processing', status: 'PROCESSING', title: 'Đang đóng gói', dotClass: 'bg-blue-500', badgeClass: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400', orders: [] },
-    { id: 'kb-shipped', status: 'SHIPPED', title: 'Đang giao hàng', dotClass: 'bg-purple-500', badgeClass: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400', orders: [] },
-    { id: 'kb-delivered', status: 'DELIVERED', title: 'Đã giao thành công', dotClass: 'bg-emerald-500', badgeClass: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400', orders: [] },
+    {
+      id: 'kb-pending',
+      status: 'PENDING_PAYMENT',
+      title: 'Chờ thanh toán',
+      dotClass: 'bg-amber-500',
+      badgeClass: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400',
+      orders: [],
+    },
+    {
+      id: 'kb-paid',
+      status: 'PAID',
+      title: 'Đã thanh toán',
+      dotClass: 'bg-cyan-500',
+      badgeClass: 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900/30 dark:text-cyan-400',
+      orders: [],
+    },
+    {
+      id: 'kb-processing',
+      status: 'PROCESSING',
+      title: 'Đang đóng gói',
+      dotClass: 'bg-blue-500',
+      badgeClass: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
+      orders: [],
+    },
+    {
+      id: 'kb-shipped',
+      status: 'SHIPPED',
+      title: 'Đang giao hàng',
+      dotClass: 'bg-purple-500',
+      badgeClass: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400',
+      orders: [],
+    },
+    {
+      id: 'kb-delivered',
+      status: 'DELIVERED',
+      title: 'Đã giao thành công',
+      dotClass: 'bg-emerald-500',
+      badgeClass: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400',
+      orders: [],
+    },
   ];
 
   readonly kanbanConnectedIds = this.kanbanColumns.map((c) => c.id);
@@ -190,7 +231,8 @@ export class AdminOrderListComponent {
         event.currentIndex,
       );
       const subOrderId = movedOrder.subOrders?.[0]?.id || movedOrder.id;
-      const targetLabel = STATUS_OPTIONS.find((s) => s.value === targetStatus)?.label || targetStatus;
+      const targetLabel =
+        STATUS_OPTIONS.find((s) => s.value === targetStatus)?.label || targetStatus;
 
       this.toast.success(`Kéo đơn #${movedOrder.id} thành công: chuyển sang "${targetLabel}"`);
 
@@ -200,7 +242,8 @@ export class AdminOrderListComponent {
       }
 
       // Call staff transition API if applicable
-      this.http.post(ApiEndpoints.staffOrders.transition(subOrderId), { status: targetStatus })
+      this.http
+        .post(ApiEndpoints.staffOrders.transition(subOrderId), { status: targetStatus })
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe({
           error: () => {
@@ -212,13 +255,12 @@ export class AdminOrderListComponent {
 
   private loadData() {
     this.loading.set(true);
-    let params = new HttpParams()
-      .set('page', this.page - 1)
-      .set('size', this.size);
+    let params = new HttpParams().set('page', this.page - 1).set('size', this.size);
     if (this.search()) params = params.set('search', this.search());
     if (this.statusFilter()) params = params.set('status', this.statusFilter());
 
-    this.http.get<AdminOrderResponse>(ApiEndpoints.admin.orders, { params })
+    this.http
+      .get<AdminOrderResponse>(ApiEndpoints.admin.orders, { params })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res) => {
@@ -289,7 +331,8 @@ export class AdminOrderListComponent {
       action: () => {
         let completed = 0;
         ids.forEach((id) => {
-          this.http.post(ApiEndpoints.staffOrders.transition(id), { status: 'PROCESSING' })
+          this.http
+            .post(ApiEndpoints.staffOrders.transition(id), { status: 'PROCESSING' })
             .pipe(takeUntilDestroyed(this.destroyRef))
             .subscribe({
               next: () => {
@@ -315,7 +358,8 @@ export class AdminOrderListComponent {
       description: `Đơn #${id} sẽ chuyển sang trạng thái Đang xử lý.`,
       confirmText: 'Xác nhận xử lý',
       action: () => {
-        this.http.post(ApiEndpoints.staffOrders.transition(id), { status: 'PROCESSING' })
+        this.http
+          .post(ApiEndpoints.staffOrders.transition(id), { status: 'PROCESSING' })
           .pipe(takeUntilDestroyed(this.destroyRef))
           .subscribe({
             next: () => {
@@ -334,10 +378,12 @@ export class AdminOrderListComponent {
   }
 
   getProductSummary(subOrders: AdminOrder['subOrders']): string {
-    return subOrders
-      .flatMap((s) => s.items)
-      .slice(0, 3)
-      .map((i) => i.name)
-      .join(', ') + (subOrders.flatMap((s) => s.items).length > 3 ? '...' : '');
+    return (
+      subOrders
+        .flatMap((s) => s.items)
+        .slice(0, 3)
+        .map((i) => i.name)
+        .join(', ') + (subOrders.flatMap((s) => s.items).length > 3 ? '...' : '')
+    );
   }
 }

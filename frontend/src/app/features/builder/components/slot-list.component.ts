@@ -1,4 +1,4 @@
-import { Component, input, output } from '@angular/core';
+import { Component, input, output, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   LucideAngularModule,
@@ -19,7 +19,13 @@ import {
   LucideIconData,
 } from 'lucide-angular';
 import { HlmButtonDirective } from '@shared/ui/button';
-import { BuilderSlot, BuilderSelection, BuilderConflict, Sku, BuilderSlotType } from '@core/models/common.model';
+import {
+  BuilderSlot,
+  BuilderSelection,
+  BuilderConflict,
+  Sku,
+  BuilderSlotType,
+} from '@core/models/common.model';
 import { CurrencyFormatPipe } from '@shared/pipes/currency-format.pipe';
 import { FallbackImageDirective } from '@shared/directives/fallback-image.directive';
 import { ProductPickerModalComponent } from './product-picker-modal.component';
@@ -36,6 +42,7 @@ import { ProductPickerModalComponent } from './product-picker-modal.component';
     ProductPickerModalComponent,
   ],
   templateUrl: './slot-list.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './slot-list.component.css',
 })
 export class SlotListComponent {

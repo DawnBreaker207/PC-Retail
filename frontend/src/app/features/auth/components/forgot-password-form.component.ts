@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
@@ -17,6 +17,7 @@ import { AuthService } from '@core/auth/auth.service';
     HlmButtonDirective,
     HlmInputDirective,
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './forgot-password-form.component.html',
 })
 export class ForgotPasswordFormComponent {

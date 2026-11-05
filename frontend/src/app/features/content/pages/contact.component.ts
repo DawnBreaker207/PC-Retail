@@ -1,4 +1,4 @@
-﻿import { Component, inject } from '@angular/core';
+﻿import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { LucideAngularModule, ChevronRight, Phone, Mail, MapPin, Send } from 'lucide-angular';
@@ -15,6 +15,7 @@ import { ToastService } from '@core/services/toast.service';
     HlmButtonDirective,
     HlmInputDirective,
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './contact.component.html',
 })
 export class ContactComponent {
@@ -39,4 +40,3 @@ export class ContactComponent {
     this.form.reset();
   }
 }
-

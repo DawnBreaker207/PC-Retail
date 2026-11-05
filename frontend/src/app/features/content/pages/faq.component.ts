@@ -1,10 +1,11 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { LucideAngularModule, ChevronRight, ChevronDown } from 'lucide-angular';
 
 @Component({
   selector: 'app-faq',
   imports: [RouterLink, LucideAngularModule],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './faq.component.html',
 })
 export class FaqComponent {

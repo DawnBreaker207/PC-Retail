@@ -1,4 +1,4 @@
-import { Component, DestroyRef, inject, signal } from '@angular/core';
+import { Component, DestroyRef, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule, Plus, Edit2, Trash2, MapPin } from 'lucide-angular';
 import { HlmButtonDirective } from '@shared/ui/button';
@@ -20,6 +20,7 @@ import { AddressFormComponent } from './address-form.component';
     LoadingSpinnerComponent,
     AddressFormComponent,
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './address-book.component.html',
 })
 export class AddressBookComponent {
@@ -43,13 +44,16 @@ export class AddressBookComponent {
 
   loadData() {
     this.loading.set(true);
-    this.userService.getAddresses().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: (addresses) => {
-        this.addresses.set(addresses);
-        this.loading.set(false);
-      },
-      error: () => this.loading.set(false),
-    });
+    this.userService
+      .getAddresses()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (addresses) => {
+          this.addresses.set(addresses);
+          this.loading.set(false);
+        },
+        error: () => this.loading.set(false),
+      });
   }
 
   openCreateModal() {
@@ -69,13 +73,15 @@ export class AddressBookComponent {
 
   deleteAddress(id: number) {
     if (!window.confirm('Bạn có chắc chắn muốn xóa địa chỉ này?')) return;
-    this.userService.deleteAddress(id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: () => {
-        this.toast.success('Xóa địa chỉ thành công');
-        this.loadData();
-      },
-      error: () => this.toast.error('Xóa địa chỉ thất bại'),
-    });
+    this.userService
+      .deleteAddress(id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.toast.success('Xóa địa chỉ thành công');
+          this.loadData();
+        },
+        error: () => this.toast.error('Xóa địa chỉ thất bại'),
+      });
   }
 }
-

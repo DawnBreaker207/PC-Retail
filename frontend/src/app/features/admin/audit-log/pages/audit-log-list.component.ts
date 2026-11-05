@@ -1,4 +1,4 @@
-import { Component, inject, DestroyRef, signal } from '@angular/core';
+import { Component, inject, DestroyRef, signal, ChangeDetectionStrategy } from '@angular/core';
 import { DatePipe, NgClass } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -56,6 +56,7 @@ interface DiffField {
     HlmTableHeadDirective,
     HlmTableCellDirective,
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './audit-log-list.component.html',
 })
 export class AuditLogListComponent {
@@ -93,12 +94,17 @@ export class AuditLogListComponent {
     this.loading.set(true);
     let params = new HttpParams();
     if (this.outcomeFilter()) params = params.set('outcome', this.outcomeFilter());
-    this.http.get<{ content: AuditLogEntry[] }>(ApiEndpoints.admin.auditLogs, { params })
+    this.http
+      .get<{ content: AuditLogEntry[] }>(ApiEndpoints.admin.auditLogs, { params })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res) => {
           const search = this.actorSearch().trim().toLowerCase();
-          this.logs.set(search ? res.content.filter((l) => l.actorName.toLowerCase().includes(search)) : res.content ?? []);
+          this.logs.set(
+            search
+              ? res.content.filter((l) => l.actorName.toLowerCase().includes(search))
+              : (res.content ?? []),
+          );
           this.loading.set(false);
         },
         error: () => this.loading.set(false),

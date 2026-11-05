@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule, ChevronRight } from 'lucide-angular';
@@ -10,6 +10,7 @@ import { BlogPost } from '@core/models/common.model';
   selector: 'app-blog-detail',
   standalone: true,
   imports: [RouterLink, LucideAngularModule, FallbackImageDirective],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './blog-detail.component.html',
 })
 export class BlogDetailComponent {
@@ -23,7 +24,9 @@ export class BlogDetailComponent {
 
   paragraphs = computed(() => this.post()?.content.split('\n\n') ?? []);
   relatedPosts = computed(() =>
-    this.allPosts().filter((p) => p.slug !== this.slug()).slice(0, 4),
+    this.allPosts()
+      .filter((p) => p.slug !== this.slug())
+      .slice(0, 4),
   );
 
   constructor() {

@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
 import { Router, ActivatedRoute, RouterLink } from '@angular/router';
 import { LoginFormComponent } from '../components/login-form.component';
 import { RegisterFormComponent } from '../components/register-form.component';
@@ -7,6 +7,7 @@ import { AuthService } from '@core/auth/auth.service';
 @Component({
   selector: 'app-auth-page',
   imports: [RouterLink, LoginFormComponent, RegisterFormComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './auth-page.component.html',
 })
 export class AuthPageComponent implements OnInit {

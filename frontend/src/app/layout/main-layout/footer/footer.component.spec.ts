@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withXhr } from '@angular/common/http';
 import { FooterComponent } from './footer.component';
 
 describe('FooterComponent', () => {
@@ -10,7 +10,7 @@ describe('FooterComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [FooterComponent],
-      providers: [provideRouter([]), provideHttpClient()],
+      providers: [provideRouter([]), provideHttpClient(withXhr())],
     }).compileComponents();
 
     fixture = TestBed.createComponent(FooterComponent);

@@ -1,4 +1,4 @@
-﻿import { Component, DestroyRef, inject, signal } from '@angular/core';
+﻿import { Component, DestroyRef, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
@@ -23,6 +23,7 @@ import { Voucher, VoucherValidationResult } from '@core/models/common.model';
     EmptyStateComponent,
     CurrencyFormatPipe,
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './my-vouchers.component.html',
 })
 export class MyVouchersComponent {
@@ -40,7 +41,8 @@ export class MyVouchersComponent {
   checking = signal(false);
 
   constructor() {
-    this.http.get<{ content: Voucher[] }>(ApiEndpoints.promotion.vouchers)
+    this.http
+      .get<{ content: Voucher[] }>(ApiEndpoints.promotion.vouchers)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res) => {
@@ -59,7 +61,8 @@ export class MyVouchersComponent {
     const val = this.code().trim();
     if (!val) return;
     this.checking.set(true);
-    this.http.post<VoucherValidationResult>(ApiEndpoints.promotion.validateVoucher, { code: val })
+    this.http
+      .post<VoucherValidationResult>(ApiEndpoints.promotion.validateVoucher, { code: val })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res) => {
@@ -77,4 +80,3 @@ export class MyVouchersComponent {
       });
   }
 }
-

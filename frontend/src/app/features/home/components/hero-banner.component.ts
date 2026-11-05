@@ -1,4 +1,13 @@
-import { Component, ElementRef, effect, inject, signal, viewChild, OnDestroy } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  effect,
+  inject,
+  signal,
+  viewChild,
+  OnDestroy,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { LucideAngularModule, ChevronRight } from 'lucide-angular';
 import { FallbackImageDirective } from '@shared/directives/fallback-image.directive';
@@ -13,10 +22,16 @@ import { CategoryStripComponent } from './category-strip.component';
 @Component({
   selector: 'app-hero-banner',
   imports: [
-    RouterLink, LucideAngularModule, FallbackImageDirective, CategorySidebarComponent,
-    PromoBannerGridComponent, PromoCardComponent, CategoryStripComponent,
+    RouterLink,
+    LucideAngularModule,
+    FallbackImageDirective,
+    CategorySidebarComponent,
+    PromoBannerGridComponent,
+    PromoCardComponent,
+    CategoryStripComponent,
   ],
   templateUrl: './hero-banner.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './hero-banner.component.css',
 })
 export class HeroBannerComponent implements OnDestroy {
@@ -25,8 +40,13 @@ export class HeroBannerComponent implements OnDestroy {
   private categorySidebar = viewChild<ElementRef<HTMLElement>>('categorySidebar');
   readonly ChevronRightIcon = ChevronRight;
 
-  slides = this.mock.getHeroSlides().map((slide) => ({ ...slide, cta: splitLinkQuery(slide.ctaLink) }));
-  sideBanners = this.mock.getPromoCampaigns().slice(0, 2).map((banner) => ({ ...banner, dest: splitLinkQuery(banner.link) }));
+  slides = this.mock
+    .getHeroSlides()
+    .map((slide) => ({ ...slide, cta: splitLinkQuery(slide.ctaLink) }));
+  sideBanners = this.mock
+    .getPromoCampaigns()
+    .slice(0, 2)
+    .map((banner) => ({ ...banner, dest: splitLinkQuery(banner.link) }));
 
   activeIndex = signal(0);
   private intervalId: number | undefined;
@@ -47,7 +67,10 @@ export class HeroBannerComponent implements OnDestroy {
 
     effect(() => {
       if (this.menu.isOpen()) {
-        this.categorySidebar()?.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        this.categorySidebar()?.nativeElement.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start',
+        });
       }
     });
 

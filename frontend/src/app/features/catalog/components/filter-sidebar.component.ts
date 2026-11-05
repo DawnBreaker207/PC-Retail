@@ -1,4 +1,4 @@
-import { Component, computed, input, model, output } from '@angular/core';
+import { Component, computed, input, model, output, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule, X, Trash2 } from 'lucide-angular';
 import { HlmBadgeDirective } from '@shared/ui/badge';
@@ -37,13 +37,9 @@ export const PRICE_RANGES = [
 @Component({
   selector: 'app-filter-sidebar',
   standalone: true,
-  imports: [
-    FormsModule,
-    LucideAngularModule,
-    HlmBadgeDirective,
-    HlmButtonDirective,
-  ],
+  imports: [FormsModule, LucideAngularModule, HlmBadgeDirective, HlmButtonDirective],
   templateUrl: './filter-sidebar.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./filter-sidebar.component.css'],
 })
 export class FilterSidebarComponent {
@@ -85,7 +81,8 @@ export class FilterSidebarComponent {
       });
     }
     for (const [key, values] of Object.entries(f.specs)) {
-      for (const v of values) tags.push({ label: `${key}: ${v}`, type: 'spec', value: `${key}::${v}` });
+      for (const v of values)
+        tags.push({ label: `${key}: ${v}`, type: 'spec', value: `${key}::${v}` });
     }
     return tags;
   }

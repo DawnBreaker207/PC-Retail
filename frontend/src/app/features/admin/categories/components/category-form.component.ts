@@ -1,4 +1,13 @@
-import { Component, DestroyRef, inject, input, output, OnInit, signal } from '@angular/core';
+import {
+  Component,
+  DestroyRef,
+  inject,
+  input,
+  output,
+  OnInit,
+  signal,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpClient } from '@angular/common/http';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -11,11 +20,8 @@ import { Category } from '@core/models/common.model';
 @Component({
   selector: 'app-category-form',
   standalone: true,
-  imports: [
-    ReactiveFormsModule,
-    HlmButtonDirective,
-    HlmInputDirective,
-  ],
+  imports: [ReactiveFormsModule, HlmButtonDirective, HlmInputDirective],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './category-form.component.html',
 })
 export class CategoryFormComponent implements OnInit {
@@ -68,14 +74,17 @@ export class CategoryFormComponent implements OnInit {
     this.submitting.set(true);
     const body = this.form.getRawValue();
     const curCat = this.category();
-    const request$ = this.isEdit && curCat
-      ? this.http.put(ApiEndpoints.admin.categoryDetail(curCat.id), body)
-      : this.http.post(ApiEndpoints.admin.categories, body);
+    const request$ =
+      this.isEdit && curCat
+        ? this.http.put(ApiEndpoints.admin.categoryDetail(curCat.id), body)
+        : this.http.post(ApiEndpoints.admin.categories, body);
 
     request$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.submitting.set(false);
-        this.toast.success(this.isEdit ? 'Cập nhật danh mục thành công' : 'Thêm danh mục thành công');
+        this.toast.success(
+          this.isEdit ? 'Cập nhật danh mục thành công' : 'Thêm danh mục thành công',
+        );
         this.saved.emit(true);
       },
       error: () => {

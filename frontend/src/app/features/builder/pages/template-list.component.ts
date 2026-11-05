@@ -1,4 +1,4 @@
-import { Component, inject, signal, DestroyRef } from '@angular/core';
+import { Component, inject, signal, DestroyRef, ChangeDetectionStrategy } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
@@ -24,6 +24,7 @@ import { ApiEndpoints } from '@core/api/api.endpoints';
     CurrencyFormatPipe,
   ],
   templateUrl: './template-list.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './template-list.component.css',
 })
 export class TemplateListComponent {

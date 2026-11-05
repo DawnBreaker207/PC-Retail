@@ -1,4 +1,4 @@
-import { Component, inject, DestroyRef, signal } from '@angular/core';
+import { Component, inject, DestroyRef, signal, ChangeDetectionStrategy } from '@angular/core';
 import { DatePipe, NgClass } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -76,6 +76,7 @@ const ROLE_OPTIONS = [
     HlmDialogFooterDirective,
     UserFormComponent,
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './admin-user-list.component.html',
 })
 export class AdminUserListComponent {
@@ -137,7 +138,8 @@ export class AdminUserListComponent {
     if (this.search()) params = params.set('search', this.search());
     if (this.roleFilter()) params = params.set('role', this.roleFilter());
 
-    this.http.get<UserResponse>(ApiEndpoints.admin.users, { params })
+    this.http
+      .get<UserResponse>(ApiEndpoints.admin.users, { params })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res) => {
@@ -192,11 +194,14 @@ export class AdminUserListComponent {
   }
 
   private executeResetPassword(user: User) {
-    this.http.post<{ tempPassword: string }>(ApiEndpoints.admin.userResetPassword(user.id), {})
+    this.http
+      .post<{ tempPassword: string }>(ApiEndpoints.admin.userResetPassword(user.id), {})
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res) => {
-          this.toast.success(`Đã đặt lại mật khẩu cho ${user.fullName}. Mật khẩu tạm: ${res.tempPassword}`);
+          this.toast.success(
+            `Đã đặt lại mật khẩu cho ${user.fullName}. Mật khẩu tạm: ${res.tempPassword}`,
+          );
           this.closeConfirmAction();
         },
         error: () => this.toast.error('Đặt lại mật khẩu thất bại'),
@@ -207,20 +212,24 @@ export class AdminUserListComponent {
     const nextStatus = user.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
     this.confirmAction.set({
       title: nextStatus === 'ACTIVE' ? 'Kích hoạt lại tài khoản?' : 'Khóa tài khoản này?',
-      description: nextStatus === 'ACTIVE'
-        ? `Tài khoản ${user.email} sẽ có thể đăng nhập lại vào hệ thống.`
-        : `Người dùng ${user.email} sẽ bị tước quyền truy cập ngay lập tức.`,
+      description:
+        nextStatus === 'ACTIVE'
+          ? `Tài khoản ${user.email} sẽ có thể đăng nhập lại vào hệ thống.`
+          : `Người dùng ${user.email} sẽ bị tước quyền truy cập ngay lập tức.`,
       confirmText: nextStatus === 'ACTIVE' ? 'Kích hoạt' : 'Khóa tài khoản',
       action: () => this.executeToggleStatus(user, nextStatus),
     });
   }
 
   private executeToggleStatus(user: User, nextStatus: string) {
-    this.http.put(ApiEndpoints.admin.userStatus(user.id), { status: nextStatus })
+    this.http
+      .put(ApiEndpoints.admin.userStatus(user.id), { status: nextStatus })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
-          this.toast.success(nextStatus === 'ACTIVE' ? 'Đã kích hoạt tài khoản' : 'Đã khóa tài khoản');
+          this.toast.success(
+            nextStatus === 'ACTIVE' ? 'Đã kích hoạt tài khoản' : 'Đã khóa tài khoản',
+          );
           this.closeConfirmAction();
           this.loadData();
         },

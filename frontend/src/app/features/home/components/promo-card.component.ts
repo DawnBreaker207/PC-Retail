@@ -1,4 +1,4 @@
-import { Component, computed, input } from '@angular/core';
+import { Component, computed, input, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { splitLinkQuery } from '@shared/utils/link-query.util';
 
@@ -7,6 +7,7 @@ import { splitLinkQuery } from '@shared/utils/link-query.util';
   standalone: true,
   imports: [RouterLink],
   templateUrl: './promo-card.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './promo-card.component.css',
 })
 export class PromoCardComponent {

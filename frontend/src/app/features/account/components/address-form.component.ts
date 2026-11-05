@@ -1,4 +1,13 @@
-﻿import { Component, DestroyRef, inject, signal, input, output, OnInit } from '@angular/core';
+﻿import {
+  Component,
+  DestroyRef,
+  inject,
+  signal,
+  input,
+  output,
+  OnInit,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { LucideAngularModule, X, Loader2 } from 'lucide-angular';
@@ -10,12 +19,8 @@ import { Address } from '@core/models/common.model';
 
 @Component({
   selector: 'app-address-form',
-  imports: [
-    ReactiveFormsModule,
-    LucideAngularModule,
-    HlmButtonDirective,
-    HlmInputDirective,
-  ],
+  imports: [ReactiveFormsModule, LucideAngularModule, HlmButtonDirective, HlmInputDirective],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './address-form.component.html',
 })
 export class AddressFormComponent implements OnInit {
@@ -85,4 +90,3 @@ export class AddressFormComponent implements OnInit {
     });
   }
 }
-

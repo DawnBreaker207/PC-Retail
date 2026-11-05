@@ -1,4 +1,4 @@
-import { Component, inject, output, signal } from '@angular/core';
+import { Component, inject, output, signal, ChangeDetectionStrategy } from '@angular/core';
 import {
   FormBuilder,
   ReactiveFormsModule,
@@ -21,12 +21,8 @@ function passwordMatchValidator(control: AbstractControl): ValidationErrors | nu
 @Component({
   selector: 'app-register-form',
   standalone: true,
-  imports: [
-    ReactiveFormsModule,
-    LucideAngularModule,
-    HlmButtonDirective,
-    HlmInputDirective,
-  ],
+  imports: [ReactiveFormsModule, LucideAngularModule, HlmButtonDirective, HlmInputDirective],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './register-form.component.html',
 })
 export class RegisterFormComponent {
@@ -50,7 +46,7 @@ export class RegisterFormComponent {
       password: ['', [Validators.required, Validators.minLength(6)]],
       confirmPassword: ['', [Validators.required]],
     },
-    { validators: passwordMatchValidator }
+    { validators: passwordMatchValidator },
   );
 
   submit() {
@@ -68,10 +64,8 @@ export class RegisterFormComponent {
     this.authService
       .register(data)
       .pipe(
-        switchMap(() =>
-          this.authService.login({ email: data.email, password: data.password })
-        ),
-        finalize(() => this.isLoading.set(false))
+        switchMap(() => this.authService.login({ email: data.email, password: data.password })),
+        finalize(() => this.isLoading.set(false)),
       )
       .subscribe(() => this.registerSuccess.emit());
   }

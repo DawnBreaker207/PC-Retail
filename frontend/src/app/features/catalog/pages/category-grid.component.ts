@@ -1,4 +1,4 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import {
   LucideAngularModule,
@@ -20,6 +20,7 @@ import { MockDataService } from '@core/services/mock-data.service';
 @Component({
   selector: 'app-category-grid',
   imports: [RouterLink, LucideAngularModule],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './category-grid.component.html',
 })
 export class CategoryGridComponent {
@@ -27,16 +28,16 @@ export class CategoryGridComponent {
   private mock = inject(MockDataService);
 
   private iconMap: Record<string, LucideIconData> = {
-    'laptop': Laptop,
+    laptop: Laptop,
     'laptop-gaming': Laptop,
-    'pc': Monitor,
+    pc: Monitor,
     'linh-kien': Cpu,
     'case-nguon-tan': HardDrive,
     'o-cung-ram': Database,
     'loa-micro-webcam': Headphones,
     'man-hinh': Tv,
     'ban-phim': Keyboard,
-    'chuot': Mouse,
+    chuot: Mouse,
     'tai-nghe': Headphones,
   };
 

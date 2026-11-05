@@ -1,4 +1,13 @@
-import { Component, computed, effect, inject, signal, HostListener, ElementRef } from '@angular/core';
+import {
+  Component,
+  computed,
+  effect,
+  inject,
+  signal,
+  HostListener,
+  ElementRef,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import {
   LucideAngularModule,
@@ -42,6 +51,7 @@ import { Sku } from '@core/models/common.model';
     FallbackImageDirective,
   ],
   templateUrl: './header.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './header.component.css',
 })
 export class HeaderComponent {
@@ -91,7 +101,11 @@ export class HeaderComponent {
     const q = this.searchQuery().trim().toLowerCase();
     if (!q || q.length < 2) return [];
     return this.allProducts
-      .filter((p) => p.name.toLowerCase().includes(q) || (p.brandName && p.brandName.toLowerCase().includes(q)))
+      .filter(
+        (p) =>
+          p.name.toLowerCase().includes(q) ||
+          (p.brandName && p.brandName.toLowerCase().includes(q)),
+      )
       .slice(0, 5);
   });
 
@@ -134,7 +148,12 @@ export class HeaderComponent {
   get userInitials(): string {
     const name = this.currentUser()?.fullName;
     if (!name) return 'U';
-    return name.split(' ').map((s) => s[0]).join('').toUpperCase().slice(0, 2);
+    return name
+      .split(' ')
+      .map((s) => s[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
   }
 
   get userName(): string {

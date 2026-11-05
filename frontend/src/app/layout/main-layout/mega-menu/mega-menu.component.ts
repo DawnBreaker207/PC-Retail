@@ -1,4 +1,4 @@
-import { Component, DestroyRef, inject, signal } from '@angular/core';
+import { Component, DestroyRef, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { filter } from 'rxjs';
@@ -42,7 +42,9 @@ const DEFAULT_GROUPS: MenuGroup[] = [
     children: [
       {
         title: 'Thương hiệu',
-        items: ['ASUS', 'ACER', 'MSI', 'LENOVO', 'DELL', 'HP', 'LG Gram'].map((b) => brandItem('laptop', b)),
+        items: ['ASUS', 'ACER', 'MSI', 'LENOVO', 'DELL', 'HP', 'LG Gram'].map((b) =>
+          brandItem('laptop', b),
+        ),
       },
       {
         title: 'Mức giá',
@@ -81,9 +83,13 @@ const DEFAULT_GROUPS: MenuGroup[] = [
     children: [
       {
         title: 'Thương hiệu',
-        items: ['ASUS ROG / TUF', 'ACER Predator / Nitro', 'MSI Gaming', 'LENOVO Legion', 'DELL Gaming'].map((b) =>
-          brandItem('laptop-gaming', b),
-        ),
+        items: [
+          'ASUS ROG / TUF',
+          'ACER Predator / Nitro',
+          'MSI Gaming',
+          'LENOVO Legion',
+          'DELL Gaming',
+        ].map((b) => brandItem('laptop-gaming', b)),
       },
       {
         title: 'Mức giá',
@@ -100,14 +106,20 @@ const DEFAULT_GROUPS: MenuGroup[] = [
           { label: 'GeForce RTX 4050', queryParams: { category: 'laptop-gaming', q: 'rtx-4050' } },
           { label: 'GeForce RTX 4060', queryParams: { category: 'laptop-gaming', q: 'rtx-4060' } },
           { label: 'GeForce RTX 4070', queryParams: { category: 'laptop-gaming', q: 'rtx-4070' } },
-          { label: 'GeForce RTX 4080 / 4090', queryParams: { category: 'laptop-gaming', q: 'rtx-4080' } },
+          {
+            label: 'GeForce RTX 4080 / 4090',
+            queryParams: { category: 'laptop-gaming', q: 'rtx-4080' },
+          },
         ],
       },
       {
         title: 'Màn hình Gaming',
         items: [
           { label: 'Tần số quét 144Hz', queryParams: { category: 'laptop-gaming', q: '144hz' } },
-          { label: 'Tần số quét 165Hz - 240Hz', queryParams: { category: 'laptop-gaming', q: '240hz' } },
+          {
+            label: 'Tần số quét 165Hz - 240Hz',
+            queryParams: { category: 'laptop-gaming', q: '240hz' },
+          },
           { label: 'Độ phân giải 2K QHD', queryParams: { category: 'laptop-gaming', q: '2k' } },
           { label: 'Tấm nền OLED / IPS', queryParams: { category: 'laptop-gaming', q: 'oled' } },
         ],
@@ -166,17 +178,35 @@ const DEFAULT_GROUPS: MenuGroup[] = [
         title: 'CPU & Bo mạch',
         items: [
           { label: 'CPU Intel Gen 14', queryParams: { category: 'linh-kien', q: 'cpu-intel' } },
-          { label: 'CPU AMD Ryzen 7000/9000', queryParams: { category: 'linh-kien', q: 'cpu-amd' } },
-          { label: 'Mainboard ASUS ROG / TUF', queryParams: { category: 'linh-kien', q: 'main-asus' } },
-          { label: 'Mainboard MSI / Gigabyte', queryParams: { category: 'linh-kien', q: 'main-msi' } },
+          {
+            label: 'CPU AMD Ryzen 7000/9000',
+            queryParams: { category: 'linh-kien', q: 'cpu-amd' },
+          },
+          {
+            label: 'Mainboard ASUS ROG / TUF',
+            queryParams: { category: 'linh-kien', q: 'main-asus' },
+          },
+          {
+            label: 'Mainboard MSI / Gigabyte',
+            queryParams: { category: 'linh-kien', q: 'main-msi' },
+          },
         ],
       },
       {
         title: 'VGA - Card màn hình',
         items: [
-          { label: 'NVIDIA RTX 4060 Series', queryParams: { category: 'linh-kien', q: 'rtx-4060' } },
-          { label: 'NVIDIA RTX 4070 Series', queryParams: { category: 'linh-kien', q: 'rtx-4070' } },
-          { label: 'NVIDIA RTX 4080 Series', queryParams: { category: 'linh-kien', q: 'rtx-4080' } },
+          {
+            label: 'NVIDIA RTX 4060 Series',
+            queryParams: { category: 'linh-kien', q: 'rtx-4060' },
+          },
+          {
+            label: 'NVIDIA RTX 4070 Series',
+            queryParams: { category: 'linh-kien', q: 'rtx-4070' },
+          },
+          {
+            label: 'NVIDIA RTX 4080 Series',
+            queryParams: { category: 'linh-kien', q: 'rtx-4080' },
+          },
           { label: 'AMD Radeon RX 7000', queryParams: { category: 'linh-kien', q: 'rx-7000' } },
         ],
       },
@@ -186,7 +216,10 @@ const DEFAULT_GROUPS: MenuGroup[] = [
           { label: 'RAM DDR4 16GB / 32GB', queryParams: { category: 'o-cung-ram', q: 'ram-ddr4' } },
           { label: 'RAM DDR5 RGB 6000MHz', queryParams: { category: 'o-cung-ram', q: 'ram-ddr5' } },
           { label: 'SSD NVMe PCIe Gen 4', queryParams: { category: 'o-cung-ram', q: 'ssd-gen4' } },
-          { label: 'SSD Dung lượng 1TB / 2TB', queryParams: { category: 'o-cung-ram', q: 'ssd-1tb' } },
+          {
+            label: 'SSD Dung lượng 1TB / 2TB',
+            queryParams: { category: 'o-cung-ram', q: 'ssd-1tb' },
+          },
         ],
       },
       {
@@ -207,7 +240,9 @@ const DEFAULT_GROUPS: MenuGroup[] = [
     children: [
       {
         title: 'Thương hiệu',
-        items: ['ASUS', 'LG', 'SAMSUNG', 'VIEWSONIC', 'AOC', 'DELL'].map((b) => brandItem('man-hinh', b)),
+        items: ['ASUS', 'LG', 'SAMSUNG', 'VIEWSONIC', 'AOC', 'DELL'].map((b) =>
+          brandItem('man-hinh', b),
+        ),
       },
       {
         title: 'Kích thước',
@@ -215,7 +250,10 @@ const DEFAULT_GROUPS: MenuGroup[] = [
           { label: 'Màn hình 24 inch', queryParams: { category: 'man-hinh', q: '24-inch' } },
           { label: 'Màn hình 27 inch', queryParams: { category: 'man-hinh', q: '27-inch' } },
           { label: 'Màn hình 32 inch', queryParams: { category: 'man-hinh', q: '32-inch' } },
-          { label: 'Màn hình Cong Ultrawide', queryParams: { category: 'man-hinh', q: 'ultrawide' } },
+          {
+            label: 'Màn hình Cong Ultrawide',
+            queryParams: { category: 'man-hinh', q: 'ultrawide' },
+          },
         ],
       },
       {
@@ -243,6 +281,7 @@ const DEFAULT_GROUPS: MenuGroup[] = [
   selector: 'app-mega-menu',
   imports: [RouterLink, LucideAngularModule, CategorySidebarComponent],
   templateUrl: './mega-menu.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './mega-menu.component.css',
 })
 export class MegaMenuComponent {
@@ -260,14 +299,16 @@ export class MegaMenuComponent {
   private hoverOpened = false;
 
   constructor() {
-    this.router.events.pipe(
-      filter((e) => e instanceof NavigationEnd),
-      takeUntilDestroyed(this.destroyRef),
-    ).subscribe(() => {
-      this.menu.close();
-      this.hoverOpened = false;
-      this.isHomeRoute.set(this.router.url === '/');
-    });
+    this.router.events
+      .pipe(
+        filter((e) => e instanceof NavigationEnd),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe(() => {
+        this.menu.close();
+        this.hoverOpened = false;
+        this.isHomeRoute.set(this.router.url === '/');
+      });
   }
 
   onCategoryClick(): void {

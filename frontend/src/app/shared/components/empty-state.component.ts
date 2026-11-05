@@ -1,4 +1,4 @@
-﻿import { Component, input } from '@angular/core';
+﻿import { Component, input, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { LucideAngularModule, Inbox } from 'lucide-angular';
 import { HlmButtonDirective } from '@shared/ui/button';
@@ -7,6 +7,7 @@ import { HlmButtonDirective } from '@shared/ui/button';
   selector: 'app-empty-state',
   imports: [RouterLink, LucideAngularModule, HlmButtonDirective],
   templateUrl: './empty-state.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './empty-state.component.css',
 })
 export class EmptyStateComponent {
@@ -17,4 +18,3 @@ export class EmptyStateComponent {
   actionLabel = input('');
   actionRoute = input('');
 }
-

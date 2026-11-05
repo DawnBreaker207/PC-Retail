@@ -1,4 +1,11 @@
-import { Component, inject, DestroyRef, signal, model } from '@angular/core';
+import {
+  Component,
+  inject,
+  DestroyRef,
+  signal,
+  model,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { Location, NgClass } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpClient } from '@angular/common/http';
@@ -16,7 +23,7 @@ import {
   CreditCard,
   AlertCircle,
   Clock,
-  Loader2
+  Loader2,
 } from 'lucide-angular';
 import { HlmButtonDirective } from '@shared/ui/button';
 import { HlmInputDirective } from '@shared/ui/input';
@@ -77,6 +84,7 @@ const STATUS_STEP_MAP: Record<string, number> = {
     CurrencyFormatPipe,
     StatusFormatPipe,
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './admin-order-detail.component.html',
 })
 export class AdminOrderDetailComponent {
@@ -121,7 +129,8 @@ export class AdminOrderDetailComponent {
 
   private loadOrder(id: number) {
     this.loading.set(true);
-    this.http.get<Order>(ApiEndpoints.staffOrders.detail(id))
+    this.http
+      .get<Order>(ApiEndpoints.staffOrders.detail(id))
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res) => {
@@ -169,7 +178,8 @@ export class AdminOrderDetailComponent {
         if (status === 'SHIPPED' && this.trackingCode()) {
           body['trackingCode'] = this.trackingCode();
         }
-        this.http.post(ApiEndpoints.staffOrders.transition(subOrderId), body)
+        this.http
+          .post(ApiEndpoints.staffOrders.transition(subOrderId), body)
           .pipe(takeUntilDestroyed(this.destroyRef))
           .subscribe({
             next: () => {

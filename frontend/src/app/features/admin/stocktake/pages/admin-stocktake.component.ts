@@ -1,4 +1,4 @@
-import { Component, inject, signal, DestroyRef } from '@angular/core';
+import { Component, inject, signal, DestroyRef, ChangeDetectionStrategy } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
@@ -48,10 +48,15 @@ interface VarianceRow {
     HlmTableHeadDirective,
     HlmTableCellDirective,
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <div class="mb-6">
-      <h1 class="text-2xl font-bold tracking-tight text-foreground">Kiểm kê kho & Đối soát chênh lệch</h1>
-      <p class="text-muted-foreground text-sm mt-1">Ghi nhận số lượng thực tế tại kho và phân tích độ lệch so với dữ liệu hệ thống</p>
+      <h1 class="text-2xl font-bold tracking-tight text-foreground">
+        Kiểm kê kho & Đối soát chênh lệch
+      </h1>
+      <p class="text-muted-foreground text-sm mt-1">
+        Ghi nhận số lượng thực tế tại kho và phân tích độ lệch so với dữ liệu hệ thống
+      </p>
     </div>
 
     <!-- Phiên kiểm kê kho -->
@@ -62,7 +67,11 @@ interface VarianceRow {
           <h2 class="text-sm font-semibold text-foreground">Phiên kiểm kê kho</h2>
         </div>
         @if (sessionId()) {
-          <span hlmBadge variant="outline" class="border-primary bg-primary/10 text-primary text-xs px-2.5 py-0.5 rounded-full font-mono font-bold">
+          <span
+            hlmBadge
+            variant="outline"
+            class="border-primary bg-primary/10 text-primary text-xs px-2.5 py-0.5 rounded-full font-mono font-bold"
+          >
             Phiên đang mở #{{ sessionId() }}
           </span>
         }
@@ -131,8 +140,12 @@ interface VarianceRow {
             <tbody hlmTableBody>
               @for (r of rows(); track r.skuId) {
                 <tr hlmTableRow class="border-b border-border/50 hover:bg-muted/20">
-                  <td hlmTableCell class="font-mono font-medium text-foreground">#SKU-{{ r.skuId }}</td>
-                  <td hlmTableCell class="text-right font-bold text-primary">{{ r.countedQuantity }}</td>
+                  <td hlmTableCell class="font-mono font-medium text-foreground">
+                    #SKU-{{ r.skuId }}
+                  </td>
+                  <td hlmTableCell class="text-right font-bold text-primary">
+                    {{ r.countedQuantity }}
+                  </td>
                 </tr>
               } @empty {
                 <tr>
@@ -151,7 +164,9 @@ interface VarianceRow {
       <!-- Bảng đối soát chênh lệch -->
       <div class="bg-card rounded-xl border border-border/80 shadow-2xs overflow-hidden">
         <div class="p-4 border-b border-border bg-muted/20">
-          <h2 class="text-sm font-semibold text-foreground">Bảng đối soát chênh lệch tồn kho (Hệ thống vs Thực đếm)</h2>
+          <h2 class="text-sm font-semibold text-foreground">
+            Bảng đối soát chênh lệch tồn kho (Hệ thống vs Thực đếm)
+          </h2>
         </div>
 
         @if (loading()) {
@@ -174,20 +189,38 @@ interface VarianceRow {
                 <tbody hlmTableBody>
                   @for (r of variances(); track r.sku_id) {
                     <tr hlmTableRow class="border-b border-border/50 hover:bg-muted/20">
-                      <td hlmTableCell class="font-mono font-semibold text-foreground">#SKU-{{ r.sku_id }}</td>
-                      <td hlmTableCell class="text-center font-medium text-foreground">{{ r.system_quantity }}</td>
-                      <td hlmTableCell class="text-center font-bold text-foreground">{{ r.counted_quantity }}</td>
+                      <td hlmTableCell class="font-mono font-semibold text-foreground">
+                        #SKU-{{ r.sku_id }}
+                      </td>
+                      <td hlmTableCell class="text-center font-medium text-foreground">
+                        {{ r.system_quantity }}
+                      </td>
+                      <td hlmTableCell class="text-center font-bold text-foreground">
+                        {{ r.counted_quantity }}
+                      </td>
                       <td hlmTableCell class="text-center">
                         @if (r.variance === 0) {
-                          <span hlmBadge variant="outline" class="border-emerald-400 bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400 text-[11px] px-2.5 py-0.5 rounded-full font-medium">
+                          <span
+                            hlmBadge
+                            variant="outline"
+                            class="border-emerald-400 bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400 text-[11px] px-2.5 py-0.5 rounded-full font-medium"
+                          >
                             Khớp (0)
                           </span>
                         } @else if (r.variance > 0) {
-                          <span hlmBadge variant="outline" class="border-amber-400 bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400 text-[11px] px-2.5 py-0.5 rounded-full font-medium">
+                          <span
+                            hlmBadge
+                            variant="outline"
+                            class="border-amber-400 bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400 text-[11px] px-2.5 py-0.5 rounded-full font-medium"
+                          >
                             Thừa (+{{ r.variance }})
                           </span>
                         } @else {
-                          <span hlmBadge variant="outline" class="border-rose-400 bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-400 text-[11px] px-2.5 py-0.5 rounded-full font-medium">
+                          <span
+                            hlmBadge
+                            variant="outline"
+                            class="border-rose-400 bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-400 text-[11px] px-2.5 py-0.5 rounded-full font-medium"
+                          >
                             Thiếu ({{ r.variance }})
                           </span>
                         }
@@ -232,54 +265,66 @@ export class AdminStocktakeComponent {
       this.toast.error('Vui lòng nhập mã SKU và số lượng hợp lệ (>= 0)');
       return;
     }
-    this.rows.update((arr) => [...arr, { skuId: this.skuId as number, countedQuantity: this.counted as number }]);
+    this.rows.update((arr) => [
+      ...arr,
+      { skuId: this.skuId as number, countedQuantity: this.counted as number },
+    ]);
     this.skuId = null;
     this.counted = null;
   }
 
   start() {
-    this.http.post<{ id: number }>(ApiEndpoints.stockTakes.base, { items: this.rows() }).pipe(
-      catchError(() => of(null)),
-      takeUntilDestroyed(this.destroyRef),
-    ).subscribe((s) => {
-      if (s) {
-        this.sessionId.set(s.id);
-        this.toast.success(`Đã khởi tạo phiên kiểm kê #${s.id}`);
-        this.loadVariances(s.id);
-      } else {
-        this.toast.error('Khởi tạo phiên kiểm kê thất bại');
-      }
-    });
+    this.http
+      .post<{ id: number }>(ApiEndpoints.stockTakes.base, { items: this.rows() })
+      .pipe(
+        catchError(() => of(null)),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe((s) => {
+        if (s) {
+          this.sessionId.set(s.id);
+          this.toast.success(`Đã khởi tạo phiên kiểm kê #${s.id}`);
+          this.loadVariances(s.id);
+        } else {
+          this.toast.error('Khởi tạo phiên kiểm kê thất bại');
+        }
+      });
   }
 
   complete() {
     const id = this.sessionId();
     if (!id) return;
-    this.http.post(ApiEndpoints.stockTakes.complete(id), {}).pipe(
-      catchError(() => of(null)),
-      takeUntilDestroyed(this.destroyRef),
-    ).subscribe((s) => {
-      if (s) {
-        this.toast.success('Đã hoàn tất phiên kiểm kê và chốt số liệu');
-        this.rows.set([]);
-        this.loadVariances(id);
-      } else {
-        this.toast.error('Hoàn tất phiên kiểm kê thất bại');
-      }
-    });
+    this.http
+      .post(ApiEndpoints.stockTakes.complete(id), {})
+      .pipe(
+        catchError(() => of(null)),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe((s) => {
+        if (s) {
+          this.toast.success('Đã hoàn tất phiên kiểm kê và chốt số liệu');
+          this.rows.set([]);
+          this.loadVariances(id);
+        } else {
+          this.toast.error('Hoàn tất phiên kiểm kê thất bại');
+        }
+      });
   }
 
   loadVariances(id: number) {
     this.loading.set(true);
-    this.http.get<VarianceRow[]>(ApiEndpoints.stockTakes.variances(id)).pipe(
-      catchError(() => of([] as VarianceRow[])),
-      takeUntilDestroyed(this.destroyRef),
-    ).subscribe({
-      next: (rows) => {
-        this.variances.set(Array.isArray(rows) ? rows : []);
-        this.loading.set(false);
-      },
-      error: () => this.loading.set(false),
-    });
+    this.http
+      .get<VarianceRow[]>(ApiEndpoints.stockTakes.variances(id))
+      .pipe(
+        catchError(() => of([] as VarianceRow[])),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe({
+        next: (rows) => {
+          this.variances.set(Array.isArray(rows) ? rows : []);
+          this.loading.set(false);
+        },
+        error: () => this.loading.set(false),
+      });
   }
 }

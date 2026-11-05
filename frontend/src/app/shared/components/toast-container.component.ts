@@ -1,13 +1,23 @@
-import { Component, inject } from '@angular/core';
-import { LucideAngularModule, CheckCircle2, AlertCircle, AlertTriangle, Info, X } from 'lucide-angular';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
+import {
+  LucideAngularModule,
+  CheckCircle2,
+  AlertCircle,
+  AlertTriangle,
+  Info,
+  X,
+} from 'lucide-angular';
 import { ToastService } from '@core/services/toast.service';
 
 @Component({
   selector: 'app-toast-container',
   standalone: true,
   imports: [LucideAngularModule],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
-    <div class="fixed top-4 right-4 z-[9999] flex flex-col gap-2 max-w-sm w-full pointer-events-none p-2">
+    <div
+      class="fixed top-4 right-4 z-[9999] flex flex-col gap-2 max-w-sm w-full pointer-events-none p-2"
+    >
       @for (t of toastService.toasts(); track t.id) {
         <div
           class="pointer-events-auto flex items-start gap-3 p-3.5 rounded-xl border shadow-lg backdrop-blur-md transition-all duration-300 animate-in fade-in slide-in-from-top-2"
@@ -26,13 +36,22 @@ import { ToastService } from '@core/services/toast.service';
         >
           @switch (t.type) {
             @case ('success') {
-              <lucide-icon [img]="CheckCircleIcon" class="size-5 shrink-0 text-emerald-500 mt-0.5" />
+              <lucide-icon
+                [img]="CheckCircleIcon"
+                class="size-5 shrink-0 text-emerald-500 mt-0.5"
+              />
             }
             @case ('error') {
-              <lucide-icon [img]="AlertCircleIcon" class="size-5 shrink-0 text-destructive mt-0.5" />
+              <lucide-icon
+                [img]="AlertCircleIcon"
+                class="size-5 shrink-0 text-destructive mt-0.5"
+              />
             }
             @case ('warning') {
-              <lucide-icon [img]="AlertTriangleIcon" class="size-5 shrink-0 text-amber-500 mt-0.5" />
+              <lucide-icon
+                [img]="AlertTriangleIcon"
+                class="size-5 shrink-0 text-amber-500 mt-0.5"
+              />
             }
             @default {
               <lucide-icon [img]="InfoIcon" class="size-5 shrink-0 text-primary mt-0.5" />

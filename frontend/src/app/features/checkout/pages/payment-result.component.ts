@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { LucideAngularModule, CheckCircle2, Clock, XCircle, ArrowRight } from 'lucide-angular';
 import { HlmButtonDirective } from '@shared/ui/button';
@@ -9,6 +9,7 @@ import { map } from 'rxjs';
   selector: 'app-payment-result',
   standalone: true,
   imports: [RouterLink, LucideAngularModule, HlmButtonDirective],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './payment-result.component.html',
 })
 export class PaymentResultComponent {
@@ -20,9 +21,7 @@ export class PaymentResultComponent {
   readonly ArrowRightIcon = ArrowRight;
 
   isSuccess = toSignal(
-    this.route.queryParams.pipe(
-      map((params) => params['vnp_ResponseCode'] === '00'),
-    ),
+    this.route.queryParams.pipe(map((params) => params['vnp_ResponseCode'] === '00')),
     { initialValue: false },
   );
 
@@ -33,8 +32,7 @@ export class PaymentResultComponent {
     { initialValue: false },
   );
 
-  orderId = toSignal(
-    this.route.queryParams.pipe(map((params) => params['orderId'])),
-    { initialValue: '' },
-  );
+  orderId = toSignal(this.route.queryParams.pipe(map((params) => params['orderId'])), {
+    initialValue: '',
+  });
 }

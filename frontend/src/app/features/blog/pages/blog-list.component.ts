@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { LucideAngularModule, ChevronRight } from 'lucide-angular';
 import { FallbackImageDirective } from '@shared/directives/fallback-image.directive';
@@ -9,6 +9,7 @@ import { BlogPost } from '@core/models/common.model';
   selector: 'app-blog-list',
   standalone: true,
   imports: [RouterLink, LucideAngularModule, FallbackImageDirective],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './blog-list.component.html',
 })
 export class BlogListComponent {

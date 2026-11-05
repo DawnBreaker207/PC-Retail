@@ -6,6 +6,7 @@ import {
   DestroyRef,
   PLATFORM_ID,
   OnDestroy,
+  ChangeDetectionStrategy,
 } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -32,6 +33,7 @@ import { switchMap, finalize } from 'rxjs';
     ShippingFormComponent,
     OrderReviewComponent,
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './checkout.component.html',
 })
 export class CheckoutComponent implements OnDestroy {
@@ -57,7 +59,12 @@ export class CheckoutComponent implements OnDestroy {
     this.store.loadCart();
     effect(() => {
       if (!this.isBrowser) return;
-      if (!this.orderPlaced && !this.isPlacing() && !this.store.isLoading() && this.selectedItems().length === 0) {
+      if (
+        !this.orderPlaced &&
+        !this.isPlacing() &&
+        !this.store.isLoading() &&
+        this.selectedItems().length === 0
+      ) {
         this.router?.navigate(['/cart']);
       }
     });
@@ -110,13 +117,11 @@ export class CheckoutComponent implements OnDestroy {
           return this.checkoutService.initiatePayment(res.id);
         }),
         finalize(() => this.isPlacing.set(false)),
-        takeUntilDestroyed(this.destroyRef)
+        takeUntilDestroyed(this.destroyRef),
       )
       .subscribe({
         next: () => {
-          const ok = window.confirm(
-            'Mô phỏng thanh toán VNPay\n\nOK = Thành công\nHuỷ = Thất bại'
-          );
+          const ok = window.confirm('Mô phỏng thanh toán VNPay\n\nOK = Thành công\nHuỷ = Thất bại');
           const code = ok ? '00' : '01';
           window.location.href = `/checkout/result?orderId=${this.createdOrderId}&vnp_ResponseCode=${code}&vnp_TransactionNo=MOCK${Date.now()}`;
         },
@@ -139,7 +144,7 @@ export class CheckoutComponent implements OnDestroy {
       })
       .pipe(
         finalize(() => this.isPlacing.set(false)),
-        takeUntilDestroyed(this.destroyRef)
+        takeUntilDestroyed(this.destroyRef),
       )
       .subscribe({
         next: (res) => {

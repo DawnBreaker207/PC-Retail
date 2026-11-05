@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed } from '@angular/core';
+import { Component, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import {
   LucideAngularModule,
@@ -26,6 +26,7 @@ import { FallbackImageDirective } from '@shared/directives/fallback-image.direct
   selector: 'app-category-sidebar',
   imports: [RouterLink, LucideAngularModule, FallbackImageDirective],
   templateUrl: './category-sidebar.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './category-sidebar.component.css',
 })
 export class CategorySidebarComponent {
@@ -45,16 +46,16 @@ export class CategorySidebarComponent {
   });
 
   private iconMap: Record<string, LucideIconData> = {
-    'laptop': Laptop,
+    laptop: Laptop,
     'laptop-gaming': Laptop,
-    'pc': Monitor,
+    pc: Monitor,
     'linh-kien': Cpu,
     'case-nguon-tan': HardDrive,
     'o-cung-ram': Database,
     'loa-micro-webcam': Headphones,
     'man-hinh': Tv,
     'ban-phim': Keyboard,
-    'chuot': Mouse,
+    chuot: Mouse,
     'tai-nghe': Headphones,
   };
 

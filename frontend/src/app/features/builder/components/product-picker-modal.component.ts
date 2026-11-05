@@ -1,4 +1,12 @@
-import { Component, inject, input, output, signal, OnInit } from '@angular/core';
+import {
+  Component,
+  inject,
+  input,
+  output,
+  signal,
+  OnInit,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
@@ -28,6 +36,7 @@ import { MockDataService } from '@core/services/mock-data.service';
     CurrencyFormatPipe,
   ],
   templateUrl: './product-picker-modal.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './product-picker-modal.component.css',
 })
 export class ProductPickerModalComponent implements OnInit {
@@ -75,16 +84,45 @@ export class ProductPickerModalComponent implements OnInit {
 
   private fallbackMock(slot: string) {
     const s = slot.toUpperCase();
-    this.mock.getProducts({ size: '100' }).subscribe(res => {
+    this.mock.getProducts({ size: '100' }).subscribe((res) => {
       const allSkus = res.content || [];
-      const filtered = allSkus.filter(item => {
+      const filtered = allSkus.filter((item) => {
         const n = item.name.toUpperCase();
-        if (s.includes('CPU')) return n.includes('CORE') || n.includes('RYZEN') || n.includes('INTEL') || n.includes('AMD');
-        if (s.includes('MAIN')) return n.includes('MAIN') || n.includes('B760') || n.includes('Z790') || n.includes('B650') || n.includes('ASUS');
-        if (s.includes('RAM')) return n.includes('RAM') || n.includes('DDR4') || n.includes('DDR5') || n.includes('CORSAIR');
-        if (s.includes('GPU') || s.includes('VGA')) return n.includes('RTX') || n.includes('VGA') || n.includes('GEFORCE') || n.includes('RADEON');
-        if (s.includes('PSU')) return n.includes('NGUỒN') || n.includes('PSU') || n.includes('850W') || n.includes('750W') || n.includes('650W');
-        if (s.includes('STORAGE') || s.includes('SSD')) return n.includes('SSD') || n.includes('NVME') || n.includes('SAMSUNG') || n.includes('KINGSTON');
+        if (s.includes('CPU'))
+          return (
+            n.includes('CORE') || n.includes('RYZEN') || n.includes('INTEL') || n.includes('AMD')
+          );
+        if (s.includes('MAIN'))
+          return (
+            n.includes('MAIN') ||
+            n.includes('B760') ||
+            n.includes('Z790') ||
+            n.includes('B650') ||
+            n.includes('ASUS')
+          );
+        if (s.includes('RAM'))
+          return (
+            n.includes('RAM') || n.includes('DDR4') || n.includes('DDR5') || n.includes('CORSAIR')
+          );
+        if (s.includes('GPU') || s.includes('VGA'))
+          return (
+            n.includes('RTX') || n.includes('VGA') || n.includes('GEFORCE') || n.includes('RADEON')
+          );
+        if (s.includes('PSU'))
+          return (
+            n.includes('NGUỒN') ||
+            n.includes('PSU') ||
+            n.includes('850W') ||
+            n.includes('750W') ||
+            n.includes('650W')
+          );
+        if (s.includes('STORAGE') || s.includes('SSD'))
+          return (
+            n.includes('SSD') ||
+            n.includes('NVME') ||
+            n.includes('SAMSUNG') ||
+            n.includes('KINGSTON')
+          );
         return true;
       });
       this.products.set(filtered.length > 0 ? filtered : allSkus.slice(0, 10));

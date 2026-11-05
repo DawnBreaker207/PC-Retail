@@ -1,4 +1,4 @@
-import { Component, inject, DestroyRef, signal } from '@angular/core';
+import { Component, inject, DestroyRef, signal, ChangeDetectionStrategy } from '@angular/core';
 import { DatePipe, CommonModule } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpClient, HttpParams } from '@angular/common/http';
@@ -17,7 +17,7 @@ import {
   HlmTableBodyDirective,
   HlmTableRowDirective,
   HlmTableHeadDirective,
-  HlmTableCellDirective
+  HlmTableCellDirective,
 } from '@shared/ui/table';
 import {
   HlmDialogOverlayDirective,
@@ -25,7 +25,7 @@ import {
   HlmDialogHeaderDirective,
   HlmDialogTitleDirective,
   HlmDialogDescriptionDirective,
-  HlmDialogFooterDirective
+  HlmDialogFooterDirective,
 } from '@shared/ui/dialog';
 import {
   LucideAngularModule,
@@ -39,7 +39,7 @@ import {
   X,
   Loader2,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
 } from 'lucide-angular';
 
 interface InventoryItem {
@@ -90,8 +90,9 @@ interface InventoryTransaction {
     HlmDialogTitleDirective,
     HlmDialogDescriptionDirective,
     HlmDialogFooterDirective,
-    LucideAngularModule
+    LucideAngularModule,
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './inventory-list.component.html',
 })
 export class InventoryListComponent {
@@ -164,14 +165,13 @@ export class InventoryListComponent {
 
   private loadData() {
     this.loading.set(true);
-    let params = new HttpParams()
-      .set('page', this.page)
-      .set('size', this.size);
+    let params = new HttpParams().set('page', this.page).set('size', this.size);
     if (this.search.trim()) params = params.set('q', this.search.trim());
     if (this.brandFilter()) params = params.set('brand', this.brandFilter());
     if (this.lowStockOnly()) params = params.set('lowStock', 'true');
 
-    this.http.get<InventoryResponse>(ApiEndpoints.inventory.base, { params })
+    this.http
+      .get<InventoryResponse>(ApiEndpoints.inventory.base, { params })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res) => {
@@ -200,11 +200,12 @@ export class InventoryListComponent {
     if (!item || isNaN(qty) || qty < 1) return;
 
     this.restockSubmitting.set(true);
-    this.http.put(ApiEndpoints.inventory.restock(item.skuId), {
-      quantity: qty,
-      unitCost: 100000,
-      note: this.restockNote,
-    })
+    this.http
+      .put(ApiEndpoints.inventory.restock(item.skuId), {
+        quantity: qty,
+        unitCost: 100000,
+        note: this.restockNote,
+      })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
@@ -225,7 +226,8 @@ export class InventoryListComponent {
     this.historyLoading.set(true);
     this.historyTransactions.set([]);
 
-    this.http.get<{ content: InventoryTransaction[] }>(ApiEndpoints.inventory.transactions(item.skuId))
+    this.http
+      .get<{ content: InventoryTransaction[] }>(ApiEndpoints.inventory.transactions(item.skuId))
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res) => {

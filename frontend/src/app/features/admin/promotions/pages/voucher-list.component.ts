@@ -1,4 +1,4 @@
-import { Component, inject, DestroyRef, signal } from '@angular/core';
+import { Component, inject, DestroyRef, signal, ChangeDetectionStrategy } from '@angular/core';
 import { DatePipe, NgClass } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -11,7 +11,7 @@ import {
   ChevronRight,
   AlertCircle,
   Loader2,
-  Ticket
+  Ticket,
 } from 'lucide-angular';
 import { HlmButtonDirective } from '@shared/ui/button';
 import { HlmBadgeDirective } from '@shared/ui/badge';
@@ -88,6 +88,7 @@ const DISCOUNT_LABEL: Record<string, string> = {
     HlmDialogFooterDirective,
     VoucherFormComponent,
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './voucher-list.component.html',
 })
 export class VoucherListComponent {
@@ -122,11 +123,10 @@ export class VoucherListComponent {
 
   private loadData() {
     this.loading.set(true);
-    const params = new HttpParams()
-      .set('page', this.page - 1)
-      .set('size', this.size);
+    const params = new HttpParams().set('page', this.page - 1).set('size', this.size);
 
-    this.http.get<VoucherResponse>(ApiEndpoints.promotion.vouchers, { params })
+    this.http
+      .get<VoucherResponse>(ApiEndpoints.promotion.vouchers, { params })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res) => {
@@ -145,18 +145,21 @@ export class VoucherListComponent {
     if (now < from) {
       return {
         label: 'Sắp diễn ra',
-        badgeClass: 'border-amber-400 bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400',
+        badgeClass:
+          'border-amber-400 bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400',
       };
     }
     if (now > to || v.remainingQuantity <= 0) {
       return {
         label: 'Hết hạn',
-        badgeClass: 'border-slate-300 bg-slate-50 text-slate-700 dark:bg-slate-900/40 dark:text-slate-400',
+        badgeClass:
+          'border-slate-300 bg-slate-50 text-slate-700 dark:bg-slate-900/40 dark:text-slate-400',
       };
     }
     return {
       label: 'Đang hoạt động',
-      badgeClass: 'border-emerald-400 bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400',
+      badgeClass:
+        'border-emerald-400 bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400',
     };
   }
 
@@ -190,7 +193,8 @@ export class VoucherListComponent {
   executeDelete() {
     const v = this.deleteTarget();
     if (!v) return;
-    this.http.delete(ApiEndpoints.promotion.voucherDetail(v.id))
+    this.http
+      .delete(ApiEndpoints.promotion.voucherDetail(v.id))
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
@@ -222,6 +226,10 @@ export class VoucherListComponent {
     if (v.discountType === 'FIXED') {
       return v.discountValue.toLocaleString('vi-VN') + '₫';
     }
-    return v.discountValue + '%' + (v.maxDiscountAmount ? ` (tối đa ${v.maxDiscountAmount.toLocaleString('vi-VN')}₫)` : '');
+    return (
+      v.discountValue +
+      '%' +
+      (v.maxDiscountAmount ? ` (tối đa ${v.maxDiscountAmount.toLocaleString('vi-VN')}₫)` : '')
+    );
   }
 }

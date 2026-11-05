@@ -1,4 +1,12 @@
-import { Component, inject, DestroyRef, signal, OnInit, output } from '@angular/core';
+import {
+  Component,
+  inject,
+  DestroyRef,
+  signal,
+  OnInit,
+  output,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpClient } from '@angular/common/http';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -10,12 +18,8 @@ import { ApiEndpoints } from '@core/api/api.endpoints';
 @Component({
   selector: 'app-voucher-form',
   standalone: true,
-  imports: [
-    FormsModule,
-    ReactiveFormsModule,
-    HlmButtonDirective,
-    HlmInputDirective,
-  ],
+  imports: [FormsModule, ReactiveFormsModule, HlmButtonDirective, HlmInputDirective],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './voucher-form.component.html',
 })
 export class VoucherFormComponent implements OnInit {
@@ -42,14 +46,22 @@ export class VoucherFormComponent implements OnInit {
   });
 
   ngOnInit() {
-    this.form.get('validFrom')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => this.validateDates());
-    this.form.get('validTo')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => this.validateDates());
+    this.form
+      .get('validFrom')
+      ?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.validateDates());
+    this.form
+      .get('validTo')
+      ?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.validateDates());
   }
 
   onCodeInput() {
     const control = this.form.get('code');
     if (control?.value) {
-      control.setValue(control.value.toUpperCase().replace(/[^A-Z0-9_-]/g, ''), { emitEvent: false });
+      control.setValue(control.value.toUpperCase().replace(/[^A-Z0-9_-]/g, ''), {
+        emitEvent: false,
+      });
     }
   }
 
@@ -80,7 +92,8 @@ export class VoucherFormComponent implements OnInit {
       discountType: this.isFreeship() ? 'FIXED' : this.form.value.discountType,
     };
 
-    this.http.post(ApiEndpoints.promotion.vouchers, body)
+    this.http
+      .post(ApiEndpoints.promotion.vouchers, body)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {

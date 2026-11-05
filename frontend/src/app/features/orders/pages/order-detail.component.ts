@@ -1,4 +1,11 @@
-﻿import { Component, inject, OnInit, signal, DestroyRef } from '@angular/core';
+﻿import {
+  Component,
+  inject,
+  OnInit,
+  signal,
+  DestroyRef,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { catchError, of } from 'rxjs';
 import { ActivatedRoute, RouterLink } from '@angular/router';
@@ -51,6 +58,7 @@ const STATUS_STEP_MAP: Record<string, number> = {
     CurrencyFormatPipe,
     ReviewFormComponent,
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './order-detail.component.html',
 })
 export class OrderDetailComponent implements OnInit {
@@ -88,24 +96,28 @@ export class OrderDetailComponent implements OnInit {
 
   loadOrder(id: number) {
     this.isLoading.set(true);
-    this.orderService.getOrderDetail(id).pipe(
-      takeUntilDestroyed(this.destroyRef),
-    ).subscribe({
-      next: (res) => {
-        this.order.set(res);
-        this.isLoading.set(false);
-        const subId = res?.subOrders[0]?.id;
-        if (subId) this.loadReturn(subId);
-      },
-      error: () => this.isLoading.set(false),
-    });
+    this.orderService
+      .getOrderDetail(id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res) => {
+          this.order.set(res);
+          this.isLoading.set(false);
+          const subId = res?.subOrders[0]?.id;
+          if (subId) this.loadReturn(subId);
+        },
+        error: () => this.isLoading.set(false),
+      });
   }
 
   private loadReturn(subOrderId: number) {
-    this.orderService.getReturnBySubOrder(subOrderId).pipe(
-      takeUntilDestroyed(this.destroyRef),
-      catchError(() => of(null)),
-    ).subscribe((res) => this.returnInfo.set(res as AdminReturnRequest | null));
+    this.orderService
+      .getReturnBySubOrder(subOrderId)
+      .pipe(
+        takeUntilDestroyed(this.destroyRef),
+        catchError(() => of(null)),
+      )
+      .subscribe((res) => this.returnInfo.set(res as AdminReturnRequest | null));
   }
 
   disputeReturn() {
@@ -114,18 +126,20 @@ export class OrderDetailComponent implements OnInit {
     if (!r || !subId) return;
     const note = window.prompt('Lý do khiếu nại:');
     if (!note) return;
-    this.orderService.disputeReturn(r.id, note).pipe(
-      takeUntilDestroyed(this.destroyRef),
-    ).subscribe(() => this.loadReturn(subId));
+    this.orderService
+      .disputeReturn(r.id, note)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.loadReturn(subId));
   }
 
   cancelOrder() {
     const o = this.order();
     if (!o) return;
     if (!window.confirm('Bạn có chắc chắn muốn hủy đơn hàng này?')) return;
-    this.orderService.cancelOrder(o.id).pipe(
-      takeUntilDestroyed(this.destroyRef),
-    ).subscribe(() => this.loadOrder(o.id));
+    this.orderService
+      .cancelOrder(o.id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.loadOrder(o.id));
   }
 
   get currentStep(): number {
@@ -148,12 +162,13 @@ export class OrderDetailComponent implements OnInit {
     if (!o || !subId) return;
     const reason = window.prompt('Lý do yêu cầu đổi trả / hoàn tiền:');
     if (!reason) return;
-    this.orderService.requestReturn(o.id, subId, reason).pipe(
-      takeUntilDestroyed(this.destroyRef),
-    ).subscribe(() => {
-      this.loadOrder(o.id);
-      this.loadReturn(subId);
-    });
+    this.orderService
+      .requestReturn(o.id, subId, reason)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
+        this.loadOrder(o.id);
+        this.loadReturn(subId);
+      });
   }
 
   openReviewForm(item: OrderItem) {
@@ -162,4 +177,3 @@ export class OrderDetailComponent implements OnInit {
 
   protected readonly DateHelper = DateHelper;
 }
-

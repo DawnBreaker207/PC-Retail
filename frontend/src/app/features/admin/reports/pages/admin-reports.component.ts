@@ -1,4 +1,4 @@
-import { Component, inject, signal, DestroyRef } from '@angular/core';
+import { Component, inject, signal, DestroyRef, ChangeDetectionStrategy } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
@@ -39,10 +39,13 @@ import { ApiEndpoints } from '@core/api/api.endpoints';
     HlmTableCellDirective,
     CurrencyFormatPipe,
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <div class="mb-6">
       <h1 class="text-2xl font-bold tracking-tight text-foreground">Báo cáo & Phân tích</h1>
-      <p class="text-muted-foreground text-sm mt-1">Theo dõi doanh thu bán hàng và sản phẩm bán chạy theo mốc thời gian</p>
+      <p class="text-muted-foreground text-sm mt-1">
+        Theo dõi doanh thu bán hàng và sản phẩm bán chạy theo mốc thời gian
+      </p>
     </div>
 
     <!-- Date Range & Actions Filter -->
@@ -50,21 +53,11 @@ import { ApiEndpoints } from '@core/api/api.endpoints';
       <div class="flex flex-wrap items-center gap-3">
         <div class="flex items-center gap-2">
           <label class="text-xs font-medium text-foreground">Từ ngày:</label>
-          <input
-            hlmInput
-            type="date"
-            [(ngModel)]="fromDate"
-            class="h-9 px-3 text-xs w-36"
-          />
+          <input hlmInput type="date" [(ngModel)]="fromDate" class="h-9 px-3 text-xs w-36" />
         </div>
         <div class="flex items-center gap-2">
           <label class="text-xs font-medium text-foreground">Đến ngày:</label>
-          <input
-            hlmInput
-            type="date"
-            [(ngModel)]="toDate"
-            class="h-9 px-3 text-xs w-36"
-          />
+          <input hlmInput type="date" [(ngModel)]="toDate" class="h-9 px-3 text-xs w-36" />
         </div>
 
         <button
@@ -130,7 +123,9 @@ import { ApiEndpoints } from '@core/api/api.endpoints';
                 @for (r of revenue(); track r.day) {
                   <tr hlmTableRow class="border-b border-border/60 hover:bg-muted/20">
                     <td hlmTableCell class="font-medium text-foreground">{{ r.day }}</td>
-                    <td hlmTableCell class="text-right font-bold text-primary">{{ r.revenue | currencyFormat }}</td>
+                    <td hlmTableCell class="text-right font-bold text-primary">
+                      {{ r.revenue | currencyFormat }}
+                    </td>
                   </tr>
                 } @empty {
                   <tr>
@@ -163,13 +158,19 @@ import { ApiEndpoints } from '@core/api/api.endpoints';
             <tbody hlmTableBody>
               @for (r of top(); track r.sku_id) {
                 <tr hlmTableRow class="border-b border-border/60 hover:bg-muted/20">
-                  <td hlmTableCell class="font-mono font-semibold text-foreground">#SKU-{{ r.sku_id }}</td>
+                  <td hlmTableCell class="font-mono font-semibold text-foreground">
+                    #SKU-{{ r.sku_id }}
+                  </td>
                   <td hlmTableCell class="text-center">
-                    <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-primary/10 text-primary">
+                    <span
+                      class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-primary/10 text-primary"
+                    >
                       {{ r.qty }}
                     </span>
                   </td>
-                  <td hlmTableCell class="text-right font-bold text-primary">{{ r.revenue | currencyFormat }}</td>
+                  <td hlmTableCell class="text-right font-bold text-primary">
+                    {{ r.revenue | currencyFormat }}
+                  </td>
                 </tr>
               } @empty {
                 <tr>
@@ -213,7 +214,8 @@ export class AdminReportsComponent {
       .set('from', new Date(this.fromDate).toISOString())
       .set('to', new Date(this.toDate).toISOString());
 
-    this.http.get<{ day: string; revenue: number }[]>(ApiEndpoints.reports.revenue, { params })
+    this.http
+      .get<{ day: string; revenue: number }[]>(ApiEndpoints.reports.revenue, { params })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res) => {
@@ -223,7 +225,10 @@ export class AdminReportsComponent {
         error: () => this.loading.set(false),
       });
 
-    this.http.get<{ sku_id: number; qty: number; revenue: number }[]>(ApiEndpoints.reports.topProducts, { params })
+    this.http
+      .get<{ sku_id: number; qty: number; revenue: number }[]>(ApiEndpoints.reports.topProducts, {
+        params,
+      })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res) => this.top.set(Array.isArray(res) ? res : []),
@@ -237,16 +242,17 @@ export class AdminReportsComponent {
       .set('to', new Date(this.toDate).toISOString())
       .set('type', type);
 
-    this.http.get(ApiEndpoints.reports.export, { params, responseType: 'text' }).pipe(
-      takeUntilDestroyed(this.destroyRef),
-    ).subscribe((csv) => {
-      const blob = new Blob([csv], { type: 'text/csv' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${type}.csv`;
-      a.click();
-      URL.revokeObjectURL(url);
-    });
+    this.http
+      .get(ApiEndpoints.reports.export, { params, responseType: 'text' })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((csv) => {
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${type}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+      });
   }
 }

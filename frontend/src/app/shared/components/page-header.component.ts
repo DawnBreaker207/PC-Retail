@@ -1,4 +1,4 @@
-import { Component, input } from '@angular/core';
+import { Component, input, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { LucideAngularModule, ChevronRight } from 'lucide-angular';
 
@@ -6,6 +6,7 @@ import { LucideAngularModule, ChevronRight } from 'lucide-angular';
   selector: 'app-page-header',
   imports: [RouterLink, LucideAngularModule],
   templateUrl: './page-header.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './page-header.component.css',
 })
 export class PageHeaderComponent {

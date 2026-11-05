@@ -1,4 +1,11 @@
-import { Component, inject, DestroyRef, signal, computed } from '@angular/core';
+import {
+  Component,
+  inject,
+  DestroyRef,
+  signal,
+  computed,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { BuilderService } from '../services/builder.service';
@@ -11,6 +18,7 @@ import { LoadingSpinnerComponent } from '@shared/components/loading-spinner.comp
   selector: 'app-custom-build',
   imports: [SlotListComponent, BuildSummaryComponent, LoadingSpinnerComponent],
   templateUrl: './custom-build.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './custom-build.component.css',
 })
 export class CustomBuildComponent {

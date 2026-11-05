@@ -1,4 +1,12 @@
-import { Component, computed, inject, input, signal, OnInit } from '@angular/core';
+import {
+  Component,
+  computed,
+  inject,
+  input,
+  signal,
+  OnInit,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { LucideAngularModule, ChevronRight, Sparkles, Flame, ArrowRight } from 'lucide-angular';
 import { MockDataService } from '@core/services/mock-data.service';
@@ -11,6 +19,7 @@ import { splitLinkQuery } from '@shared/utils/link-query.util';
   selector: 'app-product-section',
   imports: [RouterLink, ProductCardComponent, LucideAngularModule],
   templateUrl: './product-section.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './product-section.component.css',
 })
 export class ProductSectionComponent implements OnInit {
@@ -60,7 +69,9 @@ export class ProductSectionComponent implements OnInit {
       this.filteredProducts.set(res);
     } else {
       const cat = this.sectionCategory();
-      this.filteredProducts.set(cat ? this.mock.getProductsByCategory(cat) : this.mock.getSectionProducts());
+      this.filteredProducts.set(
+        cat ? this.mock.getProductsByCategory(cat) : this.mock.getSectionProducts(),
+      );
     }
   }
 }

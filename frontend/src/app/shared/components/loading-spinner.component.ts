@@ -1,10 +1,11 @@
-import { Component, input } from '@angular/core';
+import { Component, input, ChangeDetectionStrategy } from '@angular/core';
 import { LucideAngularModule, Loader2 } from 'lucide-angular';
 
 @Component({
   selector: 'app-loading-spinner',
   imports: [LucideAngularModule],
   templateUrl: './loading-spinner.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './loading-spinner.component.css',
 })
 export class LoadingSpinnerComponent {

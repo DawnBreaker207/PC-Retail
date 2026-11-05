@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { catchError, of } from 'rxjs';
 import { ApiEndpoints } from '@core/api/api.endpoints';
@@ -21,12 +21,8 @@ interface VoucherItem {
 @Component({
   selector: 'app-promotions',
   standalone: true,
-  imports: [
-    RouterLink,
-    LucideAngularModule,
-    FlashSaleSectionComponent,
-    FallbackImageDirective,
-  ],
+  imports: [RouterLink, LucideAngularModule, FlashSaleSectionComponent, FallbackImageDirective],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './promotions.component.html',
 })
 export class PromotionsComponent {

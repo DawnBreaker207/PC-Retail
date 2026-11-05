@@ -1,16 +1,17 @@
-import { Component, inject, DestroyRef, signal, computed } from '@angular/core';
+import {
+  Component,
+  inject,
+  DestroyRef,
+  signal,
+  computed,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { DatePipe, NgClass } from '@angular/common';
 import { RouterLink, ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import {
-  LucideAngularModule,
-  Filter,
-  X,
-  Loader2,
-  ExternalLink,
-} from 'lucide-angular';
+import { LucideAngularModule, Filter, X, Loader2, ExternalLink } from 'lucide-angular';
 import { HlmButtonDirective } from '@shared/ui/button';
 import { HlmBadgeDirective } from '@shared/ui/badge';
 import {
@@ -55,6 +56,7 @@ const TYPE_LABEL: Record<string, string> = {
     HlmTableHeadDirective,
     HlmTableCellDirective,
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './admin-return-list.component.html',
 })
 export class AdminReturnListComponent {
@@ -111,11 +113,16 @@ export class AdminReturnListComponent {
     this.loading.set(true);
     let params = new HttpParams();
     if (this.statusFilter()) params = params.set('status', this.statusFilter());
-    this.http.get<AdminReturnRequest[]>(ApiEndpoints.admin.returns, { params })
+    this.http
+      .get<AdminReturnRequest[]>(ApiEndpoints.admin.returns, { params })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res) => {
-          this.returns.set(Array.isArray(res) ? res : (res as unknown as { content: AdminReturnRequest[] }).content ?? []);
+          this.returns.set(
+            Array.isArray(res)
+              ? res
+              : ((res as unknown as { content: AdminReturnRequest[] }).content ?? []),
+          );
           this.loading.set(false);
         },
         error: () => this.loading.set(false),

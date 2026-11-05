@@ -1,4 +1,11 @@
-import { Component, inject, signal, computed, DestroyRef } from '@angular/core';
+import {
+  Component,
+  inject,
+  signal,
+  computed,
+  DestroyRef,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -60,6 +67,7 @@ import { SkuRatingSummary } from '@core/models/common.model';
     LoadingSpinnerComponent,
   ],
   templateUrl: './product-detail.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './product-detail.component.css',
 })
 export class ProductDetailComponent {
@@ -102,11 +110,46 @@ export class ProductDetailComponent {
   selectedMonths = signal(12);
 
   showrooms = [
-    { city: 'Hà Nội', name: 'Showroom Đống Đa', address: '180 Thái Hà, P. Trung Liệt, Q. Đống Đa', phone: '024.7305.3456', stock: 'Còn hàng (3 máy)', inStock: true },
-    { city: 'Hà Nội', name: 'Showroom Hai Bà Trưng', address: '79 Trần Đại Nghĩa, P. Bách Khoa, Q. Hai Bà Trưng', phone: '024.7305.8899', stock: 'Còn hàng (2 máy)', inStock: true },
-    { city: 'TP. Hồ Chí Minh', name: 'Showroom Tân Bình', address: '78-80 Hoàng Hoa Thám, P.12, Q. Tân Bình', phone: '028.7108.1800', stock: 'Còn hàng (5 máy)', inStock: true },
-    { city: 'TP. Hồ Chí Minh', name: 'Showroom Quận 1', address: '90-92 Nguyễn Thị Minh Khai, P. Đa Kao, Q.1', phone: '028.7108.6688', stock: 'Còn hàng (2 máy)', inStock: true },
-    { city: 'TP. Hồ Chí Minh', name: 'Showroom Thủ Đức', address: '905 Kha Vạn Cân, P. Linh Chiểu, TP. Thủ Đức', phone: '028.7108.9922', stock: 'Liên hệ trước', inStock: false },
+    {
+      city: 'Hà Nội',
+      name: 'Showroom Đống Đa',
+      address: '180 Thái Hà, P. Trung Liệt, Q. Đống Đa',
+      phone: '024.7305.3456',
+      stock: 'Còn hàng (3 máy)',
+      inStock: true,
+    },
+    {
+      city: 'Hà Nội',
+      name: 'Showroom Hai Bà Trưng',
+      address: '79 Trần Đại Nghĩa, P. Bách Khoa, Q. Hai Bà Trưng',
+      phone: '024.7305.8899',
+      stock: 'Còn hàng (2 máy)',
+      inStock: true,
+    },
+    {
+      city: 'TP. Hồ Chí Minh',
+      name: 'Showroom Tân Bình',
+      address: '78-80 Hoàng Hoa Thám, P.12, Q. Tân Bình',
+      phone: '028.7108.1800',
+      stock: 'Còn hàng (5 máy)',
+      inStock: true,
+    },
+    {
+      city: 'TP. Hồ Chí Minh',
+      name: 'Showroom Quận 1',
+      address: '90-92 Nguyễn Thị Minh Khai, P. Đa Kao, Q.1',
+      phone: '028.7108.6688',
+      stock: 'Còn hàng (2 máy)',
+      inStock: true,
+    },
+    {
+      city: 'TP. Hồ Chí Minh',
+      name: 'Showroom Thủ Đức',
+      address: '905 Kha Vạn Cân, P. Linh Chiểu, TP. Thủ Đức',
+      phone: '028.7108.9922',
+      stock: 'Liên hệ trước',
+      inStock: false,
+    },
   ];
 
   installmentMonthly = computed(() => {
@@ -209,7 +252,7 @@ export class ProductDetailComponent {
       })
       .pipe(
         catchError(() => of(null)),
-        takeUntilDestroyed(this.destroyRef)
+        takeUntilDestroyed(this.destroyRef),
       )
       .subscribe();
   }
@@ -224,7 +267,7 @@ export class ProductDetailComponent {
       .get<Sku[]>(`${ApiEndpoints.aiSimilar}/${id}`)
       .pipe(
         catchError(() => this.mock.getRelatedProducts(slug)),
-        takeUntilDestroyed(this.destroyRef)
+        takeUntilDestroyed(this.destroyRef),
       )
       .subscribe((r) => (this.relatedProducts = Array.isArray(r) ? r : []));
   }

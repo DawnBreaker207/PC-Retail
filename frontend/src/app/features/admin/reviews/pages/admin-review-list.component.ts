@@ -1,15 +1,9 @@
-import { Component, inject, DestroyRef, signal } from '@angular/core';
+import { Component, inject, DestroyRef, signal, ChangeDetectionStrategy } from '@angular/core';
 import { DatePipe, NgClass } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import {
-  LucideAngularModule,
-  Star,
-  Check,
-  EyeOff,
-  Loader2,
-} from 'lucide-angular';
+import { LucideAngularModule, Star, Check, EyeOff, Loader2 } from 'lucide-angular';
 import { HlmButtonDirective } from '@shared/ui/button';
 import { HlmBadgeDirective } from '@shared/ui/badge';
 import {
@@ -48,6 +42,7 @@ const STATUS_OPTIONS = [
     HlmTableHeadDirective,
     HlmTableCellDirective,
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './admin-review-list.component.html',
 })
 export class AdminReviewListComponent {
@@ -83,7 +78,8 @@ export class AdminReviewListComponent {
     this.loading.set(true);
     let params = new HttpParams();
     if (this.statusFilter()) params = params.set('status', this.statusFilter());
-    this.http.get<{ content: Review[] }>(ApiEndpoints.admin.reviews, { params })
+    this.http
+      .get<{ content: Review[] }>(ApiEndpoints.admin.reviews, { params })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res) => {
@@ -95,7 +91,8 @@ export class AdminReviewListComponent {
   }
 
   moderate(review: Review, status: 'APPROVED' | 'HIDDEN') {
-    this.http.post(ApiEndpoints.admin.reviewModerate(review.id), { status })
+    this.http
+      .post(ApiEndpoints.admin.reviewModerate(review.id), { status })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {

@@ -1,9 +1,23 @@
-import { Component, DestroyRef, inject, output, signal } from '@angular/core';
+import {
+  Component,
+  DestroyRef,
+  inject,
+  output,
+  signal,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { LucideAngularModule, Loader2, CheckCircle2, Building2, Store, Truck } from 'lucide-angular';
+import {
+  LucideAngularModule,
+  Loader2,
+  CheckCircle2,
+  Building2,
+  Store,
+  Truck,
+} from 'lucide-angular';
 import { HlmButtonDirective } from '@shared/ui/button';
 import { HlmInputDirective } from '@shared/ui/input';
 import { ShippingAddress, TaxInfo, FulfillmentType } from '@core/models/common.model';
@@ -21,12 +35,8 @@ export interface ShippingStepResult {
 @Component({
   selector: 'app-shipping-form',
   standalone: true,
-  imports: [
-    ReactiveFormsModule,
-    LucideAngularModule,
-    HlmButtonDirective,
-    HlmInputDirective,
-  ],
+  imports: [ReactiveFormsModule, LucideAngularModule, HlmButtonDirective, HlmInputDirective],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './shipping-form.component.html',
 })
 export class ShippingFormComponent {

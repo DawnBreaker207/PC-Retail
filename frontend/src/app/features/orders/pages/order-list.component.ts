@@ -1,4 +1,11 @@
-﻿import { Component, inject, OnInit, signal, DestroyRef } from '@angular/core';
+﻿import {
+  Component,
+  inject,
+  OnInit,
+  signal,
+  DestroyRef,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink, ActivatedRoute, Router } from '@angular/router';
 import { LucideAngularModule, ShoppingBag, ArrowRight } from 'lucide-angular';
@@ -33,6 +40,7 @@ const STATUS_TABS = [
     CurrencyFormatPipe,
     StatusFormatPipe,
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './order-list.component.html',
 })
 export class OrderListComponent implements OnInit {
@@ -50,9 +58,7 @@ export class OrderListComponent implements OnInit {
   statusTabs = STATUS_TABS;
 
   ngOnInit() {
-    this.route.queryParams.pipe(
-      takeUntilDestroyed(this.destroyRef),
-    ).subscribe((params) => {
+    this.route.queryParams.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
       this.activeTab.set(params['status'] || '');
       this.loadOrders();
     });
@@ -61,9 +67,8 @@ export class OrderListComponent implements OnInit {
   private loadOrders() {
     this.isLoading.set(true);
     this.orderService
-      .getMyOrders({ status: this.activeTab() || undefined }).pipe(
-        takeUntilDestroyed(this.destroyRef),
-      )
+      .getMyOrders({ status: this.activeTab() || undefined })
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res) => {
           this.orders.set(res.content);
@@ -82,4 +87,3 @@ export class OrderListComponent implements OnInit {
 
   protected readonly DateHelper = DateHelper;
 }
-

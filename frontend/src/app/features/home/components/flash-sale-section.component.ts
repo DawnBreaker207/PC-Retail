@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { LucideAngularModule, Zap } from 'lucide-angular';
 import { MockDataService } from '@core/services/mock-data.service';
@@ -11,6 +11,7 @@ import { FallbackImageDirective } from '@shared/directives/fallback-image.direct
   standalone: true,
   imports: [RouterLink, LucideAngularModule, CurrencyFormatPipe, FallbackImageDirective],
   templateUrl: './flash-sale-section.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './flash-sale-section.component.css',
 })
 export class FlashSaleSectionComponent {
@@ -35,7 +36,12 @@ export class FlashSaleSectionComponent {
   get filteredItems() {
     const items = this.campaign.items;
     if (this.activeTab === 0) return items;
-    const catMap: Record<number, string> = { 1: 'Laptop', 2: 'Linh kiện', 3: 'Phụ kiện', 4: 'Màn hình' };
+    const catMap: Record<number, string> = {
+      1: 'Laptop',
+      2: 'Linh kiện',
+      3: 'Phụ kiện',
+      4: 'Màn hình',
+    };
     const cat = catMap[this.activeTab];
     return items.filter((i) => i.category === cat);
   }

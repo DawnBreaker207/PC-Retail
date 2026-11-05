@@ -1,4 +1,13 @@
-import { Component, DestroyRef, inject, input, output, OnInit, signal } from '@angular/core';
+import {
+  Component,
+  DestroyRef,
+  inject,
+  input,
+  output,
+  OnInit,
+  signal,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpClient } from '@angular/common/http';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -12,11 +21,8 @@ import { Sku } from '@core/models/common.model';
 @Component({
   selector: 'app-product-form',
   standalone: true,
-  imports: [
-    ReactiveFormsModule,
-    HlmButtonDirective,
-    HlmInputDirective,
-  ],
+  imports: [ReactiveFormsModule, HlmButtonDirective, HlmInputDirective],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './product-form.component.html',
 })
 export class ProductFormComponent implements OnInit {
@@ -79,14 +85,17 @@ export class ProductFormComponent implements OnInit {
     if (!this.isEdit) body['stockAvailable'] = stockAvailable;
 
     const currentProd = this.product();
-    const request$ = this.isEdit && currentProd
-      ? this.http.put(ApiEndpoints.admin.productDetail(currentProd.id), body)
-      : this.http.post(ApiEndpoints.admin.products, body);
+    const request$ =
+      this.isEdit && currentProd
+        ? this.http.put(ApiEndpoints.admin.productDetail(currentProd.id), body)
+        : this.http.post(ApiEndpoints.admin.products, body);
 
     request$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.submitting.set(false);
-        this.toast.success(this.isEdit ? 'Cập nhật sản phẩm thành công' : 'Thêm sản phẩm thành công');
+        this.toast.success(
+          this.isEdit ? 'Cập nhật sản phẩm thành công' : 'Thêm sản phẩm thành công',
+        );
         this.saved.emit(true);
       },
       error: () => {

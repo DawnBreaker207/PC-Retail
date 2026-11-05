@@ -1,4 +1,4 @@
-﻿import { Component, inject, signal } from '@angular/core';
+﻿import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { finalize } from 'rxjs';
@@ -23,6 +23,7 @@ import { Order } from '@core/models/common.model';
     CurrencyFormatPipe,
     FallbackImageDirective,
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './order-lookup.component.html',
 })
 export class OrderLookupComponent {
@@ -52,15 +53,20 @@ export class OrderLookupComponent {
       return;
     }
     this.isLoading.set(true);
-    this.orderService.getOrderDetail(id).pipe(
-      finalize(() => { this.isLoading.set(false); this.searched.set(true); }),
-    ).subscribe({
-      next: (o) => {
-        const matches = o.shippingAddress?.phone?.replace(/\D/g, '') === phone.replace(/\D/g, '');
-        this.order.set(matches ? o : null);
-      },
-      error: () => this.order.set(null),
-    });
+    this.orderService
+      .getOrderDetail(id)
+      .pipe(
+        finalize(() => {
+          this.isLoading.set(false);
+          this.searched.set(true);
+        }),
+      )
+      .subscribe({
+        next: (o) => {
+          const matches = o.shippingAddress?.phone?.replace(/\D/g, '') === phone.replace(/\D/g, '');
+          this.order.set(matches ? o : null);
+        },
+        error: () => this.order.set(null),
+      });
   }
 }
-

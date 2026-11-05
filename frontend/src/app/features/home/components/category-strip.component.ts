@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import {
   LucideAngularModule,
@@ -78,6 +78,7 @@ const STRIP_CATEGORIES = [
   standalone: true,
   imports: [RouterLink, LucideAngularModule],
   templateUrl: './category-strip.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './category-strip.component.css',
 })
 export class CategoryStripComponent {

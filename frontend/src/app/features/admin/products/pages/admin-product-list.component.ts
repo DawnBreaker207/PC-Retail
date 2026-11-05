@@ -1,4 +1,4 @@
-import { Component, inject, DestroyRef, signal } from '@angular/core';
+import { Component, inject, DestroyRef, signal, ChangeDetectionStrategy } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpClient, HttpParams } from '@angular/common/http';
@@ -70,6 +70,7 @@ interface SkuResponse {
     FallbackImageDirective,
     ProductFormComponent,
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './admin-product-list.component.html',
 })
 export class AdminProductListComponent {
@@ -141,7 +142,8 @@ export class AdminProductListComponent {
     if (this.categoryFilter()) params = params.set('category', this.categoryFilter());
     if (this.brandFilter()) params = params.set('brand', this.brandFilter());
     if (this.statusFilter()) params = params.set('status', this.statusFilter());
-    this.http.get<SkuResponse>(ApiEndpoints.admin.products, { params })
+    this.http
+      .get<SkuResponse>(ApiEndpoints.admin.products, { params })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res) => {
@@ -197,7 +199,8 @@ export class AdminProductListComponent {
   executeDelete() {
     const id = this.deleteTargetId();
     if (!id) return;
-    this.http.delete(ApiEndpoints.admin.productDetail(id))
+    this.http
+      .delete(ApiEndpoints.admin.productDetail(id))
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {

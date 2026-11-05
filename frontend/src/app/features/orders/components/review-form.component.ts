@@ -1,4 +1,4 @@
-import { Component, inject, signal, input, output } from '@angular/core';
+import { Component, inject, signal, input, output, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule, Star, Upload, X, Loader2 } from 'lucide-angular';
 import { HlmButtonDirective } from '@shared/ui/button';
@@ -9,13 +9,9 @@ import { OrderItem } from '@core/models/common.model';
 
 @Component({
   selector: 'app-review-form',
-  imports: [
-    FormsModule,
-    LucideAngularModule,
-    HlmButtonDirective,
-    FallbackImageDirective,
-  ],
+  imports: [FormsModule, LucideAngularModule, HlmButtonDirective, FallbackImageDirective],
   templateUrl: './review-form.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './review-form.component.css',
 })
 export class ReviewFormComponent {
@@ -109,4 +105,3 @@ export class ReviewFormComponent {
       });
   }
 }
-

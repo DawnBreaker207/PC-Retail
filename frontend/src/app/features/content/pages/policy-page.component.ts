@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule, ChevronRight } from 'lucide-angular';
@@ -7,6 +7,7 @@ import { POLICY_CONTENT } from '@core/mocks/policy-content.mock';
 @Component({
   selector: 'app-policy-page',
   imports: [RouterLink, LucideAngularModule],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './policy-page.component.html',
 })
 export class PolicyPageComponent {

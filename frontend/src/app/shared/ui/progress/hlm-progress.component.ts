@@ -1,4 +1,4 @@
-import { Component, computed, input } from '@angular/core';
+import { Component, computed, input, ChangeDetectionStrategy } from '@angular/core';
 
 import { hlm } from '../core/hlm';
 
@@ -17,6 +17,7 @@ import { hlm } from '../core/hlm';
       <div [class]="indicatorClass()" [style.width.%]="percentage()"></div>
     </div>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   host: {
     class: 'block w-full',
   },

@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { HeroBannerComponent } from '../components/hero-banner.component';
 import { FlashSaleSectionComponent } from '../components/flash-sale-section.component';
@@ -21,6 +21,7 @@ import { BlogPost } from '@core/models/common.model';
     FallbackImageDirective,
   ],
   templateUrl: './home.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './home.component.css',
 })
 export class HomeComponent {

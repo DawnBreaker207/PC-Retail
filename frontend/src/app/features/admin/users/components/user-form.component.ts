@@ -1,4 +1,13 @@
-import { Component, DestroyRef, inject, input, output, OnInit, signal } from '@angular/core';
+import {
+  Component,
+  DestroyRef,
+  inject,
+  input,
+  output,
+  OnInit,
+  signal,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpClient } from '@angular/common/http';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -12,6 +21,7 @@ import { User } from '@core/models/common.model';
   selector: 'app-user-form',
   standalone: true,
   imports: [ReactiveFormsModule, HlmButtonDirective, HlmInputDirective],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './user-form.component.html',
 })
 export class UserFormComponent implements OnInit {
@@ -59,14 +69,17 @@ export class UserFormComponent implements OnInit {
     this.submitting.set(true);
     const body = this.form.getRawValue();
     const curUser = this.user();
-    const request$ = this.isEdit && curUser
-      ? this.http.put(ApiEndpoints.admin.userDetail(curUser.id), body)
-      : this.http.post(ApiEndpoints.admin.users, body);
+    const request$ =
+      this.isEdit && curUser
+        ? this.http.put(ApiEndpoints.admin.userDetail(curUser.id), body)
+        : this.http.post(ApiEndpoints.admin.users, body);
 
     request$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.submitting.set(false);
-        this.toast.success(this.isEdit ? 'Cập nhật người dùng thành công' : 'Thêm người dùng thành công');
+        this.toast.success(
+          this.isEdit ? 'Cập nhật người dùng thành công' : 'Thêm người dùng thành công',
+        );
         this.saved.emit(true);
       },
       error: () => {

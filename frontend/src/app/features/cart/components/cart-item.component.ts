@@ -1,4 +1,4 @@
-import { Component, inject, input, DestroyRef } from '@angular/core';
+import { Component, inject, input, DestroyRef, ChangeDetectionStrategy } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -11,12 +11,8 @@ import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
 @Component({
   selector: 'app-cart-item',
   standalone: true,
-  imports: [
-    RouterLink,
-    FormsModule,
-    LucideAngularModule,
-    CurrencyFormatPipe,
-  ],
+  imports: [RouterLink, FormsModule, LucideAngularModule, CurrencyFormatPipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './cart-item.component.html',
 })
 export class CartItemComponent {

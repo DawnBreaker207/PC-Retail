@@ -1,4 +1,11 @@
-import { Component, HostListener, inject, signal, PLATFORM_ID } from '@angular/core';
+import {
+  Component,
+  HostListener,
+  inject,
+  signal,
+  PLATFORM_ID,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { LucideAngularModule, Phone, MessageCircle, Wrench, ChevronUp } from 'lucide-angular';
@@ -7,6 +14,7 @@ import { LucideAngularModule, Phone, MessageCircle, Wrench, ChevronUp } from 'lu
   selector: 'app-floating-support',
   standalone: true,
   imports: [RouterLink, LucideAngularModule],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <aside
       aria-label="Tiện ích liên hệ nhanh"
@@ -18,7 +26,10 @@ import { LucideAngularModule, Phone, MessageCircle, Wrench, ChevronUp } from 'lu
         class="group relative flex items-center justify-center w-11 h-11 rounded-full bg-surface dark:bg-surface-dark border border-border/80 dark:border-border-dark/80 text-primary shadow-md hover:shadow-lg hover:border-primary/50 hover:scale-105 active:scale-95 transition-all"
         title="Xây dựng cấu hình PC tự chọn"
       >
-        <lucide-angular [img]="WrenchIcon" class="w-5 h-5 text-primary group-hover:rotate-45 transition-transform" />
+        <lucide-angular
+          [img]="WrenchIcon"
+          class="w-5 h-5 text-primary group-hover:rotate-45 transition-transform"
+        />
         <span
           class="pointer-events-none absolute right-full mr-2.5 px-2.5 py-1 rounded-lg bg-surface-dark dark:bg-surface text-surface text-[11px] font-semibold whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity shadow-md"
         >
@@ -50,8 +61,12 @@ import { LucideAngularModule, Phone, MessageCircle, Wrench, ChevronUp } from 'lu
       >
         <lucide-angular [img]="PhoneIcon" class="w-5 h-5 group-hover:animate-bounce" />
         <span class="absolute -top-1 -right-1 flex h-3.5 w-3.5">
-          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-          <span class="relative inline-flex rounded-full h-3.5 w-3.5 bg-red-500 border-2 border-white dark:border-black"></span>
+          <span
+            class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"
+          ></span>
+          <span
+            class="relative inline-flex rounded-full h-3.5 w-3.5 bg-red-500 border-2 border-white dark:border-black"
+          ></span>
         </span>
         <span
           class="pointer-events-none absolute right-full mr-2.5 px-2.5 py-1 rounded-lg bg-surface-dark dark:bg-surface text-surface text-[11px] font-semibold whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity shadow-md"

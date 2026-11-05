@@ -1,4 +1,11 @@
-import { Component, inject, DestroyRef, signal, model } from '@angular/core';
+import {
+  Component,
+  inject,
+  DestroyRef,
+  signal,
+  model,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { DatePipe, NgClass } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -14,7 +21,7 @@ import {
   Calendar,
   User,
   Layers,
-  HelpCircle
+  HelpCircle,
 } from 'lucide-angular';
 import { HlmButtonDirective } from '@shared/ui/button';
 import { HlmInputDirective } from '@shared/ui/input';
@@ -54,6 +61,7 @@ const TYPE_LABEL: Record<string, string> = {
     HlmDialogDescriptionDirective,
     HlmDialogFooterDirective,
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './admin-return-detail.component.html',
 })
 export class AdminReturnDetailComponent {
@@ -90,7 +98,8 @@ export class AdminReturnDetailComponent {
 
   private loadData(id: number) {
     this.loading.set(true);
-    this.http.get<AdminReturnRequest>(ApiEndpoints.admin.returnDetail(id))
+    this.http
+      .get<AdminReturnRequest>(ApiEndpoints.admin.returnDetail(id))
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (r) => {
@@ -111,7 +120,8 @@ export class AdminReturnDetailComponent {
     const r = this.request();
     if (!r) return;
     this.processing.set(true);
-    this.http.put<AdminReturnRequest>(ApiEndpoints.admin.returnApprove(r.id), { amount: 0 })
+    this.http
+      .put<AdminReturnRequest>(ApiEndpoints.admin.returnApprove(r.id), { amount: 0 })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (updated) => {
@@ -140,7 +150,10 @@ export class AdminReturnDetailComponent {
     if (!r || !this.rejectReason().trim()) return;
 
     this.processing.set(true);
-    this.http.put<AdminReturnRequest>(ApiEndpoints.admin.returnReject(r.id), { reason: this.rejectReason().trim() })
+    this.http
+      .put<AdminReturnRequest>(ApiEndpoints.admin.returnReject(r.id), {
+        reason: this.rejectReason().trim(),
+      })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (updated) => {
@@ -160,13 +173,16 @@ export class AdminReturnDetailComponent {
     const r = this.request();
     if (!r) return;
     this.processing.set(true);
-    this.http.put<AdminReturnRequest>(ApiEndpoints.admin.returnResolve(r.id), { overturn, note: '' })
+    this.http
+      .put<AdminReturnRequest>(ApiEndpoints.admin.returnResolve(r.id), { overturn, note: '' })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (updated) => {
           this.request.set(updated);
           this.processing.set(false);
-          this.toast.success(overturn ? 'Đã chấp nhận khiếu nại của khách hàng' : 'Đã giữ nguyên quyết định từ chối');
+          this.toast.success(
+            overturn ? 'Đã chấp nhận khiếu nại của khách hàng' : 'Đã giữ nguyên quyết định từ chối',
+          );
         },
         error: () => {
           this.processing.set(false);

@@ -1,4 +1,4 @@
-﻿import { Component, computed, inject, signal } from '@angular/core';
+﻿import { Component, computed, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import {
@@ -44,6 +44,7 @@ type AccountTab = 'profile' | 'password' | 'address' | 'vouchers';
     MyVouchersComponent,
   ],
   templateUrl: './account.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './account.component.css',
 })
 export class AccountComponent {
@@ -89,7 +90,12 @@ export class AccountComponent {
   get userInitials(): string {
     const name = this.authService.currentUser()?.fullName;
     if (!name) return 'U';
-    return name.split(' ').map((s) => s[0]).join('').toUpperCase().slice(0, 2);
+    return name
+      .split(' ')
+      .map((s) => s[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
   }
 
   get userRoleLabel(): string {
@@ -133,4 +139,3 @@ export class AccountComponent {
     this.authService.logout();
   }
 }
-

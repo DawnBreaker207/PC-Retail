@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule, Ticket, CheckCircle2, X } from 'lucide-angular';
@@ -20,6 +20,7 @@ import { ToastService } from '@core/services/toast.service';
     HlmInputDirective,
     CurrencyFormatPipe,
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './order-summary.component.html',
 })
 export class OrderSummaryComponent {

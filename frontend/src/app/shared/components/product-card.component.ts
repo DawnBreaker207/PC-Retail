@@ -1,4 +1,4 @@
-import { Component, computed, inject, input, output } from '@angular/core';
+import { Component, computed, inject, input, output, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { HlmCardDirective } from '@shared/ui/card';
 import { LucideAngularModule, Heart, ShoppingCart, Zap, Star, Loader2 } from 'lucide-angular';
@@ -18,6 +18,7 @@ import { WishlistStore } from '@features/wishlist/store/wishlist.store';
     FallbackImageDirective,
   ],
   templateUrl: './product-card.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './product-card.component.css',
 })
 export class ProductCardComponent {

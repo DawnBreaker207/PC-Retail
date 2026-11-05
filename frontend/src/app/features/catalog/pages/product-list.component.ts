@@ -1,4 +1,11 @@
-import { Component, inject, signal, computed, DestroyRef } from '@angular/core';
+import {
+  Component,
+  inject,
+  signal,
+  computed,
+  DestroyRef,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -9,7 +16,11 @@ import { LoadingSpinnerComponent } from '@shared/components/loading-spinner.comp
 import { MockDataService } from '@core/services/mock-data.service';
 import { Sku } from '@core/models/common.model';
 import { CartStore } from '@features/cart/store/cart.store';
-import { FilterSidebarComponent, FilterState, SpecFilterOption } from '../components/filter-sidebar.component';
+import {
+  FilterSidebarComponent,
+  FilterState,
+  SpecFilterOption,
+} from '../components/filter-sidebar.component';
 
 const SORT_OPTIONS = [
   { value: 'sold', label: 'Bán chạy' },
@@ -57,6 +68,7 @@ function parseSpecParam(raw: string | string[] | undefined): Record<string, stri
     FilterSidebarComponent,
   ],
   templateUrl: './product-list.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./product-list.component.css'],
 })
 export class ProductListComponent {
@@ -98,7 +110,7 @@ export class ProductListComponent {
   filters = signal<FilterState>(defaultFilters());
 
   specOptions = computed<SpecFilterOption[]>(() =>
-    this.mock.getSpecFilterOptions(this.filters().category || undefined)
+    this.mock.getSpecFilterOptions(this.filters().category || undefined),
   );
 
   constructor() {
@@ -163,7 +175,7 @@ export class ProductListComponent {
     if (f.minPrice > 0) qp['minPrice'] = f.minPrice;
     if (f.maxPrice < 500_000_000) qp['maxPrice'] = f.maxPrice;
     const specParams = Object.entries(f.specs).flatMap(([label, values]) =>
-      values.map((v) => `${label}::${v}`)
+      values.map((v) => `${label}::${v}`),
     );
     if (specParams.length > 0) qp['spec'] = specParams;
     if (f.sort && f.sort !== 'sold') qp['sort'] = f.sort;

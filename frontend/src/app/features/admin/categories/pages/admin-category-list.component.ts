@@ -1,4 +1,11 @@
-import { Component, inject, DestroyRef, signal, computed } from '@angular/core';
+import {
+  Component,
+  inject,
+  DestroyRef,
+  signal,
+  computed,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpClient } from '@angular/common/http';
 import {
@@ -51,6 +58,7 @@ import { CategoryFormComponent } from '../components/category-form.component';
     HlmDialogFooterDirective,
     CategoryFormComponent,
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './admin-category-list.component.html',
 })
 export class AdminCategoryListComponent {
@@ -94,7 +102,8 @@ export class AdminCategoryListComponent {
 
   private loadData() {
     this.loading.set(true);
-    this.http.get<{ content: Category[] }>(ApiEndpoints.admin.categories)
+    this.http
+      .get<{ content: Category[] }>(ApiEndpoints.admin.categories)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res) => {
@@ -133,7 +142,8 @@ export class AdminCategoryListComponent {
   executeDelete() {
     const id = this.deleteTargetId();
     if (!id) return;
-    this.http.delete(ApiEndpoints.admin.categoryDetail(id))
+    this.http
+      .delete(ApiEndpoints.admin.categoryDetail(id))
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {

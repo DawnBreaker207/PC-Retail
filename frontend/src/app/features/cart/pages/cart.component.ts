@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { LucideAngularModule, ShoppingCart } from 'lucide-angular';
 import { HlmButtonDirective } from '@shared/ui/button';
@@ -18,6 +18,7 @@ import { OrderSummaryComponent } from '../components/order-summary.component';
     CartItemComponent,
     OrderSummaryComponent,
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './cart.component.html',
 })
 export class CartComponent {
