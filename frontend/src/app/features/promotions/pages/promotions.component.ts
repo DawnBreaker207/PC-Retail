@@ -8,6 +8,7 @@ import { FlashSaleSectionComponent } from '@features/home/components/flash-sale-
 import { FallbackImageDirective } from '@shared/directives/fallback-image.directive';
 import { MockDataService } from '@core/services/mock-data.service';
 import { ToastService } from '@core/services/toast.service';
+import { HlmButtonDirective } from '@shared/ui/button';
 
 interface VoucherItem {
   code: string;
@@ -21,7 +22,7 @@ interface VoucherItem {
 @Component({
   selector: 'app-promotions',
   standalone: true,
-  imports: [RouterLink, LucideAngularModule, FlashSaleSectionComponent, FallbackImageDirective],
+  imports: [RouterLink, LucideAngularModule, FlashSaleSectionComponent, FallbackImageDirective, HlmButtonDirective],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './promotions.component.html',
 })

@@ -66,13 +66,10 @@
 
           <button
             type="button"
+            hlmBtn
+            size="sm"
             (click)="copyVoucher(vc.code)"
-            class="h-8 px-3 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 shadow-2xs"
-            [class.bg-emerald-500]="copiedCode() === vc.code"
-            [class.text-white]="copiedCode() === vc.code"
-            [class.bg-primary]="copiedCode() !== vc.code"
-            [class.hover:bg-primary-dark]="copiedCode() !== vc.code"
-            [class.text-white]="copiedCode() !== vc.code"
+            [class]="copiedCode() === vc.code ? 'bg-emerald-500 hover:bg-emerald-500/90' : ''"
           >
             @if (copiedCode() === vc.code) {
               <lucide-angular [img]="CheckIcon" class="size-3.5" />

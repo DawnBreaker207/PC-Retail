@@ -50,8 +50,11 @@
             @if (!selection) {
               <button
                 type="button"
+                hlmBtn
+                variant="outline"
+                size="sm"
                 (click)="openPicker(slot.slotType)"
-                class="h-9 px-4 text-xs font-bold rounded-xl border border-primary/40 bg-primary/10 hover:bg-primary hover:text-white text-primary transition-all duration-200 inline-flex items-center gap-1.5 shadow-2xs hover:shadow-sm whitespace-nowrap shrink-0"
+                class="border-primary/40 bg-primary/10 hover:bg-primary hover:text-white text-primary whitespace-nowrap shrink-0"
               >
                 <lucide-angular [img]="PlusIcon" class="w-3.5 h-3.5" />
                 <span>+ Chọn linh kiện</span>
@@ -59,8 +62,10 @@
             } @else {
               <button
                 type="button"
+                hlmBtn
+                variant="outline"
+                size="sm"
                 (click)="openPicker(slot.slotType)"
-                class="h-8 px-3 text-xs font-semibold rounded-lg border border-border/70 dark:border-border-dark/70 hover:border-primary hover:text-primary transition-colors inline-flex items-center gap-1.5 bg-surface dark:bg-surface-dark"
               >
                 <lucide-angular [img]="PencilIcon" class="w-3.5 h-3.5" />
                 <span>Thay đổi</span>
@@ -68,9 +73,12 @@
               @if (slot.isRemovable) {
                 <button
                   type="button"
+                  hlmBtn
+                  variant="ghost"
+                  size="icon"
                   (click)="confirmRemove(slot.slotType)"
                   aria-label="Bỏ linh kiện"
-                  class="h-8 w-8 rounded-lg border border-border/70 dark:border-border-dark/70 text-muted hover:text-destructive hover:bg-destructive/10 flex items-center justify-center transition-colors bg-surface dark:bg-surface-dark"
+                  class="hover:text-destructive hover:bg-destructive/10"
                   title="Xóa linh kiện này"
                 >
                   <lucide-angular [img]="Trash2Icon" class="w-3.5 h-3.5" />

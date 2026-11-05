@@ -78,8 +78,11 @@
           <div class="h-px bg-border/60 dark:border-border-dark/60 my-1"></div>
           <button
             type="button"
+            hlmBtn
+            variant="ghost"
+            size="sm"
             (click)="logout(); userMenuOpen.set(false)"
-            class="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium text-error hover:bg-error/10 transition-colors cursor-pointer text-left"
+            class="w-full justify-start text-error hover:text-error hover:bg-error/10"
           >
             <lucide-angular [img]="LogOut" class="w-4 h-4" />
             <span>Đăng xuất</span>

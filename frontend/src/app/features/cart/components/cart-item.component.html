@@ -57,8 +57,11 @@
     <!-- Delete Button -->
     <button
       type="button"
+      hlmBtn
+      variant="ghost"
+      size="sm"
       (click)="remove()"
-      class="inline-flex items-center gap-1 mt-2 text-xs text-muted hover:text-destructive transition-colors p-1"
+      class="mt-2 h-7 px-1.5 text-xs text-muted hover:text-destructive hover:bg-destructive/10"
       aria-label="Xóa sản phẩm"
     >
       <lucide-icon [img]="Trash2Icon" class="size-3.5" />

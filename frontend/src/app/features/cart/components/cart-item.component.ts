@@ -7,11 +7,12 @@ import { CurrencyFormatPipe } from '@shared/pipes/currency-format.pipe';
 import { CartItem } from '@core/models/common.model';
 import { CartStore } from '@features/cart/store/cart.store';
 import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
+import { HlmButtonDirective } from '@shared/ui/button';
 
 @Component({
   selector: 'app-cart-item',
   standalone: true,
-  imports: [RouterLink, FormsModule, LucideAngularModule, CurrencyFormatPipe],
+  imports: [RouterLink, FormsModule, LucideAngularModule, CurrencyFormatPipe, HlmButtonDirective],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './cart-item.component.html',
 })
