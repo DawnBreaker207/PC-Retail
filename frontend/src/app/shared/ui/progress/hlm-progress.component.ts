@@ -1,11 +1,11 @@
 import { Component, computed, input } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { hlm } from '../core/hlm';
 
 @Component({
   selector: 'hlm-progress',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   template: `
     <div
       role="progressbar"
@@ -14,10 +14,7 @@ import { hlm } from '../core/hlm';
       [attr.aria-valuenow]="value()"
       [class]="containerClass()"
     >
-      <div
-        [class]="indicatorClass()"
-        [style.width.%]="percentage()"
-      ></div>
+      <div [class]="indicatorClass()" [style.width.%]="percentage()"></div>
     </div>
   `,
   host: {
@@ -38,8 +35,8 @@ export class HlmProgressComponent {
   protected readonly containerClass = computed(() =>
     hlm(
       'relative h-2 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-slate-800',
-      this.userClass()
-    )
+      this.userClass(),
+    ),
   );
 
   protected readonly indicatorClass = computed(() => {

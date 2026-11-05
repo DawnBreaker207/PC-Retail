@@ -1,6 +1,6 @@
 import { Component, inject, DestroyRef, signal, computed } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { CommonModule } from '@angular/common';
+
 import { BuilderService } from '../services/builder.service';
 import { BuilderSlot, BuilderSelection, BuilderValidation } from '@core/models/common.model';
 import { SlotListComponent } from '../components/slot-list.component';
@@ -9,7 +9,7 @@ import { LoadingSpinnerComponent } from '@shared/components/loading-spinner.comp
 
 @Component({
   selector: 'app-custom-build',
-  imports: [CommonModule, SlotListComponent, BuildSummaryComponent, LoadingSpinnerComponent],
+  imports: [SlotListComponent, BuildSummaryComponent, LoadingSpinnerComponent],
   templateUrl: './custom-build.component.html',
   styleUrl: './custom-build.component.css',
 })
@@ -28,16 +28,17 @@ export class CustomBuildComponent {
 
   private loadSlots() {
     this.loading.set(true);
-    this.builderService.getSlots().pipe(
-      takeUntilDestroyed(this.destroyRef),
-    ).subscribe(res => {
-      this.slots.set(res.content);
-      this.loading.set(false);
-    });
+    this.builderService
+      .getSlots()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((res) => {
+        this.slots.set(res.content);
+        this.loading.set(false);
+      });
   }
 
   onSlotSelected(selection: BuilderSelection) {
-    this.selections.update(map => {
+    this.selections.update((map) => {
       const next = new Map(map);
       next.set(selection.slotType, selection);
       return next;
@@ -46,7 +47,7 @@ export class CustomBuildComponent {
   }
 
   onSlotRemoved(slotType: string) {
-    this.selections.update(map => {
+    this.selections.update((map) => {
       const next = new Map(map);
       next.delete(slotType);
       return next;
@@ -61,11 +62,12 @@ export class CustomBuildComponent {
 
   private revalidate() {
     const items = Array.from(this.selections().values());
-    this.builderService.validate(items).pipe(
-      takeUntilDestroyed(this.destroyRef),
-    ).subscribe(v => {
-      this.validation.set(v);
-    });
+    this.builderService
+      .validate(items)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((v) => {
+        this.validation.set(v);
+      });
   }
 
   getSlotSelection(slotType: string): BuilderSelection | undefined {
@@ -78,7 +80,9 @@ export class CustomBuildComponent {
   });
 
   missingRequired = computed(() => {
-    return this.slots().filter(s => s.isRequired).some(s => !this.selections().has(s.slotType));
+    return this.slots()
+      .filter((s) => s.isRequired)
+      .some((s) => !this.selections().has(s.slotType));
   });
 
   canAddToCart = computed(() => {
