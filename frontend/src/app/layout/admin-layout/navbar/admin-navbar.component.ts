@@ -6,6 +6,7 @@ import { ThemeService } from '@core/services/theme.service';
 import { AdminWorkQueueService } from '@core/services/admin-work-queue.service';
 import { HlmBadgeDirective } from '@shared/ui/badge';
 import { HlmButtonDirective } from '@shared/ui/button';
+import { HlmAvatarComponent, HlmAvatarFallbackDirective } from '@shared/ui/avatar';
 import {
   LucideAngularModule,
   Bell,
@@ -24,6 +25,8 @@ import {
     RouterLink,
     HlmBadgeDirective,
     HlmButtonDirective,
+    HlmAvatarComponent,
+    HlmAvatarFallbackDirective,
     LucideAngularModule
   ],
   templateUrl: './admin-navbar.component.html',

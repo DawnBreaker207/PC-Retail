@@ -50,9 +50,9 @@
         (click)="toggleUserMenu()"
         class="flex items-center gap-2.5 p-1 rounded-xl hover:bg-bg dark:hover:bg-bg-dark transition-colors cursor-pointer"
       >
-        <div class="w-8 h-8 rounded-full bg-primary/10 text-primary font-bold text-xs flex items-center justify-center border border-primary/25">
-          {{ userInitials }}
-        </div>
+        <hlm-avatar class="size-8 border border-primary/25">
+          <span hlmAvatarFallback class="bg-primary/10 text-primary font-bold text-xs">{{ userInitials }}</span>
+        </hlm-avatar>
         <span class="text-sm font-semibold hidden sm:inline text-ink dark:text-ink-dark">{{ userName }}</span>
       </button>
 

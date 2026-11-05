@@ -36,6 +36,7 @@ import { WishlistStore } from '@features/wishlist/store/wishlist.store';
 import { MockDataService } from '@core/services/mock-data.service';
 import { NotificationBellComponent } from '@shared/components/notification-bell.component';
 import { NotificationService } from '@core/services/notification.service';
+import { HlmAvatarComponent, HlmAvatarFallbackDirective } from '@shared/ui/avatar';
 import { RealtimeService } from '@core/services/realtime.service';
 import { CurrencyFormatPipe } from '@shared/pipes/currency-format.pipe';
 import { FallbackImageDirective } from '@shared/directives/fallback-image.directive';
@@ -49,6 +50,8 @@ import { Sku } from '@core/models/common.model';
     NotificationBellComponent,
     CurrencyFormatPipe,
     FallbackImageDirective,
+    HlmAvatarComponent,
+    HlmAvatarFallbackDirective,
   ],
   templateUrl: './header.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,

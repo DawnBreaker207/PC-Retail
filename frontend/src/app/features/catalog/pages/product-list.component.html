@@ -71,7 +71,16 @@
 
   <!-- Product grid -->
   @if (isLoading) {
-    <app-loading-spinner />
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 lg:gap-4 mt-4">
+      @for (_ of [1,2,3,4,5,6,7,8]; track $index) {
+        <div class="space-y-3 rounded-2xl border border-border/60 dark:border-border-dark/60 p-3 bg-surface dark:bg-surface-dark">
+          <hlm-skeleton class="aspect-square w-full rounded-xl" />
+          <hlm-skeleton class="h-3.5 w-5/6" />
+          <hlm-skeleton class="h-3 w-3/4" />
+          <hlm-skeleton class="h-5 w-1/2" />
+        </div>
+      }
+    </div>
   } @else if (products.length === 0) {
     <div class="flex flex-col items-center justify-center py-20 text-center rounded-2xl border border-dashed border-border/80 bg-surface/50 dark:bg-surface-dark/50 p-8">
       <lucide-icon [img]="FrownIcon" class="size-14 text-muted/40 mb-3" />

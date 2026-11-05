@@ -1,18 +1,13 @@
 <div class="max-w-screen-2xl mx-auto px-4 py-6 lg:py-8 min-h-[60vh]">
   <h1 class="text-2xl lg:text-3xl font-bold mb-6 tracking-tight text-ink dark:text-ink-dark">Đơn hàng của tôi</h1>
 
-  <div class="flex items-center gap-1 overflow-x-auto border-b border-border/70 dark:border-border-dark/70 pb-px mb-6 scrollbar-none">
+  <div hlmTabsList class="mb-6">
     @for (tab of statusTabs; track tab.key) {
       <button
         type="button"
+        hlmTabsTrigger
+        [state]="activeTab() === tab.key ? 'active' : 'inactive'"
         (click)="onTabChange(tab.key)"
-        class="px-4 py-2 text-sm font-medium whitespace-nowrap border-b-2 transition-colors transition-border"
-        [class.border-primary]="activeTab() === tab.key"
-        [class.text-primary]="activeTab() === tab.key"
-        [class.font-semibold]="activeTab() === tab.key"
-        [class.border-transparent]="activeTab() !== tab.key"
-        [class.text-muted]="activeTab() !== tab.key"
-        [class.dark:text-muted-dark]="activeTab() !== tab.key"
       >
         {{ tab.label }}
       </button>
@@ -20,8 +15,26 @@
   </div>
 
   @if (isLoading()) {
-    <div class="flex justify-center py-20">
-      <app-loading-spinner [size]="36" />
+    <div class="space-y-3">
+      @for (_ of [1,2,3,4]; track $index) {
+        <div class="rounded-2xl border border-border/60 dark:border-border-dark/60 p-4 bg-surface dark:bg-surface-dark space-y-3">
+          <div class="flex justify-between">
+            <hlm-skeleton class="h-4 w-32" />
+            <hlm-skeleton class="h-5 w-20 rounded-full" />
+          </div>
+          <div class="flex gap-3">
+            <hlm-skeleton class="size-16 rounded-xl shrink-0" />
+            <div class="flex-1 space-y-2">
+              <hlm-skeleton class="h-3.5 w-3/4" />
+              <hlm-skeleton class="h-3 w-1/2" />
+            </div>
+          </div>
+          <div class="flex justify-between items-center pt-1">
+            <hlm-skeleton class="h-3 w-24" />
+            <hlm-skeleton class="h-5 w-28" />
+          </div>
+        </div>
+      }
     </div>
   } @else if (orders().length === 0) {
     <div class="flex flex-col items-center justify-center py-20 animate-fade-in-up">

@@ -11,7 +11,8 @@ import { RouterLink, ActivatedRoute, Router } from '@angular/router';
 import { LucideAngularModule, ShoppingBag, ArrowRight } from 'lucide-angular';
 import { HlmButtonDirective } from '@shared/ui/button';
 import { HlmBadgeDirective } from '@shared/ui/badge';
-import { LoadingSpinnerComponent } from '@shared/components/loading-spinner.component';
+import { HlmSkeletonComponent } from '@shared/ui/skeleton';
+import { HlmTabsListDirective, HlmTabsTriggerDirective } from '@shared/ui/tabs';
 import { CurrencyFormatPipe } from '@shared/pipes/currency-format.pipe';
 import { StatusFormatPipe } from '@shared/pipes/status-format.pipe';
 import { FallbackImageDirective } from '@shared/directives/fallback-image.directive';
@@ -36,7 +37,9 @@ const STATUS_TABS = [
     LucideAngularModule,
     HlmButtonDirective,
     HlmBadgeDirective,
-    LoadingSpinnerComponent,
+    HlmSkeletonComponent,
+    HlmTabsListDirective,
+    HlmTabsTriggerDirective,
     CurrencyFormatPipe,
     StatusFormatPipe,
   ],

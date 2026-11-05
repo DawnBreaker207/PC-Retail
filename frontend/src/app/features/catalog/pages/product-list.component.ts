@@ -12,7 +12,7 @@ import { FormsModule } from '@angular/forms';
 import { LucideAngularModule, Filter, Frown, ChevronLeft, ChevronRight, X } from 'lucide-angular';
 import { HlmButtonDirective } from '@shared/ui/button';
 import { ProductCardComponent } from '@shared/components/product-card.component';
-import { LoadingSpinnerComponent } from '@shared/components/loading-spinner.component';
+import { HlmSkeletonComponent } from '@shared/ui/skeleton';
 import { MockDataService } from '@core/services/mock-data.service';
 import { Sku } from '@core/models/common.model';
 import { CartStore } from '@features/cart/store/cart.store';
@@ -63,8 +63,8 @@ function parseSpecParam(raw: string | string[] | undefined): Record<string, stri
     FormsModule,
     LucideAngularModule,
     HlmButtonDirective,
+    HlmSkeletonComponent,
     ProductCardComponent,
-    LoadingSpinnerComponent,
     FilterSidebarComponent,
   ],
   templateUrl: './product-list.component.html',

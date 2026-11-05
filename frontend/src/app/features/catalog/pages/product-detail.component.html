@@ -1,5 +1,23 @@
 @if (loading) {
-  <app-loading-spinner />
+  <div class="max-w-screen-2xl mx-auto px-4 pt-6 pb-12 grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
+    <div class="lg:col-span-5 space-y-3">
+      <hlm-skeleton class="aspect-square w-full rounded-2xl" />
+      <div class="flex gap-2">
+        @for (_ of [1,2,3,4]; track $index) {
+          <hlm-skeleton class="size-16 rounded-xl shrink-0" />
+        }
+      </div>
+    </div>
+    <div class="lg:col-span-7 space-y-4 pt-2">
+      <hlm-skeleton class="h-4 w-24" />
+      <hlm-skeleton class="h-7 w-3/4" />
+      <hlm-skeleton class="h-8 w-1/3" />
+      <hlm-skeleton class="h-4 w-full" />
+      <hlm-skeleton class="h-4 w-5/6" />
+      <hlm-skeleton class="h-4 w-4/6" />
+      <hlm-skeleton class="h-11 w-full rounded-xl mt-4" />
+    </div>
+  </div>
 } @else if (product(); as p) {
   <div class="max-w-screen-2xl mx-auto px-4 pt-6 sm:pt-8 pb-12">
     <!-- Breadcrumb -->
@@ -325,12 +343,12 @@
 
     <!-- Tabs: Mô tả / Thông số / Đánh giá -->
     <div class="max-w-4xl">
-      <div class="flex items-center gap-2 border-b border-border/80 mb-6">
+      <div hlmTabsList class="mb-6 gap-2">
         <button
           type="button"
-          class="pb-3 px-4 text-sm font-semibold transition-colors relative"
-          [class.text-primary]="activeTab() === 'desc'"
-          [class.text-muted]="activeTab() !== 'desc'"
+          hlmTabsTrigger
+          [state]="activeTab() === 'desc' ? 'active' : 'inactive'"
+          class="pb-3 px-4 relative"
           (click)="activeTab.set('desc')"
         >
           Mô tả sản phẩm
@@ -341,9 +359,9 @@
 
         <button
           type="button"
-          class="pb-3 px-4 text-sm font-semibold transition-colors relative"
-          [class.text-primary]="activeTab() === 'specs'"
-          [class.text-muted]="activeTab() !== 'specs'"
+          hlmTabsTrigger
+          [state]="activeTab() === 'specs' ? 'active' : 'inactive'"
+          class="pb-3 px-4 relative"
           (click)="activeTab.set('specs')"
         >
           Thông số kỹ thuật
@@ -354,9 +372,9 @@
 
         <button
           type="button"
-          class="pb-3 px-4 text-sm font-semibold transition-colors relative"
-          [class.text-primary]="activeTab() === 'reviews'"
-          [class.text-muted]="activeTab() !== 'reviews'"
+          hlmTabsTrigger
+          [state]="activeTab() === 'reviews' ? 'active' : 'inactive'"
+          class="pb-3 px-4 relative"
           (click)="activeTab.set('reviews')"
         >
           Đánh giá ({{ p.reviewCount || 0 }})

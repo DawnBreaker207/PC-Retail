@@ -39,7 +39,8 @@ import { HlmButtonDirective } from '@shared/ui/button';
 import { CurrencyFormatPipe } from '@shared/pipes/currency-format.pipe';
 import { FallbackImageDirective } from '@shared/directives/fallback-image.directive';
 import { ProductCardComponent } from '@shared/components/product-card.component';
-import { LoadingSpinnerComponent } from '@shared/components/loading-spinner.component';
+import { HlmSkeletonComponent } from '@shared/ui/skeleton';
+import { HlmTabsListDirective, HlmTabsTriggerDirective } from '@shared/ui/tabs';
 import { MockDataService } from '@core/services/mock-data.service';
 import { SeoService } from '@core/services/seo.service';
 import { HttpClient } from '@angular/common/http';
@@ -64,7 +65,9 @@ import { SkuRatingSummary } from '@core/models/common.model';
     CurrencyFormatPipe,
     FallbackImageDirective,
     ProductCardComponent,
-    LoadingSpinnerComponent,
+    HlmSkeletonComponent,
+    HlmTabsListDirective,
+    HlmTabsTriggerDirective,
   ],
   templateUrl: './product-detail.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,

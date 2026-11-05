@@ -2,10 +2,12 @@
   <!-- Danh mục -->
   <div class="relative">
     <select
+      hlmSelect
+      size="sm"
       [value]="filters().category"
       (change)="selectCategory($event)"
       aria-label="Lọc theo danh mục"
-      class="h-9 min-w-[140px] appearance-none rounded-lg border border-border/80 bg-surface dark:bg-surface-dark px-3 pr-8 text-xs font-medium text-foreground shadow-sm transition-colors hover:border-primary/50 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+      class="min-w-[140px]"
     >
       <option value="">Tất cả danh mục</option>
       @for (cat of categories(); track cat.slug) {
@@ -18,10 +20,12 @@
   <!-- Khoảng giá -->
   <div class="relative">
     <select
+      hlmSelect
+      size="sm"
       [value]="selectedPriceLabel()"
       (change)="onPriceSelect($event)"
       aria-label="Lọc theo khoảng giá"
-      class="h-9 min-w-[140px] appearance-none rounded-lg border border-border/80 bg-surface dark:bg-surface-dark px-3 pr-8 text-xs font-medium text-foreground shadow-sm transition-colors hover:border-primary/50 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+      class="min-w-[140px]"
     >
       <option value="">Khoảng giá</option>
       @for (range of priceRanges; track range.label) {
@@ -34,9 +38,11 @@
   <!-- Thương hiệu -->
   <div class="relative">
     <select
+      hlmSelect
+      size="sm"
       (change)="selectBrand($event)"
       aria-label="Lọc theo thương hiệu"
-      class="h-9 min-w-[140px] appearance-none rounded-lg border border-border/80 bg-surface dark:bg-surface-dark px-3 pr-8 text-xs font-medium text-foreground shadow-sm transition-colors hover:border-primary/50 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+      class="min-w-[140px]"
     >
       <option value="">+ Thêm thương hiệu</option>
       @for (brand of brands(); track brand) {
@@ -50,9 +56,11 @@
   @for (spec of specOptions(); track spec.label) {
     <div class="relative">
       <select
+        hlmSelect
+        size="sm"
         (change)="selectSpec(spec.label, $event)"
         [attr.aria-label]="'Lọc theo ' + spec.label"
-        class="h-9 min-w-[140px] appearance-none rounded-lg border border-border/80 bg-surface dark:bg-surface-dark px-3 pr-8 text-xs font-medium text-foreground shadow-sm transition-colors hover:border-primary/50 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+        class="min-w-[140px]"
       >
         <option value="">+ {{ spec.label }}</option>
         @for (value of spec.values; track value) {

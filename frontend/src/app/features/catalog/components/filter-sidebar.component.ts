@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { LucideAngularModule, X, Trash2 } from 'lucide-angular';
 import { HlmBadgeDirective } from '@shared/ui/badge';
 import { HlmButtonDirective } from '@shared/ui/button';
+import { HlmSelectDirective } from '@shared/ui/select';
 
 export interface FilterState {
   q: string;
@@ -37,7 +38,7 @@ export const PRICE_RANGES = [
 @Component({
   selector: 'app-filter-sidebar',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, HlmBadgeDirective, HlmButtonDirective],
+  imports: [FormsModule, LucideAngularModule, HlmBadgeDirective, HlmButtonDirective, HlmSelectDirective],
   templateUrl: './filter-sidebar.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./filter-sidebar.component.css'],
