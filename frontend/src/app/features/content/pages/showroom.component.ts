@@ -1,10 +1,11 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { LucideAngularModule, ChevronRight, MapPin, Phone, Clock } from 'lucide-angular';
+import { LucideAngularModule, MapPin, Phone, Clock } from 'lucide-angular';
+import { HlmBreadcrumbDirective, HlmBreadcrumbLinkDirective, HlmBreadcrumbCurrentDirective } from '@shared/ui/breadcrumb';
 
 @Component({
   selector: 'app-showroom',
-  imports: [RouterLink, LucideAngularModule],
+  imports: [RouterLink, LucideAngularModule, HlmBreadcrumbDirective, HlmBreadcrumbLinkDirective, HlmBreadcrumbCurrentDirective],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './showroom.component.html',
 })

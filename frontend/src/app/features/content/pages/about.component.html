@@ -1,8 +1,8 @@
 <div class="max-w-3xl mx-auto px-4 py-6 lg:py-8">
-  <nav class="flex items-center gap-1.5 text-xs text-muted dark:text-muted-dark mb-4">
-    <a routerLink="/" class="hover:text-primary transition-colors">Trang chủ</a>
-    <lucide-angular [img]="ChevronRight" class="w-3.5 h-3.5 text-muted/60" />
-    <span class="text-ink dark:text-ink-dark font-medium">Giới thiệu</span>
+  <nav hlmBreadcrumb class="mb-4">
+    <a hlmBreadcrumbLink routerLink="/">Trang chủ</a>
+    <span class="text-muted/40 dark:text-muted-dark/40">/</span>
+    <span hlmBreadcrumbCurrent>Giới thiệu</span>
   </nav>
 
   <h1 class="text-xl lg:text-2xl font-bold mb-6">Về DAWN PC Retail</h1>

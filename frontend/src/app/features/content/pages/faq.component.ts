@@ -1,10 +1,11 @@
 import { Component, signal, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { LucideAngularModule, ChevronRight, ChevronDown } from 'lucide-angular';
+import { LucideAngularModule, ChevronDown } from 'lucide-angular';
+import { HlmBreadcrumbDirective, HlmBreadcrumbLinkDirective, HlmBreadcrumbCurrentDirective } from '@shared/ui/breadcrumb';
 
 @Component({
   selector: 'app-faq',
-  imports: [RouterLink, LucideAngularModule],
+  imports: [RouterLink, LucideAngularModule, HlmBreadcrumbDirective, HlmBreadcrumbLinkDirective, HlmBreadcrumbCurrentDirective],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './faq.component.html',
 })

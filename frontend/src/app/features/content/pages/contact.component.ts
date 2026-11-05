@@ -1,7 +1,8 @@
 ﻿import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { LucideAngularModule, ChevronRight, Phone, Mail, MapPin, Send } from 'lucide-angular';
+import { LucideAngularModule, Phone, Mail, MapPin, Send } from 'lucide-angular';
+import { HlmBreadcrumbDirective, HlmBreadcrumbLinkDirective, HlmBreadcrumbCurrentDirective } from '@shared/ui/breadcrumb';
 import { HlmButtonDirective } from '@shared/ui/button';
 import { HlmInputDirective } from '@shared/ui/input';
 import { HlmLabelDirective } from '@shared/ui/label';
@@ -18,6 +19,9 @@ import { ToastService } from '@core/services/toast.service';
     HlmInputDirective,
     HlmLabelDirective,
     HlmTextareaDirective,
+    HlmBreadcrumbDirective,
+    HlmBreadcrumbLinkDirective,
+    HlmBreadcrumbCurrentDirective,
   ],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './contact.component.html',
