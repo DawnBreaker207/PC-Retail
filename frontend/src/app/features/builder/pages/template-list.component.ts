@@ -7,6 +7,7 @@ import { LucideAngularModule, Wrench, Monitor, PackageOpen, ArrowRight } from 'l
 import { HlmButtonDirective } from '@shared/ui/button';
 import { HlmBadgeDirective } from '@shared/ui/badge';
 import { HlmSkeletonComponent } from '@shared/ui/skeleton';
+import { HlmBreadcrumbDirective, HlmBreadcrumbLinkDirective, HlmBreadcrumbCurrentDirective } from '@shared/ui/breadcrumb';
 import { CurrencyFormatPipe } from '@shared/pipes/currency-format.pipe';
 import { ResponsePage, BuildTemplate } from '@core/models/common.model';
 import { ApiEndpoints } from '@core/api/api.endpoints';
@@ -21,6 +22,9 @@ import { ApiEndpoints } from '@core/api/api.endpoints';
     HlmButtonDirective,
     HlmBadgeDirective,
     HlmSkeletonComponent,
+    HlmBreadcrumbDirective,
+    HlmBreadcrumbLinkDirective,
+    HlmBreadcrumbCurrentDirective,
     CurrencyFormatPipe,
   ],
   templateUrl: './template-list.component.html',

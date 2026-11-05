@@ -2,15 +2,15 @@
   <div class="flex items-center justify-between pb-3.5 mb-4 border-b border-border/60 dark:border-border-dark/60">
     <div class="flex items-center gap-2">
       <h2 class="text-base font-bold text-ink dark:text-ink-dark">Cấu hình dự tính</h2>
-      <span class="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary font-bold">
-        {{ selectedItems.length }} linh kiện
-      </span>
+      <span hlmBadge variant="secondary">{{ selectedItems.length }} linh kiện</span>
     </div>
     @if (selectedItems.length > 0) {
       <button
+        hlmBtn
+        variant="ghost"
+        size="sm"
         type="button"
         (click)="clearBuild.emit()"
-        class="text-xs text-muted dark:text-muted-dark hover:text-destructive transition-colors flex items-center gap-1 cursor-pointer"
       >
         <lucide-angular [img]="RotateCcwIcon" class="w-3.5 h-3.5" />
         Làm mới

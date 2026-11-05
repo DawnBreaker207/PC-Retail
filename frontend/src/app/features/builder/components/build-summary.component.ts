@@ -23,6 +23,7 @@ import {
   HardDrive,
 } from 'lucide-angular';
 import { HlmButtonDirective } from '@shared/ui/button';
+import { HlmBadgeDirective } from '@shared/ui/badge';
 import { ToastService } from '@core/services/toast.service';
 import { CartStore } from '@features/cart/store/cart.store';
 import { CurrencyFormatPipe } from '@shared/pipes/currency-format.pipe';
@@ -44,6 +45,7 @@ export interface CompatibilityRuleResult {
     FallbackImageDirective,
     LucideAngularModule,
     HlmButtonDirective,
+    HlmBadgeDirective,
     CurrencyFormatPipe,
   ],
   templateUrl: './build-summary.component.html',

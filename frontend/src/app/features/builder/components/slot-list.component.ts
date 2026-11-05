@@ -19,6 +19,7 @@ import {
   LucideIconData,
 } from 'lucide-angular';
 import { HlmButtonDirective } from '@shared/ui/button';
+import { HlmBadgeDirective } from '@shared/ui/badge';
 import {
   BuilderSlot,
   BuilderSelection,
@@ -38,6 +39,7 @@ import { ProductPickerModalComponent } from './product-picker-modal.component';
     FallbackImageDirective,
     LucideAngularModule,
     HlmButtonDirective,
+    HlmBadgeDirective,
     CurrencyFormatPipe,
     ProductPickerModalComponent,
   ],

@@ -13,10 +13,11 @@ import { BuilderSlot, BuilderSelection, BuilderValidation } from '@core/models/c
 import { SlotListComponent } from '../components/slot-list.component';
 import { BuildSummaryComponent } from '../components/build-summary.component';
 import { HlmSkeletonComponent } from '@shared/ui/skeleton';
+import { HlmBadgeDirective } from '@shared/ui/badge';
 
 @Component({
   selector: 'app-custom-build',
-  imports: [SlotListComponent, BuildSummaryComponent, HlmSkeletonComponent],
+  imports: [SlotListComponent, BuildSummaryComponent, HlmSkeletonComponent, HlmBadgeDirective],
   templateUrl: './custom-build.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './custom-build.component.css',
