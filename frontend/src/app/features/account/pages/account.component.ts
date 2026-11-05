@@ -15,6 +15,7 @@ import {
 import { HlmButtonDirective } from '@shared/ui/button';
 import { HlmInputDirective } from '@shared/ui/input';
 import { HlmBadgeDirective } from '@shared/ui/badge';
+import { HlmLabelDirective } from '@shared/ui/label';
 import { finalize } from 'rxjs';
 import { ToastService } from '@core/services/toast.service';
 import { UserService } from '@core/services/user.service';
@@ -40,6 +41,7 @@ type AccountTab = 'profile' | 'password' | 'address' | 'vouchers';
     HlmButtonDirective,
     HlmInputDirective,
     HlmBadgeDirective,
+    HlmLabelDirective,
     AddressBookComponent,
     MyVouchersComponent,
   ],

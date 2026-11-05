@@ -4,7 +4,8 @@ import { LucideAngularModule, Plus, Edit2, Trash2, MapPin } from 'lucide-angular
 import { HlmButtonDirective } from '@shared/ui/button';
 import { HlmBadgeDirective } from '@shared/ui/badge';
 import { EmptyStateComponent } from '@shared/components/empty-state.component';
-import { LoadingSpinnerComponent } from '@shared/components/loading-spinner.component';
+import { HlmSkeletonComponent } from '@shared/ui/skeleton';
+import { HlmAlertDialogComponent } from '@shared/ui/alert-dialog';
 import { ToastService } from '@core/services/toast.service';
 import { UserService } from '@core/services/user.service';
 import { Address } from '@core/models/common.model';
@@ -17,7 +18,8 @@ import { AddressFormComponent } from './address-form.component';
     HlmButtonDirective,
     HlmBadgeDirective,
     EmptyStateComponent,
-    LoadingSpinnerComponent,
+    HlmSkeletonComponent,
+    HlmAlertDialogComponent,
     AddressFormComponent,
   ],
   changeDetection: ChangeDetectionStrategy.Eager,
@@ -37,6 +39,8 @@ export class AddressBookComponent {
   loading = signal(true);
   isCreating = signal(false);
   editingAddress = signal<Address | null>(null);
+  deleteDialogOpen = signal(false);
+  pendingDeleteId = signal<number | null>(null);
 
   constructor() {
     this.loadData();
@@ -72,7 +76,14 @@ export class AddressBookComponent {
   }
 
   deleteAddress(id: number) {
-    if (!window.confirm('Bạn có chắc chắn muốn xóa địa chỉ này?')) return;
+    this.pendingDeleteId.set(id);
+    this.deleteDialogOpen.set(true);
+  }
+
+  confirmDeleteAddress() {
+    const id = this.pendingDeleteId();
+    if (id == null) return;
+    this.deleteDialogOpen.set(false);
     this.userService
       .deleteAddress(id)
       .pipe(takeUntilDestroyed(this.destroyRef))

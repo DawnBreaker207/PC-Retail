@@ -15,33 +15,33 @@
 
     <form [formGroup]="form" (ngSubmit)="submit()" class="space-y-4">
       <div>
-        <label for="label" class="block text-xs font-semibold text-ink dark:text-ink-dark mb-1.5">Tên gợi nhớ (VD: Nhà riêng, Công ty...)</label>
+        <label hlmLabel for="label" class="block text-xs font-semibold text-ink dark:text-ink-dark mb-1.5">Tên gợi nhớ (VD: Nhà riêng, Công ty...)</label>
         <input hlmInput id="label" formControlName="label" placeholder="VD: Nhà riêng" class="w-full" />
       </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
-          <label for="fullName" class="block text-xs font-semibold text-ink dark:text-ink-dark mb-1.5">Người nhận</label>
+          <label hlmLabel for="fullName" class="block text-xs font-semibold text-ink dark:text-ink-dark mb-1.5">Người nhận</label>
           <input hlmInput id="fullName" formControlName="fullName" placeholder="Họ và tên" class="w-full" />
         </div>
         <div>
-          <label for="phone" class="block text-xs font-semibold text-ink dark:text-ink-dark mb-1.5">Số điện thoại</label>
+          <label hlmLabel for="phone" class="block text-xs font-semibold text-ink dark:text-ink-dark mb-1.5">Số điện thoại</label>
           <input hlmInput id="phone" formControlName="phone" placeholder="Số điện thoại" class="w-full" />
         </div>
       </div>
 
       <div>
-        <label for="street" class="block text-xs font-semibold text-ink dark:text-ink-dark mb-1.5">Địa chỉ cụ thể</label>
+        <label hlmLabel for="street" class="block text-xs font-semibold text-ink dark:text-ink-dark mb-1.5">Địa chỉ cụ thể</label>
         <input hlmInput id="street" formControlName="street" placeholder="Số nhà, tên đường, ngõ ngách" class="w-full" />
       </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
-          <label for="district" class="block text-xs font-semibold text-ink dark:text-ink-dark mb-1.5">Quận / Huyện</label>
+          <label hlmLabel for="district" class="block text-xs font-semibold text-ink dark:text-ink-dark mb-1.5">Quận / Huyện</label>
           <input hlmInput id="district" formControlName="district" placeholder="Quận/Huyện" class="w-full" />
         </div>
         <div>
-          <label for="city" class="block text-xs font-semibold text-ink dark:text-ink-dark mb-1.5">Tỉnh / Thành phố</label>
+          <label hlmLabel for="city" class="block text-xs font-semibold text-ink dark:text-ink-dark mb-1.5">Tỉnh / Thành phố</label>
           <input hlmInput id="city" formControlName="city" placeholder="Tỉnh/Thành phố" class="w-full" />
         </div>
       </div>

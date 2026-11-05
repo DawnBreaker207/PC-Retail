@@ -25,22 +25,23 @@
 
     <form [formGroup]="form" (ngSubmit)="submit()" class="flex flex-col gap-4">
       <div>
-        <label class="block text-xs font-medium text-ink dark:text-ink-dark mb-1.5">Họ và tên</label>
+        <label hlmLabel class="block text-xs font-medium text-ink dark:text-ink-dark mb-1.5">Họ và tên</label>
         <input hlmInput formControlName="fullName" placeholder="Nhập họ và tên của bạn" class="w-full" />
       </div>
 
       <div>
-        <label class="block text-xs font-medium text-ink dark:text-ink-dark mb-1.5">Số điện thoại</label>
+        <label hlmLabel class="block text-xs font-medium text-ink dark:text-ink-dark mb-1.5">Số điện thoại</label>
         <input hlmInput formControlName="phone" placeholder="Nhập số điện thoại liên hệ" class="w-full" />
       </div>
 
       <div>
-        <label class="block text-xs font-medium text-ink dark:text-ink-dark mb-1.5">Nội dung yêu cầu</label>
+        <label hlmLabel class="block text-xs font-medium text-ink dark:text-ink-dark mb-1.5">Nội dung yêu cầu</label>
         <textarea
+          hlmTextarea
           formControlName="content"
           rows="4"
           placeholder="Bạn cần hỗ trợ gì?"
-          class="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+          class="w-full"
         ></textarea>
       </div>
 

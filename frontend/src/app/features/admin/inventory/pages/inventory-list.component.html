@@ -224,7 +224,7 @@
 
     <div class="space-y-4 py-1">
       <div>
-        <label for="restock-quantity" class="text-xs font-semibold text-ink dark:text-ink-dark block mb-1">Số lượng nhập thêm:</label>
+        <label hlmLabel for="restock-quantity" class="text-xs font-semibold text-ink dark:text-ink-dark block mb-1">Số lượng nhập thêm:</label>
         <input
           hlmInput
           id="restock-quantity"
@@ -236,14 +236,14 @@
       </div>
 
       <div>
-        <label for="restock-note" class="text-xs font-semibold text-ink dark:text-ink-dark block mb-1">Ghi chú phiếu nhập:</label>
+        <label hlmLabel for="restock-note" class="text-xs font-semibold text-ink dark:text-ink-dark block mb-1">Ghi chú phiếu nhập:</label>
         <textarea
-          hlmInput
+          hlmTextarea
           id="restock-note"
           rows="3"
           [(ngModel)]="restockNote"
           placeholder="Ví dụ: Nhập hàng đợt 2 từ NPP ASUS Việt Nam..."
-          class="!h-auto !text-xs py-2"
+          class="w-full text-xs"
         ></textarea>
       </div>
     </div>

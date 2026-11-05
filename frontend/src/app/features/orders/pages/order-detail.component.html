@@ -1,7 +1,26 @@
 <div class="max-w-screen-2xl mx-auto px-4 py-6 lg:py-8 min-h-[60vh]">
   @if (isLoading()) {
-    <div class="flex justify-center py-20">
-      <app-loading-spinner [size]="40" />
+    <div class="space-y-4">
+      <hlm-skeleton class="h-8 w-48" />
+      <div class="rounded-2xl border border-border/60 dark:border-border-dark/60 p-6 space-y-4">
+        <hlm-skeleton class="h-5 w-32 rounded-full" />
+        <div class="space-y-3">
+          @for (_ of [1,2,3]; track $index) {
+            <div class="flex gap-4">
+              <hlm-skeleton class="size-16 rounded-xl shrink-0" />
+              <div class="flex-1 space-y-2">
+                <hlm-skeleton class="h-4 w-3/4" />
+                <hlm-skeleton class="h-3 w-1/2" />
+              </div>
+              <hlm-skeleton class="h-5 w-24" />
+            </div>
+          }
+        </div>
+        <div class="pt-3 border-t border-border/40 space-y-2">
+          <hlm-skeleton class="h-3 w-40 ml-auto" />
+          <hlm-skeleton class="h-5 w-32 ml-auto" />
+        </div>
+      </div>
     </div>
   } @else if (order(); as o) {
     <!-- Top Bar -->
@@ -165,7 +184,7 @@
             <span class="text-muted dark:text-muted-dark">Phí vận chuyển:</span>
             <span class="text-ink dark:text-ink-dark font-medium">{{ sub.shippingFee === 0 ? 'Miễn phí' : (sub.shippingFee | currencyFormat) }}</span>
           </div>
-          <hr class="border-border/60 dark:border-border-dark/60 my-3" />
+          <div hlmSeparator class="my-3"></div>
           <div class="flex justify-between items-baseline">
             <span class="text-base font-semibold text-ink dark:text-ink-dark">Tổng cộng:</span>
             <span class="text-primary text-xl font-black">{{ sub.finalAmount | currencyFormat }}</span>
@@ -183,6 +202,18 @@
         (submitted)="loadOrder(o.id)"
       />
     }
+
+    <!-- Cancel Order Dialog -->
+    <hlm-alert-dialog
+      [open]="cancelDialogOpen()"
+      title="Hủy đơn hàng"
+      description="Bạn có chắc chắn muốn hủy đơn hàng này? Hành động này không thể hoàn tác."
+      confirmLabel="Hủy đơn"
+      cancelLabel="Giữ lại"
+      [destructive]="true"
+      (confirmed)="confirmCancelOrder()"
+      (cancelled)="cancelDialogOpen.set(false)"
+    />
   } @else {
     <div class="text-center py-20 bg-surface dark:bg-surface-dark rounded-2xl border border-border/80 p-8 my-6 max-w-xl mx-auto shadow-xs">
       <div class="w-16 h-16 mx-auto rounded-full bg-muted/20 flex items-center justify-center mb-4 text-muted dark:text-muted-dark">

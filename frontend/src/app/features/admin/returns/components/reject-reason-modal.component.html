@@ -1,12 +1,12 @@
 <p class="text-xs text-muted-foreground mb-3">Vui lòng nhập lý do từ chối, khách hàng sẽ nhìn thấy nội dung này.</p>
 <textarea
-  hlmInput
+  hlmTextarea
   rows="4"
   placeholder="Lý do từ chối (bắt buộc)"
   [ngModel]="reason()"
   (ngModelChange)="reason.set($event)"
   name="reason"
-  class="w-full text-xs p-3 rounded-md border border-input bg-background"
+  class="w-full text-xs"
 ></textarea>
 
 <div class="flex justify-end gap-2 mt-4">

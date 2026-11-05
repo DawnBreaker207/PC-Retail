@@ -24,7 +24,7 @@ import {
   HelpCircle,
 } from 'lucide-angular';
 import { HlmButtonDirective } from '@shared/ui/button';
-import { HlmInputDirective } from '@shared/ui/input';
+import { HlmTextareaDirective } from '@shared/ui/textarea';
 import { HlmBadgeDirective } from '@shared/ui/badge';
 import {
   HlmDialogContentDirective,
@@ -53,7 +53,7 @@ const TYPE_LABEL: Record<string, string> = {
     FormsModule,
     LucideAngularModule,
     HlmButtonDirective,
-    HlmInputDirective,
+    HlmTextareaDirective,
     HlmBadgeDirective,
     HlmDialogContentDirective,
     HlmDialogHeaderDirective,

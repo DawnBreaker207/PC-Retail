@@ -11,6 +11,8 @@ import { WarehouseMapComponent } from '../components/warehouse-map.component';
 import { HlmButtonDirective } from '@shared/ui/button';
 import { HlmInputDirective } from '@shared/ui/input';
 import { HlmBadgeDirective } from '@shared/ui/badge';
+import { HlmLabelDirective } from '@shared/ui/label';
+import { HlmTextareaDirective } from '@shared/ui/textarea';
 import {
   HlmTableDirective,
   HlmTableHeaderDirective,
@@ -78,6 +80,8 @@ interface InventoryTransaction {
     HlmButtonDirective,
     HlmInputDirective,
     HlmBadgeDirective,
+    HlmLabelDirective,
+    HlmTextareaDirective,
     HlmTableDirective,
     HlmTableHeaderDirective,
     HlmTableBodyDirective,

@@ -13,13 +13,14 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { LucideAngularModule, X, Loader2 } from 'lucide-angular';
 import { HlmButtonDirective } from '@shared/ui/button';
 import { HlmInputDirective } from '@shared/ui/input';
+import { HlmLabelDirective } from '@shared/ui/label';
 import { ToastService } from '@core/services/toast.service';
 import { UserService } from '@core/services/user.service';
 import { Address } from '@core/models/common.model';
 
 @Component({
   selector: 'app-address-form',
-  imports: [ReactiveFormsModule, LucideAngularModule, HlmButtonDirective, HlmInputDirective],
+  imports: [ReactiveFormsModule, LucideAngularModule, HlmButtonDirective, HlmInputDirective, HlmLabelDirective],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './address-form.component.html',
 })

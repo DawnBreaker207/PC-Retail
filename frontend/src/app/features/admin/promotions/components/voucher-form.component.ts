@@ -12,13 +12,14 @@ import { HttpClient } from '@angular/common/http';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HlmButtonDirective } from '@shared/ui/button';
 import { HlmInputDirective } from '@shared/ui/input';
+import { HlmLabelDirective } from '@shared/ui/label';
 import { ToastService } from '@core/services/toast.service';
 import { ApiEndpoints } from '@core/api/api.endpoints';
 
 @Component({
   selector: 'app-voucher-form',
   standalone: true,
-  imports: [FormsModule, ReactiveFormsModule, HlmButtonDirective, HlmInputDirective],
+  imports: [FormsModule, ReactiveFormsModule, HlmButtonDirective, HlmInputDirective, HlmLabelDirective],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './voucher-form.component.html',
 })

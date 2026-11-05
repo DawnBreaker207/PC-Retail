@@ -22,7 +22,9 @@ import {
 } from 'lucide-angular';
 import { HlmButtonDirective } from '@shared/ui/button';
 import { HlmBadgeDirective } from '@shared/ui/badge';
-import { LoadingSpinnerComponent } from '@shared/components/loading-spinner.component';
+import { HlmSkeletonComponent } from '@shared/ui/skeleton';
+import { HlmAlertDialogComponent } from '@shared/ui/alert-dialog';
+import { HlmSeparatorDirective } from '@shared/ui/separator';
 import { CurrencyFormatPipe } from '@shared/pipes/currency-format.pipe';
 import { FallbackImageDirective } from '@shared/directives/fallback-image.directive';
 import { DateHelper } from '@shared/utils/date.helper';
@@ -54,7 +56,9 @@ const STATUS_STEP_MAP: Record<string, number> = {
     LucideAngularModule,
     HlmButtonDirective,
     HlmBadgeDirective,
-    LoadingSpinnerComponent,
+    HlmSkeletonComponent,
+    HlmAlertDialogComponent,
+    HlmSeparatorDirective,
     CurrencyFormatPipe,
     ReviewFormComponent,
   ],
@@ -79,6 +83,7 @@ export class OrderDetailComponent implements OnInit {
   isLoading = signal(false);
   returnInfo = signal<AdminReturnRequest | null>(null);
   reviewItem = signal<OrderItem | null>(null);
+  cancelDialogOpen = signal(false);
 
   steps = STATUS_STEPS;
 
@@ -133,9 +138,13 @@ export class OrderDetailComponent implements OnInit {
   }
 
   cancelOrder() {
+    this.cancelDialogOpen.set(true);
+  }
+
+  confirmCancelOrder() {
     const o = this.order();
     if (!o) return;
-    if (!window.confirm('Bạn có chắc chắn muốn hủy đơn hàng này?')) return;
+    this.cancelDialogOpen.set(false);
     this.orderService
       .cancelOrder(o.id)
       .pipe(takeUntilDestroyed(this.destroyRef))

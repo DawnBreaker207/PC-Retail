@@ -12,6 +12,7 @@ import { isPlatformBrowser } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { LucideAngularModule, Check, Truck, ShieldCheck, CreditCard } from 'lucide-angular';
+import { HlmSeparatorDirective } from '@shared/ui/separator';
 import { CurrencyFormatPipe } from '@shared/pipes/currency-format.pipe';
 import { FallbackImageDirective } from '@shared/directives/fallback-image.directive';
 import { ShippingFormComponent, ShippingStepResult } from '../components/shipping-form.component';
@@ -32,6 +33,7 @@ import { switchMap, finalize } from 'rxjs';
     FallbackImageDirective,
     ShippingFormComponent,
     OrderReviewComponent,
+    HlmSeparatorDirective,
   ],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './checkout.component.html',

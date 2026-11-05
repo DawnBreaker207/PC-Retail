@@ -20,6 +20,8 @@ import {
 } from 'lucide-angular';
 import { HlmButtonDirective } from '@shared/ui/button';
 import { HlmInputDirective } from '@shared/ui/input';
+import { HlmLabelDirective } from '@shared/ui/label';
+import { HlmSeparatorDirective } from '@shared/ui/separator';
 import { ShippingAddress, TaxInfo, FulfillmentType } from '@core/models/common.model';
 import { AuthService } from '@core/auth/auth.service';
 import { CheckoutService } from '@core/services/checkout.service';
@@ -35,7 +37,7 @@ export interface ShippingStepResult {
 @Component({
   selector: 'app-shipping-form',
   standalone: true,
-  imports: [ReactiveFormsModule, LucideAngularModule, HlmButtonDirective, HlmInputDirective],
+  imports: [ReactiveFormsModule, LucideAngularModule, HlmButtonDirective, HlmInputDirective, HlmLabelDirective, HlmSeparatorDirective],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './shipping-form.component.html',
 })

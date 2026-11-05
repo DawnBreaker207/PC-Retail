@@ -2,7 +2,7 @@ import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { LucideAngularModule, ShoppingCart } from 'lucide-angular';
 import { HlmButtonDirective } from '@shared/ui/button';
-import { LoadingSpinnerComponent } from '@shared/components/loading-spinner.component';
+import { HlmSkeletonComponent } from '@shared/ui/skeleton';
 import { CartStore } from '@features/cart/store/cart.store';
 import { CartItemComponent } from '../components/cart-item.component';
 import { OrderSummaryComponent } from '../components/order-summary.component';
@@ -14,7 +14,7 @@ import { OrderSummaryComponent } from '../components/order-summary.component';
     RouterLink,
     LucideAngularModule,
     HlmButtonDirective,
-    LoadingSpinnerComponent,
+    HlmSkeletonComponent,
     CartItemComponent,
     OrderSummaryComponent,
   ],

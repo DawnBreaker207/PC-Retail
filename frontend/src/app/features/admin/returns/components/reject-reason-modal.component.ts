@@ -1,12 +1,12 @@
 import { Component, output, signal, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HlmButtonDirective } from '@shared/ui/button';
-import { HlmInputDirective } from '@shared/ui/input';
+import { HlmTextareaDirective } from '@shared/ui/textarea';
 
 @Component({
   selector: 'app-reject-reason-modal',
   standalone: true,
-  imports: [FormsModule, HlmButtonDirective, HlmInputDirective],
+  imports: [FormsModule, HlmButtonDirective, HlmTextareaDirective],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './reject-reason-modal.component.html',
 })

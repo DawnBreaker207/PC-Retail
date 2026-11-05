@@ -6,7 +6,7 @@ import { HttpClient } from '@angular/common/http';
 import { LucideAngularModule, Wrench, Monitor, PackageOpen, ArrowRight } from 'lucide-angular';
 import { HlmButtonDirective } from '@shared/ui/button';
 import { HlmBadgeDirective } from '@shared/ui/badge';
-import { LoadingSpinnerComponent } from '@shared/components/loading-spinner.component';
+import { HlmSkeletonComponent } from '@shared/ui/skeleton';
 import { CurrencyFormatPipe } from '@shared/pipes/currency-format.pipe';
 import { ResponsePage, BuildTemplate } from '@core/models/common.model';
 import { ApiEndpoints } from '@core/api/api.endpoints';
@@ -20,7 +20,7 @@ import { ApiEndpoints } from '@core/api/api.endpoints';
     LucideAngularModule,
     HlmButtonDirective,
     HlmBadgeDirective,
-    LoadingSpinnerComponent,
+    HlmSkeletonComponent,
     CurrencyFormatPipe,
   ],
   templateUrl: './template-list.component.html',

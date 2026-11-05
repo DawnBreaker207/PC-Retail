@@ -339,7 +339,7 @@
     </div>
 
     <!-- Divider -->
-    <hr class="border-border/80 my-8 lg:my-10" />
+    <div hlmSeparator class="my-8 lg:my-10"></div>
 
     <!-- Tabs: Mô tả / Thông số / Đánh giá -->
     <div class="max-w-4xl">
@@ -452,7 +452,7 @@
 
     <!-- Related Products -->
     @if (relatedProducts.length > 0) {
-      <hr class="border-border/80 my-8 lg:my-10" />
+      <div hlmSeparator class="my-8 lg:my-10"></div>
       <h2 class="text-lg lg:text-xl font-bold mb-5 text-foreground">Sản phẩm liên quan</h2>
       <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4">
         @for (rp of relatedProducts; track rp.id) {

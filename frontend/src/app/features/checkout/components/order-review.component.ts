@@ -1,13 +1,14 @@
 import { Component, input, output, ChangeDetectionStrategy } from '@angular/core';
 import { LucideAngularModule, MapPin, Loader2, Store, Truck, Building2 } from 'lucide-angular';
 import { HlmButtonDirective } from '@shared/ui/button';
+import { HlmSeparatorDirective } from '@shared/ui/separator';
 import { CurrencyFormatPipe } from '@shared/pipes/currency-format.pipe';
 import { CartItem, ShippingAddress, TaxInfo, FulfillmentType } from '@core/models/common.model';
 
 @Component({
   selector: 'app-order-review',
   standalone: true,
-  imports: [LucideAngularModule, HlmButtonDirective, CurrencyFormatPipe],
+  imports: [LucideAngularModule, HlmButtonDirective, HlmSeparatorDirective, CurrencyFormatPipe],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './order-review.component.html',
 })

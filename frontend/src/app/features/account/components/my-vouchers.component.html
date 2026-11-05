@@ -19,8 +19,18 @@
   </div>
 
   @if (loading()) {
-    <div class="flex justify-center py-10">
-      <app-loading-spinner [size]="36" />
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+      @for (_ of [1,2,3,4]; track $index) {
+        <div class="rounded-xl border border-dashed border-border/60 p-4 space-y-2.5">
+          <div class="flex justify-between">
+            <hlm-skeleton class="h-4 w-28" />
+            <hlm-skeleton class="size-5 rounded" />
+          </div>
+          <hlm-skeleton class="h-4 w-3/4" />
+          <hlm-skeleton class="h-3 w-full" />
+          <hlm-skeleton class="h-3 w-2/3" />
+        </div>
+      }
     </div>
   } @else if (vouchers().length === 0) {
     <app-empty-state title="Chưa có mã ưu đãi nào" description="Theo dõi các chương trình khuyến mãi để nhận thêm voucher mới nhé." />

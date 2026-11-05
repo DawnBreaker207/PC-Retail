@@ -4,6 +4,8 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { LucideAngularModule, ChevronRight, Phone, Mail, MapPin, Send } from 'lucide-angular';
 import { HlmButtonDirective } from '@shared/ui/button';
 import { HlmInputDirective } from '@shared/ui/input';
+import { HlmLabelDirective } from '@shared/ui/label';
+import { HlmTextareaDirective } from '@shared/ui/textarea';
 import { ToastService } from '@core/services/toast.service';
 
 @Component({
@@ -14,6 +16,8 @@ import { ToastService } from '@core/services/toast.service';
     LucideAngularModule,
     HlmButtonDirective,
     HlmInputDirective,
+    HlmLabelDirective,
+    HlmTextareaDirective,
   ],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './contact.component.html',

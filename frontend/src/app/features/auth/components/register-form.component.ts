@@ -9,6 +9,7 @@ import {
 import { LucideAngularModule, Eye, EyeOff, Loader2 } from 'lucide-angular';
 import { HlmButtonDirective } from '@shared/ui/button';
 import { HlmInputDirective } from '@shared/ui/input';
+import { HlmLabelDirective } from '@shared/ui/label';
 import { AuthService } from '@core/auth/auth.service';
 import { finalize, switchMap } from 'rxjs';
 
@@ -21,7 +22,7 @@ function passwordMatchValidator(control: AbstractControl): ValidationErrors | nu
 @Component({
   selector: 'app-register-form',
   standalone: true,
-  imports: [ReactiveFormsModule, LucideAngularModule, HlmButtonDirective, HlmInputDirective],
+  imports: [ReactiveFormsModule, LucideAngularModule, HlmButtonDirective, HlmInputDirective, HlmLabelDirective],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './register-form.component.html',
 })

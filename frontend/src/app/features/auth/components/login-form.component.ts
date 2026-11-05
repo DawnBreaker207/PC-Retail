@@ -4,6 +4,7 @@ import { RouterLink } from '@angular/router';
 import { LucideAngularModule, Eye, EyeOff, Loader2 } from 'lucide-angular';
 import { HlmButtonDirective } from '@shared/ui/button';
 import { HlmInputDirective } from '@shared/ui/input';
+import { HlmLabelDirective } from '@shared/ui/label';
 import { ToastService } from '@core/services/toast.service';
 import { AuthService } from '@core/auth/auth.service';
 import { HttpClient, HttpContext, HttpParams } from '@angular/common/http';
@@ -21,6 +22,7 @@ import { catchError, finalize, of, switchMap } from 'rxjs';
     LucideAngularModule,
     HlmButtonDirective,
     HlmInputDirective,
+    HlmLabelDirective,
   ],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './login-form.component.html',

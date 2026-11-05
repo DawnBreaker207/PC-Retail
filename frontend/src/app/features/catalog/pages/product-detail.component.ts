@@ -35,6 +35,7 @@ import {
   X,
 } from 'lucide-angular';
 import { HlmBadgeDirective } from '@shared/ui/badge';
+import { HlmSeparatorDirective } from '@shared/ui/separator';
 import { HlmBreadcrumbDirective, HlmBreadcrumbLinkDirective, HlmBreadcrumbCurrentDirective } from '@shared/ui/breadcrumb';
 import { HlmButtonDirective } from '@shared/ui/button';
 import { CurrencyFormatPipe } from '@shared/pipes/currency-format.pipe';
@@ -72,6 +73,7 @@ import { SkuRatingSummary } from '@core/models/common.model';
     HlmBreadcrumbCurrentDirective,
     HlmTabsListDirective,
     HlmTabsTriggerDirective,
+    HlmSeparatorDirective,
   ],
   templateUrl: './product-detail.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,

@@ -5,6 +5,7 @@ import { finalize } from 'rxjs';
 import { LucideAngularModule, Loader2, CheckCircle2 } from 'lucide-angular';
 import { HlmButtonDirective } from '@shared/ui/button';
 import { HlmInputDirective } from '@shared/ui/input';
+import { HlmLabelDirective } from '@shared/ui/label';
 import { AuthService } from '@core/auth/auth.service';
 
 @Component({
@@ -16,6 +17,7 @@ import { AuthService } from '@core/auth/auth.service';
     LucideAngularModule,
     HlmButtonDirective,
     HlmInputDirective,
+    HlmLabelDirective,
   ],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './forgot-password-form.component.html',

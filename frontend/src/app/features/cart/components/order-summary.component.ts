@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { LucideAngularModule, Ticket, CheckCircle2, X } from 'lucide-angular';
 import { HlmButtonDirective } from '@shared/ui/button';
 import { HlmInputDirective } from '@shared/ui/input';
+import { HlmSeparatorDirective } from '@shared/ui/separator';
 import { CurrencyFormatPipe } from '@shared/pipes/currency-format.pipe';
 import { CartStore } from '@features/cart/store/cart.store';
 import { PromotionService } from '@core/services/promotion.service';
@@ -18,6 +19,7 @@ import { ToastService } from '@core/services/toast.service';
     LucideAngularModule,
     HlmButtonDirective,
     HlmInputDirective,
+    HlmSeparatorDirective,
     CurrencyFormatPipe,
   ],
   changeDetection: ChangeDetectionStrategy.Eager,

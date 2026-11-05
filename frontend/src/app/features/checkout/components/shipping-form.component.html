@@ -48,7 +48,7 @@
 
     @if (form.controls.fulfillmentType.value === 'PICKUP') {
       <div class="mt-4 p-4 rounded-xl bg-muted/20 dark:bg-muted-dark/10 border border-border/80">
-        <label for="showroomSelect" class="block text-xs font-semibold text-foreground mb-1.5">
+        <label hlmLabel for="showroomSelect" class="block text-xs font-semibold text-foreground mb-1.5">
           Chọn Showroom thuận tiện cho bạn <span class="text-destructive">*</span>
         </label>
         <select
@@ -68,7 +68,7 @@
     }
   </div>
 
-  <hr class="border-border/70 dark:border-border-dark/70" />
+  <div hlmSeparator></div>
 
   <!-- Customer Information -->
   <div>
@@ -79,7 +79,7 @@
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
       <!-- Full Name -->
       <div class="sm:col-span-2">
-        <label for="fullName" class="block text-xs font-semibold text-foreground mb-1.5">
+        <label hlmLabel for="fullName" class="block text-xs font-semibold text-foreground mb-1.5">
           Họ và tên người nhận <span class="text-destructive">*</span>
         </label>
         <input
@@ -97,7 +97,7 @@
 
       <!-- Phone -->
       <div class="sm:col-span-2">
-        <label for="phone" class="block text-xs font-semibold text-foreground mb-1.5">
+        <label hlmLabel for="phone" class="block text-xs font-semibold text-foreground mb-1.5">
           Số điện thoại nhận hàng <span class="text-destructive">*</span>
         </label>
         <input
@@ -186,7 +186,7 @@
       @if (form.controls.fulfillmentType.value === 'DELIVERY') {
         <!-- City -->
         <div>
-          <label for="city" class="block text-xs font-semibold text-foreground mb-1.5">
+          <label hlmLabel for="city" class="block text-xs font-semibold text-foreground mb-1.5">
             Tỉnh / Thành phố <span class="text-destructive">*</span>
           </label>
           <div class="relative">
@@ -209,7 +209,7 @@
 
         <!-- District -->
         <div>
-          <label for="district" class="block text-xs font-semibold text-foreground mb-1.5">
+          <label hlmLabel for="district" class="block text-xs font-semibold text-foreground mb-1.5">
             Quận / Huyện <span class="text-destructive">*</span>
           </label>
           <input
@@ -227,7 +227,7 @@
 
         <!-- Street -->
         <div class="sm:col-span-2">
-          <label for="street" class="block text-xs font-semibold text-foreground mb-1.5">
+          <label hlmLabel for="street" class="block text-xs font-semibold text-foreground mb-1.5">
             Địa chỉ chi tiết (số nhà, tên đường, phường/xã) <span class="text-destructive">*</span>
           </label>
           <input
@@ -246,7 +246,7 @@
     </div>
   </div>
 
-  <hr class="border-border/70 dark:border-border-dark/70" />
+  <div hlmSeparator></div>
 
   <!-- VAT Tax Invoice Section -->
   <div class="rounded-xl border border-border/80 p-5 bg-muted/10 dark:bg-muted-dark/5">
@@ -265,7 +265,7 @@
     @if (form.controls.invoiceRequested.value) {
       <div class="mt-4 pt-4 border-t border-border/70 grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div class="sm:col-span-2">
-          <label for="companyName" class="block text-xs font-semibold text-foreground mb-1.5">
+          <label hlmLabel for="companyName" class="block text-xs font-semibold text-foreground mb-1.5">
             Tên công ty / Doanh nghiệp <span class="text-destructive">*</span>
           </label>
           <input
@@ -277,7 +277,7 @@
           />
         </div>
         <div>
-          <label for="taxCode" class="block text-xs font-semibold text-foreground mb-1.5">
+          <label hlmLabel for="taxCode" class="block text-xs font-semibold text-foreground mb-1.5">
             Mã số thuế doanh nghiệp <span class="text-destructive">*</span>
           </label>
           <input
@@ -289,7 +289,7 @@
           />
         </div>
         <div>
-          <label for="invoiceEmail" class="block text-xs font-semibold text-foreground mb-1.5">
+          <label hlmLabel for="invoiceEmail" class="block text-xs font-semibold text-foreground mb-1.5">
             Email nhận hóa đơn điện tử (.xml, .pdf)
           </label>
           <input
@@ -302,7 +302,7 @@
           />
         </div>
         <div class="sm:col-span-2">
-          <label for="companyAddress" class="block text-xs font-semibold text-foreground mb-1.5">
+          <label hlmLabel for="companyAddress" class="block text-xs font-semibold text-foreground mb-1.5">
             Địa chỉ doanh nghiệp (theo giấy phép ĐKKD) <span class="text-destructive">*</span>
           </label>
           <input

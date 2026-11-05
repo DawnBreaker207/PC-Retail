@@ -12,11 +12,11 @@ import { BuilderService } from '../services/builder.service';
 import { BuilderSlot, BuilderSelection, BuilderValidation } from '@core/models/common.model';
 import { SlotListComponent } from '../components/slot-list.component';
 import { BuildSummaryComponent } from '../components/build-summary.component';
-import { LoadingSpinnerComponent } from '@shared/components/loading-spinner.component';
+import { HlmSkeletonComponent } from '@shared/ui/skeleton';
 
 @Component({
   selector: 'app-custom-build',
-  imports: [SlotListComponent, BuildSummaryComponent, LoadingSpinnerComponent],
+  imports: [SlotListComponent, BuildSummaryComponent, HlmSkeletonComponent],
   templateUrl: './custom-build.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './custom-build.component.css',

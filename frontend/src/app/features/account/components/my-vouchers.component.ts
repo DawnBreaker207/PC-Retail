@@ -5,7 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { LucideAngularModule, Ticket, Gift, Loader2 } from 'lucide-angular';
 import { HlmButtonDirective } from '@shared/ui/button';
 import { HlmInputDirective } from '@shared/ui/input';
-import { LoadingSpinnerComponent } from '@shared/components/loading-spinner.component';
+import { HlmSkeletonComponent } from '@shared/ui/skeleton';
 import { EmptyStateComponent } from '@shared/components/empty-state.component';
 import { CurrencyFormatPipe } from '@shared/pipes/currency-format.pipe';
 import { ToastService } from '@core/services/toast.service';
@@ -19,7 +19,7 @@ import { Voucher, VoucherValidationResult } from '@core/models/common.model';
     LucideAngularModule,
     HlmButtonDirective,
     HlmInputDirective,
-    LoadingSpinnerComponent,
+    HlmSkeletonComponent,
     EmptyStateComponent,
     CurrencyFormatPipe,
   ],

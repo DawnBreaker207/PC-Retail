@@ -2,6 +2,8 @@ import { Component, inject, signal, input, output, ChangeDetectionStrategy } fro
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule, Star, Upload, X, Loader2 } from 'lucide-angular';
 import { HlmButtonDirective } from '@shared/ui/button';
+import { HlmLabelDirective } from '@shared/ui/label';
+import { HlmTextareaDirective } from '@shared/ui/textarea';
 import { ToastService } from '@core/services/toast.service';
 import { FallbackImageDirective } from '@shared/directives/fallback-image.directive';
 import { OrderService } from '@core/services/order.service';
@@ -9,7 +11,7 @@ import { OrderItem } from '@core/models/common.model';
 
 @Component({
   selector: 'app-review-form',
-  imports: [FormsModule, LucideAngularModule, HlmButtonDirective, FallbackImageDirective],
+  imports: [FormsModule, LucideAngularModule, HlmButtonDirective, HlmLabelDirective, HlmTextareaDirective, FallbackImageDirective],
   templateUrl: './review-form.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './review-form.component.css',

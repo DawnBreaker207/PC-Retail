@@ -13,6 +13,8 @@ import { HttpClient } from '@angular/common/http';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HlmButtonDirective } from '@shared/ui/button';
 import { HlmInputDirective } from '@shared/ui/input';
+import { HlmLabelDirective } from '@shared/ui/label';
+import { HlmTextareaDirective } from '@shared/ui/textarea';
 import { ToastService } from '@core/services/toast.service';
 import { ApiEndpoints } from '@core/api/api.endpoints';
 import { MockDataService } from '@core/services/mock-data.service';
@@ -21,7 +23,7 @@ import { Sku } from '@core/models/common.model';
 @Component({
   selector: 'app-product-form',
   standalone: true,
-  imports: [ReactiveFormsModule, HlmButtonDirective, HlmInputDirective],
+  imports: [ReactiveFormsModule, HlmButtonDirective, HlmInputDirective, HlmLabelDirective, HlmTextareaDirective],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './product-form.component.html',
 })

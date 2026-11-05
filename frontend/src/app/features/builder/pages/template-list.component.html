@@ -16,8 +16,19 @@
   </div>
 
   @if (loading()) {
-    <div class="flex justify-center py-20">
-      <app-loading-spinner />
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      @for (_ of [1,2,3,4,5,6]; track $index) {
+        <div class="rounded-2xl border border-border/60 dark:border-border-dark/60 p-5 space-y-3">
+          <hlm-skeleton class="aspect-video w-full rounded-xl" />
+          <hlm-skeleton class="h-5 w-3/4" />
+          <hlm-skeleton class="h-4 w-full" />
+          <hlm-skeleton class="h-4 w-5/6" />
+          <div class="flex justify-between pt-1">
+            <hlm-skeleton class="h-6 w-24" />
+            <hlm-skeleton class="h-8 w-28 rounded-xl" />
+          </div>
+        </div>
+      }
     </div>
   } @else if (templates().length === 0) {
     <div class="flex flex-col items-center justify-center py-20 text-center rounded-2xl border border-dashed border-border/80 bg-surface/50 p-8">
