@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Yêu cầu trả hàng bị từ chối</title>
+  <style>
+    body { margin:0; font-family: 'Segoe UI', Arial, sans-serif; background:#f5f6fa; color:#222; }
+    .wrap { max-width:600px; margin:32px auto; background:#fff; border-radius:8px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,.08); }
+    .header { background:#b71c1c; color:#fff; padding:28px 32px; }
+    .header h1 { margin:0; font-size:22px; }
+    .header p { margin:4px 0 0; font-size:13px; opacity:.8; }
+    .body { padding:32px; }
+    .badge { display:inline-block; background:#ffebee; color:#b71c1c; border-radius:4px; padding:6px 14px; font-size:13px; font-weight:600; margin-bottom:20px; }
+    .info { font-size:14px; color:#555; line-height:1.8; }
+    .reason-box { background:#fff8e1; border-left:4px solid #ff8f00; padding:14px 18px; border-radius:0 6px 6px 0; font-size:14px; color:#555; margin:20px 0; }
+    .dispute-note { background:#e8eaf6; border-radius:6px; padding:14px 18px; font-size:13px; color:#333; margin:16px 0; }
+    .cta { text-align:center; margin:24px 0 8px; display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
+    .btn { display:inline-block; background:#1a237e; color:#fff; text-decoration:none; padding:12px 24px; border-radius:6px; font-weight:600; font-size:14px; }
+    .btn-outline { background:#fff; color:#b71c1c; border:2px solid #b71c1c; }
+    .footer { background:#f0f0f0; padding:18px 32px; font-size:12px; color:#888; text-align:center; }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <h1>PC Retail</h1>
+    <p>Hệ thống bán lẻ linh kiện máy tính</p>
+  </div>
+  <div class="body">
+    <div class="badge">✗ Yêu cầu trả hàng bị từ chối</div>
+    <p class="info">Yêu cầu trả hàng cho đơn <strong>#<span th:text="${orderId}">0</span></strong> đã không được chấp nhận.</p>
+    <div class="dispute-note">
+      💬 <strong>Không đồng ý?</strong> Bạn có thể khiếu nại quyết định này trong vòng <strong>72 giờ</strong>.
+      Đội ngũ hỗ trợ của chúng tôi sẽ xem xét lại trường hợp của bạn.
+    </div>
+    <div class="cta">
+      <a href="#" class="btn">Khiếu nại quyết định</a>
+      <a href="#" class="btn btn-outline">Liên hệ hỗ trợ</a>
+    </div>
+  </div>
+  <div class="footer">
+    support@pcretail.vn | Thời gian làm việc: 8:00–22:00 mỗi ngày
+  </div>
+</div>
+</body>
+</html>

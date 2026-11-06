@@ -7,10 +7,12 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication(scanBasePackages = "com.dawn.notification")
+@EnableFeignClients(basePackages = "com.dawn")
 @ComponentScan(
         basePackages = {"com.dawn.common", "com.dawn.notification"},
         excludeFilters = @ComponentScan.Filter(

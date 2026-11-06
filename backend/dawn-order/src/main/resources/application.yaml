@@ -93,6 +93,18 @@ resilience4j:
         wait-duration-in-open-state: 5s
         permitted-number-of-calls-in-half-open-state: 3
         register-health-indicator: true
+      inventory:
+        sliding-window-size: 10
+        failure-rate-threshold: 60
+        wait-duration-in-open-state: 10s
+        permitted-number-of-calls-in-half-open-state: 3
+        register-health-indicator: true
+      catalog:
+        sliding-window-size: 10
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 5s
+        permitted-number-of-calls-in-half-open-state: 3
+        register-health-indicator: true
   timelimiter:
     instances:
       default:
@@ -101,6 +113,12 @@ resilience4j:
     instances:
       default:
         max-concurrent-calls: 20
+        max-wait-duration: 100ms
+      inventory:
+        max-concurrent-calls: 50
+        max-wait-duration: 200ms
+      catalog:
+        max-concurrent-calls: 30
         max-wait-duration: 100ms
 
 management:

@@ -2,16 +2,20 @@ package com.dawn.order.service;
 
 import com.dawn.common.auditlog.LogConstant;
 import com.dawn.common.auditlog.Loggable;
+import com.dawn.common.event.SubOrderStatusChangedEvent;
 import com.dawn.common.exception.wrapper.ConflictException;
 import com.dawn.common.exception.wrapper.ResourceNotFoundException;
 import com.dawn.common.message.Message;
 import com.dawn.common.redis.service.RedisService;
 import com.dawn.common.contract.StockDecrementCommand;
+import com.dawn.common.util.AfterCommit;
 import com.dawn.order.dto.SubOrderDto;
+import com.dawn.order.entity.Order;
 import com.dawn.order.entity.OrderItem;
 import com.dawn.order.entity.SubOrder;
 import com.dawn.order.entity.enums.SubOrderStatus;
 import com.dawn.order.event.SubOrderDeliveredEvent;
+import com.dawn.order.infra.kafka.NotificationEventPublisher;
 import com.dawn.order.port.in.TransitionSubOrderUseCase;
 import com.dawn.common.contract.InventoryClientPort;
 import com.dawn.common.contract.GuestRiskPort;
@@ -25,6 +29,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tools.jackson.databind.ObjectMapper;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -45,6 +50,8 @@ public class SubOrderCommandService implements TransitionSubOrderUseCase {
     private final GuestRiskPort guestRiskPort;
     private final RedisService redisService;
     private final ApplicationEventPublisher eventPublisher;
+    private final NotificationEventPublisher notificationEventPublisher;
+    private final ObjectMapper objectMapper;
 
     @Override
     @Transactional
@@ -96,6 +103,7 @@ public class SubOrderCommandService implements TransitionSubOrderUseCase {
         if (target == SubOrderStatus.CANCELLED || target == SubOrderStatus.EXPIRED) {
             recordGuestAbuse(subOrder.getOrderId());
         }
+        publishStatusChangedEvent(subOrderId, fresh, target);
         if (target == SubOrderStatus.DELIVERED) {
             List<OrderItem> items = orderItemRepo.findBySubOrderId(subOrderId);
             eventPublisher.publishEvent(new SubOrderDeliveredEvent(subOrderId, fresh.getOrderId(), items));
@@ -164,6 +172,27 @@ public class SubOrderCommandService implements TransitionSubOrderUseCase {
                 .stream()
                 .map(item -> new StockDecrementCommand(item.getSkuId(), item.getQuantity(), warehouseId))
                 .toList();
+    }
+
+    private void publishStatusChangedEvent(Long subOrderId, SubOrder sub, SubOrderStatus target) {
+        if (target != SubOrderStatus.PAID && target != SubOrderStatus.SHIPPED && target != SubOrderStatus.DELIVERED) {
+            return;
+        }
+        try {
+            Order order = orderRepo.findById(sub.getOrderId()).orElse(null);
+            if (order == null) return;
+            String trackingCode = target == SubOrderStatus.SHIPPED ? sub.getTrackingCode() : null;
+            SubOrderStatusChangedEvent event = new SubOrderStatusChangedEvent(
+                    subOrderId, order.getId(), order.getUserId(),
+                    order.getGuestEmail(), target.name(), trackingCode);
+            String payload = objectMapper.writeValueAsString(event);
+            // fire-and-forget after commit: notification loss is acceptable vs. risking the status transition
+            AfterCommit.run(() ->
+                    notificationEventPublisher.send("order-events", "SUB_ORDER:" + subOrderId, payload));
+        } catch (Exception e) {
+            log.warn("Failed to build notification event for subOrder={} status={}: {}",
+                    subOrderId, target, e.getMessage());
+        }
     }
 
     // record phone abuse for guest orders that are cancelled, expired, or payment-failed

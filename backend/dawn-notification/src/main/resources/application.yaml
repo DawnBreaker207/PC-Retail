@@ -46,8 +46,18 @@ spring:
       auto-offset-reset: earliest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+  cloud:
+    openfeign:
+      client:
+        config:
+          default:
+            connect-timeout: 2000
+            read-timeout: 3000
+            logger-level: basic
 
 app:
+  services:
+    user-url: ${USER_SERVICE_URL:http://localhost:8086}
   internal:
     token: ${INTERNAL_TOKEN:dawn-internal-secret}
   jwt:

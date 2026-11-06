@@ -134,12 +134,15 @@ public class NotificationCommandService implements SendNotificationUseCase {
             return String.valueOf(vars.get("subject"));
         }
         return switch (templateId) {
-            case "order-created" -> "Đặt hàng thành công";
-            case "payment-success" -> "Thanh toán thành công";
-            case "otp-verification" -> "Mã xác thực OTP";
-            case "password-reset" -> "Đặt lại mật khẩu";
-            case "order-shipped" -> "Đơn hàng đang được giao";
-            default -> "Thông báo từ PC-Retail";
+            case "order-created" -> "Đặt hàng thành công – PC Retail";
+            case "payment-success" -> "Thanh toán thành công – PC Retail";
+            case "otp-verification" -> "Mã xác thực OTP – PC Retail";
+            case "password-reset" -> "Yêu cầu đặt lại mật khẩu – PC Retail";
+            case "order-shipped" -> "Đơn hàng đang trên đường giao – PC Retail";
+            case "order-delivered" -> "Đơn hàng đã giao thành công – PC Retail";
+            case "return-approved" -> "Yêu cầu trả hàng được chấp nhận – PC Retail";
+            case "return-rejected" -> "Yêu cầu trả hàng bị từ chối – PC Retail";
+            default -> "Thông báo từ PC Retail";
         };
     }
 }

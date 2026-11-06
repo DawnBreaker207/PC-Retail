@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Yêu cầu trả hàng được chấp nhận</title>
+  <style>
+    body { margin:0; font-family: 'Segoe UI', Arial, sans-serif; background:#f5f6fa; color:#222; }
+    .wrap { max-width:600px; margin:32px auto; background:#fff; border-radius:8px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,.08); }
+    .header { background:#2e7d32; color:#fff; padding:28px 32px; }
+    .header h1 { margin:0; font-size:22px; }
+    .header p { margin:4px 0 0; font-size:13px; opacity:.8; }
+    .body { padding:32px; }
+    .badge { display:inline-block; background:#e8f5e9; color:#2e7d32; border-radius:4px; padding:6px 14px; font-size:13px; font-weight:600; margin-bottom:20px; }
+    .steps { background:#f8f9ff; border-radius:8px; padding:20px 24px; margin:20px 0; }
+    .steps h3 { margin:0 0 14px; font-size:14px; color:#333; }
+    .step { display:flex; align-items:flex-start; gap:12px; margin:10px 0; font-size:14px; color:#555; }
+    .step-num { background:#1a237e; color:#fff; border-radius:50%; width:22px; height:22px; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; flex-shrink:0; }
+    .info { font-size:14px; color:#555; line-height:1.8; }
+    .cta { text-align:center; margin:24px 0 8px; }
+    .btn { display:inline-block; background:#2e7d32; color:#fff; text-decoration:none; padding:13px 32px; border-radius:6px; font-weight:600; font-size:15px; }
+    .footer { background:#f0f0f0; padding:18px 32px; font-size:12px; color:#888; text-align:center; }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <h1>PC Retail</h1>
+    <p>Hệ thống bán lẻ linh kiện máy tính</p>
+  </div>
+  <div class="body">
+    <div class="badge">✓ Yêu cầu trả hàng được chấp nhận</div>
+    <p class="info">Yêu cầu trả hàng cho đơn <strong>#<span th:text="${orderId}">0</span></strong> đã được xác nhận.</p>
+    <div class="steps">
+      <h3>Các bước tiếp theo:</h3>
+      <div class="step"><div class="step-num">1</div><div>Đóng gói sản phẩm cẩn thận theo nguyên trạng ban đầu.</div></div>
+      <div class="step"><div class="step-num">2</div><div>Gửi hàng về địa chỉ kho của chúng tôi (sẽ được gửi qua email riêng).</div></div>
+      <div class="step"><div class="step-num">3</div><div>Hoàn tiền sẽ được xử lý trong 3–5 ngày làm việc sau khi nhận hàng.</div></div>
+    </div>
+    <div class="cta">
+      <a href="#" class="btn">Xem chi tiết yêu cầu</a>
+    </div>
+  </div>
+  <div class="footer">
+    Nếu cần hỗ trợ, vui lòng liên hệ support@pcretail.vn
+  </div>
+</div>
+</body>
+</html>
