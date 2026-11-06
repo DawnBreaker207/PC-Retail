@@ -11,6 +11,7 @@ import com.dawn.order.dto.SubOrderDto;
 import com.dawn.order.entity.OrderItem;
 import com.dawn.order.entity.SubOrder;
 import com.dawn.order.entity.enums.SubOrderStatus;
+import com.dawn.order.event.SubOrderDeliveredEvent;
 import com.dawn.order.port.in.TransitionSubOrderUseCase;
 import com.dawn.common.contract.InventoryClientPort;
 import com.dawn.common.contract.GuestRiskPort;
@@ -20,6 +21,7 @@ import com.dawn.order.port.out.SubOrderRepository;
 import com.dawn.order.statemachine.SubOrderStateMachine;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,6 +44,7 @@ public class SubOrderCommandService implements TransitionSubOrderUseCase {
     private final InventoryClientPort inventoryClient;
     private final GuestRiskPort guestRiskPort;
     private final RedisService redisService;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Override
     @Transactional
@@ -87,6 +90,10 @@ public class SubOrderCommandService implements TransitionSubOrderUseCase {
         subOrderRepo.save(fresh);
         if (target == SubOrderStatus.CANCELLED || target == SubOrderStatus.EXPIRED) {
             recordGuestAbuse(subOrder.getOrderId());
+        }
+        if (target == SubOrderStatus.DELIVERED) {
+            List<OrderItem> items = orderItemRepo.findBySubOrderId(subOrderId);
+            eventPublisher.publishEvent(new SubOrderDeliveredEvent(subOrderId, fresh.getOrderId(), items));
         }
         return toDto(fresh);
     }

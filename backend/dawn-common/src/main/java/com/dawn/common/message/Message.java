@@ -145,6 +145,21 @@ public class Message {
         public static final String PHONE_ABUSE_BLOCKED = "This phone has too many cancelled orders, please login and pay online";
         // SubOrder
         public static final String SUB_ORDER_NOT_FOUND = "SubOrder not found: {0}";
+        // Return / Refund
+        public static final String RETURN_ONLY_AFTER_DELIVERY = "Return requests can only be submitted after delivery";
+        public static final String RETURN_WINDOW_CLOSED = "The 7-day return window for this order has closed";
+        public static final String RETURN_ALREADY_OPEN = "An open return request already exists for this order";
+        public static final String RETURN_REQUEST_NOT_FOUND = "Return request not found: {0}";
+        public static final String RETURN_ALREADY_REVIEWED = "This return request has already been reviewed";
+        public static final String RETURN_DISPUTE_NOT_ALLOWED = "Dispute can only be raised on a rejected return request";
+        public static final String RETURN_NOT_IN_DISPUTE = "This return request is not in dispute";
+        // Invoice
+        public static final String INVOICE_NOT_FOUND = "Invoice not found for order: {0}";
+        public static final String INVOICE_ALREADY_ISSUED = "An invoice has already been issued for this order";
+        // Warranty
+        public static final String WARRANTY_NOT_FOUND = "Warranty item not found: {0}";
+        public static final String WARRANTY_EXPIRED = "This warranty has expired";
+        public static final String WARRANTY_CLAIM_NOT_FOUND = "Warranty claim not found: {0}";
     }
 
     // Payment

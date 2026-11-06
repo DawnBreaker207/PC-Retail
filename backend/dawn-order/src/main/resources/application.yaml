@@ -71,6 +71,11 @@ app:
     catalog-url: ${CATALOG_SERVICE_URL:http://localhost:8084}
     inventory-url: ${INVENTORY_SERVICE_URL:http://localhost:8082}
     user-url: ${USER_SERVICE_URL:http://localhost:8084}
+  invoice:
+    seller-name: ${INVOICE_SELLER_NAME:Công ty TNHH PC Retail}
+    seller-tax-code: ${INVOICE_SELLER_TAX_CODE:}
+    seller-address: ${INVOICE_SELLER_ADDRESS:}
+    vat-rate: ${INVOICE_VAT_RATE:0.10}
   jwtCookieName: ${JWT_COOKIE_NAME}
   jwtRefreshCookieName: ${JWT_REFRESH_COOKIE_NAME}
   jwtExpirationsMs: ${JWT_EXPIRATION_MS}
