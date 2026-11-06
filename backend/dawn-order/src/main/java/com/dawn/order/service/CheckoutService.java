@@ -106,13 +106,14 @@ public class CheckoutService implements CheckoutUseCase {
         if (!failedSkuIds.isEmpty())
             throw new InvalidRequestException(Message.format(Message.Order.INSUFFICIENT_STOCK_SKUS, failedSkuIds));
 
-        if (!voucherCodes.isEmpty())
-            promotionClient.reservePromotions(voucherCodes, List.of());
-
-        // Phase 2: DB transaction; server recalculates shipping, ignoring client-supplied value
+        // Phase 2: reserve voucher + DB transaction in same try-catch so compensation
+        // runs on any failure after stock has been decremented in Redis
         BigDecimal shippingFee = shippingService.resolveFee(req.fulfillmentType(), req.shippingAddress());
         BigDecimal finalAmount = subTotal.subtract(discountAmount).add(shippingFee);
         try {
+            if (!voucherCodes.isEmpty())
+                promotionClient.reservePromotions(voucherCodes, List.of());
+
             return orderCommandService.createOrder(
                     req,
                     userId,
@@ -131,7 +132,7 @@ public class CheckoutService implements CheckoutUseCase {
                     .findByUserIdAndIdempotencyKey(userId, req.idempotencyKey())
                     .orElseThrow(() -> dup);
         } catch (Exception e) {
-            log.error("Checkout DB transaction failed, compensating Redis", e);
+            log.error("Checkout failed after stock decrement, compensating Redis", e);
             compensate(stockItems, voucherCodes);
             throw e;
         }
