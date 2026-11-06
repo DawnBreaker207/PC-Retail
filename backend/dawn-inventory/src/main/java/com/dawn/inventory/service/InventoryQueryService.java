@@ -6,6 +6,7 @@ import com.dawn.common.response.ResponsePage;
 import com.dawn.inventory.dto.InventoryDto;
 import com.dawn.inventory.dto.InventoryTransactionDto;
 import com.dawn.inventory.entity.Inventory;
+import java.util.List;
 import com.dawn.inventory.entity.InventoryTransaction;
 import com.dawn.inventory.port.in.QueryInventoryUseCase;
 import com.dawn.inventory.port.out.InventoryCachePort;
@@ -55,25 +56,12 @@ public class InventoryQueryService implements QueryInventoryUseCase {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Integer getAvailableQuantity(Long skuId) {
-        // Redis first; fall back to DB on failure (graceful degradation)
-        try {
-            Integer cached = cachePort.getAvailable(skuId);
-            if (cached != null) return cached;
-        } catch (RuntimeException e) {
-            log.warn("Redis unavailable, fallback DB for sku {}", skuId);
-        }
-
-        // Fallback DB & warm cache
-        int available = inventoryRepository.findBySkuId(skuId)
-                .map(Inventory::getAvailableQuantity)
-                .orElse(0);
-        try {
-            cachePort.syncFromDb(skuId, available);
-        } catch (RuntimeException ignored) {
-            // Best effort cache sync
-        }
-        return available;
+        // Multi-warehouse: aggregate total available across all warehouses (display only, not checkout)
+        return inventoryRepository.findBySkuIdIn(List.of(skuId)).stream()
+                .mapToInt(Inventory::getAvailableQuantity)
+                .sum();
     }
 
 

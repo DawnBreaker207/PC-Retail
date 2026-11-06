@@ -53,4 +53,10 @@ public class InventoryRemoteAdapter implements InventoryClientPort {
     public void restock(List<StockDecrementCommand> items, Long actorId) {
         feignClient.restock(items, actorId);
     }
+
+    @Override
+    @Bulkhead(name = "inventory")
+    public Long routeWarehouse(List<StockDecrementCommand> items) {
+        return feignClient.routeWarehouse(items);
+    }
 }

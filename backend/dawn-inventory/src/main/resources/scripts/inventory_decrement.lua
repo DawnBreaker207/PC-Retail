@@ -1,7 +1,7 @@
 -- inventory_decrement.lua
--- KEYS: skuId list (as strings)
+-- KEYS: "{warehouseId}:{skuId}" composite keys
 -- ARGV: quantity list (same order as KEYS)
--- Returns: list of failed skuIds (empty = all passed)
+-- Returns: list of failed composite keys (empty = all passed)
 
 local failed = {}
 local n = #KEYS

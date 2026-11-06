@@ -37,7 +37,7 @@ public class InventoryReconciliationJob {
         try {
             log.info("Inventory reconciliation started");
             try (Stream<Inventory> stream = inventoryRepository.streamAll()) {
-                stream.forEach(inv -> cachePort.syncFromDb(inv.getSkuId(), inv.getAvailableQuantity()));
+                stream.forEach(inv -> cachePort.syncFromDb(inv.getWarehouseId(), inv.getSkuId(), inv.getAvailableQuantity()));
             }
             log.info("Inventory reconciliation completed");
         } finally {

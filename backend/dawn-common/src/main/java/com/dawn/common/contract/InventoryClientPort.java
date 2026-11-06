@@ -21,4 +21,7 @@ public interface InventoryClientPort {
      * actorId: người thao tác (ghi created_by) — KHÔNG dùng orderId, FK users sẽ nổ.
      */
     void restock(List<StockDecrementCommand> items, Long actorId);
+
+    /** Tìm warehouse có đủ stock cho toàn bộ cart. Trả về warehouseId. */
+    Long routeWarehouse(List<StockDecrementCommand> items);
 }

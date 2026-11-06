@@ -38,15 +38,20 @@ public class InventoryCacheAdapter implements InventoryCachePort {
         rollbackScript.setResultType(Long.class);
     }
 
+    private String cacheKey(Long warehouseId, Long skuId) {
+        return warehouseId + ":" + skuId;
+    }
+
     @Override
-    public void setStock(Long skuId, int quantity) {
-        redisTemplate.opsForValue().set(KEY_PREFIX + skuId, String.valueOf(quantity));
+    public void setStock(Long warehouseId, Long skuId, int quantity) {
+        redisTemplate.opsForValue().set(KEY_PREFIX + cacheKey(warehouseId, skuId), String.valueOf(quantity));
     }
 
     @Override
     public List<Long> decrementBatch(List<StockDecrementCommandDto> items) {
+        // KEYS[i] = "{warehouseId}:{skuId}" — Lua prepends KEY_PREFIX internally
         List<String> keys = items.stream()
-                .map(i -> String.valueOf(i.skuId()))
+                .map(i -> cacheKey(i.warehouseId(), i.skuId()))
                 .toList();
 
         String[] args = items.stream()
@@ -56,16 +61,16 @@ public class InventoryCacheAdapter implements InventoryCachePort {
         List result = redisTemplate.execute(decrementScript, keys, (Object[]) args);
         if (result == null) return List.of();
 
+        // Result contains composite keys; extract skuId portion
         return result.stream()
-                .map(id -> Long.parseLong(id.toString()))
+                .map(id -> Long.parseLong(id.toString().contains(":") ? id.toString().split(":")[1] : id.toString()))
                 .toList();
-
     }
 
     @Override
     public void incrementBatch(List<StockDecrementCommandDto> items) {
         List<String> keys = items.stream()
-                .map(i -> String.valueOf(i.skuId()))
+                .map(i -> cacheKey(i.warehouseId(), i.skuId()))
                 .toList();
         String[] args = items.stream()
                 .map(i -> String.valueOf(i.quantity()))
@@ -75,13 +80,13 @@ public class InventoryCacheAdapter implements InventoryCachePort {
     }
 
     @Override
-    public void syncFromDb(Long skuId, int availableQuantity) {
-        redisTemplate.opsForValue().set(KEY_PREFIX + skuId, String.valueOf(availableQuantity));
+    public void syncFromDb(Long warehouseId, Long skuId, int availableQuantity) {
+        redisTemplate.opsForValue().set(KEY_PREFIX + cacheKey(warehouseId, skuId), String.valueOf(availableQuantity));
     }
 
     @Override
-    public Integer getAvailable(Long skuId) {
-        String val = redisTemplate.opsForValue().get(KEY_PREFIX + skuId);
+    public Integer getAvailable(Long warehouseId, Long skuId) {
+        String val = redisTemplate.opsForValue().get(KEY_PREFIX + cacheKey(warehouseId, skuId));
         return val != null ? Integer.parseInt(val) : null;
     }
 }

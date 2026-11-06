@@ -7,6 +7,7 @@ import com.dawn.inventory.port.in.QueryInventoryUseCase;
 import com.dawn.inventory.port.in.ReleaseStockUseCase;
 import com.dawn.inventory.port.in.ReserveStockUseCase;
 import com.dawn.inventory.port.in.RestockUseCase;
+import com.dawn.inventory.port.in.RouteWarehouseUseCase;
 import com.dawn.inventory.port.out.InventoryCachePort;
 import com.dawn.common.contract.StockDecrementCommand;
 import com.dawn.common.contract.InventoryClientPort;
@@ -25,6 +26,7 @@ public class InventoryClientAdapter implements InventoryClientPort, InventoryQue
     private final DeductStockUseCase deductStockUseCase;
     private final RestockUseCase restockUseCase;
     private final QueryInventoryUseCase queryInventoryUseCase;
+    private final RouteWarehouseUseCase routeWarehouseUseCase;
 
     @Override
     public List<Long> decrementBatch(List<StockDecrementCommand> items) {
@@ -64,9 +66,14 @@ public class InventoryClientAdapter implements InventoryClientPort, InventoryQue
         return queryInventoryUseCase.getAvailableQuantity(skuId);
     }
 
+    @Override
+    public Long routeWarehouse(List<StockDecrementCommand> items) {
+        return routeWarehouseUseCase.routeWarehouse(toInventoryCommands(items));
+    }
+
     private List<StockDecrementCommandDto> toInventoryCommands(List<StockDecrementCommand> items) {
         return items.stream()
-                .map(i -> new StockDecrementCommandDto(i.skuId(), i.quantity()))
+                .map(i -> new StockDecrementCommandDto(i.skuId(), i.quantity(), i.warehouseId()))
                 .toList();
     }
 }

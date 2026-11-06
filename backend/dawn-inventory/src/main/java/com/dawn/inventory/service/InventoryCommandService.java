@@ -46,12 +46,11 @@ public class InventoryCommandService implements ReserveStockUseCase, ReleaseStoc
     @Override
     @Transactional
     public void reserve(List<StockDecrementCommandDto> items, Long orderId) {
-        Map<Long, Integer> snapshot = new HashMap<>();
+        Map<Long[], Integer> snapshot = new HashMap<>();
         for (StockDecrementCommandDto item : items) {
-            Inventory inv = inventoryRepository.findBySkuIdWithLock(item.skuId())
+            Inventory inv = inventoryRepository.findBySkuIdAndWarehouseIdWithLock(item.skuId(), item.warehouseId())
                     .orElseThrow(() -> new ResourceNotFoundException(Message.format(Message.Inventory.NOT_FOUND_FOR_SKU, item.skuId())));
 
-            // Double-check after Lua gatekeeper
             if (inv.getAvailableQuantity() < item.quantity()) {
                 throw new InvalidRequestException(Message.format(Message.Inventory.INSUFFICIENT_STOCK, item.skuId()));
             }
@@ -67,11 +66,14 @@ public class InventoryCommandService implements ReserveStockUseCase, ReleaseStoc
                     .referenceId(orderId)
                     .build());
 
-            snapshot.put(item.skuId(), inv.getAvailableQuantity());
+            final Long warehouseId = inv.getWarehouseId();
+            final Long skuId = inv.getSkuId();
+            final int available = inv.getAvailableQuantity();
+            snapshot.put(new Long[]{warehouseId, skuId}, available);
         }
         outboxPublisher.publish("inventory-events", "ORDER", orderId,
                 new InventoryReservedEvent(orderId, toLines(items)));
-        runAfterCommit(() -> snapshot.forEach(cachePort::setStock));
+        runAfterCommit(() -> snapshot.forEach((k, v) -> cachePort.setStock(k[0], k[1], v)));
     }
 
     // RELEASE
@@ -79,13 +81,12 @@ public class InventoryCommandService implements ReserveStockUseCase, ReleaseStoc
     @Transactional
     public void release(List<StockDecrementCommandDto> items, Long orderId) {
         for (StockDecrementCommandDto item : items) {
-            Inventory inv = inventoryRepository.findBySkuIdWithLock(item.skuId())
+            Inventory inv = inventoryRepository.findBySkuIdAndWarehouseIdWithLock(item.skuId(), item.warehouseId())
                     .orElseThrow(() -> new ResourceNotFoundException(Message.format(Message.Inventory.NOT_FOUND_FOR_SKU, item.skuId())));
 
             int newReserved = Math.max(0, inv.getReservedQuantity() - item.quantity());
             inv.setReservedQuantity(newReserved);
             inventoryRepository.save(inv);
-
 
             transactionRepository.save(InventoryTransaction.builder()
                     .skuId(item.skuId())
@@ -96,11 +97,9 @@ public class InventoryCommandService implements ReserveStockUseCase, ReleaseStoc
                     .build());
         }
 
-        // Update Redis after commit (AFTER_COMMIT)
         outboxPublisher.publish("inventory-events", "ORDER", orderId,
                 new InventoryReleasedEvent(orderId, toLines(items)));
         runAfterCommit(() -> cachePort.incrementBatch(items));
-
     }
 
     // DEDUCT
@@ -108,7 +107,7 @@ public class InventoryCommandService implements ReserveStockUseCase, ReleaseStoc
     @Transactional
     public void deduct(List<StockDecrementCommandDto> items, Long orderId) {
         for (StockDecrementCommandDto item : items) {
-            Inventory inv = inventoryRepository.findBySkuIdWithLock(item.skuId())
+            Inventory inv = inventoryRepository.findBySkuIdAndWarehouseIdWithLock(item.skuId(), item.warehouseId())
                     .orElseThrow(() -> new ResourceNotFoundException(Message.format(Message.Inventory.NOT_FOUND_FOR_SKU, item.skuId())));
 
             int newStock = inv.getStockQuantity() - item.quantity();
@@ -119,7 +118,6 @@ public class InventoryCommandService implements ReserveStockUseCase, ReleaseStoc
             inv.setReservedQuantity(Math.max(0, inv.getReservedQuantity() - item.quantity()));
             inventoryRepository.save(inv);
 
-
             transactionRepository.save(InventoryTransaction.builder()
                     .skuId(item.skuId())
                     .type(TransactionType.DEDUCT)
@@ -128,14 +126,14 @@ public class InventoryCommandService implements ReserveStockUseCase, ReleaseStoc
                     .referenceId(orderId)
                     .build());
 
-            final Long skuId = item.skuId();
+            final Long warehouseId = inv.getWarehouseId();
+            final Long skuId = inv.getSkuId();
             final int available = inv.getAvailableQuantity();
-            runAfterCommit(() -> cachePort.setStock(skuId, available));
+            runAfterCommit(() -> cachePort.setStock(warehouseId, skuId, available));
         }
         outboxPublisher.publish("inventory-events", "ORDER", orderId,
                 new InventoryDeductedEvent(orderId, toLines(items)));
     }
-
 
     // RESTOCK
     @Override
@@ -145,9 +143,21 @@ public class InventoryCommandService implements ReserveStockUseCase, ReleaseStoc
         if (quantity <= 0) {
             throw new InvalidRequestException(Message.format(Message.Inventory.INVALID_QUANTITY, skuId));
         }
-        Inventory inv = inventoryRepository.findBySkuIdWithLock(skuId)
+        // Restock requires warehouseId — use this overload only for single-warehouse setups
+        // For multi-warehouse, see restock(skuId, warehouseId, quantity, unitCost, userId)
+        throw new UnsupportedOperationException("Use restock(skuId, warehouseId, quantity, unitCost, userId) in multi-warehouse mode");
+    }
+
+    @Transactional
+    @Loggable(action = LogConstant.Action.IMPORT_STOCK, entity = LogConstant.Entity.WAREHOUSE)
+    public void restock(Long skuId, Long warehouseId, int quantity, BigDecimal unitCost, Long userId) {
+        if (quantity <= 0) {
+            throw new InvalidRequestException(Message.format(Message.Inventory.INVALID_QUANTITY, skuId));
+        }
+        Inventory inv = inventoryRepository.findBySkuIdAndWarehouseIdWithLock(skuId, warehouseId)
                 .orElseGet(() -> Inventory.builder()
                         .skuId(skuId)
+                        .warehouseId(warehouseId)
                         .stockQuantity(0)
                         .reservedQuantity(0)
                         .build());
@@ -163,9 +173,9 @@ public class InventoryCommandService implements ReserveStockUseCase, ReleaseStoc
                 .referenceType(ReferenceType.MANUAL)
                 .createdBy(userId)
                 .build());
-        // Sync Redis after commit
+
         int newAvailable = inv.getAvailableQuantity();
-        runAfterCommit(() -> cachePort.setStock(skuId, newAvailable));
+        runAfterCommit(() -> cachePort.setStock(warehouseId, skuId, newAvailable));
     }
 
     private List<InventoryLine> toLines(List<StockDecrementCommandDto> items) {

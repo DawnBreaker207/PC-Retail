@@ -10,9 +10,11 @@ import java.util.Optional;
 public interface InventoryRepository {
     Optional<Inventory> findBySkuId(Long skuId);
 
-    Optional<Inventory> findBySkuIdWithLock(Long skuId);
+    Optional<Inventory> findBySkuIdAndWarehouseIdWithLock(Long skuId, Long warehouseId);
 
     List<Inventory> findLowStock(int threshold);
+
+    List<Inventory> findBySkuIdIn(List<Long> skuIds);
 
     Inventory save(Inventory inv);
 

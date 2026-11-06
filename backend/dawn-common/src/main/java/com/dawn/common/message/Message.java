@@ -136,6 +136,7 @@ public class Message {
         public static final String CART_EMPTY = "Cart is empty";
         public static final String SHIPPING_ADDRESS_REQUIRED = "Shipping address is required for DELIVERY";
         public static final String INSUFFICIENT_STOCK_SKUS = "Not enough stock for SKU: {0}";
+        public static final String NO_WAREHOUSE_CAN_FULFILL = "No warehouse has sufficient stock to fulfill this order";
         public static final String EXPIRED = "Order expired, please checkout again";
         public static final String INVALID_TRANSITION = "Invalid transition from {0} -> {1}";
         // Guest risk-gate (docs 13.5)

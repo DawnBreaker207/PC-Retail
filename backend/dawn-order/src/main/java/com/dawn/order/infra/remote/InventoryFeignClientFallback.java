@@ -46,4 +46,10 @@ public class InventoryFeignClientFallback implements InventoryFeignClient {
         log.warn("Inventory service unavailable — returning 0 available for skuId={}", skuId);
         return 0;
     }
+
+    @Override
+    public Long routeWarehouse(List<StockDecrementCommand> items) {
+        log.warn("Inventory service unavailable — warehouse routing failed");
+        return null;
+    }
 }

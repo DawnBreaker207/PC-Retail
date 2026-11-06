@@ -41,27 +41,33 @@ class InventoryCommandServiceTest {
         service = new InventoryCommandService(inventoryRepository, transactionRepository, cachePort, outboxPublisher);
     }
 
+    private static final Long WH = 1L;
+
     private Inventory inv(int stock, int reserved) {
-        return Inventory.builder().skuId(1L).stockQuantity(stock).reservedQuantity(reserved).build();
+        return Inventory.builder().skuId(1L).warehouseId(WH).stockQuantity(stock).reservedQuantity(reserved).build();
+    }
+
+    private StockDecrementCommandDto cmd(int qty) {
+        return new StockDecrementCommandDto(1L, qty, WH);
     }
 
     @Test
     @DisplayName("Reserve: Redis snapshot = available sau trừ, không trừ 2 lần")
     void reserve_snapshotIsAvailable() {
-        when(inventoryRepository.findBySkuIdWithLock(1L)).thenReturn(Optional.of(inv(10, 2)));
+        when(inventoryRepository.findBySkuIdAndWarehouseIdWithLock(1L, WH)).thenReturn(Optional.of(inv(10, 2)));
 
-        service.reserve(List.of(new StockDecrementCommandDto(1L, 3)), 99L);
+        service.reserve(List.of(cmd(3)), 99L);
 
-        // available = 10 - (2+3) = 5 (bug cũ ra 2)
-        verify(cachePort).setStock(1L, 5);
+        // available = 10 - (2+3) = 5
+        verify(cachePort).setStock(WH, 1L, 5);
     }
 
     @Test
     @DisplayName("Reserve quá tồn: throw, không đụng Redis")
     void reserve_insufficient_throws() {
-        when(inventoryRepository.findBySkuIdWithLock(1L)).thenReturn(Optional.of(inv(2, 0)));
+        when(inventoryRepository.findBySkuIdAndWarehouseIdWithLock(1L, WH)).thenReturn(Optional.of(inv(2, 0)));
 
-        assertThatThrownBy(() -> service.reserve(List.of(new StockDecrementCommandDto(1L, 5)), 99L))
+        assertThatThrownBy(() -> service.reserve(List.of(cmd(5)), 99L))
                 .isInstanceOf(InvalidRequestException.class);
 
         verifyNoInteractions(cachePort);
@@ -81,9 +87,9 @@ class InventoryCommandServiceTest {
     @Test
     @DisplayName("Deduct vượt tồn: throw, không đụng Redis")
     void deduct_exceeding_throws() {
-        when(inventoryRepository.findBySkuIdWithLock(1L)).thenReturn(Optional.of(inv(2, 2)));
+        when(inventoryRepository.findBySkuIdAndWarehouseIdWithLock(1L, WH)).thenReturn(Optional.of(inv(2, 2)));
 
-        assertThatThrownBy(() -> service.deduct(List.of(new StockDecrementCommandDto(1L, 5)), 99L))
+        assertThatThrownBy(() -> service.deduct(List.of(cmd(5)), 99L))
                 .isInstanceOf(InvalidRequestException.class);
 
         verifyNoInteractions(cachePort);
@@ -93,9 +99,9 @@ class InventoryCommandServiceTest {
     @DisplayName("Release vượt reserved: kẹp về 0, không âm")
     void release_clampsAtZero() {
         Inventory entity = inv(10, 1);
-        when(inventoryRepository.findBySkuIdWithLock(1L)).thenReturn(Optional.of(entity));
+        when(inventoryRepository.findBySkuIdAndWarehouseIdWithLock(1L, WH)).thenReturn(Optional.of(entity));
 
-        service.release(List.of(new StockDecrementCommandDto(1L, 5)), 99L);
+        service.release(List.of(cmd(5)), 99L);
 
         assertThat(entity.getReservedQuantity()).isZero();
     }

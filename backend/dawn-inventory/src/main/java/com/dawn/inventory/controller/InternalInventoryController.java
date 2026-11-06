@@ -6,6 +6,7 @@ import com.dawn.inventory.port.in.QueryInventoryUseCase;
 import com.dawn.inventory.port.in.ReleaseStockUseCase;
 import com.dawn.inventory.port.in.ReserveStockUseCase;
 import com.dawn.inventory.port.in.RestockUseCase;
+import com.dawn.inventory.port.in.RouteWarehouseUseCase;
 import com.dawn.inventory.port.out.InventoryCachePort;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -24,6 +25,7 @@ public class InternalInventoryController {
     private final DeductStockUseCase deductStockUseCase;
     private final RestockUseCase restockUseCase;
     private final QueryInventoryUseCase queryInventoryUseCase;
+    private final RouteWarehouseUseCase routeWarehouseUseCase;
 
     @PostMapping("/decrement-batch")
     public List<Long> decrementBatch(@RequestBody List<StockDecrementCommandDto> items) {
@@ -60,5 +62,10 @@ public class InternalInventoryController {
     @GetMapping("/{skuId}/available")
     public Integer available(@PathVariable Long skuId) {
         return queryInventoryUseCase.getAvailableQuantity(skuId);
+    }
+
+    @PostMapping("/route-warehouse")
+    public Long routeWarehouse(@RequestBody List<StockDecrementCommandDto> items) {
+        return routeWarehouseUseCase.routeWarehouse(items);
     }
 }

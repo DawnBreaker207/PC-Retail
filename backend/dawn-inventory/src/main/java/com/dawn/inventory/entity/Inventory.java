@@ -9,7 +9,10 @@ import lombok.experimental.SuperBuilder;
 import java.time.Instant;
 
 @Entity
-@Table(name = "inventory")
+@Table(
+    name = "inventory",
+    uniqueConstraints = @UniqueConstraint(columnNames = {"sku_id", "warehouse_id"})
+)
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -19,8 +22,11 @@ import java.time.Instant;
 @ToString(callSuper = true)
 public class Inventory extends AuditableEntity {
 
-    @Column(name = "sku_id", nullable = false, unique = true)
+    @Column(name = "sku_id", nullable = false)
     private Long skuId;
+
+    @Column(name = "warehouse_id", nullable = false)
+    private Long warehouseId;
 
     @Column(name = "stock_quantity", nullable = false)
     private int stockQuantity;

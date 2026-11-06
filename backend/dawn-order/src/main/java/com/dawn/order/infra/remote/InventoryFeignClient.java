@@ -41,4 +41,7 @@ public interface InventoryFeignClient {
 
     @GetMapping("/{skuId}/available")
     Integer available(@PathVariable("skuId") Long skuId);
+
+    @PostMapping("/route-warehouse")
+    Long routeWarehouse(@RequestBody List<StockDecrementCommand> items);
 }

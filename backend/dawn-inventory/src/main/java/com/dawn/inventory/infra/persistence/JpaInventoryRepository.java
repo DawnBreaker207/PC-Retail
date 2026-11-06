@@ -22,8 +22,16 @@ public interface JpaInventoryRepository extends JpaRepository<Inventory, Long>, 
 
     @Override
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("SELECT i FROM Inventory i WHERE i.skuId = :skuId")
-    Optional<Inventory> findBySkuIdWithLock(Long skuId);
+    @Query("SELECT i FROM Inventory i WHERE i.skuId = :skuId AND i.warehouseId = :warehouseId")
+    Optional<Inventory> findBySkuIdAndWarehouseIdWithLock(@Param("skuId") Long skuId, @Param("warehouseId") Long warehouseId);
+
+    @Override
+    @Query("SELECT i FROM Inventory i WHERE i.skuId IN :skuIds")
+    List<Inventory> findBySkuIdIn(@Param("skuIds") List<Long> skuIds);
+
+    // Single-warehouse compat — returns first warehouse record (for admin display)
+    @Query("SELECT i FROM Inventory i WHERE i.skuId = :skuId ORDER BY i.warehouseId ASC")
+    Optional<Inventory> findBySkuId(@Param("skuId") Long skuId);
 
     @Override
     @Query("SELECT i FROM Inventory i WHERE ( i.stockQuantity - i.reservedQuantity ) <= :threshold")

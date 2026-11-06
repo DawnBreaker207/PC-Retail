@@ -97,8 +97,14 @@ public class CheckoutService implements CheckoutUseCase {
                         .multiply(BigDecimal.valueOf(item.quantity())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        List<StockDecrementCommand> stockItems = cartItems.stream()
+        List<StockDecrementCommand> baseItems = cartItems.stream()
                 .map(item -> new StockDecrementCommand(item.skuId(), item.quantity()))
+                .toList();
+
+        // Route to warehouse with enough stock, then attach warehouseId to each command
+        Long warehouseId = inventoryClient.routeWarehouse(baseItems);
+        List<StockDecrementCommand> stockItems = baseItems.stream()
+                .map(item -> new StockDecrementCommand(item.skuId(), item.quantity(), warehouseId))
                 .toList();
 
         // Phase 1: Lua atomic decrement, outside transaction
