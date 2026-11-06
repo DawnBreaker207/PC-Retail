@@ -49,6 +49,13 @@ public class OrderClientAdapter implements OrderClientPort {
                 .map(Order::getReservedUntil)
                 .orElse(null);
     }
+
+    @Override
+    public Long getOrderOwnerId(Long orderId) {
+        return orderRepository.findById(orderId)
+                .map(Order::getUserId)
+                .orElse(null);
+    }
     @Transactional
     @Override
     public void markOrderPaid(Long orderId) {
@@ -75,11 +82,9 @@ public class OrderClientAdapter implements OrderClientPort {
                     "createdAt", Instant.now().toString()));
             subOrderRepository.save(fresh);
         }
-        List<OrderItem> items = subOrders.stream()
-                .flatMap(so -> orderItemRepository.findBySubOrderId(so.getId()).stream())
-                .toList();
-        List<StockDecrementCommand> deductItems = items.stream()
-                .map(i -> new StockDecrementCommand(i.getSkuId(), i.getQuantity()))
+        List<StockDecrementCommand> deductItems = subOrders.stream()
+                .flatMap(so -> orderItemRepository.findBySubOrderId(so.getId()).stream()
+                        .map(i -> new StockDecrementCommand(i.getSkuId(), i.getQuantity(), so.getWarehouseId())))
                 .toList();
         inventoryClient.deduct(deductItems, orderId);
     }
@@ -116,13 +121,9 @@ public class OrderClientAdapter implements OrderClientPort {
                     "createdAt", Instant.now().toString()));
             subOrderRepository.save(fresh);
         }
-        List<OrderItem> items = subOrders
-                .stream()
-                .flatMap(so -> orderItemRepository.findBySubOrderId(so.getId()).stream())
-                .toList();
-
-        List<StockDecrementCommand> releaseItems = items.stream()
-                .map(i -> new StockDecrementCommand(i.getSkuId(), i.getQuantity()))
+        List<StockDecrementCommand> releaseItems = subOrders.stream()
+                .flatMap(so -> orderItemRepository.findBySubOrderId(so.getId()).stream()
+                        .map(i -> new StockDecrementCommand(i.getSkuId(), i.getQuantity(), so.getWarehouseId())))
                 .toList();
         inventoryClient.release(releaseItems, orderId);
     }

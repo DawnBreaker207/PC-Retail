@@ -1,8 +1,11 @@
 package com.dawn.order.service;
 
+import com.dawn.common.contract.InventoryClientPort;
+import com.dawn.common.contract.StockDecrementCommand;
 import com.dawn.common.lock.AdvisoryLocks;
+import com.dawn.order.entity.SubOrder;
 import com.dawn.order.entity.enums.SubOrderStatus;
-import com.dawn.order.port.out.OrderRepository;
+import com.dawn.order.port.out.OrderItemRepository;
 import com.dawn.order.port.out.SubOrderRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +31,8 @@ public class SagaSweepService {
 
     private final AdvisoryLocks advisoryLocks;
     private final SubOrderRepository subOrderRepository;
+    private final OrderItemRepository orderItemRepository;
+    private final InventoryClientPort inventoryClient;
 
     @Scheduled(fixedDelay = 60_000)
     public void sweepStuckSagas() {
@@ -38,31 +43,50 @@ public class SagaSweepService {
     public void doSweep() {
         Instant threshold = Instant.now().minus(TIMEOUT_MINUTES, ChronoUnit.MINUTES);
 
-        // Sub-orders stuck in AWAITING_INVENTORY → cancel them
-        List<com.dawn.order.entity.SubOrder> stuckInventory =
+        // Sub-orders stuck in AWAITING_INVENTORY → cancel + release reserved stock
+        List<SubOrder> stuckInventory =
                 subOrderRepository.findByStatusAndCreatedAtBefore(SubOrderStatus.AWAITING_INVENTORY, threshold);
-        for (com.dawn.order.entity.SubOrder sub : stuckInventory) {
+        for (SubOrder sub : stuckInventory) {
             int rows = subOrderRepository.transitionIfStatus(
                     sub.getId(), SubOrderStatus.AWAITING_INVENTORY, SubOrderStatus.CANCELLED);
             if (rows > 0) {
-                log.warn("SAGA sweep: sub-order {} timed out from AWAITING_INVENTORY → CANCELLED", sub.getId());
+                releaseInventory(sub);
+                log.warn("SAGA sweep: sub-order {} timed out AWAITING_INVENTORY → CANCELLED, inventory released",
+                        sub.getId());
             }
         }
 
-        // Sub-orders stuck in PENDING_PAYMENT beyond timeout → expire them
-        List<com.dawn.order.entity.SubOrder> stuckPayment =
+        // Sub-orders stuck in PENDING_PAYMENT beyond reservation deadline → expire + release
+        // Note: SubOrderCommandService.expiredUnpaidOrders() handles reservedUntil-based expiry;
+        // this sweep catches any the scheduled job missed (e.g. node was down).
+        List<SubOrder> stuckPayment =
                 subOrderRepository.findByStatusAndReservedUntilBefore(SubOrderStatus.PENDING_PAYMENT, Instant.now());
-        for (com.dawn.order.entity.SubOrder sub : stuckPayment) {
+        for (SubOrder sub : stuckPayment) {
             int rows = subOrderRepository.transitionIfStatus(
                     sub.getId(), SubOrderStatus.PENDING_PAYMENT, SubOrderStatus.EXPIRED);
             if (rows > 0) {
-                log.warn("SAGA sweep: sub-order {} reservation expired → EXPIRED", sub.getId());
+                releaseInventory(sub);
+                log.warn("SAGA sweep: sub-order {} reservation expired → EXPIRED, inventory released", sub.getId());
             }
         }
 
         if (!stuckInventory.isEmpty() || !stuckPayment.isEmpty()) {
             log.warn("SAGA sweep complete: {} AWAITING_INVENTORY cancelled, {} PENDING_PAYMENT expired",
                     stuckInventory.size(), stuckPayment.size());
+        }
+    }
+
+    private void releaseInventory(SubOrder sub) {
+        try {
+            List<StockDecrementCommand> items = orderItemRepository.findBySubOrderId(sub.getId())
+                    .stream()
+                    .map(item -> new StockDecrementCommand(item.getSkuId(), item.getQuantity(), sub.getWarehouseId()))
+                    .toList();
+            if (!items.isEmpty()) {
+                inventoryClient.release(items, sub.getOrderId());
+            }
+        } catch (Exception e) {
+            log.error("SAGA sweep: failed to release inventory for sub-order {}: {}", sub.getId(), e.getMessage());
         }
     }
 }

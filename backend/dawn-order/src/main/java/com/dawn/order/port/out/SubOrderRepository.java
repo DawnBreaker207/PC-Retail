@@ -36,4 +36,5 @@ public interface SubOrderRepository {
      */
     int transitionIfStatus(Long id, SubOrderStatus expected, SubOrderStatus target);
 
+    List<SubOrder> findByTrackingCode(String trackingCode);
 }

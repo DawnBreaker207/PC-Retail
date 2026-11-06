@@ -68,6 +68,8 @@ public class OrderCommandService {
             BigDecimal discountAmount,
             BigDecimal shippingFee,
             BigDecimal finalAmount) {
+        // extract warehouseId from first stockItem (all items routed to same warehouse)
+        Long warehouseId = stockItems.isEmpty() ? null : stockItems.get(0).warehouseId();
 
         Order order = Order.builder()
                 .userId(userId)
@@ -91,6 +93,7 @@ public class OrderCommandService {
                 .shippingFee(shippingFee)
                 .discountAmount(discountAmount)
                 .finalAmount(finalAmount)
+                .warehouseId(warehouseId)
                 .status(SubOrderStatus.PENDING_PAYMENT)
                 .statusHistory(new ArrayList<>(List.of(Map.of(
                         "from", "CREATED",

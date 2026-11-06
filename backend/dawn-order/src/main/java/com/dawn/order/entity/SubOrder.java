@@ -52,6 +52,9 @@ public class SubOrder extends AuditableEntity {
     @Builder.Default
     private SubOrderStatus status = SubOrderStatus.PENDING_PAYMENT;
 
+    @Column(name = "warehouse_id")
+    private Long warehouseId;
+
     @Column(name = "tracking_code", length = 100)
     private String trackingCode;
 

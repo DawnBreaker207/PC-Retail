@@ -29,6 +29,11 @@ public class InternalOrderController {
         return orderClientPort.getOrderReservedUntil(orderId);
     }
 
+    @GetMapping("/{orderId}/owner")
+    public Long owner(@PathVariable Long orderId) {
+        return orderClientPort.getOrderOwnerId(orderId);
+    }
+
     @PostMapping("/{orderId}/paid")
     public void paid(@PathVariable Long orderId) {
         orderClientPort.markOrderPaid(orderId);

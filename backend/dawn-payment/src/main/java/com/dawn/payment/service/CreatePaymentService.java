@@ -32,6 +32,13 @@ public class CreatePaymentService implements CreatePaymentUseCase {
     public CreatePaymentResult create(Long orderId, PaymentMethod method, Long userId) {
         // legacy clients omit method; default to VNPAY to preserve flow
         PaymentMethod effectiveMethod = method == null ? PaymentMethod.VNPAY : method;
+
+        // Ownership check: prevent paying for another user's order
+        Long ownerId = orderClient.getOrderOwnerId(orderId);
+        if (ownerId != null && !ownerId.equals(userId)) {
+            throw new InvalidRequestException(Message.Order.NOT_FOUND + ": " + orderId);
+        }
+
         Instant reservedUntil = orderClient.getOrderReservedUntil(orderId);
         if (reservedUntil != null && reservedUntil.isBefore(Instant.now())) {
             throw new ConflictException(Message.Order.EXPIRED);

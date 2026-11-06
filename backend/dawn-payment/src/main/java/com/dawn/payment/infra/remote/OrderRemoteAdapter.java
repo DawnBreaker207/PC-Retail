@@ -32,6 +32,12 @@ public class OrderRemoteAdapter implements OrderClientPort {
 
     @Override
     @Bulkhead(name = "order")
+    public Long getOrderOwnerId(Long orderId) {
+        return feignClient.getOrderOwnerId(orderId);
+    }
+
+    @Override
+    @Bulkhead(name = "order")
     public void markOrderPaid(Long orderId) {
         feignClient.markOrderPaid(orderId);
     }

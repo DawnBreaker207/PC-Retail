@@ -78,6 +78,11 @@ public class SubOrderCommandService implements TransitionSubOrderUseCase {
                     inventoryClient.restock(items, staffId);
                 }
             }
+            if (target == SubOrderStatus.RETURNED) {
+                // physical item back in warehouse — restock confirmed by staff
+                List<StockDecrementCommand> items = toStockCommands(subOrder.getId());
+                inventoryClient.restock(items, staffId);
+            }
         } catch (RuntimeException e) {
             // roll back CAS claim if inventory call fails
             subOrderRepo.transitionIfStatus(subOrderId, target, subOrder.getStatus());
@@ -153,9 +158,11 @@ public class SubOrderCommandService implements TransitionSubOrderUseCase {
     }
 
     private List<StockDecrementCommand> toStockCommands(Long subOrderId) {
+        Long warehouseId = subOrderRepo.findById(subOrderId)
+                .map(com.dawn.order.entity.SubOrder::getWarehouseId).orElse(null);
         return orderItemRepo.findBySubOrderId(subOrderId)
                 .stream()
-                .map(item -> new StockDecrementCommand(item.getSkuId(), item.getQuantity()))
+                .map(item -> new StockDecrementCommand(item.getSkuId(), item.getQuantity(), warehouseId))
                 .toList();
     }
 

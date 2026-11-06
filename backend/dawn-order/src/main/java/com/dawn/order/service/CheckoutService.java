@@ -61,41 +61,29 @@ public class CheckoutService implements CheckoutUseCase {
                 .map(CartItemSnapshot::skuId)
                 .toList();
 
-        // fetch prices and validate voucher concurrently
         CompletableFuture<Map<Long, BigDecimal>> pricesFuture = CompletableFuture
                 .supplyAsync(() -> catalogClient.getPrices(skuIds), checkoutExecutor);
 
         List<String> voucherCodes = req.voucherCode() != null
                 ? List.of(req.voucherCode()) : List.of();
 
-        CompletableFuture<BigDecimal> discountFuture = pricesFuture.thenCompose(priceMap -> {
-            BigDecimal subTotal = cartItems.stream()
-                    .map(item -> priceMap
-                            .getOrDefault(item.skuId(), BigDecimal.ZERO)
-                            .multiply(BigDecimal.valueOf(item.quantity())))
-                    .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-            if (voucherCodes.isEmpty()) {
-                return CompletableFuture.completedFuture(BigDecimal.ZERO);
-            }
-
-            return CompletableFuture.supplyAsync(() -> {
-                promotionClient.validateStack(skuIds, voucherCodes);
-                VoucherApplyResult validation = promotionClient.validate(req.voucherCode(), subTotal);
-                if (!validation.valid()) {
-                    throw new InvalidRequestException(validation.errorMessage());
-                }
-                return validation.discountAmount();
-            }, checkoutExecutor);
-        });
-
         Map<Long, BigDecimal> priceMap = joinUnchecked(pricesFuture);
-        BigDecimal discountAmount = joinUnchecked(discountFuture);
         BigDecimal subTotal = cartItems.stream()
                 .map(item -> priceMap
                         .getOrDefault(item.skuId(), BigDecimal.ZERO)
                         .multiply(BigDecimal.valueOf(item.quantity())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        // Validate voucher after price resolution; discount amount used for order creation
+        BigDecimal discountAmount = BigDecimal.ZERO;
+        if (!voucherCodes.isEmpty()) {
+            promotionClient.validateStack(skuIds, voucherCodes);
+            VoucherApplyResult validation = promotionClient.validate(req.voucherCode(), subTotal);
+            if (!validation.valid()) {
+                throw new InvalidRequestException(validation.errorMessage());
+            }
+            discountAmount = validation.discountAmount();
+        }
 
         List<StockDecrementCommand> baseItems = cartItems.stream()
                 .map(item -> new StockDecrementCommand(item.skuId(), item.quantity()))

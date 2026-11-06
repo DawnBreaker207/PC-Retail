@@ -24,6 +24,9 @@ public interface OrderFeignClient {
     @GetMapping("/{orderId}/reserved-until")
     Instant getOrderReservedUntil(@PathVariable("orderId") Long orderId);
 
+    @GetMapping("/{orderId}/owner")
+    Long getOrderOwnerId(@PathVariable("orderId") Long orderId);
+
     @PostMapping("/{orderId}/paid")
     void markOrderPaid(@PathVariable("orderId") Long orderId);
 

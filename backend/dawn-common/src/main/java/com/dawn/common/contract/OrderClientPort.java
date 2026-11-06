@@ -8,6 +8,9 @@ public interface OrderClientPort {
 
     Instant getOrderReservedUntil(Long orderId);
 
+    /** Returns the userId who owns this order, or null for guest orders. */
+    Long getOrderOwnerId(Long orderId);
+
     void markOrderPaid(Long orderId);
 
     void markOrderPaymentFailed(Long orderId);

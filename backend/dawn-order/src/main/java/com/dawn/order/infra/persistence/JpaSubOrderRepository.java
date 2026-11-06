@@ -47,4 +47,7 @@ public interface JpaSubOrderRepository extends JpaRepository<SubOrder, Long>, Su
             @Param("id") Long id,
             @Param("expected") SubOrderStatus expected,
             @Param("target") SubOrderStatus target);
+
+    @Override
+    List<SubOrder> findByTrackingCode(String trackingCode);
 }
