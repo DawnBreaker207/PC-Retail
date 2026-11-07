@@ -178,6 +178,30 @@ public class InventoryCommandService implements ReserveStockUseCase, ReleaseStoc
         runAfterCommit(() -> cachePort.setStock(warehouseId, skuId, newAvailable));
     }
 
+    /** Adjusts absolute stockQuantity for a stocktake variance (delta may be negative). */
+    @Transactional
+    public void adjustForStocktake(Long skuId, Long warehouseId, int delta, Long stocktakeId, Long staffId) {
+        if (delta == 0) return;
+        Inventory inv = inventoryRepository.findBySkuIdAndWarehouseIdWithLock(skuId, warehouseId)
+                .orElseThrow(() -> new ResourceNotFoundException(Message.format(Message.Inventory.NOT_FOUND_FOR_SKU, skuId)));
+        inv.setStockQuantity(inv.getStockQuantity() + delta);
+        if (inv.getStockQuantity() < 0) inv.setStockQuantity(0);
+        inventoryRepository.save(inv);
+
+        transactionRepository.save(InventoryTransaction.builder()
+                .skuId(skuId)
+                .type(delta > 0 ? TransactionType.ADJUSTMENT_IN : TransactionType.ADJUSTMENT_OUT)
+                .quantity(Math.abs(delta))
+                .referenceType(ReferenceType.STOCKTAKE)
+                .referenceId(stocktakeId)
+                .createdBy(staffId)
+                .reason("stocktake variance")
+                .build());
+
+        int newAvailable = inv.getAvailableQuantity();
+        runAfterCommit(() -> cachePort.setStock(warehouseId, skuId, newAvailable));
+    }
+
     private List<InventoryLine> toLines(List<StockDecrementCommandDto> items) {
         return items.stream()
                 .map(item -> new InventoryLine(item.skuId(), item.quantity()))

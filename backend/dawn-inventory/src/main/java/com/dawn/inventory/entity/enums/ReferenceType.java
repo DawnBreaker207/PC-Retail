@@ -4,5 +4,6 @@ public enum ReferenceType {
     ORDER_ITEM,
     MANUAL,
     RETURN,
-    PURCHASE_ORDER
+    PURCHASE_ORDER,
+    STOCKTAKE
 }

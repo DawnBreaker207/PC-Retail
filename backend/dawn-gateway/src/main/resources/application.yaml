@@ -52,6 +52,15 @@ spring:
                   args:
                     rate-limiter: "#{@standardRateLimiter}"
                     key-resolver: "#{@userKeyResolver}"
+            - id: dawn-inventory-stocktake
+              uri: ${INVENTORY_SERVICE_URL:http://localhost:8082}
+              predicates:
+                - Path=/api/v1/admin/stock-takes/**
+              filters:
+                - name: RequestRateLimiter
+                  args:
+                    rate-limiter: "#{@standardRateLimiter}"
+                    key-resolver: "#{@userKeyResolver}"
             - id: dawn-order
               uri: ${ORDER_SERVICE_URL:http://localhost:8081}
               predicates:
