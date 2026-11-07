@@ -199,7 +199,8 @@ public class SubOrderCommandService implements TransitionSubOrderUseCase {
     private void publishStatusChangedEvent(Long subOrderId, SubOrder sub, SubOrderStatus target) {
         if (target != SubOrderStatus.PAID && target != SubOrderStatus.SHIPPED
                 && target != SubOrderStatus.OUT_FOR_DELIVERY && target != SubOrderStatus.DELIVERED
-                && target != SubOrderStatus.DELIVERY_FAILED) {
+                && target != SubOrderStatus.DELIVERY_FAILED && target != SubOrderStatus.CANCELLED
+                && target != SubOrderStatus.RETURNED) {
             return;
         }
         try {
@@ -310,6 +311,8 @@ public class SubOrderCommandService implements TransitionSubOrderUseCase {
         if (fresh.getDeliveryAttempts() >= MAX_DELIVERY_ATTEMPTS) {
             log.info("Sub-order {} reached max delivery attempts ({}), auto-cancelling", subOrderId, MAX_DELIVERY_ATTEMPTS);
             transition(subOrderId, SubOrderStatus.CANCELLED, shipperId);
+            // re-fetch so response reflects auto-cancel, not stale DELIVERY_FAILED
+            return toDto(subOrderRepo.findById(subOrderId).orElse(fresh));
         }
 
         return toDto(fresh);

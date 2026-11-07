@@ -100,6 +100,8 @@ public class OrderEventNotificationConsumer {
             case "OUT_FOR_DELIVERY" -> "delivery-out";
             case "DELIVERY_FAILED"  -> "delivery-failed";
             case "DELIVERED"        -> "order-delivered";
+            case "CANCELLED"        -> "order-cancelled";
+            case "RETURNED"         -> "order-returned";
             default -> null;
         };
         if (templateId == null) return;

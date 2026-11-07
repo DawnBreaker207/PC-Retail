@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Đơn hàng đã bị hủy</title>
+  <style>
+    body { margin:0; font-family: 'Segoe UI', Arial, sans-serif; background:#f5f6fa; color:#222; }
+    .wrap { max-width:600px; margin:32px auto; background:#fff; border-radius:8px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,.08); }
+    .header { background:#424242; color:#fff; padding:28px 32px; }
+    .header h1 { margin:0; font-size:22px; }
+    .header p { margin:4px 0 0; font-size:13px; opacity:.8; }
+    .body { padding:32px; }
+    .badge { display:inline-block; background:#f5f5f5; color:#424242; border-radius:4px; padding:6px 14px; font-size:13px; font-weight:600; margin-bottom:20px; }
+    .info { font-size:14px; color:#555; line-height:1.8; }
+    .note { background:#e8f5e9; border-radius:6px; padding:14px 18px; font-size:13px; color:#333; margin:20px 0; }
+    .footer { background:#f0f0f0; padding:18px 32px; font-size:12px; color:#888; text-align:center; }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <h1>PC Retail</h1>
+    <p>Hệ thống bán lẻ linh kiện máy tính</p>
+  </div>
+  <div class="body">
+    <div class="badge">✕ Đơn hàng đã bị hủy</div>
+    <p class="info">
+      Đơn hàng <strong>#<span th:text="${orderId}">0</span></strong> (mã vận đơn <strong>#<span th:text="${subOrderId}">0</span></strong>)
+      đã được hủy thành công.
+    </p>
+    <div class="note">
+      💳 Nếu bạn đã thanh toán, khoản tiền sẽ được hoàn trả về phương thức thanh toán gốc trong vòng
+      <strong>3–5 ngày làm việc</strong>.<br/>
+      Nếu chưa thấy hoàn tiền sau 7 ngày, vui lòng liên hệ <strong>support@pcretail.vn</strong>.
+    </div>
+    <p class="info" style="font-size:13px; color:#888;">
+      Nếu bạn không yêu cầu hủy đơn này, hãy liên hệ ngay với chúng tôi.
+    </p>
+  </div>
+  <div class="footer">
+    support@pcretail.vn | Thời gian làm việc: 8:00–22:00 mỗi ngày
+  </div>
+</div>
+</body>
+</html>
