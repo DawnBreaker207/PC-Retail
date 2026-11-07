@@ -4,12 +4,17 @@
   --color-primary: #e53935;
   --color-primary-dark: #b71c1c;
   --color-primary-light: #ffebee;
+  --color-primary-foreground: #ffffff;
+
+  --color-destructive: #dc2626;
+  --color-destructive-foreground: #ffffff;
 
   --color-bg: #fafafa;
   --color-surface: #ffffff;
   --color-surface-card: #f8fafc;
   --color-border: #e2e8f0;
   --color-muted: #475569;
+  --color-muted-foreground: #64748b;
 
   --color-bg-dark: #0c1220;
   --color-surface-dark: #162032;
@@ -19,6 +24,20 @@
 
   --color-ink: #111111;
   --color-ink-dark: #e2eaf5;
+
+  /* Spartan UI Semantic System Tokens */
+  --color-background: #ffffff;
+  --color-foreground: #111111;
+  --color-card: #ffffff;
+  --color-card-foreground: #111111;
+  --color-popover: #ffffff;
+  --color-popover-foreground: #111111;
+  --color-secondary: #f1f5f9;
+  --color-secondary-foreground: #0f172a;
+  --color-accent: #f8fafc;
+  --color-accent-foreground: #0f172a;
+  --color-input: #e2e8f0;
+  --color-ring: #e53935;
 
   --color-success: #2d7d46;
   --color-success-dark: #22c55e;
@@ -153,6 +172,24 @@ html.dark {
   --color-primary: #ef5350;
   --color-primary-dark: #b71c1c;
   --color-primary-light: #2a1518;
+  --color-primary-foreground: #ffffff;
+
+  --color-destructive: #ef4444;
+  --color-destructive-foreground: #ffffff;
+
+  --color-background: #0c1220;
+  --color-foreground: #e2eaf5;
+  --color-card: #162032;
+  --color-card-foreground: #e2eaf5;
+  --color-popover: #162032;
+  --color-popover-foreground: #e2eaf5;
+  --color-muted-foreground: #8895b0;
+  --color-secondary: #1e2a3e;
+  --color-secondary-foreground: #e2eaf5;
+  --color-accent: #1e2a3e;
+  --color-accent-foreground: #e2eaf5;
+  --color-input: #2a344a;
+  --color-ring: #ef5350;
 
   --color-success: #22c55e;
   --color-warning: #f59e0b;

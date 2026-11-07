@@ -29,6 +29,7 @@ export const ApiEndpoints = {
     compare: `${API}/api/v1/skus/compare`,
     brands: `${API}/api/v1/brands`,
     categories: `${API}/api/v1/categories`,
+    importSku: `${API}/api/v1/catalog/import/sku`,
   },
   cart: {
     base: `${API}/api/v1/cart`,
@@ -52,11 +53,19 @@ export const ApiEndpoints = {
     guestCheckout: `${API}/api/v1/orders/guest-checkout`,
     detail: (id: number) => `${API}/api/v1/orders/${id}`,
     cancelSubOrder: (id: number) => `${API}/api/v1/orders/sub-orders/${id}/cancel`,
+    exportExcel: `${API}/api/v1/orders/export-excel`,
   },
   staffOrders: {
     base: `${API}/api/v1/staff/orders`,
     detail: (id: number) => `${API}/api/v1/staff/orders/${id}`,
     transition: (id: number) => `${API}/api/v1/staff/orders/sub-orders/${id}/transition`,
+    assignShipper: (id: number, shipperId: number) => `${API}/api/v1/staff/orders/sub-orders/${id}/assign-shipper?shipperId=${shipperId}`,
+  },
+  shipper: {
+    myOrders: `${API}/api/v1/shipper/my-orders`,
+    pickup: (id: number) => `${API}/api/v1/shipper/sub-orders/${id}/pickup`,
+    delivered: (id: number, codCollected: boolean) => `${API}/api/v1/shipper/sub-orders/${id}/delivered?codCollected=${codCollected}`,
+    failed: (id: number) => `${API}/api/v1/shipper/sub-orders/${id}/failed`,
   },
   carriers: {
     assign: (subOrderId: number) => `${API}/api/v1/sub-orders/${subOrderId}/assign-carrier`,
@@ -70,12 +79,18 @@ export const ApiEndpoints = {
   },
   tax: {
     calculate: `${API}/api/v1/tax/calculate`,
+    myInvoices: `${API}/api/v1/tax/invoices/my`,
+    invoiceDetail: (id: number) => `${API}/api/v1/tax/invoices/${id}`,
   },
   promotion: {
     vouchers: `${API}/api/v1/vouchers`,
     voucherDetail: (id: number) => `${API}/api/v1/vouchers/${id}`,
     validateVoucher: `${API}/api/v1/vouchers/validate`,
     flashSalesActive: `${API}/api/v1/promotion/flash-sales/active`,
+    adminFlashSales: `${API}/api/v1/promotion/flash-sales/admin`,
+    adminFlashSaleItems: (campaignId: number) => `${API}/api/v1/promotion/flash-sales/admin/${campaignId}/items`,
+    adminFlashSaleItem: (itemId: number) => `${API}/api/v1/promotion/flash-sales/admin/items/${itemId}`,
+    adminFlashSaleCampaign: (campaignId: number) => `${API}/api/v1/promotion/flash-sales/admin/${campaignId}`,
   },
   wishlist: {
     base: `${API}/api/v1/wishlist`,
@@ -95,12 +110,27 @@ export const ApiEndpoints = {
     bySku: (skuId: number, page = 0, size = 10) => `${API}/api/v1/ratings/sku/${skuId}?page=${page}&size=${size}`,
     summary: (skuId: number) => `${API}/api/v1/ratings/sku/${skuId}/summary`,
   },
+  ai: {
+    optimizeBuild: `${API}/api/v1/ai/build/optimize`,
+    search: `${API}/api/v1/ai/search`,
+    trending: `${API}/api/v1/ai/trending`,
+    similar: `${API}/api/v1/ai/similar`,
+  },
+  warranty: {
+    bySubOrder: (subOrderId: number) => `${API}/api/v1/orders/sub-orders/${subOrderId}/warranty`,
+    claims: (itemId: number) => `${API}/api/v1/warranty/${itemId}/claims`,
+    submitClaim: (itemId: number) => `${API}/api/v1/warranty/${itemId}/claims`,
+    staffUpdateClaimStatus: (claimId: number) => `${API}/api/v1/staff/warranty/claims/${claimId}/status`,
+  },
   aiSimilar: `${API}/api/v1/ai/similar`,
   returns: {
+    submit: (subOrderId: number) => `${API}/api/v1/orders/sub-orders/${subOrderId}/return`,
     request: (orderId: number) => `${API}/api/v1/orders/${orderId}/return-requests`,
     detail: (requestId: number) => `${API}/api/v1/return-requests/${requestId}`,
     bySubOrder: (subOrderId: number) => `${API}/api/v1/return-requests/sub-order/${subOrderId}`,
-    dispute: (requestId: number) => `${API}/api/v1/return-requests/${requestId}/dispute`,
+    dispute: (requestId: number) => `${API}/api/v1/orders/returns/${requestId}/dispute`,
+    pendingRefunds: `${API}/api/v1/staff/refunds/pending`,
+    confirmPaid: (refundId: number) => `${API}/api/v1/staff/refunds/${refundId}/confirm-paid`,
   },
   reports: {
     revenue: `${API}/api/v1/admin/reports/revenue`,

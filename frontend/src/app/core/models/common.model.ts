@@ -20,7 +20,7 @@ export interface User {
   fullName: string;
   email: string;
   phone?: string;
-  systemRole: 'CUSTOMER' | 'STAFF' | 'ADMIN' | 'SUPER_ADMIN';
+  systemRole: 'CUSTOMER' | 'STAFF' | 'ADMIN' | 'SUPER_ADMIN' | 'SHIPPER';
   status?: 'ACTIVE' | 'INACTIVE';
   createdAt?: string;
 }
@@ -111,6 +111,9 @@ export interface SkuRatingSummary {
   oneStarCount: number;
 }
 
+export type PaymentMethod = 'ONLINE' | 'COD';
+export type ShippingMethod = 'INTERNAL' | 'CARRIER' | 'STORE_PICKUP';
+
 export interface CheckoutRequest {
   idempotencyKey: string;
   fulfillmentType: FulfillmentType;
@@ -118,6 +121,7 @@ export interface CheckoutRequest {
   voucherCode?: string;
   taxInfo?: TaxInfo;
   invoiceRequested?: boolean;
+  paymentMethod?: PaymentMethod;
 }
 
 export interface CheckoutResponse {
@@ -125,6 +129,7 @@ export interface CheckoutResponse {
   totalAmount: number;
   paymentStatus: string;
   paymentUrl?: string;
+  paymentMethod?: PaymentMethod;
 }
 
 export interface OrderItem {
@@ -140,6 +145,7 @@ export interface OrderItem {
 
 export interface SubOrder {
   id: number;
+  orderId?: number;
   status: string;
   fulfillmentType: string;
   subtotal: number;
@@ -147,6 +153,13 @@ export interface SubOrder {
   discountAmount: number;
   finalAmount: number;
   items: OrderItem[];
+  shippingMethod?: string;
+  shipperId?: number;
+  shipperName?: string;
+  deliveryAttempts?: number;
+  deliveryAttemptedAt?: string;
+  codCollectedAt?: string;
+  deliveryNote?: string;
 }
 
 export interface Order {
@@ -155,7 +168,30 @@ export interface Order {
   shippingAddress?: ShippingAddress;
   totalAmount: number;
   paymentStatus: string;
+  paymentMethod?: PaymentMethod;
   subOrders: SubOrder[];
+}
+
+export interface SubmitReturnPayload {
+  reason: string;
+  images?: string[];
+  bankAccount: string;
+  bankName: string;
+  accountHolder: string;
+}
+
+export interface Refund {
+  id: number;
+  returnRequestId?: number;
+  subOrderId: number;
+  amount: number;
+  status: 'PENDING' | 'COMPLETED' | 'FAILED';
+  refundMethod: 'BANK_TRANSFER' | 'VNPAY_REFUND';
+  bankAccount?: string;
+  bankName?: string;
+  accountHolder?: string;
+  createdAt?: string;
+  completedAt?: string;
 }
 
 export interface VnpayInitResponse {
@@ -329,4 +365,112 @@ export interface BuildTemplateDetail {
     defaultSku?: Sku;
     allowedSkus?: Sku[];
   }[];
+}
+
+// Warranty Models
+export type WarrantyClaimStatus =
+  | 'CLAIMED'
+  | 'RECEIVED'
+  | 'DIAGNOSING'
+  | 'REPAIRED'
+  | 'REPLACED'
+  | 'REJECTED'
+  | 'RETURNED_TO_CUSTOMER';
+
+export interface WarrantyItem {
+  id: number;
+  orderItemId: number;
+  subOrderId: number;
+  skuId: number;
+  skuName?: string;
+  shopMonths: number;
+  mfrMonths: number;
+  activatedAt: string;
+  expiresAt: string;
+  serialNumber?: string;
+  active: boolean;
+}
+
+export interface WarrantyClaim {
+  id: number;
+  warrantyItemId: number;
+  customerName: string;
+  customerPhone: string;
+  description: string;
+  images?: string[];
+  status: WarrantyClaimStatus;
+  diagnosisNote?: string;
+  resolution?: string;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export interface SubmitWarrantyClaimRequest {
+  customerName: string;
+  customerPhone: string;
+  description: string;
+  images?: string[];
+  branchId?: number;
+}
+
+// AI Builder Models
+export type AiUseCase = 'GAMING' | 'WORKSTATION' | 'OFFICE' | 'STUDY';
+
+export interface AiOptimizeRequest {
+  budget: number;
+  useCase: AiUseCase;
+  preferBrand?: string;
+}
+
+export interface AiComponentSlot {
+  slotType: string;
+  skuId: number;
+  name: string;
+  price: number;
+  specs?: string;
+  perfScore?: number;
+}
+
+export interface AiBuildResult {
+  components: AiComponentSlot[];
+  totalPrice: number;
+  valueScore: number;
+  description: string;
+}
+
+// Tax Invoice Model
+export interface TaxInvoice {
+  id: number;
+  orderId: number;
+  userId?: number;
+  buyerType: 'INDIVIDUAL' | 'BUSINESS';
+  subtotal: number;
+  taxAmount: number;
+  total: number;
+  taxRate: number;
+  invoiceNumber?: string;
+  invoiceStatus: 'PENDING' | 'ISSUED' | 'CANCELLED';
+  businessTaxCode?: string;
+  issuedAt?: string;
+  createdAt: string;
+}
+
+// Flash Sale Campaign Admin Models
+export interface FlashSaleCampaign {
+  id: number;
+  name: string;
+  startTime: string;
+  endTime: string;
+  active?: boolean;
+}
+
+export interface FlashSaleItem {
+  id: number;
+  campaignId: number;
+  skuId: number;
+  skuName?: string;
+  flashPrice: number;
+  originalPrice?: number;
+  quantityLimit: number;
+  soldQuantity?: number;
 }
