@@ -1,12 +1,7 @@
 package com.dawn.payment.infra.messaging;
 
 import com.dawn.common.dlt.DeadLetterService;
-import com.dawn.common.event.InventoryFailedEvent;
-import com.dawn.common.event.PaymentRefundedEvent;
-import com.dawn.common.outbox.OutboxPublisher;
-import com.dawn.payment.entity.Payment;
-import com.dawn.payment.entity.enums.PaymentResultStatus;
-import com.dawn.payment.port.out.PaymentRepository;
+import com.dawn.payment.service.PaymentRefundCommandService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -22,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
 
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -34,8 +28,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class InventoryEventConsumer {
 
-    private final PaymentRepository paymentRepository;
-    private final OutboxPublisher outboxPublisher;
+    private final PaymentRefundCommandService refundCommandService;
     private final DeadLetterService deadLetterService;
     private final ObjectMapper objectMapper;
 
@@ -63,37 +56,11 @@ public class InventoryEventConsumer {
 
             Long orderId = Long.valueOf(fields.get("orderId").toString());
             String reason = (String) fields.getOrDefault("reason", "inventory_failure");
-            processRefund(orderId, reason);
+            refundCommandService.processRefund(orderId, reason);
         } catch (Exception e) {
             log.error("Error processing inventory event in payment (topic={}, key={}): {}", topic, key, e.getMessage());
             throw new RuntimeException("Payment inventory event processing failed, will retry", e);
         }
-    }
-
-    private void processRefund(Long orderId, String reason) {
-        List<Payment> payments = paymentRepository.findByOrderId(orderId);
-        Payment completed = payments.stream()
-                .filter(p -> p.getStatus() == PaymentResultStatus.COMPLETED)
-                .findFirst()
-                .orElse(null);
-
-        if (completed == null) {
-            log.warn("No COMPLETED payment found for orderId={}, cannot refund", orderId);
-            return;
-        }
-
-        if (completed.getStatus() == PaymentResultStatus.REFUNDED) {
-            log.info("Payment for orderId={} already REFUNDED (idempotent skip)", orderId);
-            return;
-        }
-
-        completed.setStatus(PaymentResultStatus.REFUNDED);
-        paymentRepository.save(completed);
-
-        outboxPublisher.publish("payment-events", "PAYMENT", completed.getId(),
-                new PaymentRefundedEvent(orderId, completed.getTransactionRef()));
-
-        log.info("SAGA compensation: payment refunded for orderId={}, reason={}", orderId, reason);
     }
 
     @DltHandler

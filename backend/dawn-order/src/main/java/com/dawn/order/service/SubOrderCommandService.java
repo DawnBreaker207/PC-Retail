@@ -2,6 +2,7 @@ package com.dawn.order.service;
 
 import com.dawn.common.auditlog.LogConstant;
 import com.dawn.common.auditlog.Loggable;
+import com.dawn.common.event.SubOrderCancelledEvent;
 import com.dawn.common.event.SubOrderStatusChangedEvent;
 import com.dawn.common.exception.wrapper.ConflictException;
 import com.dawn.common.exception.wrapper.ResourceNotFoundException;
@@ -13,6 +14,8 @@ import com.dawn.order.dto.SubOrderDto;
 import com.dawn.order.entity.Order;
 import com.dawn.order.entity.OrderItem;
 import com.dawn.order.entity.SubOrder;
+import com.dawn.order.entity.enums.PaymentMethod;
+import com.dawn.order.entity.enums.PaymentStatus;
 import com.dawn.order.entity.enums.SubOrderStatus;
 import com.dawn.order.event.SubOrderDeliveredEvent;
 import com.dawn.order.infra.kafka.NotificationEventPublisher;
@@ -102,6 +105,7 @@ public class SubOrderCommandService implements TransitionSubOrderUseCase {
         subOrderRepo.save(fresh);
         if (target == SubOrderStatus.CANCELLED || target == SubOrderStatus.EXPIRED) {
             recordGuestAbuse(subOrder.getOrderId());
+            publishCancelledRefundEvent(fresh, target);
         }
         publishStatusChangedEvent(subOrderId, fresh, target);
         if (target == SubOrderStatus.DELIVERED) {
@@ -172,6 +176,24 @@ public class SubOrderCommandService implements TransitionSubOrderUseCase {
                 .stream()
                 .map(item -> new StockDecrementCommand(item.getSkuId(), item.getQuantity(), warehouseId))
                 .toList();
+    }
+
+    /** Publishes refund saga event when a PAID ONLINE sub-order is cancelled or expired. */
+    private void publishCancelledRefundEvent(SubOrder sub, SubOrderStatus target) {
+        try {
+            Order order = orderRepo.findById(sub.getOrderId()).orElse(null);
+            if (order == null) return;
+            if (order.getPaymentMethod() != PaymentMethod.ONLINE) return;
+            if (order.getPaymentStatus() != PaymentStatus.PAID) return;
+
+            String reason = target == SubOrderStatus.EXPIRED ? "expired_unpaid" : "sub_order_cancelled";
+            SubOrderCancelledEvent event = new SubOrderCancelledEvent(sub.getId(), sub.getOrderId(), reason);
+            String payload = objectMapper.writeValueAsString(event);
+            AfterCommit.run(() ->
+                    notificationEventPublisher.send("order-events", "CANCEL:" + sub.getId(), payload));
+        } catch (Exception e) {
+            log.warn("Failed to publish cancelled-refund event for subOrder={}: {}", sub.getId(), e.getMessage());
+        }
     }
 
     private void publishStatusChangedEvent(Long subOrderId, SubOrder sub, SubOrderStatus target) {
@@ -264,6 +286,8 @@ public class SubOrderCommandService implements TransitionSubOrderUseCase {
         return toDto(fresh);
     }
 
+    private static final int MAX_DELIVERY_ATTEMPTS = 2;
+
     @Override
     @Transactional
     public SubOrderDto deliveryFailed(Long subOrderId, Long shipperId, String note) {
@@ -277,10 +301,17 @@ public class SubOrderCommandService implements TransitionSubOrderUseCase {
         SubOrder fresh = subOrderRepo.findById(subOrderId).orElse(sub);
         fresh.setDeliveryNote(note);
         fresh.setDeliveryAttemptedAt(Instant.now());
+        fresh.setDeliveryAttempts(fresh.getDeliveryAttempts() + 1);
         appendHistory(fresh, SubOrderStatus.DELIVERY_FAILED, shipperId);
         fresh.setStatus(SubOrderStatus.DELIVERY_FAILED);
         subOrderRepo.save(fresh);
         publishStatusChangedEvent(subOrderId, fresh, SubOrderStatus.DELIVERY_FAILED);
+
+        if (fresh.getDeliveryAttempts() >= MAX_DELIVERY_ATTEMPTS) {
+            log.info("Sub-order {} reached max delivery attempts ({}), auto-cancelling", subOrderId, MAX_DELIVERY_ATTEMPTS);
+            transition(subOrderId, SubOrderStatus.CANCELLED, shipperId);
+        }
+
         return toDto(fresh);
     }
 

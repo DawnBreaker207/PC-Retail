@@ -40,6 +40,8 @@ public class OrderEventNotificationConsumer {
             Map<String, Object> fields = objectMapper.readValue(payload, new TypeReference<>() {});
             if (fields.containsKey("newStatus")) {
                 handleSubOrderStatusChanged(fields);
+            } else if (fields.containsKey("returnStatus")) {
+                handleReturnStatusChanged(fields);
             } else if (fields.containsKey("orderId") && fields.containsKey("userId")) {
                 handleOrderCreated(fields);
             }
@@ -111,6 +113,37 @@ public class OrderEventNotificationConsumer {
 
         notificationCommandService.processEvent(new NotificationEvent(
                 "SubOrderStatusChanged", userId, email, null,
+                NotificationChannel.EMAIL, templateId, vars));
+    }
+
+    private void handleReturnStatusChanged(Map<String, Object> fields) {
+        Long returnRequestId = toLong(fields.get("returnRequestId"));
+        Long orderId = toLong(fields.get("orderId"));
+        Long userId = toLong(fields.get("userId"));
+        String guestEmail = (String) fields.get("guestEmail");
+        String returnStatus = (String) fields.get("returnStatus");
+
+        String email = resolveEmail(userId, guestEmail);
+        if (email == null) {
+            log.warn("No email for returnRequest={} returnStatus={}, skipping", returnRequestId, returnStatus);
+            return;
+        }
+
+        String templateId = switch (returnStatus != null ? returnStatus : "") {
+            case "APPROVED"         -> "return-approved";
+            case "REJECTED"         -> "return-rejected";
+            case "REFUND_CONFIRMED" -> "refund-confirmed";
+            default -> null;
+        };
+        if (templateId == null) return;
+
+        Map<String, Object> vars = new HashMap<>();
+        vars.put("orderId", orderId);
+        vars.put("returnRequestId", returnRequestId);
+        if (fields.containsKey("amount")) vars.put("amount", fields.get("amount"));
+
+        notificationCommandService.processEvent(new NotificationEvent(
+                "ReturnStatusChanged", userId, email, null,
                 NotificationChannel.EMAIL, templateId, vars));
     }
 

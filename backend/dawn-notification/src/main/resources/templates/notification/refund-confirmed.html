@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Hoàn tiền thành công</title>
+  <style>
+    body { margin:0; font-family: 'Segoe UI', Arial, sans-serif; background:#f5f6fa; color:#222; }
+    .wrap { max-width:600px; margin:32px auto; background:#fff; border-radius:8px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,.08); }
+    .header { background:#1565c0; color:#fff; padding:28px 32px; }
+    .header h1 { margin:0; font-size:22px; }
+    .header p { margin:4px 0 0; font-size:13px; opacity:.8; }
+    .body { padding:32px; }
+    .badge { display:inline-block; background:#e3f2fd; color:#1565c0; border-radius:4px; padding:6px 14px; font-size:13px; font-weight:600; margin-bottom:20px; }
+    .info { font-size:14px; color:#555; line-height:1.8; }
+    .amount-box { background:#e8f5e9; border-radius:8px; padding:20px 24px; margin:20px 0; text-align:center; }
+    .amount-box .label { font-size:13px; color:#555; margin-bottom:6px; }
+    .amount-box .amount { font-size:28px; font-weight:700; color:#2e7d32; }
+    .note { background:#f8f9ff; border-radius:6px; padding:14px 18px; font-size:13px; color:#555; margin:16px 0; line-height:1.7; }
+    .footer { background:#f0f0f0; padding:18px 32px; font-size:12px; color:#888; text-align:center; }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <h1>PC Retail</h1>
+    <p>Hệ thống bán lẻ linh kiện máy tính</p>
+  </div>
+  <div class="body">
+    <div class="badge">✓ Hoàn tiền đã được xử lý</div>
+    <p class="info">
+      Chúng tôi đã hoàn tiền cho đơn hàng <strong>#<span th:text="${orderId}">0</span></strong>.
+      Tiền đã được chuyển khoản vào tài khoản ngân hàng bạn đã cung cấp.
+    </p>
+    <div class="amount-box" th:if="${amount}">
+      <div class="label">Số tiền hoàn trả</div>
+      <div class="amount"><span th:text="${#numbers.formatDecimal(amount, 0, 'COMMA', 0, 'POINT')}">0</span> ₫</div>
+    </div>
+    <div class="note">
+      💡 Thời gian nhận tiền thường mất <strong>1–3 ngày làm việc</strong> tùy theo ngân hàng của bạn.<br/>
+      Nếu sau 5 ngày làm việc bạn chưa nhận được tiền, vui lòng liên hệ <strong>support@pcretail.vn</strong>
+      và cung cấp mã yêu cầu trả hàng <strong>#<span th:text="${returnRequestId}">0</span></strong>.
+    </div>
+  </div>
+  <div class="footer">
+    support@pcretail.vn | Thời gian làm việc: 8:00–22:00 mỗi ngày
+  </div>
+</div>
+</body>
+</html>

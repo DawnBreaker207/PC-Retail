@@ -7,5 +7,8 @@ import java.util.List;
 
 public record SubmitReturnRequest(
         @NotBlank String reason,
-        @Size(max = 5) List<String> images
+        @Size(max = 5) List<String> images,
+        @NotBlank String bankAccount,
+        @NotBlank String bankName,
+        @NotBlank String accountHolder
 ) {}

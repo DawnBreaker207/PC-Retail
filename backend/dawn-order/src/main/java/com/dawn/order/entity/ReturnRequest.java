@@ -60,6 +60,15 @@ public class ReturnRequest {
     @Column(name = "dispute_note", columnDefinition = "TEXT")
     private String disputeNote;
 
+    @Column(name = "bank_account", length = 30)
+    private String bankAccount;
+
+    @Column(name = "bank_name", length = 100)
+    private String bankName;
+
+    @Column(name = "account_holder", length = 100)
+    private String accountHolder;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     @Builder.Default
     private Instant createdAt = Instant.now();

@@ -142,8 +142,9 @@ public class NotificationCommandService implements SendNotificationUseCase {
             case "delivery-out" -> "Shipper đang giao hàng đến bạn – PC Retail";
             case "delivery-failed" -> "Giao hàng thất bại – PC Retail sẽ liên hệ lại";
             case "order-delivered" -> "Đơn hàng đã giao thành công – PC Retail";
-            case "return-approved" -> "Yêu cầu trả hàng được chấp nhận – PC Retail";
-            case "return-rejected" -> "Yêu cầu trả hàng bị từ chối – PC Retail";
+            case "return-approved"  -> "Yêu cầu trả hàng được chấp nhận – PC Retail";
+            case "return-rejected"  -> "Yêu cầu trả hàng bị từ chối – PC Retail";
+            case "refund-confirmed" -> "Hoàn tiền đã được xử lý – PC Retail";
             default -> "Thông báo từ PC Retail";
         };
     }

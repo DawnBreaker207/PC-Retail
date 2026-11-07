@@ -90,4 +90,8 @@ public class SubOrder extends AuditableEntity {
 
     @Column(name = "cod_collected_at")
     private Instant codCollectedAt;
+
+    @Column(name = "delivery_attempts", nullable = false)
+    @Builder.Default
+    private int deliveryAttempts = 0;
 }

@@ -5,11 +5,14 @@ import com.dawn.common.utils.SecurityUtils;
 import com.dawn.order.controller.request.ReviewReturnRequest;
 import com.dawn.order.controller.request.SubmitReturnRequest;
 import com.dawn.order.dto.ReturnRequestDto;
+import com.dawn.order.entity.Refund;
 import com.dawn.order.service.ReturnRequestService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -24,7 +27,8 @@ public class ReturnController {
     public ReturnRequestDto submit(@PathVariable Long subOrderId,
                                    @Valid @RequestBody SubmitReturnRequest req) {
         Long userId = SecurityUtils.getCurrentUserId();
-        return returnRequestService.submit(subOrderId, userId, req.reason(), req.images());
+        return returnRequestService.submit(subOrderId, userId, req.reason(), req.images(),
+                req.bankAccount(), req.bankName(), req.accountHolder());
     }
 
     @PostMapping("/orders/returns/{returnId}/dispute")
@@ -56,5 +60,24 @@ public class ReturnController {
                                            @Valid @RequestBody ReviewReturnRequest req) {
         Long staffId = SecurityUtils.getCurrentUserId();
         return returnRequestService.resolveDispute(returnId, staffId, req.approve(), req.note());
+    }
+
+    @GetMapping("/staff/returns/{returnId}/refund")
+    @PreAuthorize(AuthorizationConstants.STAFF_OR_ADMIN)
+    public Refund getRefundByReturn(@PathVariable Long returnId) {
+        return returnRequestService.getRefundByReturnRequest(returnId);
+    }
+
+    @GetMapping("/staff/refunds/pending")
+    @PreAuthorize(AuthorizationConstants.STAFF_OR_ADMIN)
+    public List<Refund> listPendingRefunds() {
+        return returnRequestService.listPendingRefunds();
+    }
+
+    @PostMapping("/staff/refunds/{refundId}/confirm-paid")
+    @PreAuthorize(AuthorizationConstants.STAFF_OR_ADMIN)
+    public void confirmRefundPaid(@PathVariable Long refundId) {
+        Long staffId = SecurityUtils.getCurrentUserId();
+        returnRequestService.confirmRefundPaid(refundId, staffId);
     }
 }
