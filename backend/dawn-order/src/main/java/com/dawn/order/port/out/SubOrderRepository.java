@@ -37,4 +37,8 @@ public interface SubOrderRepository {
     int transitionIfStatus(Long id, SubOrderStatus expected, SubOrderStatus target);
 
     List<SubOrder> findByTrackingCode(String trackingCode);
+
+    Page<SubOrder> findByShipperId(Long shipperId, Pageable pageable);
+
+    Page<SubOrder> findByShipperIdAndStatus(Long shipperId, SubOrderStatus status, Pageable pageable);
 }

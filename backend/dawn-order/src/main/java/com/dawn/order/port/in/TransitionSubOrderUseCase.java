@@ -8,5 +8,11 @@ public interface TransitionSubOrderUseCase {
 
     SubOrderDto cancel(Long subOrderId, Long userId);
 
+    SubOrderDto assignShipper(Long subOrderId, Long shipperId, Long staffId);
+
+    SubOrderDto deliver(Long subOrderId, Long shipperId, boolean codCollected);
+
+    SubOrderDto deliveryFailed(Long subOrderId, Long shipperId, String note);
+
     void expiredUnpaidOrders();
 }

@@ -9,6 +9,7 @@ import com.dawn.common.contract.StockDecrementCommand;
 import com.dawn.order.entity.Order;
 import com.dawn.order.entity.OrderItem;
 import com.dawn.order.entity.SubOrder;
+import com.dawn.order.entity.enums.PaymentMethod;
 import com.dawn.order.entity.enums.PaymentStatus;
 import com.dawn.order.entity.enums.SubOrderStatus;
 import com.dawn.common.contract.InventoryClientPort;
@@ -71,6 +72,14 @@ public class OrderCommandService {
         // extract warehouseId from first stockItem (all items routed to same warehouse)
         Long warehouseId = stockItems.isEmpty() ? null : stockItems.get(0).warehouseId();
 
+        PaymentMethod pm = req.resolvedPaymentMethod();
+        // COD orders bypass payment gateway: paymentStatus = COD_PENDING
+        PaymentStatus initialPaymentStatus = pm == PaymentMethod.COD
+                ? PaymentStatus.COD_PENDING : PaymentStatus.PENDING;
+        // COD orders skip PENDING_PAYMENT → go directly to PROCESSING
+        SubOrderStatus initialSubStatus = pm == PaymentMethod.COD
+                ? SubOrderStatus.PROCESSING : SubOrderStatus.PENDING_PAYMENT;
+
         Order order = Order.builder()
                 .userId(userId)
                 .guestEmail(guestEmail)
@@ -79,7 +88,8 @@ public class OrderCommandService {
                         ? req.shippingAddress() : Map.of())
                 .totalAmount(finalAmount)
                 .taxAmount(BigDecimal.ZERO)
-                .paymentStatus(PaymentStatus.PENDING)
+                .paymentStatus(initialPaymentStatus)
+                .paymentMethod(pm)
                 .reservedUntil(Instant.now().plusSeconds(120 * 60))
                 .idempotencyKey(req.idempotencyKey())
                 .taxInfo(req.taxInfo())
@@ -94,10 +104,10 @@ public class OrderCommandService {
                 .discountAmount(discountAmount)
                 .finalAmount(finalAmount)
                 .warehouseId(warehouseId)
-                .status(SubOrderStatus.PENDING_PAYMENT)
+                .status(initialSubStatus)
                 .statusHistory(new ArrayList<>(List.of(Map.of(
                         "from", "CREATED",
-                        "to", SubOrderStatus.PENDING_PAYMENT.name(),
+                        "to", initialSubStatus.name(),
                         "createdAt", Instant.now().toString()
                 ))))
                 .build();

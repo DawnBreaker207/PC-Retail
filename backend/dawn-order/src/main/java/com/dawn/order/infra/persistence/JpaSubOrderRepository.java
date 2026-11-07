@@ -3,6 +3,8 @@ package com.dawn.order.infra.persistence;
 import com.dawn.order.entity.SubOrder;
 import com.dawn.order.entity.enums.SubOrderStatus;
 import com.dawn.order.port.out.SubOrderRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -50,4 +52,10 @@ public interface JpaSubOrderRepository extends JpaRepository<SubOrder, Long>, Su
 
     @Override
     List<SubOrder> findByTrackingCode(String trackingCode);
+
+    @Override
+    Page<SubOrder> findByShipperId(Long shipperId, Pageable pageable);
+
+    @Override
+    Page<SubOrder> findByShipperIdAndStatus(Long shipperId, SubOrderStatus status, Pageable pageable);
 }

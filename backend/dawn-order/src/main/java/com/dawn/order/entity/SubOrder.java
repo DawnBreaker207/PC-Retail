@@ -2,6 +2,7 @@ package com.dawn.order.entity;
 
 import com.dawn.common.entity.AuditableEntity;
 import com.dawn.order.entity.enums.FulfillmentType;
+import com.dawn.order.entity.enums.ShippingMethod;
 import com.dawn.order.entity.enums.SubOrderStatus;
 import io.swagger.v3.oas.annotations.Hidden;
 import jakarta.persistence.*;
@@ -11,6 +12,7 @@ import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -70,4 +72,22 @@ public class SubOrder extends AuditableEntity {
     @Column(name = "status_history", nullable = false, columnDefinition = "jsonb")
     @Builder.Default
     private List<Map<String, Object>> statusHistory = new ArrayList<>();
+
+    // In-house delivery fields
+    @Enumerated(EnumType.STRING)
+    @Column(name = "shipping_method", nullable = false, length = 20)
+    @Builder.Default
+    private ShippingMethod shippingMethod = ShippingMethod.INTERNAL;
+
+    @Column(name = "shipper_id")
+    private Long shipperId;
+
+    @Column(name = "delivery_note", length = 500)
+    private String deliveryNote;
+
+    @Column(name = "delivery_attempted_at")
+    private Instant deliveryAttemptedAt;
+
+    @Column(name = "cod_collected_at")
+    private Instant codCollectedAt;
 }

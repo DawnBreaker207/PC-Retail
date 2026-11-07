@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Shipper đang giao hàng</title>
+  <style>
+    body { margin:0; font-family: 'Segoe UI', Arial, sans-serif; background:#f5f6fa; color:#222; }
+    .wrap { max-width:600px; margin:32px auto; background:#fff; border-radius:8px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,.08); }
+    .header { background:#1a237e; color:#fff; padding:28px 32px; }
+    .header h1 { margin:0; font-size:22px; }
+    .header p { margin:4px 0 0; font-size:13px; opacity:.8; }
+    .body { padding:32px; }
+    .badge { display:inline-block; background:#e8eaf6; color:#1a237e; border-radius:4px; padding:6px 14px; font-size:13px; font-weight:600; margin-bottom:20px; }
+    .info { font-size:14px; color:#555; line-height:1.8; margin-bottom:20px; }
+    .shipper-box { background:#f0f4ff; border-radius:8px; padding:18px 20px; margin:20px 0; }
+    .shipper-box p { margin:4px 0; font-size:14px; color:#333; }
+    .shipper-box strong { color:#1a237e; }
+    .timeline { margin:24px 0; padding:0; list-style:none; }
+    .timeline li { padding:8px 0 8px 28px; position:relative; font-size:13px; color:#555; border-left:2px solid #e0e0e0; }
+    .timeline li.active { color:#1a237e; font-weight:600; border-left-color:#1a237e; }
+    .timeline li::before { content:''; position:absolute; left:-5px; top:12px; width:8px; height:8px; border-radius:50%; background:#e0e0e0; }
+    .timeline li.active::before { background:#1a237e; }
+    .footer { background:#f0f0f0; padding:18px 32px; font-size:12px; color:#888; text-align:center; }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <h1>PC Retail</h1>
+    <p>Hệ thống bán lẻ linh kiện máy tính</p>
+  </div>
+  <div class="body">
+    <div class="badge">🚚 Shipper đang trên đường giao hàng</div>
+    <p class="info">
+      Đơn hàng <strong>#<span th:text="${orderId}">0</span></strong> đang được giao đến bạn hôm nay.
+      Vui lòng đảm bảo có người nhận hàng tại địa chỉ giao.
+    </p>
+    <div class="shipper-box">
+      <p><strong>Shipper:</strong> <span th:text="${shipperName ?: 'Nhân viên giao hàng PC Retail'}">Nhân viên giao hàng PC Retail</span></p>
+      <p><strong>Địa chỉ giao:</strong> <span th:text="${shippingAddress}">—</span></p>
+    </div>
+    <ul class="timeline">
+      <li>Đặt hàng thành công</li>
+      <li>Thanh toán xác nhận</li>
+      <li>Kho chuẩn bị hàng</li>
+      <li class="active">Shipper đang giao hàng ← Đang ở đây</li>
+      <li>Giao hàng thành công</li>
+    </ul>
+  </div>
+  <div class="footer">
+    support@pcretail.vn | Thời gian làm việc: 8:00–22:00 mỗi ngày
+  </div>
+</div>
+</body>
+</html>

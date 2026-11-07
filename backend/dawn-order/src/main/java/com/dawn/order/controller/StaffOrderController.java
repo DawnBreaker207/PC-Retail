@@ -8,6 +8,7 @@ import com.dawn.order.dto.SubOrderDto;
 import com.dawn.order.port.in.QueryOrderUseCase;
 import com.dawn.order.port.in.TransitionSubOrderUseCase;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -38,5 +39,14 @@ public class StaffOrderController {
     public SubOrderDto transition(@PathVariable Long id, @Valid @RequestBody TransitionRequest req) {
         Long staffId = SecurityUtils.getCurrentUserId();
         return transitionUseCase.transition(id, req.status(), staffId);
+    }
+
+    /** Assign an in-house shipper to a READY_TO_SHIP sub-order. */
+    @PostMapping("/sub-orders/{id}/assign-shipper")
+    @PreAuthorize(AuthorizationConstants.STAFF_OR_ADMIN)
+    public SubOrderDto assignShipper(@PathVariable Long id,
+                                     @RequestParam @NotNull Long shipperId) {
+        Long staffId = SecurityUtils.getCurrentUserId();
+        return transitionUseCase.assignShipper(id, shipperId, staffId);
     }
 }

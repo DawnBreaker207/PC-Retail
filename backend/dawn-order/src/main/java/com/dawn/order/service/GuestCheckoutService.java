@@ -116,7 +116,8 @@ public class GuestCheckoutService {
         BigDecimal finalAmount = subTotal.add(shippingFee);
         try {
             var checkoutReq = new com.dawn.order.controller.request.CheckoutRequest(
-                    req.idempotencyKey(), req.fulfillmentType(), req.shippingAddress(), null, null);
+                    req.idempotencyKey(), req.fulfillmentType(), req.shippingAddress(), null, null,
+                    req.resolvedPaymentMethod());
             OrderDto dto = orderCommandService.createOrder(checkoutReq, null,
                     req.guestEmail(), req.guestPhone(),
                     cartItems, stockItems, priceMap, subTotal, BigDecimal.ZERO, shippingFee, finalAmount);

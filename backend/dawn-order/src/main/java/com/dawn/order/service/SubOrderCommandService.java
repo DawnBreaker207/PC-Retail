@@ -175,16 +175,19 @@ public class SubOrderCommandService implements TransitionSubOrderUseCase {
     }
 
     private void publishStatusChangedEvent(Long subOrderId, SubOrder sub, SubOrderStatus target) {
-        if (target != SubOrderStatus.PAID && target != SubOrderStatus.SHIPPED && target != SubOrderStatus.DELIVERED) {
+        if (target != SubOrderStatus.PAID && target != SubOrderStatus.SHIPPED
+                && target != SubOrderStatus.OUT_FOR_DELIVERY && target != SubOrderStatus.DELIVERED
+                && target != SubOrderStatus.DELIVERY_FAILED) {
             return;
         }
         try {
             Order order = orderRepo.findById(sub.getOrderId()).orElse(null);
             if (order == null) return;
             String trackingCode = target == SubOrderStatus.SHIPPED ? sub.getTrackingCode() : null;
+            String deliveryNote = target == SubOrderStatus.DELIVERY_FAILED ? sub.getDeliveryNote() : null;
             SubOrderStatusChangedEvent event = new SubOrderStatusChangedEvent(
                     subOrderId, order.getId(), order.getUserId(),
-                    order.getGuestEmail(), target.name(), trackingCode);
+                    order.getGuestEmail(), target.name(), trackingCode, deliveryNote);
             String payload = objectMapper.writeValueAsString(event);
             // fire-and-forget after commit: notification loss is acceptable vs. risking the status transition
             AfterCommit.run(() ->
@@ -217,15 +220,84 @@ public class SubOrderCommandService implements TransitionSubOrderUseCase {
         ));
     }
 
+    @Override
+    @Transactional
+    public SubOrderDto assignShipper(Long subOrderId, Long shipperId, Long staffId) {
+        SubOrder sub = subOrderRepo.findById(subOrderId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        Message.format(Message.Order.SUB_ORDER_NOT_FOUND, subOrderId)));
+        if (sub.getShipperId() != null) {
+            throw new ConflictException("Sub-order already assigned to a shipper");
+        }
+        sub.setShipperId(shipperId);
+        appendHistory(sub, sub.getStatus(), staffId);
+        subOrderRepo.save(sub);
+        log.info("Sub-order {} assigned to shipper {}", subOrderId, shipperId);
+        return toDto(sub);
+    }
+
+    @Override
+    @Transactional
+    public SubOrderDto deliver(Long subOrderId, Long shipperId, boolean codCollected) {
+        SubOrder sub = subOrderRepo.findById(subOrderId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        Message.format(Message.Order.SUB_ORDER_NOT_FOUND, subOrderId)));
+        stateMachine.assertValidTransition(sub.getStatus(), SubOrderStatus.DELIVERED);
+        int claimed = subOrderRepo.transitionIfStatus(subOrderId, sub.getStatus(), SubOrderStatus.DELIVERED);
+        if (claimed == 0) throw new ConflictException("Concurrent status change, please retry");
+
+        SubOrder fresh = subOrderRepo.findById(subOrderId).orElse(sub);
+        if (codCollected) {
+            fresh.setCodCollectedAt(Instant.now());
+            // mark order as paid for COD
+            orderRepo.findById(fresh.getOrderId()).ifPresent(o -> {
+                o.setPaymentStatus(com.dawn.order.entity.enums.PaymentStatus.PAID);
+                orderRepo.save(o);
+            });
+        }
+        appendHistory(fresh, SubOrderStatus.DELIVERED, shipperId);
+        fresh.setStatus(SubOrderStatus.DELIVERED);
+        subOrderRepo.save(fresh);
+        publishStatusChangedEvent(subOrderId, fresh, SubOrderStatus.DELIVERED);
+        List<OrderItem> items = orderItemRepo.findBySubOrderId(subOrderId);
+        eventPublisher.publishEvent(new SubOrderDeliveredEvent(subOrderId, fresh.getOrderId(), items));
+        return toDto(fresh);
+    }
+
+    @Override
+    @Transactional
+    public SubOrderDto deliveryFailed(Long subOrderId, Long shipperId, String note) {
+        SubOrder sub = subOrderRepo.findById(subOrderId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        Message.format(Message.Order.SUB_ORDER_NOT_FOUND, subOrderId)));
+        stateMachine.assertValidTransition(sub.getStatus(), SubOrderStatus.DELIVERY_FAILED);
+        int claimed = subOrderRepo.transitionIfStatus(subOrderId, sub.getStatus(), SubOrderStatus.DELIVERY_FAILED);
+        if (claimed == 0) throw new ConflictException("Concurrent status change, please retry");
+
+        SubOrder fresh = subOrderRepo.findById(subOrderId).orElse(sub);
+        fresh.setDeliveryNote(note);
+        fresh.setDeliveryAttemptedAt(Instant.now());
+        appendHistory(fresh, SubOrderStatus.DELIVERY_FAILED, shipperId);
+        fresh.setStatus(SubOrderStatus.DELIVERY_FAILED);
+        subOrderRepo.save(fresh);
+        publishStatusChangedEvent(subOrderId, fresh, SubOrderStatus.DELIVERY_FAILED);
+        return toDto(fresh);
+    }
+
     private SubOrderDto toDto(SubOrder s) {
         return new SubOrderDto(
                 s.getId(),
+                s.getOrderId(),
                 s.getFulfillmentType(),
                 s.getSubtotal(),
                 s.getShippingFee(),
                 s.getDiscountAmount(),
                 s.getFinalAmount(),
                 s.getStatus(),
+                s.getShippingMethod(),
+                s.getShipperId(),
+                s.getDeliveryAttemptedAt(),
+                s.getCodCollectedAt(),
                 List.of());
     }
 }

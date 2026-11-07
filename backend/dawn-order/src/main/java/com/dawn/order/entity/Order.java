@@ -2,6 +2,7 @@ package com.dawn.order.entity;
 
 import com.dawn.common.entity.AbstractMappedEntity;
 import com.dawn.order.entity.enums.CreatedByType;
+import com.dawn.order.entity.enums.PaymentMethod;
 import com.dawn.order.entity.enums.PaymentStatus;
 import io.swagger.v3.oas.annotations.Hidden;
 import jakarta.persistence.*;
@@ -71,6 +72,11 @@ public class Order extends AbstractMappedEntity {
     @Column(name = "invoice_requested", nullable = false)
     @Builder.Default
     private boolean invoiceRequested = false;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "payment_method", nullable = false, length = 20)
+    @Builder.Default
+    private PaymentMethod paymentMethod = PaymentMethod.ONLINE;
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "tax_info", columnDefinition = "jsonb")

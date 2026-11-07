@@ -20,9 +20,15 @@ public class SubOrderStateMachine {
     static {
         TRANSITIONS.put(PENDING_PAYMENT, EnumSet.of(PAID, CANCELLED, EXPIRED));
         TRANSITIONS.put(PAID, EnumSet.of(PROCESSING, CANCELLED));
-        TRANSITIONS.put(PROCESSING, EnumSet.of(SHIPPED, READY_FOR_PICKUP, CANCELLED));
+        TRANSITIONS.put(PROCESSING, EnumSet.of(READY_TO_SHIP, SHIPPED, READY_FOR_PICKUP, CANCELLED));
+        // in-house delivery flow
+        TRANSITIONS.put(READY_TO_SHIP, EnumSet.of(OUT_FOR_DELIVERY, CANCELLED));
+        TRANSITIONS.put(OUT_FOR_DELIVERY, EnumSet.of(DELIVERED, DELIVERY_FAILED));
+        TRANSITIONS.put(DELIVERY_FAILED, EnumSet.of(OUT_FOR_DELIVERY, CANCELLED));
+        // carrier (GHN) flow
         TRANSITIONS.put(READY_FOR_PICKUP, EnumSet.of(DELIVERED));
         TRANSITIONS.put(SHIPPED, EnumSet.of(DELIVERED));
+        // terminal states
         TRANSITIONS.put(DELIVERED, EnumSet.of(RETURN_REQUESTED));
         TRANSITIONS.put(RETURN_REQUESTED, EnumSet.of(RETURNED, DELIVERED));
         TRANSITIONS.put(RETURNED, EnumSet.noneOf(SubOrderStatus.class));

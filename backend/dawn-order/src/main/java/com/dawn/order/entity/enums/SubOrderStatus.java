@@ -5,7 +5,10 @@ public enum SubOrderStatus {
     AWAITING_INVENTORY,
     PAID,
     PROCESSING,
-    SHIPPED,
+    READY_TO_SHIP,       // packed, waiting for shipper pickup
+    OUT_FOR_DELIVERY,    // shipper has picked up, en route
+    DELIVERY_FAILED,     // delivery attempt failed (not home, wrong address)
+    SHIPPED,             // carrier (GHN/etc) flow — kept for hybrid
     READY_FOR_PICKUP,
     DELIVERED,
     RETURN_REQUESTED,

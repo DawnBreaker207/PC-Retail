@@ -1,6 +1,7 @@
 package com.dawn.order.controller.request;
 
 import com.dawn.order.entity.enums.FulfillmentType;
+import com.dawn.order.entity.enums.PaymentMethod;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
@@ -11,6 +12,10 @@ public record CheckoutRequest(
         @NotNull FulfillmentType fulfillmentType,
         Map<String, Object> shippingAddress,
         String voucherCode,
-        Map<String, Object> taxInfo
+        Map<String, Object> taxInfo,
+        PaymentMethod paymentMethod  // null defaults to ONLINE
 ) {
+    public PaymentMethod resolvedPaymentMethod() {
+        return paymentMethod != null ? paymentMethod : PaymentMethod.ONLINE;
+    }
 }

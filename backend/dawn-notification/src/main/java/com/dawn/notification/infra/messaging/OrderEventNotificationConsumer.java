@@ -93,9 +93,11 @@ public class OrderEventNotificationConsumer {
         }
 
         String templateId = switch (newStatus != null ? newStatus : "") {
-            case "PAID" -> "payment-success";
-            case "SHIPPED" -> "order-shipped";
-            case "DELIVERED" -> "order-delivered";
+            case "PAID"             -> "payment-success";
+            case "SHIPPED"          -> "order-shipped";
+            case "OUT_FOR_DELIVERY" -> "delivery-out";
+            case "DELIVERY_FAILED"  -> "delivery-failed";
+            case "DELIVERED"        -> "order-delivered";
             default -> null;
         };
         if (templateId == null) return;
@@ -104,6 +106,8 @@ public class OrderEventNotificationConsumer {
         vars.put("orderId", orderId);
         vars.put("subOrderId", subOrderId);
         if (trackingCode != null) vars.put("trackingCode", trackingCode);
+        // delivery-failed: forward the note if present
+        if (fields.containsKey("deliveryNote")) vars.put("deliveryNote", fields.get("deliveryNote"));
 
         notificationCommandService.processEvent(new NotificationEvent(
                 "SubOrderStatusChanged", userId, email, null,
