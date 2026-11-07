@@ -90,20 +90,20 @@
                   @if (getDiff(log).length > 0) {
                     <div class="rounded-lg border border-border/80 bg-card p-3 shadow-2xs">
                       <h4 class="font-semibold text-xs text-foreground mb-2">Chi tiết thay đổi dữ liệu:</h4>
-                      <table class="w-full text-xs">
-                        <thead>
-                          <tr class="text-muted-foreground border-b border-border/60">
-                            <th class="text-left font-medium pb-1.5 w-1/4">Trường dữ liệu</th>
-                            <th class="text-left font-medium pb-1.5 w-3/8">Giá trị cũ</th>
-                            <th class="text-left font-medium pb-1.5 w-3/8">Giá trị mới</th>
+                      <table hlmTable class="w-full text-xs">
+                        <thead hlmTableHeader>
+                          <tr hlmTableRow class="text-muted-foreground border-b border-border/60">
+                            <th hlmTableHead class="text-left font-medium pb-1.5 w-1/4">Trường dữ liệu</th>
+                            <th hlmTableHead class="text-left font-medium pb-1.5 w-3/8">Giá trị cũ</th>
+                            <th hlmTableHead class="text-left font-medium pb-1.5 w-3/8">Giá trị mới</th>
                           </tr>
                         </thead>
-                        <tbody>
+                        <tbody hlmTableBody>
                           @for (field of getDiff(log); track field.key) {
-                            <tr class="border-b border-border/40">
-                              <td class="py-1.5 font-mono text-[11px] text-foreground">{{ field.key }}</td>
-                              <td class="py-1.5 text-rose-600 line-through font-mono text-[11px]">{{ field.oldValue }}</td>
-                              <td class="py-1.5 text-emerald-600 font-semibold font-mono text-[11px]">{{ field.newValue }}</td>
+                            <tr hlmTableRow class="border-b border-border/40">
+                              <td hlmTableCell class="py-1.5 font-mono text-[11px] text-foreground">{{ field.key }}</td>
+                              <td hlmTableCell class="py-1.5 text-rose-600 line-through font-mono text-[11px]">{{ field.oldValue }}</td>
+                              <td hlmTableCell class="py-1.5 text-emerald-600 font-semibold font-mono text-[11px]">{{ field.newValue }}</td>
                             </tr>
                           }
                         </tbody>

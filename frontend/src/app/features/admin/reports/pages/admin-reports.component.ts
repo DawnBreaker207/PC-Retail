@@ -66,7 +66,7 @@ import { ApiEndpoints } from '@core/api/api.endpoints';
           size="sm"
           (click)="load()"
           [disabled]="loading() || !fromDate || !toDate"
-          class="h-9 gap-1.5 text-xs bg-primary text-primary-foreground cursor-pointer"
+          class="h-9 gap-1.5 text-xs bg-primary text-white text-primary-foreground cursor-pointer"
         >
           <lucide-icon [img]="Calendar" class="w-3.5 h-3.5"></lucide-icon>
           Tải dữ liệu

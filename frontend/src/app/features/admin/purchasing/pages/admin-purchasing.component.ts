@@ -94,7 +94,7 @@ interface PurchaseOrder {
                 size="sm"
                 (click)="addSupplier()"
                 [disabled]="!supplierName.trim()"
-                class="h-9 px-3 gap-1 text-xs bg-primary text-primary-foreground cursor-pointer"
+                class="h-9 px-3 gap-1 text-xs bg-primary text-white text-primary-foreground cursor-pointer"
               >
                 <lucide-icon [img]="Plus" class="w-3.5 h-3.5"></lucide-icon>
                 Thêm
@@ -158,7 +158,7 @@ interface PurchaseOrder {
                 size="sm"
                 (click)="addOrder()"
                 [disabled]="!newSupplierId"
-                class="h-9 px-3.5 gap-1.5 text-xs bg-primary text-primary-foreground cursor-pointer"
+                class="h-9 px-3.5 gap-1.5 text-xs bg-primary text-white text-primary-foreground cursor-pointer"
               >
                 <lucide-icon [img]="Plus" class="w-3.5 h-3.5"></lucide-icon>
                 Tạo đơn nháp (DRAFT)

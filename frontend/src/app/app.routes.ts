@@ -1,4 +1,6 @@
 import { Routes } from '@angular/router';
+import { authGuard } from '@core/guards/auth.guard';
+import { roleGuard } from '@core/guards/role.guard';
 
 export const routes: Routes = [
   {
@@ -82,6 +84,15 @@ export const routes: Routes = [
   {
     path: 'admin',
     loadChildren: () => import('./features/admin/admin.routes').then((r) => r.ADMIN_ROUTES),
+  },
+  {
+    path: 'shipper',
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['SHIPPER', 'STAFF', 'ADMIN'] },
+    loadComponent: () =>
+      import('./features/shipper/pages/shipper-orders.component').then(
+        (m) => m.ShipperOrdersComponent,
+      ),
   },
   { path: '**', redirectTo: '/error/404' },
 ];

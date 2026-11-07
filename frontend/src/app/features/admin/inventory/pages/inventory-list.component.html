@@ -7,27 +7,27 @@
   <!-- View Mode Switcher (Spartan UI Button) -->
   <div class="flex items-center gap-1 p-1 bg-bg dark:bg-bg-dark rounded-xl border border-border/80 dark:border-border-dark">
     <button
+      hlmBtn
+      [variant]="viewMode() === 'table' ? 'secondary' : 'ghost'"
+      size="sm"
       type="button"
       (click)="viewMode.set('table')"
-      class="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer"
-      [class.bg-surface]="viewMode() === 'table'"
-      [class.dark:bg-surface-dark]="viewMode() === 'table'"
+      [hlmTooltip]="'Xem danh sách dạng bảng'"
+      class="flex items-center gap-2 text-xs font-semibold cursor-pointer"
       [class.text-primary]="viewMode() === 'table'"
-      [class.shadow-xs]="viewMode() === 'table'"
-      [class.text-muted]="viewMode() !== 'table'"
     >
       <lucide-angular [img]="Table" class="w-4 h-4" />
       <span>Bảng danh sách</span>
     </button>
     <button
+      hlmBtn
+      [variant]="viewMode() === 'map' ? 'secondary' : 'ghost'"
+      size="sm"
       type="button"
       (click)="viewMode.set('map')"
-      class="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer"
-      [class.bg-surface]="viewMode() === 'map'"
-      [class.dark:bg-surface-dark]="viewMode() === 'map'"
+      [hlmTooltip]="'Xem sơ đồ mặt bằng kho trực quan'"
+      class="flex items-center gap-2 text-xs font-semibold cursor-pointer"
       [class.text-primary]="viewMode() === 'map'"
-      [class.shadow-xs]="viewMode() === 'map'"
-      [class.text-muted]="viewMode() !== 'map'"
     >
       <lucide-angular [img]="Warehouse" class="w-4 h-4" />
       <span>Bản đồ kho trực quan</span>
@@ -152,6 +152,7 @@
                       variant="default"
                       size="sm"
                       (click)="openRestockModal(item)"
+                      [hlmTooltip]="'Nhập thêm hàng vào kho'"
                       class="!h-7.5 !px-2.5 !text-xs !rounded-lg cursor-pointer flex items-center gap-1 shadow-2xs"
                     >
                       <lucide-angular [img]="PlusCircle" class="w-3.5 h-3.5" />
@@ -163,7 +164,7 @@
                       variant="ghost"
                       size="icon"
                       (click)="openHistoryModal(item)"
-                      title="Xem lịch sử biến động kho"
+                      [hlmTooltip]="'Xem lịch sử biến động kho'"
                       class="!w-7.5 !h-7.5 !min-h-[30px] !min-w-[30px] !rounded-lg text-muted hover:text-ink cursor-pointer"
                     >
                       <lucide-angular [img]="History" class="w-3.5 h-3.5" />

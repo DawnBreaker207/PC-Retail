@@ -6,24 +6,26 @@
     </div>
 
     <!-- Tab Switcher (Spartan UI Style) -->
-    <div class="flex items-center p-1 bg-surface dark:bg-surface-dark rounded-xl border border-border/80 dark:border-border-dark shadow-2xs">
+    <div class="flex items-center p-1 bg-surface dark:bg-surface-dark rounded-xl border border-border/80 dark:border-border-dark shadow-2xs gap-1">
       <button
+        hlmBtn
+        [variant]="activeTab() === 'analytics' ? 'default' : 'ghost'"
+        size="sm"
         type="button"
         (click)="activeTab.set('analytics')"
-        class="px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer"
-        [ngClass]="activeTab() === 'analytics'
-          ? 'bg-primary text-white shadow-2xs'
-          : 'text-muted dark:text-muted-dark hover:text-ink'"
+        class="text-xs font-semibold"
+        [class.text-white]="activeTab() === 'analytics'"
       >
         Phân tích số liệu
       </button>
       <button
+        hlmBtn
+        [variant]="activeTab() === 'queue' ? 'default' : 'ghost'"
+        size="sm"
         type="button"
         (click)="activeTab.set('queue')"
-        class="px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5"
-        [ngClass]="activeTab() === 'queue'
-          ? 'bg-primary text-white shadow-2xs'
-          : 'text-muted dark:text-muted-dark hover:text-ink'"
+        class="text-xs font-semibold flex items-center gap-1.5"
+        [class.text-white]="activeTab() === 'queue'"
       >
         <span>Hàng đợi công việc</span>
         @if (pendingReturns().length + pendingOrders().length > 0) {
@@ -31,6 +33,7 @@
             hlmBadge
             [variant]="activeTab() === 'queue' ? 'secondary' : 'destructive'"
             class="text-[10px] px-1 py-0 h-4 min-w-[16px] flex items-center justify-center rounded-full"
+            [class.text-white]="activeTab() !== 'queue'"
           >
             {{ pendingReturns().length + pendingOrders().length }}
           </span>

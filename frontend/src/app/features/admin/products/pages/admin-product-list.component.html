@@ -3,16 +3,29 @@
     <h1 class="text-2xl font-bold tracking-tight text-foreground">Quản lý sản phẩm</h1>
     <p class="text-muted-foreground text-sm mt-1">Danh mục sản phẩm, cấu hình giá bán và kiểm soát trạng thái</p>
   </div>
-  <button
-    hlmBtn
-    variant="default"
-    size="sm"
-    (click)="openCreateModal()"
-    class="h-9 px-4 gap-1.5 text-xs bg-primary text-primary-foreground self-start sm:self-auto cursor-pointer"
-  >
-    <lucide-icon [img]="Plus" class="w-4 h-4"></lucide-icon>
-    Thêm sản phẩm mới
-  </button>
+  <div class="flex items-center gap-2 self-start sm:self-auto">
+    <button
+      hlmBtn
+      variant="outline"
+      size="sm"
+      (click)="openImportModal()"
+      class="h-9 px-3 gap-1.5 text-xs cursor-pointer"
+      hlmTooltip="Nhập danh sách sản phẩm hàng loạt từ file Excel"
+    >
+      <lucide-icon [img]="UploadIcon" class="w-4 h-4 text-emerald-600"></lucide-icon>
+      Nhập từ Excel
+    </button>
+    <button
+      hlmBtn
+      variant="default"
+      size="sm"
+      (click)="openCreateModal()"
+      class="h-9 px-4 gap-1.5 text-xs bg-primary text-white cursor-pointer"
+    >
+      <lucide-icon [img]="Plus" class="w-4 h-4"></lucide-icon>
+      Thêm sản phẩm mới
+    </button>
+  </div>
 </div>
 
 <!-- Filters -->
@@ -234,8 +247,84 @@
         <button hlmBtn variant="outline" size="sm" (click)="cancelDelete()">
           Hủy bỏ
         </button>
-        <button hlmBtn variant="destructive" size="sm" (click)="executeDelete()" class="bg-destructive text-destructive-foreground">
+        <button hlmBtn variant="destructive" size="sm" (click)="executeDelete()" class="bg-destructive text-white text-destructive-foreground cursor-pointer">
           Xóa sản phẩm
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Spartan Dialog: Excel Batch Import -->
+@if (importModalOpen()) {
+  <div hlmDialogOverlay class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4" (click)="closeImportModal()">
+    <div
+      hlmDialogContent
+      class="max-w-lg w-full bg-card border border-border rounded-2xl p-6 shadow-2xl space-y-5 animate-in fade-in-0 zoom-in-95"
+      (click)="$event.stopPropagation()"
+    >
+      <div hlmDialogHeader class="space-y-1">
+        <h3 hlmDialogTitle class="text-lg font-bold text-foreground flex items-center gap-2">
+          <lucide-icon [img]="FileSpreadsheetIcon" class="size-5 text-emerald-600"></lucide-icon>
+          Nhập dữ liệu sản phẩm từ Excel
+        </h3>
+        <p hlmDialogDescription class="text-xs text-muted-foreground">
+          Tải lên tệp bảng tính (.xlsx) theo định dạng chuẩn để cập nhật thông tin SKU hàng loạt vào cơ sở dữ liệu.
+        </p>
+      </div>
+
+      <div class="space-y-4">
+        <div class="border-2 border-dashed border-border rounded-xl p-6 text-center hover:border-primary/50 transition-colors">
+          <lucide-icon [img]="UploadIcon" class="size-8 mx-auto text-muted-foreground mb-2"></lucide-icon>
+          <p class="text-xs font-medium text-foreground mb-1">
+            Chọn tệp Excel từ thiết bị của bạn
+          </p>
+          <p class="text-[11px] text-muted-foreground mb-4">
+            Định dạng hỗ trợ: .xlsx (Kích thước tối đa: 20MB)
+          </p>
+          <input
+            type="file"
+            accept=".xlsx, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            (change)="onFileSelected($event)"
+            class="text-xs text-muted-foreground file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-primary file:text-white hover:file:opacity-90 cursor-pointer"
+          />
+        </div>
+
+        @if (importFile(); as file) {
+          <div class="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-between text-xs">
+            <div class="flex items-center gap-2">
+              <lucide-icon [img]="FileSpreadsheetIcon" class="size-4 text-emerald-600"></lucide-icon>
+              <span class="font-medium text-foreground">{{ file.name }}</span>
+            </div>
+            <span class="text-muted-foreground font-mono">{{ (file.size / 1024).toFixed(1) }} KB</span>
+          </div>
+        }
+      </div>
+
+      <div hlmDialogFooter class="flex items-center justify-end gap-2.5 pt-3 border-t border-border">
+        <button
+          hlmBtn
+          variant="outline"
+          (click)="closeImportModal()"
+          [disabled]="importing()"
+          class="h-9 px-4 text-xs font-semibold"
+        >
+          Hủy bỏ
+        </button>
+        <button
+          hlmBtn
+          variant="default"
+          (click)="uploadImportFile()"
+          [disabled]="importing() || !importFile()"
+          class="h-9 px-5 text-xs font-bold bg-primary text-white flex items-center gap-2"
+        >
+          @if (importing()) {
+            <lucide-icon [img]="Loader2" class="size-3.5 animate-spin"></lucide-icon>
+            Đang nhập...
+          } @else {
+            <lucide-icon [img]="UploadIcon" class="size-3.5"></lucide-icon>
+            Bắt đầu nhập dữ liệu
+          }
         </button>
       </div>
     </div>

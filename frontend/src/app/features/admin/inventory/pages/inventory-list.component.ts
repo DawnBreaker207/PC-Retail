@@ -9,6 +9,7 @@ import { MockDataService } from '@core/services/mock-data.service';
 import { ToastService } from '@core/services/toast.service';
 import { WarehouseMapComponent } from '../components/warehouse-map.component';
 import { HlmButtonDirective } from '@shared/ui/button';
+import { HlmTooltipDirective } from '@shared/ui/tooltip';
 import { HlmInputDirective } from '@shared/ui/input';
 import { HlmBadgeDirective } from '@shared/ui/badge';
 import { HlmLabelDirective } from '@shared/ui/label';
@@ -78,6 +79,7 @@ interface InventoryTransaction {
     FallbackImageDirective,
     WarehouseMapComponent,
     HlmButtonDirective,
+    HlmTooltipDirective,
     HlmInputDirective,
     HlmBadgeDirective,
     HlmLabelDirective,

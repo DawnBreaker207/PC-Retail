@@ -109,7 +109,7 @@ interface VarianceRow {
             size="sm"
             (click)="start()"
             [disabled]="!rows().length"
-            class="h-9 px-3.5 gap-1.5 text-xs bg-primary text-primary-foreground cursor-pointer"
+            class="h-9 px-3.5 gap-1.5 text-xs bg-primary text-white text-primary-foreground cursor-pointer"
           >
             <lucide-icon [img]="Play" class="w-3.5 h-3.5"></lucide-icon>
             Bắt đầu kiểm kê
@@ -121,7 +121,7 @@ interface VarianceRow {
               variant="destructive"
               size="sm"
               (click)="complete()"
-              class="h-9 px-3.5 gap-1.5 text-xs bg-destructive text-destructive-foreground cursor-pointer"
+              class="h-9 px-3.5 gap-1.5 text-xs bg-destructive text-white text-destructive-foreground cursor-pointer"
             >
               <lucide-icon [img]="CheckCircle" class="w-3.5 h-3.5"></lucide-icon>
               Hoàn tất kiểm kê (#{{ sessionId() }})

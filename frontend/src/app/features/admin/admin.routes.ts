@@ -39,6 +39,18 @@ export const ADMIN_ROUTES: Routes = [
         loadComponent: () => import('./returns/pages/admin-return-detail.component').then(m => m.AdminReturnDetailComponent),
       },
       {
+        path: 'refunds',
+        canActivate: [roleGuard],
+        data: { roles: STAFF_AND_ADMIN },
+        loadComponent: () => import('./refunds/pages/admin-refund-list.component').then(m => m.AdminRefundListComponent),
+      },
+      {
+        path: 'warranty',
+        canActivate: [roleGuard],
+        data: { roles: STAFF_AND_ADMIN },
+        loadComponent: () => import('./warranty/pages/admin-warranty-list.component').then(m => m.AdminWarrantyListComponent),
+      },
+      {
         path: 'products',
         canActivate: [roleGuard],
         data: { roles: ADMIN_ONLY },
@@ -52,6 +64,12 @@ export const ADMIN_ROUTES: Routes = [
         loadComponent: () => import('./categories/pages/admin-category-list.component').then(m => m.AdminCategoryListComponent),
       },
       { path: 'vouchers', component: VoucherListComponent, canActivate: [roleGuard], data: { roles: ADMIN_ONLY } },
+      {
+        path: 'flash-sales',
+        canActivate: [roleGuard],
+        data: { roles: ADMIN_ONLY },
+        loadComponent: () => import('./promotions/pages/admin-flash-sale-list.component').then(m => m.AdminFlashSaleListComponent),
+      },
       {
         path: 'reviews',
         canActivate: [roleGuard],

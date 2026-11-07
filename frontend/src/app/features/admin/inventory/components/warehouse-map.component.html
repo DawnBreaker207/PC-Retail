@@ -155,37 +155,62 @@
       />
       <lucide-angular [img]="Search" class="w-3.5 h-3.5 text-muted dark:text-muted-dark absolute left-2.5 top-2.5" />
       @if (searchQuery()) {
-        <button (click)="searchQuery.set('')" class="absolute right-2.5 top-2 text-muted dark:text-muted-dark hover:text-ink text-xs font-bold cursor-pointer">✕</button>
+        <button
+          hlmBtn
+          variant="ghost"
+          size="icon"
+          type="button"
+          (click)="searchQuery.set('')"
+          class="absolute right-2 top-2 h-5 w-5 p-0 text-muted dark:text-muted-dark hover:text-ink text-xs font-bold"
+        >
+          ✕
+        </button>
       }
     </div>
 
     <!-- Filter Mode Pills -->
     <div class="flex items-center gap-1">
       <button
+        hlmBtn
+        [variant]="filterStatus() === 'all' ? 'default' : 'ghost'"
+        size="sm"
+        type="button"
         (click)="filterStatus.set('all')"
-        class="px-2.5 py-1 rounded-md text-xs font-medium transition-colors cursor-pointer"
-        [ngClass]="filterStatus() === 'all' ? 'bg-primary text-white shadow-2xs' : 'bg-bg dark:bg-bg-dark text-muted dark:text-muted-dark hover:text-ink'"
+        class="h-7 text-xs font-medium"
+        [class.text-white]="filterStatus() === 'all'"
       >
         Tất cả
       </button>
       <button
+        hlmBtn
+        [variant]="filterStatus() === 'empty' ? 'default' : 'ghost'"
+        size="sm"
+        type="button"
         (click)="filterStatus.set('empty')"
-        class="px-2.5 py-1 rounded-md text-xs font-medium transition-colors cursor-pointer"
-        [ngClass]="filterStatus() === 'empty' ? 'bg-primary text-white shadow-2xs' : 'bg-bg dark:bg-bg-dark text-muted dark:text-muted-dark hover:text-ink'"
+        class="h-7 text-xs font-medium"
+        [class.text-white]="filterStatus() === 'empty'"
       >
         Ô trống ({{ emptyBinsCount() }})
       </button>
       <button
+        hlmBtn
+        [variant]="filterStatus() === 'stocked' ? 'default' : 'ghost'"
+        size="sm"
+        type="button"
         (click)="filterStatus.set('stocked')"
-        class="px-2.5 py-1 rounded-md text-xs font-medium transition-colors cursor-pointer"
-        [ngClass]="filterStatus() === 'stocked' ? 'bg-primary text-white shadow-2xs' : 'bg-bg dark:bg-bg-dark text-muted dark:text-muted-dark hover:text-ink'"
+        class="h-7 text-xs font-medium"
+        [class.text-white]="filterStatus() === 'stocked'"
       >
         Có hàng
       </button>
       <button
+        hlmBtn
+        [variant]="filterStatus() === 'full' ? 'default' : 'ghost'"
+        size="sm"
+        type="button"
         (click)="filterStatus.set('full')"
-        class="px-2.5 py-1 rounded-md text-xs font-medium transition-colors cursor-pointer"
-        [ngClass]="filterStatus() === 'full' ? 'bg-primary text-white shadow-2xs' : 'bg-bg dark:bg-bg-dark text-muted dark:text-muted-dark hover:text-ink'"
+        class="h-7 text-xs font-medium"
+        [class.text-white]="filterStatus() === 'full'"
       >
         Đã đầy ({{ fullBinsCount() }})
       </button>

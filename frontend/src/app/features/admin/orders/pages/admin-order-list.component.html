@@ -4,30 +4,55 @@
     <p class="text-muted-foreground text-sm mt-1">Theo dõi, xử lý và kéo thả điều phối đơn hàng trong hệ thống</p>
   </div>
 
-  <!-- View Switcher -->
-  <div class="inline-flex rounded-xl bg-muted/60 p-1 border border-border/80 self-start sm:self-auto">
+  <!-- Actions & View Switcher -->
+  <div class="flex items-center gap-2 self-start sm:self-auto">
     <button
+      hlmBtn
+      variant="outline"
+      size="sm"
       type="button"
-      (click)="viewMode.set('table')"
-      [class.bg-card]="viewMode() === 'table'"
-      [class.shadow-xs]="viewMode() === 'table'"
-      [class.font-semibold]="viewMode() === 'table'"
-      class="px-3.5 py-1.5 rounded-lg text-xs font-medium text-foreground transition-all flex items-center gap-1.5 hover:text-primary cursor-pointer"
+      (click)="exportOrdersExcel()"
+      [disabled]="exportingExcel()"
+      hlmTooltip="Tải file Excel báo cáo toàn bộ dữ liệu đơn hàng"
+      class="text-xs font-semibold flex items-center gap-1.5 cursor-pointer h-9"
     >
-      <lucide-icon [img]="TableIcon" class="w-3.5 h-3.5"></lucide-icon>
-      Dạng Bảng
+      @if (exportingExcel()) {
+        <lucide-icon [img]="Loader2" class="w-3.5 h-3.5 animate-spin"></lucide-icon>
+        Đang xuất...
+      } @else {
+        <lucide-icon [img]="DownloadIcon" class="w-3.5 h-3.5 text-emerald-600"></lucide-icon>
+        Xuất Excel
+      }
     </button>
-    <button
-      type="button"
-      (click)="viewMode.set('kanban')"
-      [class.bg-card]="viewMode() === 'kanban'"
-      [class.shadow-xs]="viewMode() === 'kanban'"
-      [class.font-semibold]="viewMode() === 'kanban'"
-      class="px-3.5 py-1.5 rounded-lg text-xs font-medium text-foreground transition-all flex items-center gap-1.5 hover:text-primary cursor-pointer"
-    >
-      <lucide-icon [img]="LayoutGrid" class="w-3.5 h-3.5"></lucide-icon>
-      Kanban Kéo Thả
-    </button>
+
+    <div class="inline-flex rounded-xl bg-muted/60 p-1 border border-border/80 gap-1">
+      <button
+        hlmBtn
+        [variant]="viewMode() === 'table' ? 'secondary' : 'ghost'"
+        size="sm"
+        type="button"
+        (click)="viewMode.set('table')"
+        [hlmTooltip]="'Xem danh sách dạng bảng'"
+        class="text-xs font-semibold flex items-center gap-1.5 cursor-pointer"
+        [class.text-primary]="viewMode() === 'table'"
+      >
+        <lucide-icon [img]="TableIcon" class="w-3.5 h-3.5"></lucide-icon>
+        Dạng Bảng
+      </button>
+      <button
+        hlmBtn
+        [variant]="viewMode() === 'kanban' ? 'secondary' : 'ghost'"
+        size="sm"
+        type="button"
+        (click)="viewMode.set('kanban')"
+        [hlmTooltip]="'Xem và kéo thả điều phối Kanban'"
+        class="text-xs font-semibold flex items-center gap-1.5 cursor-pointer"
+        [class.text-primary]="viewMode() === 'kanban'"
+      >
+        <lucide-icon [img]="LayoutGrid" class="w-3.5 h-3.5"></lucide-icon>
+        Kanban Kéo Thả
+      </button>
+    </div>
   </div>
 </div>
 
@@ -62,7 +87,7 @@
   </button>
 
   @if (hasBulkConfirmable) {
-    <button hlmBtn variant="default" size="sm" (click)="bulkConfirm()" class="h-9 gap-1.5 text-xs bg-primary text-primary-foreground">
+    <button hlmBtn variant="default" size="sm" (click)="bulkConfirm()" class="h-9 gap-1.5 text-xs bg-primary text-white text-primary-foreground cursor-pointer">
       <lucide-icon [img]="CheckCircle2" class="w-3.5 h-3.5"></lucide-icon>
       Xác nhận ({{ bulkSelectedIds.length }})
     </button>
@@ -142,11 +167,11 @@
               <td hlmTableCell class="text-right">
                 <div class="flex items-center justify-end gap-1.5">
                   @if (o.subOrders[0]?.status === 'PAID') {
-                    <button hlmBtn variant="default" size="sm" (click)="confirmOrder(o.id)" class="h-7 text-xs px-2.5 bg-primary text-primary-foreground">
+                    <button hlmBtn variant="default" size="sm" (click)="confirmOrder(o.id)" [hlmTooltip]="'Xác nhận xử lý đơn hàng'" class="h-7 text-xs px-2.5 bg-primary text-white text-primary-foreground cursor-pointer">
                       Xác nhận
                     </button>
                   }
-                  <a hlmBtn variant="ghost" size="sm" [routerLink]="['/admin/orders', o.id]" class="h-7 text-xs px-2 text-primary hover:text-primary">
+                  <a hlmBtn variant="ghost" size="sm" [routerLink]="['/admin/orders', o.id]" [hlmTooltip]="'Xem chi tiết đơn hàng'" class="h-7 text-xs px-2 text-primary hover:text-primary">
                     Chi tiết
                   </a>
                 </div>
@@ -285,7 +310,7 @@
         <button hlmBtn variant="outline" size="sm" (click)="closeConfirmModal()">
           Hủy bỏ
         </button>
-        <button hlmBtn variant="default" size="sm" (click)="modal.action()" class="bg-primary text-primary-foreground">
+        <button hlmBtn variant="default" size="sm" (click)="modal.action()" class="bg-primary text-white text-primary-foreground cursor-pointer">
           {{ modal.confirmText }}
         </button>
       </div>

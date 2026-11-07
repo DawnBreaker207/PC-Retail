@@ -8,7 +8,7 @@
     variant="default"
     size="sm"
     (click)="openCreateModal()"
-    class="h-9 px-4 gap-1.5 text-xs bg-primary text-primary-foreground self-start sm:self-auto cursor-pointer"
+    class="h-9 px-4 gap-1.5 text-xs bg-primary text-white text-primary-foreground self-start sm:self-auto cursor-pointer"
   >
     <lucide-icon [img]="Plus" class="w-4 h-4"></lucide-icon>
     Thêm danh mục
@@ -127,7 +127,7 @@
         <button hlmBtn variant="outline" size="sm" (click)="cancelDelete()">
           Hủy bỏ
         </button>
-        <button hlmBtn variant="destructive" size="sm" (click)="executeDelete()" class="bg-destructive text-destructive-foreground">
+        <button hlmBtn variant="destructive" size="sm" (click)="executeDelete()" class="bg-destructive text-white text-destructive-foreground cursor-pointer">
           Xóa danh mục
         </button>
       </div>

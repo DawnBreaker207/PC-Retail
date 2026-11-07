@@ -8,7 +8,7 @@
     variant="default"
     size="sm"
     (click)="openCreateModal()"
-    class="h-9 px-4 gap-1.5 text-xs bg-primary text-primary-foreground self-start sm:self-auto cursor-pointer"
+    class="h-9 px-4 gap-1.5 text-xs bg-primary text-white text-primary-foreground self-start sm:self-auto cursor-pointer"
   >
     <lucide-icon [img]="Plus" class="w-4 h-4"></lucide-icon>
     Thêm người dùng mới
@@ -226,7 +226,7 @@
         <button hlmBtn variant="outline" size="sm" (click)="closeConfirmAction()">
           Hủy bỏ
         </button>
-        <button hlmBtn variant="default" size="sm" (click)="modal.action()" class="bg-primary text-primary-foreground">
+        <button hlmBtn variant="default" size="sm" (click)="modal.action()" class="bg-primary text-white text-primary-foreground cursor-pointer">
           {{ modal.confirmText }}
         </button>
       </div>

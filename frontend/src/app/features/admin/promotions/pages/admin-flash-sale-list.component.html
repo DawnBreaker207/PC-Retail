@@ -1,0 +1,381 @@
+<div class="space-y-6">
+  <!-- Page Header -->
+  <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+    <div>
+      <h1 class="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
+        <lucide-icon [img]="ZapIcon" class="h-6 w-6 text-amber-500 fill-amber-500"></lucide-icon>
+        Quản lý Flash Sale
+      </h1>
+      <p class="text-sm text-muted-foreground mt-1">
+        Cấu hình chiến dịch bán hàng giờ vàng, thiết lập khung giờ giảm sốc và danh mục sản phẩm tham gia.
+      </p>
+    </div>
+
+    <button
+      hlmBtn
+      variant="default"
+      class="text-white bg-primary flex items-center gap-2 font-medium"
+      (click)="openCreateCampaignModal()"
+      hlmTooltip="Tạo mới một chiến dịch Flash Sale"
+    >
+      <lucide-icon [img]="PlusIcon" class="h-4 w-4"></lucide-icon>
+      Tạo chiến dịch mới
+    </button>
+  </div>
+
+  <!-- Content Grid -->
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+    <!-- Left Column: Campaigns List (5 Cols) -->
+    <div class="lg:col-span-5 rounded-xl border border-border bg-card overflow-hidden shadow-xs">
+      <div class="px-5 py-4 border-b border-border bg-muted/30 flex items-center justify-between">
+        <div>
+          <h2 class="text-base font-semibold text-foreground">Chiến dịch Flash Sale</h2>
+          <p class="text-xs text-muted-foreground">Chọn chiến dịch để quản lý danh sách sản phẩm</p>
+        </div>
+        <span hlmBadge variant="outline" class="text-xs">
+          {{ campaigns().length }} chiến dịch
+        </span>
+      </div>
+
+      @if (loadingCampaigns() && campaigns().length === 0) {
+        <div class="p-8 text-center text-muted-foreground">
+          <lucide-icon [img]="LoaderIcon" class="h-6 w-6 mx-auto animate-spin mb-2 text-primary"></lucide-icon>
+          <p class="text-xs">Đang tải danh sách chiến dịch...</p>
+        </div>
+      } @else if (campaigns().length === 0) {
+        <div class="p-8 text-center text-muted-foreground space-y-2">
+          <lucide-icon [img]="AlertCircleIcon" class="h-8 w-8 mx-auto text-muted-foreground/60"></lucide-icon>
+          <p class="text-sm font-medium">Chưa có chiến dịch Flash Sale nào</p>
+          <p class="text-xs">Bấm nút "Tạo chiến dịch mới" để bắt đầu thiết lập chương trình.</p>
+        </div>
+      } @else {
+        <div class="divide-y divide-border max-h-[600px] overflow-y-auto">
+          @for (camp of campaigns(); track camp.id) {
+            <div
+              (click)="selectCampaign(camp)"
+              class="p-4 transition-colors cursor-pointer flex items-center justify-between gap-3"
+              [class.bg-primary/5]="selectedCampaign()?.id === camp.id"
+              [class.border-l-4]="selectedCampaign()?.id === camp.id"
+              [class.border-l-primary]="selectedCampaign()?.id === camp.id"
+              [class.hover:bg-muted/50]="selectedCampaign()?.id !== camp.id"
+            >
+              <div class="min-w-0 flex-1 space-y-1">
+                <div class="flex items-center gap-2">
+                  <h3 class="font-bold text-sm text-foreground truncate" [title]="camp.name">
+                    {{ camp.name }}
+                  </h3>
+                  <span hlmBadge variant="outline" class="text-[10px] uppercase font-mono px-1.5 py-0">
+                    #{{ camp.id }}
+                  </span>
+                </div>
+                <div class="text-xs text-muted-foreground space-y-0.5">
+                  <div class="flex items-center gap-1.5">
+                    <lucide-icon [img]="ClockIcon" class="size-3.5 text-muted-foreground"></lucide-icon>
+                    <span>{{ camp.startTime | date:'dd/MM HH:mm' }} - {{ camp.endTime | date:'dd/MM HH:mm' }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-2 shrink-0">
+                <button
+                  hlmBtn
+                  variant="ghost"
+                  size="icon"
+                  class="h-8 w-8 text-destructive hover:bg-destructive/10 cursor-pointer"
+                  (click)="$event.stopPropagation(); deleteCampaign(camp)"
+                  hlmTooltip="Xóa chiến dịch này"
+                >
+                  <lucide-icon [img]="Trash2Icon" class="size-4"></lucide-icon>
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- Right Column: Campaign Items Management (7 Cols) -->
+    <div class="lg:col-span-7 rounded-xl border border-border bg-card overflow-hidden shadow-xs">
+      @if (selectedCampaign(); as camp) {
+        <div class="px-5 py-4 border-b border-border bg-muted/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <div class="flex items-center gap-2">
+              <span hlmBadge class="bg-amber-500 text-white font-bold text-xs">Đang mở</span>
+              <h2 class="text-base font-bold text-foreground truncate">{{ camp.name }}</h2>
+            </div>
+            <p class="text-xs text-muted-foreground mt-0.5">
+              Từ {{ camp.startTime | date:'dd/MM/yyyy HH:mm' }} đến {{ camp.endTime | date:'dd/MM/yyyy HH:mm' }}
+            </p>
+          </div>
+
+          <button
+            hlmBtn
+            variant="default"
+            size="sm"
+            class="text-white bg-primary flex items-center gap-1.5 font-medium self-start sm:self-auto"
+            (click)="openAddItemModal()"
+            hlmTooltip="Bổ sung linh kiện vào khung giờ Flash Sale này"
+          >
+            <lucide-icon [img]="PlusIcon" class="size-3.5"></lucide-icon>
+            Thêm sản phẩm
+          </button>
+        </div>
+
+        @if (loadingItems()) {
+          <div class="p-12 text-center text-muted-foreground">
+            <lucide-icon [img]="LoaderIcon" class="h-6 w-6 mx-auto animate-spin mb-2 text-primary"></lucide-icon>
+            <p class="text-xs">Đang tải danh sách linh kiện...</p>
+          </div>
+        } @else if (items().length === 0) {
+          <div class="p-12 text-center text-muted-foreground space-y-2">
+            <lucide-icon [img]="TagIcon" class="h-8 w-8 mx-auto text-muted-foreground/60"></lucide-icon>
+            <p class="text-sm font-medium">Chưa có sản phẩm nào trong chiến dịch</p>
+            <p class="text-xs">Bấm "Thêm sản phẩm" để gán mã SKU và giá bán ưu đãi.</p>
+          </div>
+        } @else {
+          <div class="overflow-x-auto">
+            <table hlmTable class="w-full text-xs sm:text-sm">
+              <thead hlmTableHeader>
+                <tr hlmTableRow>
+                  <th hlmTableHead class="w-16">ID</th>
+                  <th hlmTableHead>Mã SKU</th>
+                  <th hlmTableHead class="text-right">Giá Flash Sale</th>
+                  <th hlmTableHead class="text-center">Số lượng</th>
+                  <th hlmTableHead class="text-center">Đã bán</th>
+                  <th hlmTableHead class="text-right">Thao tác</th>
+                </tr>
+              </thead>
+              <tbody hlmTableBody>
+                @for (item of items(); track item.id) {
+                  <tr hlmTableRow class="hover:bg-muted/40 transition-colors">
+                    <td hlmTableCell class="font-medium text-muted-foreground">#{{ item.id }}</td>
+                    <td hlmTableCell class="font-mono font-bold text-foreground">
+                      SKU #{{ item.skuId }}
+                      @if (item.skuName) {
+                        <div class="text-[11px] font-normal text-muted-foreground truncate max-w-xs">{{ item.skuName }}</div>
+                      }
+                    </td>
+                    <td hlmTableCell class="text-right font-mono font-bold text-primary">
+                      {{ item.flashPrice | currencyFormat }}
+                    </td>
+                    <td hlmTableCell class="text-center font-medium">
+                      {{ item.quantityLimit }} cái
+                    </td>
+                    <td hlmTableCell class="text-center">
+                      <span hlmBadge variant="secondary" class="font-mono">
+                        {{ item.soldQuantity ?? 0 }}
+                      </span>
+                    </td>
+                    <td hlmTableCell class="text-right">
+                      <button
+                        hlmBtn
+                        variant="ghost"
+                        size="icon"
+                        class="h-8 w-8 text-destructive hover:bg-destructive/10 cursor-pointer"
+                        (click)="deleteItem(item)"
+                        hlmTooltip="Xóa sản phẩm này khỏi Flash Sale"
+                      >
+                        <lucide-icon [img]="Trash2Icon" class="size-4"></lucide-icon>
+                      </button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      } @else {
+        <div class="p-16 text-center text-muted-foreground">
+          <lucide-icon [img]="ZapIcon" class="h-10 w-10 mx-auto text-muted-foreground/40 mb-3"></lucide-icon>
+          <h3 class="text-base font-semibold text-foreground">Chưa chọn chiến dịch nào</h3>
+          <p class="text-xs text-muted-foreground mt-1">
+            Vui lòng chọn một chiến dịch từ danh sách bên trái hoặc tạo mới để thiết lập linh kiện.
+          </p>
+        </div>
+      }
+    </div>
+  </div>
+</div>
+
+<!-- Spartan Dialog: Create Flash Sale Campaign -->
+@if (createCampaignModalOpen()) {
+  <div hlmDialogOverlay class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div
+      hlmDialogContent
+      class="max-w-md w-full bg-card border border-border rounded-2xl p-6 shadow-2xl space-y-5 animate-in fade-in-0 zoom-in-95"
+    >
+      <div hlmDialogHeader class="space-y-1">
+        <h3 hlmDialogTitle class="text-lg font-bold text-foreground flex items-center gap-2">
+          <lucide-icon [img]="ZapIcon" class="size-5 text-amber-500 fill-amber-500"></lucide-icon>
+          Tạo chiến dịch Flash Sale
+        </h3>
+        <p hlmDialogDescription class="text-xs text-muted-foreground">
+          Thiết lập tên chương trình khuyến mãi và khung thời gian áp dụng giá sốc.
+        </p>
+      </div>
+
+      <div class="space-y-4">
+        <div>
+          <label class="block text-xs font-medium text-foreground mb-1.5">
+            Tên chiến dịch <span class="text-destructive">*</span>
+          </label>
+          <input
+            hlmInput
+            type="text"
+            placeholder="VD: Flash Sale Siêu Bão Đêm..."
+            class="w-full text-xs h-9"
+            [ngModel]="newCampaignName()"
+            (ngModelChange)="newCampaignName.set($event)"
+          />
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-medium text-foreground mb-1.5">
+              Thời gian bắt đầu <span class="text-destructive">*</span>
+            </label>
+            <input
+              hlmInput
+              type="datetime-local"
+              class="w-full text-xs h-9"
+              [ngModel]="newCampaignStart()"
+              (ngModelChange)="newCampaignStart.set($event)"
+            />
+          </div>
+
+          <div>
+            <label class="block text-xs font-medium text-foreground mb-1.5">
+              Thời gian kết thúc <span class="text-destructive">*</span>
+            </label>
+            <input
+              hlmInput
+              type="datetime-local"
+              class="w-full text-xs h-9"
+              [ngModel]="newCampaignEnd()"
+              (ngModelChange)="newCampaignEnd.set($event)"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div hlmDialogFooter class="flex items-center justify-end gap-2.5 pt-3 border-t border-border">
+        <button
+          hlmBtn
+          variant="outline"
+          (click)="createCampaignModalOpen.set(false)"
+          [disabled]="submitting()"
+          class="h-9 px-4 text-xs font-semibold"
+        >
+          Hủy bỏ
+        </button>
+        <button
+          hlmBtn
+          variant="default"
+          (click)="submitCreateCampaign()"
+          [disabled]="submitting()"
+          class="h-9 px-5 text-xs font-bold bg-primary text-white flex items-center gap-2"
+        >
+          @if (submitting()) {
+            <lucide-icon [img]="LoaderIcon" class="size-3.5 animate-spin"></lucide-icon>
+            Đang tạo...
+          } @else {
+            <lucide-icon [img]="CheckCircleIcon" class="size-3.5"></lucide-icon>
+            Tạo chiến dịch
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Spartan Dialog: Add Item to Flash Sale -->
+@if (addItemModalOpen()) {
+  <div hlmDialogOverlay class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div
+      hlmDialogContent
+      class="max-w-md w-full bg-card border border-border rounded-2xl p-6 shadow-2xl space-y-5 animate-in fade-in-0 zoom-in-95"
+    >
+      <div hlmDialogHeader class="space-y-1">
+        <h3 hlmDialogTitle class="text-lg font-bold text-foreground flex items-center gap-2">
+          <lucide-icon [img]="TagIcon" class="size-5 text-primary"></lucide-icon>
+          Thêm linh kiện vào Flash Sale
+        </h3>
+        <p hlmDialogDescription class="text-xs text-muted-foreground">
+          Chiến dịch: <span class="font-bold text-foreground">{{ selectedCampaign()?.name }}</span>
+        </p>
+      </div>
+
+      <div class="space-y-4">
+        <div>
+          <label class="block text-xs font-medium text-foreground mb-1.5">
+            Mã SKU ID <span class="text-destructive">*</span>
+          </label>
+          <input
+            hlmInput
+            type="number"
+            placeholder="VD: 1, 10, 42..."
+            class="w-full text-xs h-9 font-mono"
+            [ngModel]="newItemSkuId()"
+            (ngModelChange)="newItemSkuId.set($event)"
+          />
+        </div>
+
+        <div>
+          <label class="block text-xs font-medium text-foreground mb-1.5">
+            Giá bán Flash Sale (VND) <span class="text-destructive">*</span>
+          </label>
+          <input
+            hlmInput
+            type="number"
+            step="10000"
+            placeholder="VD: 1590000"
+            class="w-full text-xs h-9 font-mono"
+            [ngModel]="newItemFlashPrice()"
+            (ngModelChange)="newItemFlashPrice.set($event)"
+          />
+        </div>
+
+        <div>
+          <label class="block text-xs font-medium text-foreground mb-1.5">
+            Số lượng giới hạn mở bán <span class="text-destructive">*</span>
+          </label>
+          <input
+            hlmInput
+            type="number"
+            placeholder="VD: 50"
+            class="w-full text-xs h-9"
+            [ngModel]="newItemQuantityLimit()"
+            (ngModelChange)="newItemQuantityLimit.set($event)"
+          />
+        </div>
+      </div>
+
+      <div hlmDialogFooter class="flex items-center justify-end gap-2.5 pt-3 border-t border-border">
+        <button
+          hlmBtn
+          variant="outline"
+          (click)="addItemModalOpen.set(false)"
+          [disabled]="submitting()"
+          class="h-9 px-4 text-xs font-semibold"
+        >
+          Hủy bỏ
+        </button>
+        <button
+          hlmBtn
+          variant="default"
+          (click)="submitAddItem()"
+          [disabled]="submitting()"
+          class="h-9 px-5 text-xs font-bold bg-primary text-white flex items-center gap-2"
+        >
+          @if (submitting()) {
+            <lucide-icon [img]="LoaderIcon" class="size-3.5 animate-spin"></lucide-icon>
+            Đang thêm...
+          } @else {
+            <lucide-icon [img]="PlusIcon" class="size-3.5"></lucide-icon>
+            Thêm vào Flash Sale
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+}

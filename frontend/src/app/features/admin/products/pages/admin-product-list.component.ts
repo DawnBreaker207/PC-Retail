@@ -13,10 +13,13 @@ import {
   ChevronRight,
   AlertCircle,
   Loader2,
+  Upload,
+  FileSpreadsheet,
 } from 'lucide-angular';
 import { HlmButtonDirective } from '@shared/ui/button';
 import { HlmInputDirective } from '@shared/ui/input';
 import { HlmBadgeDirective } from '@shared/ui/badge';
+import { HlmTooltipDirective } from '@shared/ui/tooltip';
 import {
   HlmTableDirective,
   HlmTableHeaderDirective,
@@ -26,6 +29,7 @@ import {
   HlmTableCellDirective,
 } from '@shared/ui/table';
 import {
+  HlmDialogOverlayDirective,
   HlmDialogContentDirective,
   HlmDialogHeaderDirective,
   HlmDialogTitleDirective,
@@ -61,6 +65,8 @@ interface SkuResponse {
     HlmTableRowDirective,
     HlmTableHeadDirective,
     HlmTableCellDirective,
+    HlmTooltipDirective,
+    HlmDialogOverlayDirective,
     HlmDialogContentDirective,
     HlmDialogHeaderDirective,
     HlmDialogTitleDirective,
@@ -87,6 +93,8 @@ export class AdminProductListComponent {
   readonly ChevronRight = ChevronRight;
   readonly AlertCircle = AlertCircle;
   readonly Loader2 = Loader2;
+  readonly UploadIcon = Upload;
+  readonly FileSpreadsheetIcon = FileSpreadsheet;
 
   categories = this.mock.categories;
   brands = this.mock.brands;
@@ -101,6 +109,11 @@ export class AdminProductListComponent {
   page = 1;
   size = 20;
   pageSizeOptions = [10, 20, 50];
+
+  // Batch import state
+  importModalOpen = signal(false);
+  importFile = signal<File | null>(null);
+  importing = signal(false);
 
   // Spartan Form Dialog State
   formModalProduct = signal<Sku | null | 'create'>(null);
@@ -181,6 +194,52 @@ export class AdminProductListComponent {
 
   closeFormModal() {
     this.formModalProduct.set(null);
+  }
+
+  openImportModal() {
+    this.importFile.set(null);
+    this.importModalOpen.set(true);
+  }
+
+  closeImportModal() {
+    this.importModalOpen.set(false);
+    this.importFile.set(null);
+  }
+
+  onFileSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      this.importFile.set(input.files[0]);
+    }
+  }
+
+  uploadImportFile() {
+    const file = this.importFile();
+    if (!file) {
+      this.toast.error('Vui lòng chọn file Excel (.xlsx)');
+      return;
+    }
+
+    this.importing.set(true);
+    const formData = new FormData();
+    formData.append('file', file);
+
+    this.http
+      .post(ApiEndpoints.catalog.importSku, formData)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.importing.set(false);
+          this.toast.success('Đã gửi tác vụ nhập sản phẩm hàng loạt thành công!');
+          this.closeImportModal();
+          this.loadData();
+        },
+        error: (err) => {
+          this.importing.set(false);
+          console.error('Import products error:', err);
+          this.toast.error(err?.error?.message || 'Nhập dữ liệu từ Excel thất bại');
+        },
+      });
   }
 
   onFormSaved() {

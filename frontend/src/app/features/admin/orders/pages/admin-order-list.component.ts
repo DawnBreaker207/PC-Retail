@@ -21,10 +21,12 @@ import {
   ExternalLink,
   Loader2,
   AlertCircle,
+  Download,
 } from 'lucide-angular';
 import { HlmButtonDirective } from '@shared/ui/button';
 import { HlmInputDirective } from '@shared/ui/input';
 import { HlmBadgeDirective } from '@shared/ui/badge';
+import { HlmTooltipDirective } from '@shared/ui/tooltip';
 import {
   HlmTableDirective,
   HlmTableHeaderDirective,
@@ -96,6 +98,7 @@ const STATUS_OPTIONS = [
     HlmButtonDirective,
     HlmInputDirective,
     HlmBadgeDirective,
+    HlmTooltipDirective,
     HlmTableDirective,
     HlmTableHeaderDirective,
     HlmTableBodyDirective,
@@ -127,10 +130,12 @@ export class AdminOrderListComponent {
   readonly ExternalLink = ExternalLink;
   readonly Loader2 = Loader2;
   readonly AlertCircle = AlertCircle;
+  readonly DownloadIcon = Download;
 
   viewMode = signal<'table' | 'kanban'>('table');
   orders = signal<AdminOrder[]>([]);
   loading = signal(false);
+  exportingExcel = signal(false);
   total = signal(0);
   search = signal('');
   statusFilter = signal('');
@@ -375,6 +380,30 @@ export class AdminOrderListComponent {
 
   closeConfirmModal() {
     this.confirmModal.set(null);
+  }
+
+  exportOrdersExcel() {
+    this.exportingExcel.set(true);
+    this.http
+      .get(ApiEndpoints.orders.exportExcel, { responseType: 'blob' })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (blob) => {
+          this.exportingExcel.set(false);
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `orders_export_${Date.now()}.xlsx`;
+          a.click();
+          window.URL.revokeObjectURL(url);
+          this.toast.success('Xuất file Excel danh sách đơn hàng thành công!');
+        },
+        error: (err) => {
+          this.exportingExcel.set(false);
+          console.error('Export orders excel error:', err);
+          this.toast.error('Không thể xuất file Excel đơn hàng lúc này');
+        },
+      });
   }
 
   getProductSummary(subOrders: AdminOrder['subOrders']): string {
