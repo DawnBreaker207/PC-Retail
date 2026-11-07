@@ -39,9 +39,13 @@
           <button hlmBtn variant="outline" size="sm" (click)="requestReturn()">
             Yêu cầu đổi trả
           </button>
+          <button hlmBtn variant="secondary" size="sm" class="flex items-center gap-1.5" (click)="openWarrantyModal()">
+            <lucide-angular [img]="ShieldCheckIcon" class="w-4 h-4 text-primary" />
+            Bảo hành linh kiện
+          </button>
         }
         @if (isCancellable) {
-          <button hlmBtn variant="destructive" size="sm" (click)="cancelOrder()">
+          <button hlmBtn variant="destructive" size="sm" class="text-white" (click)="cancelOrder()">
             Hủy đơn hàng
           </button>
         }
@@ -189,6 +193,42 @@
             <span class="text-base font-semibold text-ink dark:text-ink-dark">Tổng cộng:</span>
             <span class="text-primary text-xl font-black">{{ sub.finalAmount | currencyFormat }}</span>
           </div>
+
+          <!-- VAT Invoice Section -->
+          <div hlmSeparator class="my-3"></div>
+          <div class="p-3 rounded-xl bg-muted/30 border border-border/60 text-xs space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="font-semibold text-foreground flex items-center gap-1.5">
+                <lucide-angular [img]="ReceiptTextIcon" class="w-4 h-4 text-primary" />
+                Hóa đơn điện tử VAT
+              </span>
+              @if (invoiceInfo(); as inv) {
+                <span hlmBadge class="text-[10px] bg-emerald-600 text-white font-bold">
+                  {{ inv.invoiceNumber ? '#' + inv.invoiceNumber : 'Đã tiếp nhận yêu cầu' }}
+                </span>
+              } @else {
+                <button
+                  hlmBtn
+                  variant="outline"
+                  size="sm"
+                  class="h-7 px-2.5 text-xs font-semibold cursor-pointer"
+                  [disabled]="requestingInvoice()"
+                  (click)="requestInvoice()"
+                >
+                  {{ requestingInvoice() ? 'Đang gửi...' : 'Yêu cầu xuất hóa đơn' }}
+                </button>
+              }
+            </div>
+            @if (invoiceInfo(); as inv) {
+              <div class="text-[11px] text-muted-foreground space-y-0.5">
+                <p>Người mua: <strong class="text-foreground">{{ inv.buyerName }}</strong></p>
+                @if (inv.buyerTaxCode) {
+                  <p>Mã số thuế: <strong class="text-foreground">{{ inv.buyerTaxCode }}</strong></p>
+                }
+                <p>Thuế VAT: {{ inv.vatAmount | currencyFormat }}</p>
+              </div>
+            }
+          </div>
         }
       </div>
     </div>
@@ -200,6 +240,25 @@
         [item]="rItem"
         (closed)="reviewItem.set(null)"
         (submitted)="loadOrder(o.id)"
+      />
+    }
+
+    <!-- Return Request Modal -->
+    @if (returnModalOpen() && o.subOrders[0]; as firstSub) {
+      <app-return-request-modal
+        [subOrderId]="firstSub.id"
+        [orderId]="o.id"
+        (closed)="returnModalOpen.set(false)"
+        (submitted)="onReturnSubmitted()"
+      />
+    }
+
+    <!-- Warranty Claim Modal -->
+    @if (warrantyModalOpen() && o.subOrders[0]; as firstSub) {
+      <app-warranty-claim-modal
+        [subOrderId]="firstSub.id"
+        (closed)="warrantyModalOpen.set(false)"
+        (submitted)="onWarrantyClaimSubmitted()"
       />
     }
 
@@ -221,7 +280,7 @@
       </div>
       <h2 class="text-lg font-bold mb-2 text-foreground">Không tìm thấy thông tin đơn hàng</h2>
       <p class="text-sm text-muted dark:text-muted-dark mb-6">Đơn hàng này không tồn tại hoặc bạn chưa có quyền truy cập.</p>
-      <a routerLink="/orders" hlmBtn variant="default" class="rounded-xl px-6">
+      <a routerLink="/orders" hlmBtn variant="default" class="rounded-xl px-6 text-white bg-primary">
         Quay lại danh sách đơn hàng
       </a>
     </div>

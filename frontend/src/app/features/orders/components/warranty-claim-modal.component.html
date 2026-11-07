@@ -1,0 +1,184 @@
+<div hlmDialogOverlay (click)="closed.emit()"></div>
+<div
+  hlmDialogContent
+  class="w-full max-w-lg max-h-[90vh] overflow-y-auto p-6 bg-surface dark:bg-surface-dark border border-border/80 shadow-2xl rounded-2xl animate-in fade-in-0 zoom-in-95"
+>
+  <div hlmDialogHeader class="mb-4">
+    <div class="flex items-center gap-2">
+      <div class="p-2 rounded-xl bg-blue-500/10 text-blue-600">
+        <lucide-icon [img]="ShieldCheckIcon" class="size-5" />
+      </div>
+      <div>
+        <h2 hlmDialogTitle class="text-lg font-bold text-foreground">
+          Yêu cầu bảo hành linh kiện
+        </h2>
+        <p hlmDialogDescription class="text-xs text-muted-foreground">
+          @if (selectedItem(); as itm) {
+            Mã bảo hành #WAR-{{ itm.id }} · Số Serial: <span class="font-mono font-semibold text-foreground">{{ itm.serialNumber || 'Theo mã kiện hàng' }}</span>
+          } @else {
+            Đang tải thông tin linh kiện bảo hành...
+          }
+        </p>
+      </div>
+    </div>
+  </div>
+
+  @if (availableItems().length > 1) {
+    <div class="mb-4 space-y-1">
+      <label hlmLabel class="font-semibold text-foreground">
+        Chọn linh kiện cần yêu cầu bảo hành <span class="text-destructive">*</span>
+      </label>
+      <select
+        class="w-full h-9 px-3 rounded-lg border border-input bg-background text-foreground text-xs focus:outline-none focus:ring-2 focus:ring-ring"
+        [value]="selectedItem()?.id"
+        (change)="onItemSelect($event)"
+      >
+        @for (item of availableItems(); track item.id) {
+          <option [value]="item.id">
+            Mã #{{ item.id }} - Serial: {{ item.serialNumber || 'N/A' }} (SKU #{{ item.skuId }})
+          </option>
+        }
+      </select>
+    </div>
+  }
+
+  <!-- Warranty Policy Info Card -->
+  @if (selectedItem(); as itm) {
+    <div class="p-3.5 rounded-xl bg-muted/20 border border-border/60 text-xs space-y-1.5 mb-4">
+      <div class="flex justify-between items-center">
+        <span class="text-muted-foreground">Số Serial (S/N):</span>
+        <span class="font-mono font-bold text-foreground">{{ itm.serialNumber || 'N/A' }}</span>
+      </div>
+      <div class="flex justify-between items-center">
+        <span class="text-muted-foreground">Thời hạn hiệu lực:</span>
+        <span class="font-semibold text-emerald-600 dark:text-emerald-400">
+          {{ itm.activatedAt | date:'dd/MM/yyyy' }} - {{ itm.expiresAt | date:'dd/MM/yyyy' }}
+        </span>
+      </div>
+    </div>
+  }
+
+  <form (ngSubmit)="onSubmit()" class="space-y-4 text-xs sm:text-sm">
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div class="space-y-1">
+        <label hlmLabel class="font-semibold text-foreground">
+          Họ và tên người gửi <span class="text-destructive">*</span>
+        </label>
+        <input
+          hlmInput
+          type="text"
+          [(ngModel)]="customerName"
+          name="customerName"
+          required
+          placeholder="Nguyễn Văn A"
+          class="h-9 text-xs rounded-lg"
+        />
+      </div>
+
+      <div class="space-y-1">
+        <label hlmLabel class="font-semibold text-foreground">
+          Số điện thoại liên hệ <span class="text-destructive">*</span>
+        </label>
+        <input
+          hlmInput
+          type="tel"
+          [(ngModel)]="customerPhone"
+          name="customerPhone"
+          required
+          placeholder="0912345678"
+          class="h-9 text-xs rounded-lg font-mono"
+        />
+      </div>
+    </div>
+
+    <!-- Symptom / Description -->
+    <div class="space-y-1.5">
+      <label hlmLabel class="font-semibold text-foreground">
+        Mô tả triệu chứng / Hiện tượng lỗi <span class="text-destructive">*</span>
+      </label>
+      <textarea
+        hlmTextarea
+        [(ngModel)]="description"
+        name="description"
+        rows="3"
+        required
+        placeholder="Mô tả cụ thể hiện tượng: Máy không lên nguồn, xuất hiện sọc màn hình, quạt kêu to, rớt kết nối..."
+        class="w-full text-xs rounded-xl resize-none"
+      ></textarea>
+    </div>
+
+    <!-- Images Proof -->
+    <div class="space-y-2">
+      <label hlmLabel class="font-semibold text-foreground flex items-center justify-between">
+        <span>Hình ảnh / Video minh chứng (URL)</span>
+        <span class="text-[11px] text-muted-foreground">{{ images.length }}/5 ảnh</span>
+      </label>
+      <div class="flex gap-2">
+        <input
+          hlmInput
+          type="url"
+          [(ngModel)]="imageUrlInput"
+          name="imageUrlInput"
+          placeholder="Nhập đường dẫn ảnh (URL)"
+          class="h-9 text-xs flex-1 rounded-lg"
+          (keydown.enter)="$event.preventDefault(); addImage()"
+        />
+        <button
+          type="button"
+          hlmBtn
+          variant="outline"
+          size="sm"
+          (click)="addImage()"
+          [disabled]="images.length >= 5 || !imageUrlInput.trim()"
+          class="h-9 px-3 rounded-lg text-xs font-semibold cursor-pointer"
+        >
+          Thêm
+        </button>
+      </div>
+
+      @if (images.length > 0) {
+        <div class="flex flex-wrap gap-2 pt-1">
+          @for (img of images; track $index) {
+            <div class="relative group size-16 rounded-lg overflow-hidden border border-border">
+              <img [src]="img" alt="Minh chứng bảo hành" class="w-full h-full object-cover" />
+              <button
+                type="button"
+                (click)="removeImage($index)"
+                class="absolute inset-0 bg-black/60 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+              >
+                <lucide-icon [img]="XIcon" class="size-4" />
+              </button>
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    <div hlmDialogFooter class="flex justify-end gap-2.5 pt-3 border-t border-border/60">
+      <button
+        type="button"
+        hlmBtn
+        variant="outline"
+        (click)="closed.emit()"
+        [disabled]="submitting()"
+        class="h-10 px-4 rounded-xl text-xs font-semibold"
+      >
+        Hủy bỏ
+      </button>
+      <button
+        type="submit"
+        hlmBtn
+        variant="default"
+        [disabled]="submitting() || !selectedItem()"
+        class="h-10 px-5 rounded-xl text-xs font-bold bg-primary text-white shadow-xs cursor-pointer inline-flex items-center gap-1.5"
+      >
+        @if (submitting()) {
+          <lucide-icon [img]="LoaderIcon" class="size-3.5 animate-spin" />
+          Đang gửi...
+        } @else {
+          Gửi yêu cầu bảo hành
+        }
+      </button>
+    </div>
+  </form>
+</div>

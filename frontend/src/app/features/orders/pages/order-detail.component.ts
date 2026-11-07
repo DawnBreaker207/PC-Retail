@@ -1,4 +1,4 @@
-﻿import {
+import {
   Component,
   inject,
   OnInit,
@@ -19,6 +19,8 @@ import {
   Truck,
   Package,
   XCircle,
+  ShieldCheck,
+  ReceiptText,
 } from 'lucide-angular';
 import { HlmButtonDirective } from '@shared/ui/button';
 import { HlmBadgeDirective } from '@shared/ui/badge';
@@ -31,6 +33,8 @@ import { DateHelper } from '@shared/utils/date.helper';
 import { OrderService } from '@core/services/order.service';
 import { Order, OrderItem, AdminReturnRequest } from '@core/models/common.model';
 import { ReviewFormComponent } from '../components/review-form.component';
+import { ReturnRequestModalComponent } from '../components/return-request-modal.component';
+import { WarrantyClaimModalComponent } from '../components/warranty-claim-modal.component';
 
 const STATUS_STEPS = [
   { key: 'PENDING_PAYMENT', label: 'Đặt hàng' },
@@ -61,6 +65,8 @@ const STATUS_STEP_MAP: Record<string, number> = {
     HlmSeparatorDirective,
     CurrencyFormatPipe,
     ReviewFormComponent,
+    ReturnRequestModalComponent,
+    WarrantyClaimModalComponent,
   ],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './order-detail.component.html',
@@ -74,6 +80,8 @@ export class OrderDetailComponent implements OnInit {
   readonly Truck = Truck;
   readonly Package = Package;
   readonly XCircle = XCircle;
+  readonly ShieldCheckIcon = ShieldCheck;
+  readonly ReceiptTextIcon = ReceiptText;
 
   private route = inject(ActivatedRoute);
   private orderService = inject(OrderService);
@@ -82,8 +90,12 @@ export class OrderDetailComponent implements OnInit {
   order = signal<Order | null>(null);
   isLoading = signal(false);
   returnInfo = signal<AdminReturnRequest | null>(null);
+  invoiceInfo = signal<any>(null);
+  requestingInvoice = signal(false);
   reviewItem = signal<OrderItem | null>(null);
   cancelDialogOpen = signal(false);
+  returnModalOpen = signal(false);
+  warrantyModalOpen = signal(false);
 
   steps = STATUS_STEPS;
 
@@ -110,8 +122,37 @@ export class OrderDetailComponent implements OnInit {
           this.isLoading.set(false);
           const subId = res?.subOrders[0]?.id;
           if (subId) this.loadReturn(subId);
+          if (res?.id) this.loadInvoice(res.id);
         },
         error: () => this.isLoading.set(false),
+      });
+  }
+
+  private loadInvoice(orderId: number) {
+    this.orderService
+      .getOrderInvoice(orderId)
+      .pipe(
+        takeUntilDestroyed(this.destroyRef),
+        catchError(() => of(null)),
+      )
+      .subscribe((inv) => this.invoiceInfo.set(inv));
+  }
+
+  requestInvoice() {
+    const o = this.order();
+    if (!o) return;
+    this.requestingInvoice.set(true);
+    this.orderService
+      .requestOrderInvoice(o.id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (inv) => {
+          this.requestingInvoice.set(false);
+          this.invoiceInfo.set(inv);
+        },
+        error: () => {
+          this.requestingInvoice.set(false);
+        },
       });
   }
 
@@ -166,18 +207,29 @@ export class OrderDetailComponent implements OnInit {
   }
 
   requestReturn() {
+    this.returnModalOpen.set(true);
+  }
+
+  openWarrantyModal() {
+    this.warrantyModalOpen.set(true);
+  }
+
+  onWarrantyClaimSubmitted() {
+    this.warrantyModalOpen.set(false);
+    const o = this.order();
+    if (o) {
+      this.loadOrder(o.id);
+    }
+  }
+
+  onReturnSubmitted() {
+    this.returnModalOpen.set(false);
     const o = this.order();
     const subId = o?.subOrders[0]?.id;
-    if (!o || !subId) return;
-    const reason = window.prompt('Lý do yêu cầu đổi trả / hoàn tiền:');
-    if (!reason) return;
-    this.orderService
-      .requestReturn(o.id, subId, reason)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(() => {
-        this.loadOrder(o.id);
-        this.loadReturn(subId);
-      });
+    if (o && subId) {
+      this.loadOrder(o.id);
+      this.loadReturn(subId);
+    }
   }
 
   openReviewForm(item: OrderItem) {

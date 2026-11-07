@@ -1,0 +1,352 @@
+<div class="space-y-6">
+  <!-- Page Header -->
+  <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+    <div>
+      <h1 class="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
+        <lucide-icon [img]="ShieldCheckIcon" class="h-6 w-6 text-primary"></lucide-icon>
+        Quản lý Bảo hành linh kiện
+      </h1>
+      <p class="text-sm text-muted-foreground mt-1">
+        Tra cứu hồ sơ bảo hành theo kiện hàng (SubOrder ID) và điều phối quy trình tiếp nhận, chẩn đoán, sửa chữa hoặc đổi mới.
+      </p>
+    </div>
+  </div>
+
+  <!-- Search Filter Card -->
+  <div class="p-4 rounded-xl border border-border bg-card shadow-xs">
+    <form (ngSubmit)="lookupWarrantyBySubOrder()" class="flex flex-col sm:flex-row items-center gap-3">
+      <div class="relative flex-1 w-full">
+        <lucide-icon [img]="SearchIcon" class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"></lucide-icon>
+        <input
+          hlmInput
+          type="number"
+          placeholder="Nhập mã kiện hàng SubOrder ID (VD: 101, 102)..."
+          class="pl-9 w-full"
+          [ngModel]="searchSubOrderId()"
+          (ngModelChange)="searchSubOrderId.set($event)"
+          name="subOrderId"
+          required
+        />
+      </div>
+      <button
+        type="submit"
+        hlmBtn
+        variant="default"
+        class="w-full sm:w-auto text-white flex items-center gap-2 font-medium"
+        [disabled]="loading()"
+        hlmTooltip="Tra cứu linh kiện và yêu cầu bảo hành"
+      >
+        @if (loading()) {
+          <lucide-icon [img]="LoaderIcon" class="h-4 w-4 animate-spin"></lucide-icon>
+          Đang tra cứu...
+        } @else {
+          <lucide-icon [img]="SearchIcon" class="h-4 w-4"></lucide-icon>
+          Tra cứu kiện hàng
+        }
+      </button>
+    </form>
+  </div>
+
+  <!-- Results Sections -->
+  @if (warrantyItems().length > 0) {
+    <!-- Metric Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div class="p-4 rounded-xl border border-border bg-card shadow-xs flex items-center gap-4">
+        <div class="w-12 h-12 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+          <lucide-icon [img]="ShieldCheckIcon" class="h-6 w-6"></lucide-icon>
+        </div>
+        <div>
+          <p class="text-xs font-medium text-muted-foreground">Linh kiện có bảo hành</p>
+          <p class="text-2xl font-bold text-foreground">{{ warrantyItems().length }}</p>
+        </div>
+      </div>
+      <div class="p-4 rounded-xl border border-border bg-card shadow-xs flex items-center gap-4">
+        <div class="w-12 h-12 rounded-lg bg-blue-500/10 text-blue-600 flex items-center justify-center">
+          <lucide-icon [img]="ClockIcon" class="h-6 w-6"></lucide-icon>
+        </div>
+        <div>
+          <p class="text-xs font-medium text-muted-foreground">Phiếu yêu cầu bảo hành</p>
+          <p class="text-2xl font-bold text-foreground">{{ claims().length }}</p>
+        </div>
+      </div>
+      <div class="p-4 rounded-xl border border-border bg-card shadow-xs flex items-center gap-4">
+        <div class="w-12 h-12 rounded-lg bg-emerald-500/10 text-emerald-600 flex items-center justify-center">
+          <lucide-icon [img]="CheckCircleIcon" class="h-6 w-6"></lucide-icon>
+        </div>
+        <div>
+          <p class="text-xs font-medium text-muted-foreground">Đang xử lý / Hoàn tất</p>
+          <p class="text-2xl font-bold text-foreground">
+            {{ claims().length > 0 ? claims().length : 'Sẵn sàng' }}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Warranty Items Table -->
+    <div class="rounded-xl border border-border bg-card overflow-hidden shadow-xs">
+      <div class="px-5 py-4 border-b border-border bg-muted/30 flex items-center justify-between">
+        <div>
+          <h2 class="text-base font-semibold text-foreground">Hồ sơ linh kiện bảo hành trong đơn</h2>
+          <p class="text-xs text-muted-foreground">Danh sách mã serial và thời hạn hiệu lực của từng sản phẩm</p>
+        </div>
+        <span hlmBadge variant="outline" class="text-xs">
+          {{ warrantyItems().length }} linh kiện
+        </span>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table hlmTable class="w-full text-sm">
+          <thead hlmTableHeader>
+            <tr hlmTableRow>
+              <th hlmTableHead class="w-16">ID</th>
+              <th hlmTableHead>Số Serial (S/N)</th>
+              <th hlmTableHead>Mã SKU</th>
+              <th hlmTableHead>Ngày kích hoạt</th>
+              <th hlmTableHead>Ngày hết hạn</th>
+              <th hlmTableHead class="text-right">Tình trạng</th>
+            </tr>
+          </thead>
+          <tbody hlmTableBody>
+            @for (item of warrantyItems(); track item.id) {
+              <tr hlmTableRow class="hover:bg-muted/50 transition-colors">
+                <td hlmTableCell class="font-medium text-muted-foreground">#{{ item.id }}</td>
+                <td hlmTableCell class="font-mono font-semibold text-foreground">
+                  {{ item.serialNumber }}
+                </td>
+                <td hlmTableCell>SKU #{{ item.skuId }}</td>
+                <td hlmTableCell class="text-muted-foreground">
+                  {{ item.activatedAt | date:'dd/MM/yyyy' }}
+                </td>
+                <td hlmTableCell class="text-muted-foreground">
+                  {{ item.expiresAt | date:'dd/MM/yyyy' }}
+                </td>
+                <td hlmTableCell class="text-right">
+                  <span
+                    hlmBadge
+                    [variant]="item.active ? 'default' : 'secondary'"
+                    [ngClass]="item.active ? 'bg-emerald-600 text-white' : ''"
+                  >
+                    {{ item.active ? 'Còn hạn bảo hành' : 'Hết hạn bảo hành' }}
+                  </span>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Warranty Claims Table -->
+    <div class="rounded-xl border border-border bg-card overflow-hidden shadow-xs">
+      <div class="px-5 py-4 border-b border-border bg-muted/30 flex items-center justify-between">
+        <div>
+          <h2 class="text-base font-semibold text-foreground">Phiếu yêu cầu bảo hành đã tạo</h2>
+          <p class="text-xs text-muted-foreground">Theo dõi và cập nhật trạng thái xử lý sự cố cho khách hàng</p>
+        </div>
+        <span hlmBadge variant="outline" class="text-xs">
+          {{ claims().length }} phiếu
+        </span>
+      </div>
+
+      @if (claims().length === 0) {
+        <div class="py-12 text-center text-muted-foreground">
+          <lucide-icon [img]="ShieldCheckIcon" class="h-10 w-10 mx-auto text-muted-foreground/50 mb-2"></lucide-icon>
+          <p class="font-medium">Chưa có phiếu yêu cầu bảo hành nào được gửi</p>
+          <p class="text-xs mt-1">Khách hàng chưa báo cáo sự cố hoặc kiện hàng đang vận hành tốt.</p>
+        </div>
+      } @else {
+        <div class="overflow-x-auto">
+          <table hlmTable class="w-full text-sm">
+            <thead hlmTableHeader>
+              <tr hlmTableRow>
+                <th hlmTableHead class="w-16">Mã phiếu</th>
+                <th hlmTableHead>Linh kiện ID</th>
+                <th hlmTableHead>Liên hệ</th>
+                <th hlmTableHead>Mô tả sự cố</th>
+                <th hlmTableHead>Trạng thái</th>
+                <th hlmTableHead>Ghi chú kỹ thuật</th>
+                <th hlmTableHead class="text-right">Thao tác</th>
+              </tr>
+            </thead>
+            <tbody hlmTableBody>
+              @for (claim of claims(); track claim.id) {
+                <tr hlmTableRow class="hover:bg-muted/50 transition-colors">
+                  <td hlmTableCell class="font-bold text-foreground">#{{ claim.id }}</td>
+                  <td hlmTableCell class="font-mono text-muted-foreground">Item #{{ claim.warrantyItemId }}</td>
+                  <td hlmTableCell>
+                    <div class="text-xs space-y-0.5">
+                      <div class="font-semibold text-foreground flex items-center gap-1">
+                        <lucide-icon [img]="PhoneIcon" class="h-3 w-3 text-muted-foreground"></lucide-icon>
+                        {{ claim.customerPhone }}
+                      </div>
+                      <div class="text-muted-foreground flex items-center gap-1">
+                        <lucide-icon [img]="ClockIcon" class="h-3 w-3"></lucide-icon>
+                        {{ claim.createdAt | date:'dd/MM/yyyy HH:mm' }}
+                      </div>
+                    </div>
+                  </td>
+                  <td hlmTableCell class="max-w-xs">
+                    <p class="text-xs font-medium text-foreground line-clamp-2" [title]="claim.description">
+                      {{ claim.description }}
+                    </p>
+                  </td>
+                  <td hlmTableCell>
+                    <span
+                      hlmBadge
+                      [ngClass]="{
+                        'bg-amber-500 text-white': claim.status === 'CLAIMED',
+                        'bg-blue-600 text-white': claim.status === 'RECEIVED',
+                        'bg-purple-600 text-white': claim.status === 'DIAGNOSING',
+                        'bg-emerald-600 text-white': claim.status === 'REPAIRED' || claim.status === 'REPLACED',
+                        'bg-rose-600 text-white': claim.status === 'REJECTED',
+                        'bg-slate-700 text-white': claim.status === 'RETURNED_TO_CUSTOMER'
+                      }"
+                      class="text-xs font-semibold px-2 py-0.5"
+                    >
+                      @switch (claim.status) {
+                        @case ('CLAIMED') { Tiếp nhận }
+                        @case ('RECEIVED') { Đã nhận hàng }
+                        @case ('DIAGNOSING') { Đang chẩn đoán }
+                        @case ('REPAIRED') { Đã sửa xong }
+                        @case ('REPLACED') { Đổi linh kiện mới }
+                        @case ('REJECTED') { Từ chối bảo hành }
+                        @case ('RETURNED_TO_CUSTOMER') { Đã trả khách }
+                        @default { {{ claim.status }} }
+                      }
+                    </span>
+                  </td>
+                  <td hlmTableCell class="max-w-xs text-xs text-muted-foreground">
+                    @if (claim.diagnosisNote || claim.resolution) {
+                      <div class="space-y-0.5">
+                        @if (claim.diagnosisNote) {
+                          <p><strong class="text-foreground">Lỗi:</strong> {{ claim.diagnosisNote }}</p>
+                        }
+                        @if (claim.resolution) {
+                          <p><strong class="text-foreground">Giải pháp:</strong> {{ claim.resolution }}</p>
+                        }
+                      </div>
+                    } @else {
+                      <span class="text-muted-foreground/60 italic">Chưa ghi nhận</span>
+                    }
+                  </td>
+                  <td hlmTableCell class="text-right">
+                    <button
+                      hlmBtn
+                      variant="outline"
+                      size="sm"
+                      class="gap-1.5"
+                      (click)="openUpdateModal(claim)"
+                      hlmTooltip="Cập nhật tiến độ xử lý bảo hành"
+                    >
+                      <lucide-icon [img]="WrenchIcon" class="h-3.5 w-3.5"></lucide-icon>
+                      Cập nhật
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+  } @else if (!loading() && searchSubOrderId()) {
+    <div class="p-12 text-center rounded-xl border border-dashed border-border bg-card">
+      <lucide-icon [img]="AlertCircleIcon" class="h-10 w-10 mx-auto text-muted-foreground mb-3"></lucide-icon>
+      <h3 class="text-base font-semibold text-foreground">Không tìm thấy linh kiện bảo hành</h3>
+      <p class="text-sm text-muted-foreground mt-1">
+        Vui lòng kiểm tra lại mã kiện hàng SubOrder ID hoặc xác nhận đơn hàng đã được giao thành công.
+      </p>
+    </div>
+  }
+</div>
+
+<!-- Spartan Dialog: Update Claim Status Modal -->
+@if (selectedClaim(); as claim) {
+  <div hlmDialogOverlay class="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+    <div hlmDialogContent class="bg-card border border-border rounded-xl shadow-2xl max-w-lg w-full p-6 space-y-5 animate-in fade-in-0 zoom-in-95">
+      <div hlmDialogHeader class="space-y-1">
+        <h3 hlmDialogTitle class="text-lg font-bold text-foreground flex items-center gap-2">
+          <lucide-icon [img]="WrenchIcon" class="h-5 w-5 text-primary"></lucide-icon>
+          Cập nhật tiến trình bảo hành #{{ claim.id }}
+        </h3>
+        <p hlmDialogDescription class="text-xs text-muted-foreground">
+          Linh kiện ID: #{{ claim.warrantyItemId }} | Liên hệ: {{ claim.customerPhone }}
+        </p>
+      </div>
+
+      <div class="space-y-4">
+        <!-- Status Select -->
+        <div>
+          <label class="block text-xs font-medium text-foreground mb-1.5">
+            Trạng thái xử lý <span class="text-destructive">*</span>
+          </label>
+          <select
+            class="w-full h-10 px-3 rounded-md border border-input bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+            [ngModel]="newStatus()"
+            (ngModelChange)="newStatus.set($event)"
+          >
+            @for (opt of statusOptions; track opt.value) {
+              <option [value]="opt.value">{{ opt.label }}</option>
+            }
+          </select>
+        </div>
+
+        <!-- Diagnosis Note -->
+        <div>
+          <label class="block text-xs font-medium text-foreground mb-1.5">
+            Kết quả chẩn đoán kỹ thuật
+          </label>
+          <textarea
+            hlmTextarea
+            rows="3"
+            placeholder="Mô tả nguyên nhân hư hỏng, chập cháy, lỗi chip..."
+            class="w-full text-sm"
+            [ngModel]="diagnosisNote()"
+            (ngModelChange)="diagnosisNote.set($event)"
+          ></textarea>
+        </div>
+
+        <!-- Resolution -->
+        <div>
+          <label class="block text-xs font-medium text-foreground mb-1.5">
+            Biện pháp giải quyết / Kết quả
+          </label>
+          <textarea
+            hlmTextarea
+            rows="2"
+            placeholder="Thay linh kiện mới, đóng lại chân chip, gửi trả hãng..."
+            class="w-full text-sm"
+            [ngModel]="resolution()"
+            (ngModelChange)="resolution.set($event)"
+          ></textarea>
+        </div>
+      </div>
+
+      <div hlmDialogFooter class="flex items-center justify-end gap-2 pt-3 border-t border-border">
+        <button
+          hlmBtn
+          variant="outline"
+          (click)="closeUpdateModal()"
+          [disabled]="processing()"
+        >
+          Hủy bỏ
+        </button>
+        <button
+          hlmBtn
+          variant="default"
+          class="text-white flex items-center gap-2"
+          (click)="submitUpdateStatus()"
+          [disabled]="processing()"
+        >
+          @if (processing()) {
+            <lucide-icon [img]="LoaderIcon" class="h-4 w-4 animate-spin"></lucide-icon>
+            Đang lưu...
+          } @else {
+            <lucide-icon [img]="CheckCircleIcon" class="h-4 w-4"></lucide-icon>
+            Lưu thay đổi
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+}

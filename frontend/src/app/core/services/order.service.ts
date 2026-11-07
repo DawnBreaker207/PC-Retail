@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { ApiEndpoints } from '@core/api/api.endpoints';
-import { CreateReviewRequest, Order, ResponsePage, Review } from '@core/models/common.model';
+import { CreateReviewRequest, Order, ResponsePage, Review, SubmitReturnPayload } from '@core/models/common.model';
 
 @Injectable({ providedIn: 'root' })
 export class OrderService {
@@ -37,8 +37,8 @@ export class OrderService {
     return this.http.post<Review>(ApiEndpoints.reviews.create, payload);
   }
 
-  requestReturn(orderId: number, subOrderId: number, reason: string) {
-    return this.http.post(ApiEndpoints.returns.request(orderId), { subOrderId, reason, images: [] });
+  requestReturn(subOrderId: number, payload: SubmitReturnPayload) {
+    return this.http.post(ApiEndpoints.returns.submit(subOrderId), payload);
   }
 
   getReturnBySubOrder(subOrderId: number) {
@@ -47,5 +47,13 @@ export class OrderService {
 
   disputeReturn(requestId: number, note: string) {
     return this.http.post(ApiEndpoints.returns.dispute(requestId), { note });
+  }
+
+  requestOrderInvoice(orderId: number) {
+    return this.http.post(`${ApiEndpoints.orders.base}/${orderId}/invoice`, {});
+  }
+
+  getOrderInvoice(orderId: number) {
+    return this.http.get(`${ApiEndpoints.orders.base}/${orderId}/invoice`);
   }
 }
