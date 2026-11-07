@@ -70,14 +70,55 @@
 
   <!-- Payment Method -->
   <div class="mt-6 p-4 bg-bg dark:bg-bg-dark rounded-xl border border-border/60">
-    <p class="text-xs font-semibold text-muted mb-2">Phương thức thanh toán</p>
-    <label class="flex items-center gap-3 p-3 rounded-lg border border-primary/40 bg-primary/5 cursor-pointer">
-      <input type="radio" name="paymentMethod" value="VNPAY" checked class="size-4 text-primary accent-primary" />
-      <div>
-        <span class="font-bold text-xs sm:text-sm text-foreground">VNPay QR / Thẻ ATM & Thẻ Quốc tế (Visa, Master)</span>
-        <p class="text-[11px] text-muted dark:text-muted-dark">Quét mã QR qua app ngân hàng hoặc thanh toán thẻ trực tuyến</p>
-      </div>
-    </label>
+    <p class="text-xs font-semibold text-muted mb-3">Phương thức thanh toán</p>
+    <div class="space-y-2.5">
+      <label
+        class="flex items-center gap-3 p-3.5 rounded-xl border transition-all cursor-pointer"
+        [class.border-primary]="paymentMethod() === 'ONLINE'"
+        [class.bg-primary/5]="paymentMethod() === 'ONLINE'"
+        [class.border-border/60]="paymentMethod() !== 'ONLINE'"
+      >
+        <input
+          type="radio"
+          name="paymentMethod"
+          value="ONLINE"
+          [checked]="paymentMethod() === 'ONLINE'"
+          (change)="paymentMethod.set('ONLINE')"
+          class="size-4 text-primary accent-primary"
+        />
+        <div class="flex-1">
+          <div class="flex items-center gap-2">
+            <lucide-icon [img]="CreditCardIcon" class="size-4 text-primary" />
+            <span class="font-bold text-xs sm:text-sm text-foreground">VNPay QR / Thẻ ATM & Thẻ Quốc tế (Visa, Master)</span>
+          </div>
+          <p class="text-[11px] text-muted dark:text-muted-dark ml-6 mt-0.5">Quét mã QR qua app ngân hàng hoặc thanh toán thẻ trực tuyến tức thì</p>
+        </div>
+      </label>
+
+      <label
+        class="flex items-center gap-3 p-3.5 rounded-xl border transition-all cursor-pointer"
+        [class.border-primary]="paymentMethod() === 'COD'"
+        [class.bg-primary/5]="paymentMethod() === 'COD'"
+        [class.border-border/60]="paymentMethod() !== 'COD'"
+      >
+        <input
+          type="radio"
+          name="paymentMethod"
+          value="COD"
+          [checked]="paymentMethod() === 'COD'"
+          (change)="paymentMethod.set('COD')"
+          class="size-4 text-primary accent-primary"
+        />
+        <div class="flex-1">
+          <div class="flex items-center gap-2">
+            <lucide-icon [img]="BanknoteIcon" class="size-4 text-emerald-600 dark:text-emerald-400" />
+            <span class="font-bold text-xs sm:text-sm text-foreground">Thanh toán khi nhận hàng (COD)</span>
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">Tiện lợi</span>
+          </div>
+          <p class="text-[11px] text-muted dark:text-muted-dark ml-6 mt-0.5">Kiểm tra kiện hàng và thanh toán tiền mặt hoặc chuyển khoản cho shipper</p>
+        </div>
+      </label>
+    </div>
   </div>
 
   <div class="flex flex-col sm:flex-row gap-3 mt-6">
@@ -94,13 +135,15 @@
       type="button"
       hlmBtn
       variant="default"
-      (click)="placeOrder.emit()"
+      (click)="placeOrder.emit(paymentMethod())"
       [disabled]="isPlacing()"
-      class="flex-1 h-11 px-8 rounded-xl font-bold text-xs sm:text-sm bg-primary text-primary-foreground shadow-xs hover:shadow-sm"
+      class="flex-1 h-11 px-8 rounded-xl font-bold text-xs sm:text-sm bg-primary text-white text-primary-foreground shadow-xs hover:shadow-sm cursor-pointer"
     >
       @if (isPlacing()) {
         <lucide-icon [img]="LoaderIcon" class="size-4 animate-spin mr-2 inline" />
         Đang xử lý đơn hàng...
+      } @else if (paymentMethod() === 'COD') {
+        Xác nhận đặt hàng (COD)
       } @else {
         Xác nhận đặt hàng & Thanh toán
       }

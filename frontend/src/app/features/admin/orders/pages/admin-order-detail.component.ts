@@ -37,6 +37,7 @@ import {
   HlmTableCellDirective,
 } from '@shared/ui/table';
 import {
+  HlmDialogOverlayDirective,
   HlmDialogContentDirective,
   HlmDialogHeaderDirective,
   HlmDialogTitleDirective,
@@ -76,6 +77,7 @@ const STATUS_STEP_MAP: Record<string, number> = {
     HlmTableRowDirective,
     HlmTableHeadDirective,
     HlmTableCellDirective,
+    HlmDialogOverlayDirective,
     HlmDialogContentDirective,
     HlmDialogHeaderDirective,
     HlmDialogTitleDirective,
@@ -110,6 +112,10 @@ export class AdminOrderDetailComponent {
   loading = signal(false);
   trackingCode = model('');
   updating = signal(false);
+
+  // Shipper Assignment Modal State
+  assignShipperModalOpen = signal(false);
+  assignShipperId = signal<number | null>(null);
 
   // Spartan Confirmation Dialog State
   confirmModal = signal<{
@@ -195,6 +201,37 @@ export class AdminOrderDetailComponent {
           });
       },
     });
+  }
+
+  openAssignShipperModal() {
+    this.assignShipperId.set(null);
+    this.assignShipperModalOpen.set(true);
+  }
+
+  submitAssignShipper() {
+    const sId = this.assignShipperId();
+    const o = this.order();
+    const subOrderId = o?.subOrders?.[0]?.id;
+    if (!o || !subOrderId || !sId) {
+      this.toast.error('Vui lòng nhập ID Shipper hợp lệ');
+      return;
+    }
+    this.updating.set(true);
+    this.http
+      .post(ApiEndpoints.staffOrders.assignShipper(subOrderId, sId), {})
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.toast.success(`Đã phân công đơn hàng cho Shipper #${sId}`);
+          this.assignShipperModalOpen.set(false);
+          this.loadOrder(o.id);
+          this.updating.set(false);
+        },
+        error: (err) => {
+          this.toast.error(err?.error?.message || 'Phân công Shipper thất bại');
+          this.updating.set(false);
+        },
+      });
   }
 
   closeConfirmModal() {

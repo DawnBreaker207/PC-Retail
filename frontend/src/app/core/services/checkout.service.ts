@@ -21,6 +21,7 @@ export class CheckoutService {
     shippingAddress: unknown;
     guestToken: string;
     guestPhone?: string;
+    paymentMethod?: 'ONLINE' | 'COD';
   }) {
     return this.http.post<any>(ApiEndpoints.orders.guestCheckout, data).pipe(
       map(res => (res?.data ?? res) as CheckoutResponse)

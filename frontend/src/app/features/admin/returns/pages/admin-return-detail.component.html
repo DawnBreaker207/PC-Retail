@@ -79,7 +79,7 @@
           size="sm"
           [disabled]="processing()"
           (click)="approve()"
-          class="h-9 px-4 gap-1.5 text-xs bg-primary text-primary-foreground"
+          class="h-9 px-4 gap-1.5 text-xs bg-primary text-white text-primary-foreground cursor-pointer"
         >
           <lucide-icon [img]="Check" class="w-4 h-4"></lucide-icon>
           Duyệt yêu cầu
@@ -92,7 +92,7 @@
         size="sm"
         [disabled]="isSelfCreated || processing()"
         (click)="openRejectDialog()"
-        class="h-9 px-4 gap-1.5 text-xs bg-destructive text-destructive-foreground"
+        class="h-9 px-4 gap-1.5 text-xs bg-destructive text-white text-destructive-foreground cursor-pointer"
       >
         <lucide-icon [img]="X" class="w-4 h-4"></lucide-icon>
         Từ chối

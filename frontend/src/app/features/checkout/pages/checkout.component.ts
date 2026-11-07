@@ -21,7 +21,7 @@ import { CheckoutService } from '@core/services/checkout.service';
 import { AuthService } from '@core/auth/auth.service';
 import { getGuestToken } from '@core/utils/guest-token';
 import { CartStore } from '@features/cart/store/cart.store';
-import { CheckoutRequest, ShippingAddress } from '@core/models/common.model';
+import { CheckoutRequest, PaymentMethod, ShippingAddress } from '@core/models/common.model';
 import { switchMap, finalize } from 'rxjs';
 
 @Component({
@@ -94,13 +94,13 @@ export class CheckoutComponent implements OnDestroy {
     }
   }
 
-  placeOrder() {
+  placeOrder(method: PaymentMethod = 'ONLINE') {
     const sData = this.shippingData();
     if (!sData || this.isPlacing()) return;
 
     this.isPlacing.set(true);
     if (!this.auth.isAuthenticated()) {
-      this.placeGuestOrder(sData);
+      this.placeGuestOrder(sData, method);
       return;
     }
     const req: CheckoutRequest = {
@@ -109,7 +109,31 @@ export class CheckoutComponent implements OnDestroy {
       shippingAddress: sData.address,
       taxInfo: sData.taxInfo,
       invoiceRequested: sData.invoiceRequested,
+      paymentMethod: method,
     };
+
+    if (method === 'COD') {
+      this.checkoutService
+        .checkout(req)
+        .pipe(
+          finalize(() => this.isPlacing.set(false)),
+          takeUntilDestroyed(this.destroyRef),
+        )
+        .subscribe({
+          next: (res) => {
+            this.orderPlaced = true;
+            this.store.clearCart();
+            this.router.navigate(['/checkout/result'], {
+              queryParams: { orderId: res.id, method: 'COD' },
+            });
+          },
+          error: (err) => {
+            console.error('COD Checkout failed:', err);
+            window.alert('Lỗi: không thể tạo đơn hàng COD. Vui lòng thử lại.');
+          },
+        });
+      return;
+    }
 
     this.checkoutService
       .checkout(req)
@@ -134,7 +158,7 @@ export class CheckoutComponent implements OnDestroy {
       });
   }
 
-  private placeGuestOrder(sData: ShippingStepResult) {
+  private placeGuestOrder(sData: ShippingStepResult, method: PaymentMethod = 'ONLINE') {
     this.isPlacing.set(true);
     this.checkoutService
       .guestCheckout({
@@ -143,6 +167,7 @@ export class CheckoutComponent implements OnDestroy {
         shippingAddress: sData.address,
         guestToken: getGuestToken(),
         guestPhone: sData.address.phone,
+        paymentMethod: method,
       })
       .pipe(
         finalize(() => this.isPlacing.set(false)),
@@ -153,7 +178,7 @@ export class CheckoutComponent implements OnDestroy {
           this.orderPlaced = true;
           this.store.clearCart();
           this.router?.navigate(['/checkout/result'], {
-            queryParams: { orderId: res.id, guest: 1 },
+            queryParams: { orderId: res.id, guest: 1, ...(method === 'COD' ? { method: 'COD' } : {}) },
           });
         },
         error: () => {

@@ -1,12 +1,18 @@
 <div class="max-w-xl mx-auto px-4 py-16 text-center">
-  @if (isSuccess()) {
+  @if (isSuccess() || isCod()) {
     <div class="bg-surface dark:bg-surface-dark rounded-2xl border border-border/80 dark:border-border-dark/80 p-8 sm:p-10 shadow-xs">
       <div class="w-20 h-20 rounded-full bg-emerald-500/10 flex items-center justify-center mx-auto mb-5 text-emerald-500">
         <lucide-icon [img]="CheckCircleIcon" class="size-10" />
       </div>
-      <h1 class="text-2xl font-bold tracking-tight text-foreground mb-2">Đặt hàng thành công!</h1>
+      <h1 class="text-2xl font-bold tracking-tight text-foreground mb-2">
+        {{ isCod() ? 'Đặt hàng COD thành công!' : 'Đặt hàng thành công!' }}
+      </h1>
       <p class="text-sm text-muted dark:text-muted-dark mb-6">
-        Mã đơn hàng: <span class="font-bold text-foreground">#ORD-{{ orderId() }}</span>. Cảm ơn bạn đã tin tưởng mua sắm tại DAWN PC Retail.
+        @if (isCod()) {
+          Mã đơn hàng: <span class="font-bold text-foreground">#ORD-{{ orderId() }}</span>. Đơn hàng đang được chuẩn bị giao. Quý khách vui lòng chuẩn bị tiền mặt hoặc chuyển khoản cho shipper khi nhận kiện hàng.
+        } @else {
+          Mã đơn hàng: <span class="font-bold text-foreground">#ORD-{{ orderId() }}</span>. Cảm ơn bạn đã tin tưởng mua sắm tại DAWN PC Retail.
+        }
       </p>
 
       <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
@@ -14,7 +20,7 @@
           [routerLink]="['/orders', orderId()]"
           hlmBtn
           variant="default"
-          class="h-11 px-6 rounded-xl font-bold text-sm w-full sm:w-auto inline-flex items-center justify-center gap-2"
+          class="h-11 px-6 rounded-xl font-bold text-sm w-full sm:w-auto inline-flex items-center justify-center gap-2 text-white bg-primary"
         >
           <span>Xem chi tiết đơn hàng</span>
           <lucide-icon [img]="ArrowRightIcon" class="size-4" />
@@ -44,7 +50,7 @@
           routerLink="/tra-cuu-don-hang"
           hlmBtn
           variant="default"
-          class="h-11 px-6 rounded-xl font-bold text-sm w-full sm:w-auto"
+          class="h-11 px-6 rounded-xl font-bold text-sm w-full sm:w-auto text-white bg-primary"
         >
           Tra cứu đơn hàng
         </a>

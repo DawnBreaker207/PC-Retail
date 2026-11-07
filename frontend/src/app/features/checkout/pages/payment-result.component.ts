@@ -25,6 +25,11 @@ export class PaymentResultComponent {
     { initialValue: false },
   );
 
+  isCod = toSignal(
+    this.route.queryParams.pipe(map((params) => params['method'] === 'COD')),
+    { initialValue: false },
+  );
+
   isPlaced = toSignal(
     this.route.queryParams.pipe(
       map((params) => params['guest'] === '1' && params['vnp_ResponseCode'] == null),

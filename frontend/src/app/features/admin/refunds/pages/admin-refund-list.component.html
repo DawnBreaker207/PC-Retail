@@ -1,0 +1,226 @@
+<div class="space-y-6">
+  <!-- Page Header -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div>
+      <h1 class="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2.5">
+        <lucide-icon [img]="BanknoteIcon" class="size-6 text-primary" />
+        Quản lý Hoàn tiền
+      </h1>
+      <p class="text-xs sm:text-sm text-muted-foreground mt-1">
+        Danh sách các yêu cầu hoàn tiền đang chờ chuyển khoản thủ công cho khách hàng
+      </p>
+    </div>
+
+    <button
+      hlmBtn
+      variant="outline"
+      size="sm"
+      (click)="loadPendingRefunds()"
+      [disabled]="loading()"
+      [hlmTooltip]="'Làm mới danh sách hoàn tiền'"
+      class="h-9 px-3.5 rounded-xl text-xs font-semibold gap-1.5 self-start sm:self-auto cursor-pointer"
+    >
+      <lucide-icon [img]="LoaderIcon" class="size-3.5" [class.animate-spin]="loading()" />
+      Làm mới
+    </button>
+  </div>
+
+  <!-- Summary Metric Cards -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div class="p-4 rounded-xl border border-border/80 bg-card shadow-xs">
+      <p class="text-xs font-medium text-muted-foreground">Khoản chờ hoàn</p>
+      <div class="flex items-baseline justify-between mt-1.5">
+        <span class="text-2xl font-extrabold text-foreground">{{ filteredRefunds().length }}</span>
+        <span class="text-xs px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 font-semibold">Chờ chuyển</span>
+      </div>
+    </div>
+
+    <div class="p-4 rounded-xl border border-border/80 bg-card shadow-xs">
+      <p class="text-xs font-medium text-muted-foreground">Tổng tiền cần thanh toán</p>
+      <div class="flex items-baseline justify-between mt-1.5">
+        <span class="text-2xl font-extrabold text-primary">{{ totalPendingAmount() | currencyFormat }}</span>
+        <span class="text-xs text-muted-foreground">VND</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Search & Filter Bar -->
+  <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+    <div class="relative flex-1">
+      <lucide-icon [img]="SearchIcon" class="size-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+      <input
+        hlmInput
+        type="text"
+        placeholder="Tìm kiếm theo mã hoàn tiền, STK, tên chủ tài khoản, ngân hàng..."
+        [ngModel]="searchKeyword()"
+        (ngModelChange)="searchKeyword.set($event)"
+        class="pl-9 h-10 w-full text-xs rounded-xl"
+      />
+    </div>
+  </div>
+
+  <!-- Refund Table -->
+  <div class="rounded-xl border border-border/80 bg-card shadow-xs overflow-hidden">
+    @if (loading()) {
+      <div class="py-16 text-center text-muted-foreground">
+        <lucide-icon [img]="LoaderIcon" class="size-6 animate-spin mx-auto mb-2 text-primary" />
+        <p class="text-xs">Đang tải danh sách hoàn tiền...</p>
+      </div>
+    } @else if (filteredRefunds().length === 0) {
+      <div class="py-16 text-center text-muted-foreground">
+        <lucide-icon [img]="CheckCircleIcon" class="size-8 mx-auto mb-2 text-emerald-500" />
+        <p class="font-semibold text-sm text-foreground">Không có khoản hoàn tiền nào đang chờ!</p>
+        <p class="text-xs mt-1">Tất cả các yêu cầu hoàn tiền đã được xử lý hoặc chưa phát sinh yêu cầu mới.</p>
+      </div>
+    } @else {
+      <div class="overflow-x-auto">
+        <table hlmTable class="w-full text-xs">
+          <thead hlmTableHeader class="bg-muted/30">
+            <tr hlmTableRow>
+              <th hlmTableHead class="font-bold py-3 px-4">Mã Refund</th>
+              <th hlmTableHead class="font-bold py-3 px-4">Kiện hàng</th>
+              <th hlmTableHead class="font-bold py-3 px-4">Số tiền hoàn</th>
+              <th hlmTableHead class="font-bold py-3 px-4">Thông tin ngân hàng nhận</th>
+              <th hlmTableHead class="font-bold py-3 px-4">Chủ tài khoản</th>
+              <th hlmTableHead class="font-bold py-3 px-4">Trạng thái</th>
+              <th hlmTableHead class="font-bold py-3 px-4 text-right">Thao tác</th>
+            </tr>
+          </thead>
+          <tbody hlmTableBody>
+            @for (ref of filteredRefunds(); track ref.id) {
+              <tr hlmTableRow class="hover:bg-muted/20 transition-colors">
+                <td hlmTableCell class="py-3.5 px-4 font-mono font-bold text-foreground">
+                  #REF-{{ ref.id }}
+                </td>
+                <td hlmTableCell class="py-3.5 px-4">
+                  <div class="space-y-0.5">
+                    <span class="font-semibold text-foreground">Kiện #SO-{{ ref.subOrderId }}</span>
+                    @if (ref.returnRequestId) {
+                      <p class="text-[11px] text-muted-foreground">Yêu cầu #RET-{{ ref.returnRequestId }}</p>
+                    }
+                  </div>
+                </td>
+                <td hlmTableCell class="py-3.5 px-4 font-bold text-sm text-primary">
+                  {{ ref.amount | currencyFormat }}
+                </td>
+                <td hlmTableCell class="py-3.5 px-4">
+                  <div class="space-y-0.5">
+                    <div class="flex items-center gap-1.5 font-semibold text-foreground">
+                      <lucide-icon [img]="BuildingIcon" class="size-3.5 text-primary" />
+                      {{ ref.bankName || 'Chưa cập nhật' }}
+                    </div>
+                    <div class="flex items-center gap-1 font-mono text-[11px] text-muted-foreground">
+                      <lucide-icon [img]="CreditCardIcon" class="size-3" />
+                      {{ ref.bankAccount || '—' }}
+                    </div>
+                  </div>
+                </td>
+                <td hlmTableCell class="py-3.5 px-4">
+                  <span class="font-bold uppercase tracking-wide text-foreground">
+                    {{ ref.accountHolder || '—' }}
+                  </span>
+                </td>
+                <td hlmTableCell class="py-3.5 px-4">
+                  <span
+                    hlmBadge
+                    variant="outline"
+                    class="border-amber-400 bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400 font-semibold px-2.5 py-0.5 text-[11px] rounded-full"
+                  >
+                    Chờ chuyển tiền
+                  </span>
+                </td>
+                <td hlmTableCell class="py-3.5 px-4 text-right">
+                  <button
+                    hlmBtn
+                    variant="default"
+                    size="sm"
+                    (click)="openConfirmModal(ref)"
+                    [hlmTooltip]="'Xác nhận đã chuyển khoản thành công'"
+                    class="h-8 px-3 rounded-lg text-xs font-bold bg-primary text-white text-primary-foreground shadow-xs cursor-pointer inline-flex items-center gap-1"
+                  >
+                    <lucide-icon [img]="CheckCircleIcon" class="size-3.5" />
+                    Xác nhận đã chuyển
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</div>
+
+<!-- Confirm Paid Spartan Modal -->
+@if (selectedRefundToConfirm(); as ref) {
+  <div hlmDialogOverlay (click)="closeConfirmModal()"></div>
+  <div
+    hlmDialogContent
+    class="w-full max-w-md p-6 bg-surface dark:bg-surface-dark border border-border/80 shadow-2xl rounded-2xl animate-in fade-in-0 zoom-in-95"
+  >
+    <div hlmDialogHeader class="mb-4">
+      <div class="flex items-center gap-2">
+        <div class="p-2 rounded-lg bg-emerald-500/10 text-emerald-600">
+          <lucide-icon [img]="CheckCircleIcon" class="size-5" />
+        </div>
+        <div>
+          <h2 hlmDialogTitle class="text-base font-bold text-foreground">
+            Xác nhận hoàn tiền thành công
+          </h2>
+          <p hlmDialogDescription class="text-xs text-muted-foreground">
+            Mã yêu cầu hoàn tiền #REF-{{ ref.id }}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="p-4 rounded-xl bg-muted/30 border border-border/60 space-y-2 text-xs mb-6">
+      <div class="flex justify-between">
+        <span class="text-muted-foreground">Số tiền đã chuyển:</span>
+        <span class="font-extrabold text-sm text-primary">{{ ref.amount | currencyFormat }}</span>
+      </div>
+      <div class="flex justify-between">
+        <span class="text-muted-foreground">Ngân hàng:</span>
+        <span class="font-bold text-foreground">{{ ref.bankName }}</span>
+      </div>
+      <div class="flex justify-between">
+        <span class="text-muted-foreground">Số tài khoản:</span>
+        <span class="font-mono font-bold text-foreground">{{ ref.bankAccount }}</span>
+      </div>
+      <div class="flex justify-between">
+        <span class="text-muted-foreground">Chủ tài khoản:</span>
+        <span class="font-bold uppercase text-foreground">{{ ref.accountHolder }}</span>
+      </div>
+    </div>
+
+    <p class="text-xs text-muted-foreground mb-6">
+      Lưu ý: Chỉ bấm xác nhận sau khi bạn đã thực hiện ủy nhiệm chi / chuyển khoản thành công tới tài khoản khách hàng trên hệ thống ngân hàng.
+    </p>
+
+    <div hlmDialogFooter class="flex justify-end gap-2.5">
+      <button
+        hlmBtn
+        variant="outline"
+        (click)="closeConfirmModal()"
+        [disabled]="processing()"
+        class="h-9 px-4 rounded-xl text-xs font-semibold"
+      >
+        Hủy bỏ
+      </button>
+      <button
+        hlmBtn
+        variant="default"
+        [disabled]="processing()"
+        (click)="confirmPaid()"
+        class="h-9 px-5 rounded-xl text-xs font-bold bg-primary text-white text-primary-foreground shadow-xs cursor-pointer inline-flex items-center gap-1.5"
+      >
+        @if (processing()) {
+          <lucide-icon [img]="LoaderIcon" class="size-3.5 animate-spin" />
+          Đang lưu...
+        } @else {
+          Đã chuyển khoản
+        }
+      </button>
+    </div>
+  </div>
+}

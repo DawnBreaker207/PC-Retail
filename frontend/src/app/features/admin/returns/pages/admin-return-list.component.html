@@ -18,7 +18,14 @@
   @if (orderIdFilter()) {
     <div class="inline-flex items-center gap-2 bg-primary/10 text-primary text-xs px-3 py-1.5 rounded-full font-medium">
       <span>Lọc theo đơn hàng #{{ orderIdFilter() }}</span>
-      <button (click)="clearOrderFilter()" class="hover:opacity-75 font-bold cursor-pointer ml-1">
+      <button
+        hlmBtn
+        variant="ghost"
+        size="icon"
+        type="button"
+        (click)="clearOrderFilter()"
+        class="h-4 w-4 p-0 ml-1 hover:bg-transparent text-primary"
+      >
         <lucide-icon [img]="X" class="w-3.5 h-3.5"></lucide-icon>
       </button>
     </div>

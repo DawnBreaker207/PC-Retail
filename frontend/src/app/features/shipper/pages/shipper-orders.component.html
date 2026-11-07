@@ -1,0 +1,468 @@
+<div class="min-h-screen bg-bg dark:bg-bg-dark pb-20">
+  <!-- Top App Bar for Shipper -->
+  <header class="sticky top-0 z-30 bg-surface/95 dark:bg-surface-dark/95 backdrop-blur-md border-b border-border/80 px-4 py-3 sm:px-6">
+    <div class="max-w-5xl mx-auto flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="p-2 rounded-xl bg-primary text-white">
+          <lucide-icon [img]="TruckIcon" class="size-5" />
+        </div>
+        <div>
+          <h1 class="text-base sm:text-lg font-black tracking-tight text-foreground flex items-center gap-2">
+            DAWN Shipper Portal
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary">In-house</span>
+          </h1>
+          <p class="text-xs text-muted-foreground">
+            Xin chào, <span class="font-semibold text-foreground">{{ currentUser()?.fullName || 'Shipper' }}</span>
+          </p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button
+          hlmBtn
+          variant="outline"
+          size="sm"
+          (click)="loadOrders()"
+          [disabled]="loading()"
+          [hlmTooltip]="'Tải lại danh sách đơn hàng'"
+          class="h-9 px-3 rounded-xl text-xs font-semibold gap-1.5 cursor-pointer"
+        >
+          <lucide-icon [img]="RefreshCwIcon" class="size-3.5" [class.animate-spin]="loading()" />
+          <span class="hidden sm:inline">Làm mới</span>
+        </button>
+        <a
+          routerLink="/"
+          hlmBtn
+          variant="ghost"
+          size="sm"
+          class="h-9 px-3 rounded-xl text-xs font-medium"
+        >
+          Trang chủ
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-5xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+    <!-- Stat Pills -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div
+        (click)="activeTab.set('READY_TO_SHIP')"
+        class="p-3.5 rounded-2xl border transition-all cursor-pointer bg-card hover:border-primary/50"
+        [class.ring-2]="activeTab() === 'READY_TO_SHIP'"
+        [class.ring-primary]="activeTab() === 'READY_TO_SHIP'"
+      >
+        <p class="text-xs text-muted-foreground font-medium">Cần lấy hàng</p>
+        <div class="flex items-baseline justify-between mt-1">
+          <span class="text-2xl font-black text-amber-500">{{ countReady() }}</span>
+          <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-600">Chờ lấy</span>
+        </div>
+      </div>
+
+      <div
+        (click)="activeTab.set('OUT_FOR_DELIVERY')"
+        class="p-3.5 rounded-2xl border transition-all cursor-pointer bg-card hover:border-primary/50"
+        [class.ring-2]="activeTab() === 'OUT_FOR_DELIVERY'"
+        [class.ring-primary]="activeTab() === 'OUT_FOR_DELIVERY'"
+      >
+        <p class="text-xs text-muted-foreground font-medium">Đang giao hàng</p>
+        <div class="flex items-baseline justify-between mt-1">
+          <span class="text-2xl font-black text-blue-500">{{ countDelivering() }}</span>
+          <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-600">Đang giao</span>
+        </div>
+      </div>
+
+      <div
+        (click)="activeTab.set('DELIVERED')"
+        class="p-3.5 rounded-2xl border transition-all cursor-pointer bg-card hover:border-primary/50"
+        [class.ring-2]="activeTab() === 'DELIVERED'"
+        [class.ring-primary]="activeTab() === 'DELIVERED'"
+      >
+        <p class="text-xs text-muted-foreground font-medium">Đã giao thành công</p>
+        <div class="flex items-baseline justify-between mt-1">
+          <span class="text-2xl font-black text-emerald-500">{{ countDelivered() }}</span>
+          <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-600">Hoàn tất</span>
+        </div>
+      </div>
+
+      <div
+        (click)="activeTab.set('DELIVERY_FAILED')"
+        class="p-3.5 rounded-2xl border transition-all cursor-pointer bg-card hover:border-primary/50"
+        [class.ring-2]="activeTab() === 'DELIVERY_FAILED'"
+        [class.ring-primary]="activeTab() === 'DELIVERY_FAILED'"
+      >
+        <p class="text-xs text-muted-foreground font-medium">Giao thất bại</p>
+        <div class="flex items-baseline justify-between mt-1">
+          <span class="text-2xl font-black text-destructive">{{ countFailed() }}</span>
+          <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-destructive/10 text-destructive">Thử lại</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab filter buttons -->
+    <div class="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs">
+      <button
+        hlmBtn
+        [variant]="activeTab() === 'ALL' ? 'default' : 'outline'"
+        size="sm"
+        (click)="activeTab.set('ALL')"
+        class="rounded-xl px-4 h-9 font-semibold shrink-0"
+        [class.text-white]="activeTab() === 'ALL'"
+        [class.bg-primary]="activeTab() === 'ALL'"
+      >
+        Tất cả ({{ orders().length }})
+      </button>
+      <button
+        hlmBtn
+        [variant]="activeTab() === 'READY_TO_SHIP' ? 'default' : 'outline'"
+        size="sm"
+        (click)="activeTab.set('READY_TO_SHIP')"
+        class="rounded-xl px-4 h-9 font-semibold shrink-0"
+        [class.text-white]="activeTab() === 'READY_TO_SHIP'"
+        [class.bg-primary]="activeTab() === 'READY_TO_SHIP'"
+      >
+        Cần lấy hàng ({{ countReady() }})
+      </button>
+      <button
+        hlmBtn
+        [variant]="activeTab() === 'OUT_FOR_DELIVERY' ? 'default' : 'outline'"
+        size="sm"
+        (click)="activeTab.set('OUT_FOR_DELIVERY')"
+        class="rounded-xl px-4 h-9 font-semibold shrink-0"
+        [class.text-white]="activeTab() === 'OUT_FOR_DELIVERY'"
+        [class.bg-primary]="activeTab() === 'OUT_FOR_DELIVERY'"
+      >
+        Đang giao ({{ countDelivering() }})
+      </button>
+      <button
+        hlmBtn
+        [variant]="activeTab() === 'DELIVERED' ? 'default' : 'outline'"
+        size="sm"
+        (click)="activeTab.set('DELIVERED')"
+        class="rounded-xl px-4 h-9 font-semibold shrink-0"
+        [class.text-white]="activeTab() === 'DELIVERED'"
+        [class.bg-primary]="activeTab() === 'DELIVERED'"
+      >
+        Thành công ({{ countDelivered() }})
+      </button>
+      <button
+        hlmBtn
+        [variant]="activeTab() === 'DELIVERY_FAILED' ? 'default' : 'outline'"
+        size="sm"
+        (click)="activeTab.set('DELIVERY_FAILED')"
+        class="rounded-xl px-4 h-9 font-semibold shrink-0"
+        [class.text-white]="activeTab() === 'DELIVERY_FAILED'"
+        [class.bg-primary]="activeTab() === 'DELIVERY_FAILED'"
+      >
+        Thất bại ({{ countFailed() }})
+      </button>
+    </div>
+
+    <!-- Orders List -->
+    @if (loading()) {
+      <div class="py-20 text-center text-muted-foreground">
+        <lucide-icon [img]="LoaderIcon" class="size-8 animate-spin mx-auto mb-3 text-primary" />
+        <p class="text-sm font-medium">Đang tải danh sách đơn hàng được phân công...</p>
+      </div>
+    } @else if (filteredOrders().length === 0) {
+      <div class="py-20 text-center bg-card rounded-2xl border border-border/80 p-8 shadow-xs">
+        <div class="w-14 h-14 rounded-full bg-muted/30 flex items-center justify-center mx-auto mb-3 text-muted-foreground">
+          <lucide-icon [img]="PackageIcon" class="size-7" />
+        </div>
+        <p class="font-bold text-sm text-foreground">Không có đơn hàng nào trong mục này</p>
+        <p class="text-xs text-muted-foreground mt-1">Khi nhân viên điều phối gán đơn cho bạn, các đơn sẽ xuất hiện tại đây.</p>
+      </div>
+    } @else {
+      <div class="space-y-4">
+        @for (order of filteredOrders(); track order.id) {
+          <div class="p-5 rounded-2xl border border-border/80 bg-card shadow-xs transition-all hover:shadow-md space-y-4">
+            <!-- Header of card -->
+            <div class="flex items-center justify-between gap-3 border-b border-border/60 pb-3">
+              <div class="flex items-center gap-2">
+                <span class="font-black text-sm text-foreground">Kiện #SO-{{ order.id }}</span>
+                <span class="text-xs text-muted-foreground">· Đơn #ORD-{{ order.orderId }}</span>
+              </div>
+
+              <!-- Status Badge -->
+              @switch (order.status) {
+                @case ('READY_TO_SHIP') {
+                  <span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-500/10 text-amber-600 border border-amber-500/20">
+                    Chờ lấy hàng
+                  </span>
+                }
+                @case ('OUT_FOR_DELIVERY') {
+                  <span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-blue-500/10 text-blue-600 border border-blue-500/20 flex items-center gap-1">
+                    <span class="size-1.5 rounded-full bg-blue-500 animate-pulse"></span>
+                    Đang đi giao
+                  </span>
+                }
+                @case ('DELIVERED') {
+                  <span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
+                    Đã giao thành công
+                  </span>
+                }
+                @case ('DELIVERY_FAILED') {
+                  <span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-rose-500/10 text-rose-600 border border-rose-500/20">
+                    Giao không thành công
+                  </span>
+                }
+                @default {
+                  <span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-muted/40 text-muted-foreground">
+                    {{ order.status }}
+                  </span>
+                }
+              }
+            </div>
+
+            <!-- Price & COD info -->
+            <div class="flex items-center justify-between p-3 rounded-xl bg-muted/20 border border-border/40">
+              <div>
+                <p class="text-[11px] text-muted-foreground font-medium">Giá trị kiện hàng</p>
+                <p class="text-base font-extrabold text-foreground">{{ order.finalAmount | currencyFormat }}</p>
+              </div>
+
+              <div class="text-right">
+                <p class="text-[11px] text-muted-foreground font-medium">Tiền COD cần thu</p>
+                @if (order.codCollectedAt) {
+                  <span class="text-xs font-bold text-emerald-600 flex items-center gap-1">
+                    <lucide-icon [img]="CheckCircleIcon" class="size-3.5" />
+                    Đã thu COD
+                  </span>
+                } @else {
+                  <span class="text-sm font-extrabold text-primary">
+                    {{ order.finalAmount | currencyFormat }}
+                  </span>
+                }
+              </div>
+            </div>
+
+            <!-- Notes or Attempts if any -->
+            @if (order.deliveryAttempts && order.deliveryAttempts > 0) {
+              <div class="flex items-center gap-2 text-xs text-amber-600 dark:text-amber-400 bg-amber-500/10 p-2.5 rounded-xl border border-amber-500/20">
+                <lucide-icon [img]="AlertTriangleIcon" class="size-4 shrink-0" />
+                <span>Đã thử giao <strong>{{ order.deliveryAttempts }}</strong> lần.</span>
+                @if (order.deliveryNote) {
+                  <span class="italic truncate">— {{ order.deliveryNote }}</span>
+                }
+              </div>
+            }
+
+            <!-- Items list preview -->
+            @if (order.items && order.items.length > 0) {
+              <div class="space-y-1.5 text-xs">
+                <p class="text-[11px] font-semibold text-muted-foreground uppercase">Sản phẩm trong kiện:</p>
+                @for (item of order.items; track item.id) {
+                  <div class="flex justify-between items-center py-1 border-b border-border/40 last:border-0">
+                    <span class="text-foreground truncate flex-1 pr-2 font-medium">
+                      {{ item.name }}
+                    </span>
+                    <span class="font-bold text-muted-foreground shrink-0">× {{ item.quantity }}</span>
+                  </div>
+                }
+              </div>
+            }
+
+            <!-- Actions row -->
+            <div class="pt-2 flex flex-wrap gap-2.5">
+              @if (order.status === 'READY_TO_SHIP') {
+                <button
+                  hlmBtn
+                  variant="default"
+                  (click)="pickup(order)"
+                  [disabled]="processingSubOrderId() === order.id"
+                  [hlmTooltip]="'Xác nhận lấy kiện hàng từ kho để bắt đầu đi giao'"
+                  class="flex-1 h-11 rounded-xl text-xs sm:text-sm font-bold bg-primary text-white text-primary-foreground shadow-xs cursor-pointer inline-flex items-center justify-center gap-2"
+                >
+                  @if (processingSubOrderId() === order.id) {
+                    <lucide-icon [img]="LoaderIcon" class="size-4 animate-spin" />
+                  } @else {
+                    <lucide-icon [img]="TruckIcon" class="size-4" />
+                  }
+                  Nhận hàng & Đi giao
+                </button>
+              }
+
+              @if (order.status === 'OUT_FOR_DELIVERY') {
+                <button
+                  hlmBtn
+                  variant="default"
+                  (click)="openDeliverModal(order)"
+                  [disabled]="processingSubOrderId() === order.id"
+                  [hlmTooltip]="'Hoàn tất giao hàng và thu COD'"
+                  class="flex-1 h-11 rounded-xl text-xs sm:text-sm font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs cursor-pointer inline-flex items-center justify-center gap-2"
+                >
+                  <lucide-icon [img]="CheckCircleIcon" class="size-4" />
+                  Giao thành công & Thu tiền
+                </button>
+                <button
+                  hlmBtn
+                  variant="outline"
+                  (click)="openFailModal(order)"
+                  [disabled]="processingSubOrderId() === order.id"
+                  [hlmTooltip]="'Báo cáo không giao được kiện hàng'"
+                  class="h-11 px-4 rounded-xl text-xs sm:text-sm font-bold border-rose-300 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/20 cursor-pointer"
+                >
+                  <lucide-icon [img]="XCircleIcon" class="size-4 inline mr-1" />
+                  Giao thất bại
+                </button>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </main>
+</div>
+
+<!-- Modal Deliver Success -->
+@if (deliverModal(); as dModal) {
+  <div hlmDialogOverlay (click)="closeDeliverModal()"></div>
+  <div
+    hlmDialogContent
+    class="w-full max-w-md p-6 bg-surface dark:bg-surface-dark border border-border/80 shadow-2xl rounded-2xl animate-in fade-in-0 zoom-in-95"
+  >
+    <div hlmDialogHeader class="mb-4">
+      <div class="flex items-center gap-2">
+        <div class="p-2 rounded-xl bg-emerald-500/10 text-emerald-600">
+          <lucide-icon [img]="CheckCircleIcon" class="size-5" />
+        </div>
+        <div>
+          <h2 hlmDialogTitle class="text-base font-bold text-foreground">
+            Xác nhận giao thành công
+          </h2>
+          <p hlmDialogDescription class="text-xs text-muted-foreground">
+            Kiện hàng #SO-{{ dModal.subOrder.id }}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="p-4 rounded-xl bg-muted/20 border border-border/60 space-y-2 mb-6">
+      <div class="flex justify-between text-xs">
+        <span class="text-muted-foreground">Tổng tiền đơn hàng:</span>
+        <span class="font-extrabold text-foreground">{{ dModal.subOrder.finalAmount | currencyFormat }}</span>
+      </div>
+
+      <label class="flex items-center gap-2.5 pt-3 border-t border-border/60 cursor-pointer">
+        <input
+          type="checkbox"
+          [(ngModel)]="dModal.codCollected"
+          class="size-4 text-emerald-600 rounded accent-emerald-600"
+        />
+        <span class="font-bold text-xs text-foreground">
+          Đã thu tiền COD ({{ dModal.subOrder.finalAmount | currencyFormat }})
+        </span>
+      </label>
+    </div>
+
+    <div hlmDialogFooter class="flex justify-end gap-2.5">
+      <button
+        hlmBtn
+        variant="outline"
+        (click)="closeDeliverModal()"
+        [disabled]="processingSubOrderId() != null"
+        class="h-9 px-4 rounded-xl text-xs font-semibold"
+      >
+        Hủy bỏ
+      </button>
+      <button
+        hlmBtn
+        variant="default"
+        [disabled]="processingSubOrderId() != null"
+        (click)="confirmDelivered()"
+        class="h-9 px-5 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs cursor-pointer inline-flex items-center gap-1.5"
+      >
+        @if (processingSubOrderId() != null) {
+          <lucide-icon [img]="LoaderIcon" class="size-3.5 animate-spin" />
+          Đang cập nhật...
+        } @else {
+          Hoàn tất đơn giao
+        }
+      </button>
+    </div>
+  </div>
+}
+
+<!-- Modal Delivery Failed -->
+@if (failModal(); as fModal) {
+  <div hlmDialogOverlay (click)="closeFailModal()"></div>
+  <div
+    hlmDialogContent
+    class="w-full max-w-md p-6 bg-surface dark:bg-surface-dark border border-border/80 shadow-2xl rounded-2xl animate-in fade-in-0 zoom-in-95"
+  >
+    <div hlmDialogHeader class="mb-4">
+      <div class="flex items-center gap-2">
+        <div class="p-2 rounded-xl bg-rose-500/10 text-rose-600">
+          <lucide-icon [img]="XCircleIcon" class="size-5" />
+        </div>
+        <div>
+          <h2 hlmDialogTitle class="text-base font-bold text-foreground">
+            Báo cáo giao hàng thất bại
+          </h2>
+          <p hlmDialogDescription class="text-xs text-muted-foreground">
+            Kiện hàng #SO-{{ fModal.subOrder.id }}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="space-y-3 mb-6">
+      <label class="block text-xs font-semibold text-foreground">
+        Lý do giao thất bại <span class="text-destructive">*</span>
+      </label>
+
+      <!-- Quick reason pills -->
+      <div class="flex flex-wrap gap-1.5">
+        @for (quick of failureQuickNotes; track quick) {
+          <button
+            type="button"
+            (click)="selectQuickNote(quick)"
+            class="px-2.5 py-1 text-[11px] rounded-lg border font-medium transition-all"
+            [class.bg-rose-500]="fModal.note === quick"
+            [class.text-white]="fModal.note === quick"
+            [class.border-rose-500]="fModal.note === quick"
+            [class.bg-surface]="fModal.note !== quick"
+            [class.border-border/60]="fModal.note !== quick"
+            [class.text-foreground]="fModal.note !== quick"
+          >
+            {{ quick }}
+          </button>
+        }
+      </div>
+
+      <textarea
+        hlmTextarea
+        [(ngModel)]="fModal.note"
+        rows="3"
+        placeholder="Nhập ghi chú chi tiết lý do không thể giao hàng..."
+        class="w-full text-xs rounded-xl resize-none"
+      ></textarea>
+    </div>
+
+    <div hlmDialogFooter class="flex justify-end gap-2.5">
+      <button
+        hlmBtn
+        variant="outline"
+        (click)="closeFailModal()"
+        [disabled]="processingSubOrderId() != null"
+        class="h-9 px-4 rounded-xl text-xs font-semibold"
+      >
+        Hủy bỏ
+      </button>
+      <button
+        hlmBtn
+        variant="destructive"
+        [disabled]="!fModal.note.trim() || processingSubOrderId() != null"
+        (click)="confirmFailed()"
+        class="h-9 px-5 rounded-xl text-xs font-bold text-white shadow-xs cursor-pointer inline-flex items-center gap-1.5"
+      >
+        @if (processingSubOrderId() != null) {
+          <lucide-icon [img]="LoaderIcon" class="size-3.5 animate-spin" />
+          Đang gửi...
+        } @else {
+          Xác nhận thất bại
+        }
+      </button>
+    </div>
+  </div>
+}
