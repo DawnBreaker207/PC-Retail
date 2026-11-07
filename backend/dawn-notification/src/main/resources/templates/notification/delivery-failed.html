@@ -2,47 +2,31 @@
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8"/>
-  <title>Giao hàng thất bại</title>
-  <style>
-    body { margin:0; font-family: 'Segoe UI', Arial, sans-serif; background:#f5f6fa; color:#222; }
-    .wrap { max-width:600px; margin:32px auto; background:#fff; border-radius:8px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,.08); }
-    .header { background:#e65100; color:#fff; padding:28px 32px; }
-    .header h1 { margin:0; font-size:22px; }
-    .header p { margin:4px 0 0; font-size:13px; opacity:.8; }
-    .body { padding:32px; }
-    .badge { display:inline-block; background:#fff3e0; color:#e65100; border-radius:4px; padding:6px 14px; font-size:13px; font-weight:600; margin-bottom:20px; }
-    .info { font-size:14px; color:#555; line-height:1.8; margin-bottom:20px; }
-    .reason-box { background:#fff8e1; border-left:4px solid #ff8f00; padding:14px 18px; border-radius:0 6px 6px 0; font-size:14px; color:#555; margin:16px 0; }
-    .action-box { background:#e8eaf6; border-radius:6px; padding:16px 18px; font-size:13px; color:#333; margin:20px 0; }
-    .footer { background:#f0f0f0; padding:18px 32px; font-size:12px; color:#888; text-align:center; }
-  </style>
+  <title th:remove="all">notification/delivery-failed</title>
+  <th:block th:replace="~{notification/fragments/style :: mailCss}"/>
 </head>
 <body>
-<div class="wrap">
-  <div class="header">
-    <h1>PC Retail</h1>
-    <p>Hệ thống bán lẻ linh kiện máy tính</p>
-  </div>
-  <div class="body">
-    <div class="badge">⚠ Giao hàng thất bại</div>
-    <p class="info">
-      Shipper của chúng tôi đã cố gắng giao đơn hàng <strong>#<span th:text="${orderId}">0</span></strong>
-      nhưng không thành công.
-    </p>
-    <div class="reason-box" th:if="${deliveryNote}">
-      <strong>Lý do:</strong> <span th:text="${deliveryNote}">Không có người nhận hàng</span>
+  <div class="preheader">Giao hàng không thành công – chúng tôi sẽ liên hệ lại.</div>
+  <div class="wrap">
+    <th:block th:replace="~{notification/fragments/header :: brand(headerBg=${'#e65100'})}"/>
+    <div class="inner">
+      <div class="badge" style="background:#fff3e0;color:#e65100;">⚠ Giao hàng thất bại</div>
+      <p class="info">
+        Shipper của chúng tôi đã cố gắng giao đơn hàng <strong>#<span th:text="${orderId}">0</span></strong>
+        nhưng không thành công.
+      </p>
+      <div class="warnbox" th:if="${deliveryNote}">
+        <strong>Lý do:</strong> <span th:text="${deliveryNote}">Không có người nhận hàng</span>
+      </div>
+      <div class="action-box">
+        📞 Đội ngũ hỗ trợ sẽ liên hệ với bạn trong vòng <strong>2 giờ</strong> để sắp xếp lại lịch giao hàng.<br/>
+        Hoặc bạn có thể liên hệ trực tiếp: <strong>support@pcretail.vn</strong>
+      </div>
+      <p class="muted">
+        Nếu không thể giao sau 2 lần thử, đơn hàng có thể bị hủy và hoàn tiền theo chính sách của chúng tôi.
+      </p>
     </div>
-    <div class="action-box">
-      📞 Đội ngũ hỗ trợ sẽ liên hệ với bạn trong vòng <strong>2 giờ</strong> để sắp xếp lại lịch giao hàng.<br/>
-      Hoặc bạn có thể liên hệ trực tiếp: <strong>support@pcretail.vn</strong>
-    </div>
-    <p class="info" style="font-size:13px; color:#888;">
-      Nếu không thể giao sau 2 lần thử, đơn hàng có thể bị hủy và hoàn tiền theo chính sách của chúng tôi.
-    </p>
+    <th:block th:replace="~{notification/fragments/footer :: footer}"/>
   </div>
-  <div class="footer">
-    support@pcretail.vn | Thời gian làm việc: 8:00–22:00 mỗi ngày
-  </div>
-</div>
 </body>
 </html>

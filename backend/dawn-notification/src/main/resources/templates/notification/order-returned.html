@@ -2,58 +2,39 @@
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8"/>
-  <title>Đã nhận hàng hoàn trả</title>
-  <style>
-    body { margin:0; font-family: 'Segoe UI', Arial, sans-serif; background:#f5f6fa; color:#222; }
-    .wrap { max-width:600px; margin:32px auto; background:#fff; border-radius:8px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,.08); }
-    .header { background:#1565c0; color:#fff; padding:28px 32px; }
-    .header h1 { margin:0; font-size:22px; }
-    .header p { margin:4px 0 0; font-size:13px; opacity:.8; }
-    .body { padding:32px; }
-    .badge { display:inline-block; background:#e3f2fd; color:#1565c0; border-radius:4px; padding:6px 14px; font-size:13px; font-weight:600; margin-bottom:20px; }
-    .info { font-size:14px; color:#555; line-height:1.8; }
-    .timeline { background:#f8f9ff; border-radius:8px; padding:20px 24px; margin:20px 0; }
-    .timeline h3 { margin:0 0 14px; font-size:14px; color:#333; }
-    .step { display:flex; align-items:flex-start; gap:12px; margin:10px 0; font-size:14px; color:#555; }
-    .step-num { background:#1565c0; color:#fff; border-radius:50%; width:22px; height:22px; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; flex-shrink:0; }
-    .step-done { background:#2e7d32; }
-    .footer { background:#f0f0f0; padding:18px 32px; font-size:12px; color:#888; text-align:center; }
-  </style>
+  <title th:remove="all">notification/order-returned</title>
+  <th:block th:replace="~{notification/fragments/style :: mailCss}"/>
 </head>
 <body>
-<div class="wrap">
-  <div class="header">
-    <h1>PC Retail</h1>
-    <p>Hệ thống bán lẻ linh kiện máy tính</p>
-  </div>
-  <div class="body">
-    <div class="badge">✓ Đã nhận hàng hoàn trả</div>
-    <p class="info">
-      Chúng tôi đã nhận được hàng hoàn trả cho đơn <strong>#<span th:text="${orderId}">0</span></strong>.
-      Đội ngũ của chúng tôi đang kiểm tra sản phẩm.
-    </p>
-    <div class="timeline">
-      <h3>Tiến trình hoàn tiền:</h3>
-      <div class="step">
-        <div class="step-num step-done">✓</div>
-        <div>Yêu cầu trả hàng được chấp nhận</div>
+  <div class="preheader">PC Retail đã nhận hàng hoàn trả – đang kiểm tra để hoàn tiền.</div>
+  <div class="wrap">
+    <th:block th:replace="~{notification/fragments/header :: brand(headerBg=${'#1565c0'})}"/>
+    <div class="inner">
+      <div class="badge" style="background:#e3f2fd;color:#1565c0;">✓ Đã nhận hàng hoàn trả</div>
+      <p class="info">
+        Chúng tôi đã nhận được hàng hoàn trả cho đơn <strong>#<span th:text="${orderId}">0</span></strong>.
+        Đội ngũ của chúng tôi đang kiểm tra sản phẩm.
+      </p>
+      <div class="timeline">
+        <div class="step">
+          <div class="step-num step-done">✓</div>
+          <div>Yêu cầu trả hàng được chấp nhận</div>
+        </div>
+        <div class="step">
+          <div class="step-num step-done">✓</div>
+          <div>PC Retail đã nhận hàng và đang kiểm tra</div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div>Hoàn tiền về tài khoản ngân hàng (1–3 ngày làm việc)</div>
+        </div>
       </div>
-      <div class="step">
-        <div class="step-num step-done">✓</div>
-        <div>PC Retail đã nhận hàng và đang kiểm tra</div>
-      </div>
-      <div class="step">
-        <div class="step-num">3</div>
-        <div>Hoàn tiền về tài khoản ngân hàng (1–3 ngày làm việc)</div>
-      </div>
+      <p class="muted">
+        Nếu có câu hỏi, liên hệ <strong>support@pcretail.vn</strong>
+        với mã đơn hàng #<span th:text="${orderId}">0</span>.
+      </p>
     </div>
-    <p class="info" style="font-size:13px; color:#888;">
-      Nếu có câu hỏi, liên hệ <strong>support@pcretail.vn</strong> với mã đơn hàng #<span th:text="${orderId}">0</span>.
-    </p>
+    <th:block th:replace="~{notification/fragments/footer :: footer}"/>
   </div>
-  <div class="footer">
-    support@pcretail.vn | Thời gian làm việc: 8:00–22:00 mỗi ngày
-  </div>
-</div>
 </body>
 </html>

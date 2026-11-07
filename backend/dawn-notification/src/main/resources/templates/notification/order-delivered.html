@@ -2,47 +2,30 @@
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8"/>
-  <title>Đơn hàng đã giao thành công</title>
-  <style>
-    body { margin:0; font-family: 'Segoe UI', Arial, sans-serif; background:#f5f6fa; color:#222; }
-    .wrap { max-width:600px; margin:32px auto; background:#fff; border-radius:8px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,.08); }
-    .header { background:#1a237e; color:#fff; padding:28px 32px; }
-    .header h1 { margin:0; font-size:22px; }
-    .header p { margin:4px 0 0; font-size:13px; opacity:.8; }
-    .body { padding:32px; }
-    .badge { display:inline-block; background:#e8f5e9; color:#2e7d32; border-radius:4px; padding:6px 14px; font-size:13px; font-weight:600; margin-bottom:20px; }
-    .info { font-size:14px; color:#555; line-height:1.8; margin:16px 0; }
-    .warranty-note { background:#fffde7; border-left:4px solid #f9a825; padding:14px 18px; border-radius:0 6px 6px 0; font-size:13px; color:#555; margin:20px 0; }
-    .cta { text-align:center; margin:24px 0 8px; display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
-    .btn { display:inline-block; background:#1a237e; color:#fff; text-decoration:none; padding:12px 24px; border-radius:6px; font-weight:600; font-size:14px; }
-    .btn-outline { background:#fff; color:#1a237e; border:2px solid #1a237e; }
-    .footer { background:#f0f0f0; padding:18px 32px; font-size:12px; color:#888; text-align:center; }
-  </style>
+  <title th:remove="all">notification/order-delivered</title>
+  <th:block th:replace="~{notification/fragments/style :: mailCss}"/>
 </head>
 <body>
-<div class="wrap">
-  <div class="header">
-    <h1>PC Retail</h1>
-    <p>Hệ thống bán lẻ linh kiện máy tính</p>
-  </div>
-  <div class="body">
-    <div class="badge">✓ Giao hàng thành công</div>
-    <p class="info">
-      Đơn hàng <strong>#<span th:text="${orderId}">0</span></strong> đã được giao đến bạn thành công.<br/>
-      Cảm ơn bạn đã mua sắm tại PC Retail!
-    </p>
-    <div class="warranty-note">
-      🛡️ <strong>Bảo hành:</strong> Phiếu bảo hành điện tử đã được kích hoạt tự động.
-      Vui lòng kiểm tra mục "Bảo hành" trong tài khoản để xem chi tiết.
+  <div class="preheader">Đơn hàng đã giao thành công – cảm ơn bạn đã mua sắm tại PC Retail!</div>
+  <div class="wrap">
+    <th:block th:replace="~{notification/fragments/header :: brand(headerBg=${'#1a237e'})}"/>
+    <div class="inner">
+      <div class="badge" style="background:#e8f5e9;color:#2e7d32;">✓ Giao hàng thành công</div>
+      <p class="info">
+        Đơn hàng <strong>#<span th:text="${orderId}">0</span></strong> đã được giao đến bạn thành công.<br/>
+        Cảm ơn bạn đã mua sắm tại PC Retail!
+      </p>
+      <div class="warranty-note">
+        🛡️ <strong>Bảo hành:</strong> Phiếu bảo hành điện tử đã được kích hoạt tự động.
+        Vui lòng kiểm tra mục "Bảo hành" trong tài khoản để xem chi tiết.
+      </div>
+      <div class="cta-flex">
+        <a href="#" class="btn">Xem đơn hàng</a>
+        <a href="#" class="btn btn-outline">Yêu cầu trả hàng</a>
+      </div>
+      <p class="muted">Bạn có 7 ngày để yêu cầu trả hàng kể từ ngày nhận.</p>
     </div>
-    <div class="cta">
-      <a href="#" class="btn">Xem đơn hàng</a>
-      <a href="#" class="btn btn-outline">Yêu cầu trả hàng</a>
-    </div>
+    <th:block th:replace="~{notification/fragments/footer :: footer}"/>
   </div>
-  <div class="footer">
-    Bạn có 7 ngày để yêu cầu trả hàng kể từ ngày nhận. Vui lòng liên hệ nếu cần hỗ trợ.
-  </div>
-</div>
 </body>
 </html>

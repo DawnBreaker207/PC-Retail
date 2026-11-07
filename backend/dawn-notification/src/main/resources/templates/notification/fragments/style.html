@@ -1,0 +1,68 @@
+<style th:fragment="mailCss">
+  body { margin:0; font-family:'Segoe UI',Arial,sans-serif; background:#f5f6fa; color:#222; }
+  .wrap { max-width:600px; margin:32px auto; background:#fff; border-radius:8px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,.08); }
+  .inner { padding:32px; }
+  .preheader { display:none; max-height:0; overflow:hidden; opacity:0; }
+
+  /* Badge */
+  .badge { display:inline-block; border-radius:4px; padding:6px 14px; font-size:13px; font-weight:600; margin-bottom:20px; }
+
+  /* Typography */
+  .info { font-size:14px; color:#555; line-height:1.8; margin:16px 0; }
+  .muted { font-size:12px; color:#888; margin-top:12px; }
+  .order-id { font-size:28px; font-weight:700; color:#1a237e; }
+
+  /* Info boxes */
+  .infobox { background:#f8f9ff; border-left:4px solid #1a237e; padding:16px 20px; border-radius:0 6px 6px 0; margin:20px 0; font-size:14px; line-height:1.7; }
+  .warnbox { background:#fff8e1; border-left:4px solid #ff8f00; padding:14px 18px; border-radius:0 6px 6px 0; font-size:14px; color:#555; margin:16px 0; }
+  .notebox { background:#f8f9ff; border-radius:6px; padding:14px 18px; font-size:13px; color:#555; margin:16px 0; line-height:1.7; }
+  .successbox { background:#e8f5e9; border-radius:8px; padding:20px 24px; margin:20px 0; text-align:center; }
+  .dispute-note { background:#e8eaf6; border-radius:6px; padding:14px 18px; font-size:13px; color:#333; margin:16px 0; }
+  .action-box { background:#e8eaf6; border-radius:6px; padding:16px 18px; font-size:13px; color:#333; margin:20px 0; }
+  .warranty-note { background:#fffde7; border-left:4px solid #f9a825; padding:14px 18px; border-radius:0 6px 6px 0; font-size:13px; color:#555; margin:20px 0; }
+
+  /* Amount */
+  .amountbox { background:#e8f5e9; border-radius:8px; padding:20px 24px; margin:20px 0; text-align:center; }
+  .amount { font-size:28px; font-weight:700; color:#2e7d32; }
+  .amount-label { font-size:13px; color:#555; margin-bottom:6px; }
+
+  /* OTP */
+  .otpbox { background:#f0f4ff; border-radius:12px; padding:28px 20px; margin:24px auto; display:inline-block; min-width:200px; text-align:center; }
+  .otp-label { font-size:12px; color:#888; text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }
+  .otp { font-size:48px; font-weight:700; color:#1a237e; letter-spacing:12px; }
+
+  /* Tracking */
+  .tracking { background:#f0f8ff; border:2px dashed #0277bd; border-radius:8px; padding:20px; margin:20px 0; text-align:center; }
+  .tracking-label { font-size:12px; color:#666; text-transform:uppercase; letter-spacing:1px; margin-bottom:4px; }
+  .tracking-code { font-size:24px; font-weight:700; color:#0277bd; letter-spacing:2px; }
+
+  /* Steps */
+  .steps { background:#f8f9ff; border-radius:8px; padding:20px 24px; margin:20px 0; }
+  .steps h3 { margin:0 0 14px; font-size:14px; color:#333; }
+  .step { display:flex; align-items:flex-start; gap:12px; margin:10px 0; font-size:14px; color:#555; }
+  .step-num { background:#1a237e; color:#fff; border-radius:50%; width:22px; height:22px; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; flex-shrink:0; }
+  .step-done { background:#2e7d32; }
+
+  /* Timeline */
+  .timeline { margin:24px 0; padding:0; list-style:none; }
+  .timeline li { padding:8px 0 8px 28px; position:relative; font-size:13px; color:#555; border-left:2px solid #e0e0e0; }
+  .timeline li.active { color:#1a237e; font-weight:600; border-left-color:#1a237e; }
+  .timeline li::before { content:''; position:absolute; left:-5px; top:12px; width:8px; height:8px; border-radius:50%; background:#e0e0e0; }
+  .timeline li.active::before { background:#1a237e; }
+
+  /* Shipper */
+  .shipper-box { background:#f0f4ff; border-radius:8px; padding:18px 20px; margin:20px 0; }
+  .shipper-box p { margin:4px 0; font-size:14px; color:#333; }
+
+  /* CTAs */
+  .cta { text-align:center; margin:24px 0 8px; }
+  .cta-flex { text-align:center; margin:24px 0 8px; display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
+  .btn { display:inline-block; background:#1a237e; color:#fff !important; font-size:14px; font-weight:700; text-decoration:none; padding:12px 28px; border-radius:6px; margin:4px 0; }
+  .btn-outline { background:#fff; border:2px solid currentColor; }
+  .btn-green { background:#2e7d32; }
+
+  /* Footer */
+  .footer { background:#f0f0f0; padding:18px 32px; font-size:12px; color:#888; text-align:center; }
+  .footer a { color:#1a237e; }
+  .footer p { margin:4px 0; }
+</style>
