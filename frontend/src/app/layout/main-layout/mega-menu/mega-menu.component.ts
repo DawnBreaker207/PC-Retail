@@ -15,6 +15,7 @@ import {
 } from 'lucide-angular';
 import { CategorySidebarComponent } from '@shared/components/category-sidebar.component';
 import { CategoryMenuService } from '@core/services/category-menu.service';
+import { HlmButtonDirective } from '@shared/ui/button';
 
 interface MenuGroup {
   label: string;
@@ -279,7 +280,7 @@ const DEFAULT_GROUPS: MenuGroup[] = [
 
 @Component({
   selector: 'app-mega-menu',
-  imports: [RouterLink, LucideAngularModule, CategorySidebarComponent],
+  imports: [RouterLink, LucideAngularModule, CategorySidebarComponent, HlmButtonDirective],
   templateUrl: './mega-menu.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './mega-menu.component.css',

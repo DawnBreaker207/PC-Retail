@@ -1,6 +1,6 @@
 import { Component, signal, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { LucideAngularModule, ChevronDown } from 'lucide-angular';
+import { LucideAngularModule, ChevronDown, ChevronRight } from 'lucide-angular';
 import { HlmBreadcrumbDirective, HlmBreadcrumbLinkDirective, HlmBreadcrumbCurrentDirective } from '@shared/ui/breadcrumb';
 
 @Component({

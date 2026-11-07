@@ -63,10 +63,13 @@
         class="w-full h-11 pl-3.5 pr-11 rounded-xl border-border/80 text-sm"
       />
       <button
+        hlmBtn
+        variant="ghost"
+        size="icon"
         type="button"
         (click)="passwordVisible.set(!passwordVisible())"
         [attr.aria-label]="passwordVisible() ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'"
-        class="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted hover:text-foreground p-1 transition-colors"
+        class="absolute right-1 top-1/2 -translate-y-1/2 text-muted hover:text-foreground h-8 w-8 hover:bg-transparent"
       >
         <lucide-icon [img]="passwordVisible() ? EyeOffIcon : EyeIcon" class="size-4.5" />
       </button>
@@ -89,10 +92,13 @@
         class="w-full h-11 pl-3.5 pr-11 rounded-xl border-border/80 text-sm"
       />
       <button
+        hlmBtn
+        variant="ghost"
+        size="icon"
         type="button"
         (click)="confirmVisible.set(!confirmVisible())"
         [attr.aria-label]="confirmVisible() ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'"
-        class="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted hover:text-foreground p-1 transition-colors"
+        class="absolute right-1 top-1/2 -translate-y-1/2 text-muted hover:text-foreground h-8 w-8 hover:bg-transparent"
       >
         <lucide-icon [img]="confirmVisible() ? EyeOffIcon : EyeIcon" class="size-4.5" />
       </button>
@@ -110,13 +116,13 @@
     hlmBtn
     variant="default"
     [disabled]="form.invalid || isLoading()"
-    class="w-full h-11 mt-2 rounded-xl text-sm font-bold shadow-xs hover:shadow-sm inline-flex items-center justify-center gap-2"
+    class="w-full h-11 mt-2 rounded-xl text-sm font-bold shadow-xs hover:shadow-sm inline-flex items-center justify-center gap-2 text-white"
   >
     @if (isLoading()) {
-      <lucide-icon [img]="LoaderIcon" class="size-4 animate-spin" />
-      <span>Đang tạo tài khoản...</span>
+      <lucide-icon [img]="LoaderIcon" class="size-4 animate-spin text-white" />
+      <span class="text-white">Đang tạo tài khoản...</span>
     } @else {
-      <span>Đăng ký</span>
+      <span class="text-white">Đăng ký</span>
     }
   </button>
 </form>

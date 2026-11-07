@@ -28,6 +28,7 @@ import {
   Bell,
   ArrowRight,
   TrendingUp,
+  Truck,
 } from 'lucide-angular';
 import { ThemeService } from '@core/services/theme.service';
 import { AuthService } from '@core/auth/auth.service';
@@ -37,6 +38,9 @@ import { MockDataService } from '@core/services/mock-data.service';
 import { NotificationBellComponent } from '@shared/components/notification-bell.component';
 import { NotificationService } from '@core/services/notification.service';
 import { HlmAvatarComponent, HlmAvatarFallbackDirective } from '@shared/ui/avatar';
+import { HlmButtonDirective } from '@shared/ui/button';
+import { HlmInputDirective } from '@shared/ui/input';
+import { HlmTooltipDirective } from '@shared/ui/tooltip';
 import { RealtimeService } from '@core/services/realtime.service';
 import { CurrencyFormatPipe } from '@shared/pipes/currency-format.pipe';
 import { FallbackImageDirective } from '@shared/directives/fallback-image.directive';
@@ -52,6 +56,9 @@ import { Sku } from '@core/models/common.model';
     FallbackImageDirective,
     HlmAvatarComponent,
     HlmAvatarFallbackDirective,
+    HlmButtonDirective,
+    HlmInputDirective,
+    HlmTooltipDirective,
   ],
   templateUrl: './header.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
@@ -75,6 +82,7 @@ export class HeaderComponent {
   readonly Bell = Bell;
   readonly ArrowRight = ArrowRight;
   readonly TrendingUp = TrendingUp;
+  readonly Truck = Truck;
 
   private router = inject(Router);
   private themeService = inject(ThemeService);
@@ -134,6 +142,11 @@ export class HeaderComponent {
   isAdminOrStaff = computed(() => {
     const role = this.currentUser()?.systemRole;
     return role === 'ADMIN' || role === 'STAFF' || role === 'SUPER_ADMIN';
+  });
+
+  isShipper = computed(() => {
+    const role = this.currentUser()?.systemRole;
+    return role === 'SHIPPER';
   });
 
   showMobileSearch = signal(false);

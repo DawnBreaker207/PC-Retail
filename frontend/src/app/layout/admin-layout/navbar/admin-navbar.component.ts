@@ -6,6 +6,7 @@ import { ThemeService } from '@core/services/theme.service';
 import { AdminWorkQueueService } from '@core/services/admin-work-queue.service';
 import { HlmBadgeDirective } from '@shared/ui/badge';
 import { HlmButtonDirective } from '@shared/ui/button';
+import { HlmTooltipDirective } from '@shared/ui/tooltip';
 import { HlmAvatarComponent, HlmAvatarFallbackDirective } from '@shared/ui/avatar';
 import {
   LucideAngularModule,
@@ -25,6 +26,7 @@ import {
     RouterLink,
     HlmBadgeDirective,
     HlmButtonDirective,
+    HlmTooltipDirective,
     HlmAvatarComponent,
     HlmAvatarFallbackDirective,
     LucideAngularModule

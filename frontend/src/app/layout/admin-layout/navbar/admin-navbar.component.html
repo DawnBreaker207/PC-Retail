@@ -15,14 +15,14 @@
       routerLink="/admin"
       class="relative w-10 h-10 rounded-full bg-bg dark:bg-bg-dark border border-border/80 dark:border-border-dark flex items-center justify-center cursor-pointer text-muted dark:text-muted-dark hover:text-primary dark:hover:text-primary hover:bg-primary-light/40 dark:hover:bg-white/10 transition-colors shadow-2xs"
       aria-label="Việc cần xử lý"
-      title="Xem Work Queue"
+      [hlmTooltip]="'Xem hàng đợi việc cần xử lý (Work Queue)'"
     >
       <lucide-angular [img]="Bell" class="w-4.5 h-4.5" />
       @if (notificationCount() > 0) {
         <span
           hlmBadge
           variant="destructive"
-          class="absolute -top-1 -right-1 text-[10px] font-bold px-1.5 py-0 h-4.5 min-w-[18px] flex items-center justify-center rounded-full"
+          class="absolute -top-1 -right-1 text-[10px] font-bold px-1.5 py-0 h-4.5 min-w-[18px] flex items-center justify-center rounded-full text-white"
         >
           {{ notificationCount() }}
         </span>
@@ -31,11 +31,14 @@
 
     <!-- Theme Toggle -->
     <button
+      hlmBtn
+      variant="ghost"
+      size="icon"
       type="button"
       (click)="toggleTheme()"
       aria-label="Chuyển giao diện sáng/tối"
-      title="Chuyển giao diện sáng/tối"
-      class="w-10 h-10 rounded-full bg-bg dark:bg-bg-dark border border-border/80 dark:border-border-dark flex items-center justify-center text-muted dark:text-muted-dark hover:text-primary dark:hover:text-primary hover:bg-primary-light/40 dark:hover:bg-white/10 transition-colors shadow-2xs cursor-pointer"
+      [hlmTooltip]="isDark() ? 'Chuyển sang chế độ Sáng' : 'Chuyển sang chế độ Tối'"
+      class="w-10 h-10 rounded-full border border-border/80 dark:border-border-dark text-muted dark:text-muted-dark hover:text-primary cursor-pointer"
     >
       <lucide-angular [img]="isDark() ? Sun : Moon" class="w-4.5 h-4.5" />
     </button>
@@ -46,9 +49,11 @@
     <!-- User Profile Dropdown Menu (Spartan UI Style) -->
     <div class="relative">
       <button
+        hlmBtn
+        variant="ghost"
         type="button"
         (click)="toggleUserMenu()"
-        class="flex items-center gap-2.5 p-1 rounded-xl hover:bg-bg dark:hover:bg-bg-dark transition-colors cursor-pointer"
+        class="flex items-center gap-2.5 p-1 h-auto rounded-xl hover:bg-bg dark:hover:bg-bg-dark transition-colors"
       >
         <hlm-avatar class="size-8 border border-primary/25">
           <span hlmAvatarFallback class="bg-primary/10 text-primary font-bold text-xs">{{ userInitials }}</span>

@@ -30,17 +30,11 @@
       <div class="flex flex-wrap gap-2 mb-4" role="tablist" aria-label="Flash sale categories">
         @for (tab of flashCategories; track tab; let i = $index) {
           <button
-            class="px-4 py-2 text-xs font-semibold rounded-xl border transition-all duration-200 focus-visible:outline-2 focus-visible:outline-primary/60"
-            [class.bg-primary]="activeTab === i"
+            hlmBtn
+            [variant]="activeTab === i ? 'default' : 'outline'"
+            size="sm"
+            class="rounded-xl text-xs font-semibold"
             [class.text-white]="activeTab === i"
-            [class.border-primary]="activeTab === i"
-            [class.shadow-xs]="activeTab === i"
-            [class.bg-bg]="activeTab !== i"
-            [class.text-muted]="activeTab !== i"
-            [class.border-border/80]="activeTab !== i"
-            [class.dark:bg-bg-dark]="activeTab !== i"
-            [class.dark:text-muted-dark]="activeTab !== i"
-            [class.dark:border-border-dark/80]="activeTab !== i"
             (click)="activeTab = i"
             role="tab"
             [attr.aria-selected]="activeTab === i"

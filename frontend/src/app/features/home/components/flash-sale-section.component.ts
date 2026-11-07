@@ -1,6 +1,7 @@
 import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { LucideAngularModule, Zap } from 'lucide-angular';
+import { HlmButtonDirective } from '@shared/ui/button';
 import { MockDataService } from '@core/services/mock-data.service';
 import { PromotionService } from '@core/services/promotion.service';
 import { CurrencyFormatPipe } from '@shared/pipes/currency-format.pipe';
@@ -9,7 +10,7 @@ import { FallbackImageDirective } from '@shared/directives/fallback-image.direct
 @Component({
   selector: 'app-flash-sale-section',
   standalone: true,
-  imports: [RouterLink, LucideAngularModule, CurrencyFormatPipe, FallbackImageDirective],
+  imports: [RouterLink, LucideAngularModule, HlmButtonDirective, CurrencyFormatPipe, FallbackImageDirective],
   templateUrl: './flash-sale-section.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './flash-sale-section.component.css',

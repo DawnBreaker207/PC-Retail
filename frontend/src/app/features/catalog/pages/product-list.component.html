@@ -153,7 +153,14 @@
       <div class="absolute right-0 top-0 bottom-0 w-[300px] max-w-[85vw] bg-surface dark:bg-surface-dark p-5 overflow-y-auto shadow-2xl flex flex-col">
         <div class="flex items-center justify-between pb-3 border-b border-border/80 mb-4">
           <h3 class="font-bold text-sm">Bộ lọc sản phẩm</h3>
-          <button type="button" class="text-muted hover:text-foreground p-1" (click)="drawerOpen.set(false)">
+          <button
+            hlmBtn
+            variant="ghost"
+            size="icon"
+            type="button"
+            class="text-muted hover:text-foreground"
+            (click)="drawerOpen.set(false)"
+          >
             <lucide-icon [img]="XIcon" class="size-4" />
           </button>
         </div>
@@ -171,7 +178,7 @@
           type="button"
           hlmBtn
           variant="default"
-          class="w-full mt-4"
+          class="w-full mt-4 text-white"
           (click)="drawerOpen.set(false)"
         >
           Áp dụng

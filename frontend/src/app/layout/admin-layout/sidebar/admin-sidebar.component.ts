@@ -7,6 +7,7 @@ import { AuthService } from '@core/auth/auth.service';
 import { AdminWorkQueueService } from '@core/services/admin-work-queue.service';
 import { HlmBadgeDirective } from '@shared/ui/badge';
 import { HlmButtonDirective } from '@shared/ui/button';
+import { HlmTooltipDirective } from '@shared/ui/tooltip';
 import {
   LucideAngularModule,
   LayoutDashboard,
@@ -24,7 +25,9 @@ import {
   Boxes,
   ChevronLeft,
   ChevronRight,
-  Zap
+  Zap,
+  Banknote,
+  ShieldCheck
 } from 'lucide-angular';
 
 export interface AdminNavItem {
@@ -46,6 +49,8 @@ export interface AdminNavSection {
     NgClass,
     RouterLink,
     HlmBadgeDirective,
+    HlmButtonDirective,
+    HlmTooltipDirective,
     LucideAngularModule,
   ],
   templateUrl: './admin-sidebar.component.html',
@@ -86,6 +91,8 @@ export class AdminSidebarComponent {
           items: [
             { label: 'Đơn hàng', icon: ShoppingCart, route: '/admin/orders', badgeKey: 'orders' },
             { label: 'Trả hàng', icon: RotateCcw, route: '/admin/returns', badgeKey: 'returns' },
+            { label: 'Hoàn tiền', icon: Banknote, route: '/admin/refunds' },
+            { label: 'Bảo hành', icon: ShieldCheck, route: '/admin/warranty' },
           ],
         },
       ];
@@ -97,6 +104,8 @@ export class AdminSidebarComponent {
           items: [
             { label: 'Đơn hàng', icon: ShoppingCart, route: '/admin/orders', badgeKey: 'orders' },
             { label: 'Trả hàng', icon: RotateCcw, route: '/admin/returns', badgeKey: 'returns' },
+            { label: 'Hoàn tiền', icon: Banknote, route: '/admin/refunds' },
+            { label: 'Bảo hành', icon: ShieldCheck, route: '/admin/warranty' },
           ],
         },
         {
@@ -111,6 +120,7 @@ export class AdminSidebarComponent {
           title: 'Khuyến mãi & đánh giá',
           items: [
             { label: 'Khuyến mãi', icon: Ticket, route: '/admin/vouchers' },
+            { label: 'Flash Sale', icon: Zap, route: '/admin/flash-sales' },
             { label: 'Đánh giá', icon: Star, route: '/admin/reviews' },
           ],
         },

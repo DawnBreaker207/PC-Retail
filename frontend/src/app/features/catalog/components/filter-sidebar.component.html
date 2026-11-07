@@ -82,9 +82,12 @@
         >
           <span>{{ af.label }}</span>
           <button
+            hlmBtn
+            variant="ghost"
+            size="icon"
             type="button"
             (click)="removeFilter(af)"
-            class="text-muted-foreground hover:text-foreground transition-colors ml-0.5 rounded-full p-0.5"
+            class="h-4 w-4 text-muted-foreground hover:text-foreground transition-colors ml-0.5 rounded-full p-0"
             [attr.aria-label]="'Bỏ lọc ' + af.label"
           >
             <lucide-icon [img]="XIcon" class="size-3" />

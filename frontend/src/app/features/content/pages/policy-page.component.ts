@@ -1,7 +1,7 @@
 import { Component, computed, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { LucideAngularModule } from 'lucide-angular';
+import { LucideAngularModule, ChevronRight } from 'lucide-angular';
 import { POLICY_CONTENT } from '@core/mocks/policy-content.mock';
 import { HlmBreadcrumbDirective, HlmBreadcrumbLinkDirective, HlmBreadcrumbCurrentDirective } from '@shared/ui/breadcrumb';
 

@@ -38,11 +38,24 @@ import { HlmBadgeDirective } from '@shared/ui/badge';
 import { HlmSeparatorDirective } from '@shared/ui/separator';
 import { HlmBreadcrumbDirective, HlmBreadcrumbLinkDirective, HlmBreadcrumbCurrentDirective } from '@shared/ui/breadcrumb';
 import { HlmButtonDirective } from '@shared/ui/button';
+import { HlmTooltipDirective } from '@shared/ui/tooltip';
 import { CurrencyFormatPipe } from '@shared/pipes/currency-format.pipe';
 import { FallbackImageDirective } from '@shared/directives/fallback-image.directive';
 import { ProductCardComponent } from '@shared/components/product-card.component';
 import { HlmSkeletonComponent } from '@shared/ui/skeleton';
 import { HlmTabsListDirective, HlmTabsTriggerDirective } from '@shared/ui/tabs';
+import {
+  HlmTableDirective,
+  HlmTableBodyDirective,
+  HlmTableRowDirective,
+  HlmTableCellDirective,
+} from '@shared/ui/table';
+import {
+  HlmDialogContentDirective,
+  HlmDialogHeaderDirective,
+  HlmDialogTitleDirective,
+  HlmDialogDescriptionDirective,
+} from '@shared/ui/dialog';
 import { MockDataService } from '@core/services/mock-data.service';
 import { SeoService } from '@core/services/seo.service';
 import { HttpClient } from '@angular/common/http';
@@ -64,6 +77,7 @@ import { SkuRatingSummary } from '@core/models/common.model';
     LucideAngularModule,
     HlmBadgeDirective,
     HlmButtonDirective,
+    HlmTooltipDirective,
     CurrencyFormatPipe,
     FallbackImageDirective,
     ProductCardComponent,
@@ -74,6 +88,14 @@ import { SkuRatingSummary } from '@core/models/common.model';
     HlmTabsListDirective,
     HlmTabsTriggerDirective,
     HlmSeparatorDirective,
+    HlmTableDirective,
+    HlmTableBodyDirective,
+    HlmTableRowDirective,
+    HlmTableCellDirective,
+    HlmDialogContentDirective,
+    HlmDialogHeaderDirective,
+    HlmDialogTitleDirective,
+    HlmDialogDescriptionDirective,
   ],
   templateUrl: './product-detail.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,

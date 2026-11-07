@@ -1,9 +1,17 @@
-﻿import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { catchError, of } from 'rxjs';
 import { LucideAngularModule, ChevronRight, Scale, ArrowLeft } from 'lucide-angular';
 import { HlmButtonDirective } from '@shared/ui/button';
+import {
+  HlmTableDirective,
+  HlmTableHeaderDirective,
+  HlmTableRowDirective,
+  HlmTableHeadDirective,
+  HlmTableBodyDirective,
+  HlmTableCellDirective,
+} from '@shared/ui/table';
 import { CurrencyFormatPipe } from '@shared/pipes/currency-format.pipe';
 import { FallbackImageDirective } from '@shared/directives/fallback-image.directive';
 import { ApiEndpoints } from '@core/api/api.endpoints';
@@ -23,6 +31,12 @@ interface CompareSku {
     RouterLink,
     LucideAngularModule,
     HlmButtonDirective,
+    HlmTableDirective,
+    HlmTableHeaderDirective,
+    HlmTableRowDirective,
+    HlmTableHeadDirective,
+    HlmTableBodyDirective,
+    HlmTableCellDirective,
     CurrencyFormatPipe,
     FallbackImageDirective,
   ],
@@ -61,18 +75,20 @@ interface CompareSku {
         <div
           class="overflow-x-auto rounded-card border border-border dark:border-border-dark bg-surface dark:bg-surface-dark shadow-sm"
         >
-          <table class="w-full text-sm text-left border-collapse">
-            <thead>
+          <table hlmTable class="w-full text-sm text-left border-collapse">
+            <thead hlmTableHeader>
               <tr
+                hlmTableRow
                 class="border-b border-border dark:border-border-dark bg-bg/50 dark:bg-bg-dark/50"
               >
                 <th
+                  hlmTableHead
                   class="p-4 w-48 min-w-[160px] font-semibold text-muted dark:text-muted-dark text-xs uppercase tracking-wider"
                 >
                   Thông số kỹ thuật
                 </th>
                 @for (s of skus(); track s.id) {
-                  <th class="p-4 min-w-[220px] max-w-[300px] align-top">
+                  <th hlmTableHead class="p-4 min-w-[220px] max-w-[300px] align-top">
                     <div
                       class="aspect-square w-24 mx-auto mb-3 flex items-center justify-center bg-surface dark:bg-surface-dark rounded-md border border-border/50 overflow-hidden"
                     >
@@ -93,16 +109,17 @@ interface CompareSku {
                 }
               </tr>
             </thead>
-            <tbody class="divide-y divide-border/60 dark:divide-border-dark/60">
+            <tbody hlmTableBody class="divide-y divide-border/60 dark:divide-border-dark/60">
               @for (r of rows(); track r.key) {
-                <tr class="hover:bg-bg/40 dark:hover:bg-bg-dark/40 transition-colors">
+                <tr hlmTableRow class="hover:bg-bg/40 dark:hover:bg-bg-dark/40 transition-colors">
                   <td
+                    hlmTableCell
                     class="p-4 font-medium text-ink dark:text-ink-dark bg-bg/20 dark:bg-bg-dark/20 text-xs"
                   >
                     {{ r.key }}
                   </td>
                   @for (v of r.values; track $index) {
-                    <td class="p-4 text-xs text-muted dark:text-muted-dark">{{ v }}</td>
+                    <td hlmTableCell class="p-4 text-xs text-muted dark:text-muted-dark">{{ v }}</td>
                   }
                 </tr>
               }

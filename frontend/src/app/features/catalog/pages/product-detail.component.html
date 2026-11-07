@@ -222,8 +222,12 @@
           <span class="text-xs font-medium text-muted">Số lượng:</span>
           <div class="flex items-center border border-border dark:border-border-dark rounded-lg overflow-hidden bg-surface dark:bg-surface-dark">
             <button
+              hlmBtn
+              variant="ghost"
+              size="icon"
               type="button"
-              class="w-9 h-9 flex items-center justify-center hover:bg-muted/20 disabled:opacity-40 transition-colors"
+              [hlmTooltip]="'Giảm số lượng'"
+              class="w-9 h-9 rounded-none hover:bg-muted/20 disabled:opacity-40 transition-colors p-0 cursor-pointer"
               (click)="decrementQty()"
               [disabled]="quantity <= 1"
               aria-label="Giảm số lượng"
@@ -232,8 +236,12 @@
             </button>
             <span class="w-10 text-center text-xs font-semibold select-none" aria-live="polite">{{ quantity }}</span>
             <button
+              hlmBtn
+              variant="ghost"
+              size="icon"
               type="button"
-              class="w-9 h-9 flex items-center justify-center hover:bg-muted/20 disabled:opacity-40 transition-colors"
+              [hlmTooltip]="'Tăng số lượng'"
+              class="w-9 h-9 rounded-none hover:bg-muted/20 disabled:opacity-40 transition-colors p-0 cursor-pointer"
               (click)="incrementQty()"
               [disabled]="p.stockAvailable !== undefined && quantity >= p.stockAvailable"
               aria-label="Tăng số lượng"
@@ -249,15 +257,17 @@
             type="button"
             hlmBtn
             variant="default"
-            class="h-14 px-6 text-sm font-bold flex-1 sm:flex-[2] rounded-xl shadow-md shadow-primary/20 hover:shadow-lg transition-all flex flex-col items-center justify-center gap-0.5"
+            class="h-14 px-6 text-sm font-bold flex-1 sm:flex-[2] rounded-xl shadow-md shadow-primary/20 hover:shadow-lg transition-all flex flex-col items-center justify-center gap-0.5 text-white"
             [disabled]="p.stockAvailable === 0"
             (click)="buyNow(p)"
           >
-            <span class="text-sm font-extrabold uppercase tracking-wide">MUA NGAY</span>
-            <span class="text-[11px] font-normal opacity-90">Giao tận nơi hoặc nhận tại Showroom</span>
+            <span class="text-sm font-extrabold uppercase tracking-wide text-white">MUA NGAY</span>
+            <span class="text-[11px] font-normal opacity-90 text-white">Giao tận nơi hoặc nhận tại Showroom</span>
           </button>
           <button
             type="button"
+            hlmBtn
+            variant="outline"
             class="h-14 px-5 text-sm font-bold flex-1 rounded-xl border-2 border-primary text-primary dark:text-red-400 dark:border-red-500 hover:bg-primary/10 flex flex-col items-center justify-center gap-0.5 transition-colors bg-surface dark:bg-surface-dark"
             [disabled]="p.stockAvailable === 0"
             (click)="addToCart(p)"
@@ -270,8 +280,11 @@
           </button>
           <button
             type="button"
-            class="size-14 rounded-xl flex items-center justify-center shrink-0 border border-border/80 dark:border-border-dark/80 hover:border-primary transition-colors bg-surface dark:bg-surface-dark"
+            hlmBtn
+            variant="outline"
+            class="size-14 rounded-xl flex items-center justify-center shrink-0 border border-border/80 dark:border-border-dark/80 hover:border-primary transition-colors bg-surface dark:bg-surface-dark p-0 cursor-pointer"
             [class.border-primary]="wishlist.has(p.id)"
+            [hlmTooltip]="wishlist.has(p.id) ? 'Bỏ yêu thích' : 'Lưu vào danh sách yêu thích'"
             [attr.aria-label]="wishlist.has(p.id) ? 'Bỏ yêu thích' : 'Yêu thích'"
             (click)="wishlist.toggle(p.id)"
           >
@@ -398,12 +411,12 @@
                 <span>Bảng thông số kỹ thuật chi tiết</span>
                 <span class="text-[11px] font-normal lowercase">({{ specEntries().length }} thông số)</span>
               </div>
-              <table class="w-full text-xs">
-                <tbody>
+              <table hlmTable class="w-full text-xs">
+                <tbody hlmTableBody>
                   @for (spec of specEntries(); track spec.key; let even = $even) {
-                    <tr [class.bg-bg/60]="even" [class.dark:bg-bg-dark/40]="even" class="border-b border-border/40 dark:border-border-dark/40 last:border-0 hover:bg-primary/5 transition-colors">
-                      <td class="py-3 px-4 text-muted dark:text-muted-dark font-medium w-44 sm:w-56 shrink-0">{{ spec.key }}</td>
-                      <td class="py-3 px-4 text-foreground font-semibold">{{ spec.value }}</td>
+                    <tr hlmTableRow [class.bg-bg/60]="even" [class.dark:bg-bg-dark/40]="even" class="border-b border-border/40 dark:border-border-dark/40 last:border-0 hover:bg-primary/5 transition-colors">
+                      <td hlmTableCell class="py-3 px-4 text-muted dark:text-muted-dark font-medium w-44 sm:w-56 shrink-0">{{ spec.key }}</td>
+                      <td hlmTableCell class="py-3 px-4 text-foreground font-semibold">{{ spec.value }}</td>
                     </tr>
                   }
                 </tbody>
@@ -461,21 +474,26 @@
       </div>
     }
 
-    <!-- Installment 0% Calculator Modal -->
+    <!-- Installment 0% Calculator Modal (Spartan Dialog) -->
     @if (showInstallmentModal()) {
       <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
-        <div class="w-full max-w-lg rounded-2xl bg-surface dark:bg-surface-dark border border-border/80 shadow-2xl p-6 relative">
+        <div hlmDialogContent class="w-full max-w-lg rounded-2xl bg-card border border-border shadow-2xl p-6 relative text-card-foreground">
           <button
             type="button"
+            hlmBtn
+            variant="ghost"
+            size="sm"
             (click)="showInstallmentModal.set(false)"
-            class="absolute top-4 right-4 text-muted hover:text-foreground p-1 rounded-lg"
+            class="absolute top-4 right-4 text-muted-foreground hover:text-foreground h-8 w-8 p-0 rounded-lg cursor-pointer"
             aria-label="Đóng modal"
           >
-            <lucide-angular [img]="XIcon" class="size-5" />
+            <lucide-angular [img]="XIcon" class="size-4" />
           </button>
 
-          <h3 class="text-lg font-black text-foreground mb-1">Dự toán trả góp lãi suất 0%</h3>
-          <p class="text-xs text-muted mb-4">{{ p.name }}</p>
+          <div hlmDialogHeader class="mb-4">
+            <h3 hlmDialogTitle class="text-lg font-black text-foreground">Dự toán trả góp lãi suất 0%</h3>
+            <p hlmDialogDescription class="text-xs text-muted-foreground mt-0.5">{{ p.name }}</p>
+          </div>
 
           <div class="space-y-4 text-xs">
             <!-- Chọn mức trả trước -->
@@ -484,13 +502,13 @@
               <div class="grid grid-cols-4 gap-2">
                 @for (rate of [0, 20, 30, 50]; track rate) {
                   <button
+                    hlmBtn
+                    [variant]="selectedDownPayment() === rate ? 'default' : 'outline'"
+                    size="sm"
                     type="button"
                     (click)="selectedDownPayment.set(rate)"
-                    class="py-2 px-1 rounded-xl border text-center font-bold transition-all"
-                    [class.border-primary]="selectedDownPayment() === rate"
-                    [class.bg-primary/10]="selectedDownPayment() === rate"
-                    [class.text-primary]="selectedDownPayment() === rate"
-                    [class.border-border]="selectedDownPayment() !== rate"
+                    class="py-2 px-1 rounded-xl text-center font-bold text-xs"
+                    [class.text-white]="selectedDownPayment() === rate"
                   >
                     {{ rate }}%
                   </button>
@@ -507,13 +525,13 @@
               <div class="grid grid-cols-3 gap-2">
                 @for (m of [6, 9, 12]; track m) {
                   <button
+                    hlmBtn
+                    [variant]="selectedMonths() === m ? 'default' : 'outline'"
+                    size="sm"
                     type="button"
                     (click)="selectedMonths.set(m)"
-                    class="py-2 px-1 rounded-xl border text-center font-bold transition-all"
-                    [class.border-primary]="selectedMonths() === m"
-                    [class.bg-primary/10]="selectedMonths() === m"
-                    [class.text-primary]="selectedMonths() === m"
-                    [class.border-border]="selectedMonths() !== m"
+                    class="py-2 px-1 rounded-xl text-center font-bold text-xs"
+                    [class.text-white]="selectedMonths() === m"
                   >
                     {{ m }} tháng
                   </button>
@@ -539,8 +557,10 @@
 
             <button
               type="button"
+              hlmBtn
+              variant="default"
               (click)="showInstallmentModal.set(false); buyNow(p)"
-              class="w-full py-3 rounded-xl bg-primary hover:bg-primary-dark text-white font-black text-xs uppercase tracking-wider shadow-md transition-all"
+              class="w-full py-3 h-11 rounded-xl text-white font-black text-xs uppercase tracking-wider shadow-md transition-all cursor-pointer"
             >
               Đăng ký trả góp online ngay
             </button>
@@ -566,19 +586,23 @@
 
       <div class="flex items-center gap-2 shrink-0">
         <button
+          hlmBtn
+          variant="outline"
+          size="icon"
           type="button"
           (click)="addToCart(p)"
           [disabled]="p.stockAvailable === 0"
-          class="h-10 px-3 rounded-xl border border-primary text-primary hover:bg-primary/10 flex items-center justify-center transition-colors"
+          class="h-10 w-10 rounded-xl border border-primary text-primary hover:bg-primary/10 flex items-center justify-center transition-colors"
           aria-label="Thêm vào giỏ"
         >
           <lucide-angular [img]="CartIcon" class="size-4" />
         </button>
         <button
+          hlmBtn
           type="button"
           (click)="buyNow(p)"
           [disabled]="p.stockAvailable === 0"
-          class="h-10 px-4 rounded-xl bg-primary text-white text-xs font-black uppercase tracking-wider shadow-md hover:bg-primary-dark transition-all"
+          class="h-10 px-4 rounded-xl text-white text-xs font-black uppercase tracking-wider shadow-md hover:bg-primary-dark transition-all"
         >
           MUA NGAY
         </button>
@@ -592,7 +616,7 @@
     </div>
     <h1 class="text-xl font-bold text-ink dark:text-ink-dark mb-2">Không tìm thấy sản phẩm</h1>
     <p class="text-sm text-muted dark:text-muted-dark mb-6">Sản phẩm bạn đang tìm kiếm có thể đã tạm ngừng kinh doanh hoặc đường dẫn không đúng.</p>
-    <a routerLink="/products" class="inline-flex items-center px-6 py-2.5 rounded-xl bg-primary text-white font-semibold text-xs tracking-wider uppercase hover:bg-primary-dark transition-colors shadow-xs">
+    <a routerLink="/products" hlmBtn class="px-6 py-2.5 rounded-xl text-white font-semibold text-xs tracking-wider uppercase shadow-xs">
       Quay lại danh mục sản phẩm
     </a>
   </div>

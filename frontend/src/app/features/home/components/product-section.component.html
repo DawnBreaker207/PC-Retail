@@ -14,42 +14,26 @@
         <div class="flex items-center gap-1.5 overflow-x-auto scrollbar-none py-1 max-w-full" role="tablist">
           <!-- All Tab -->
           <button
+            hlmBtn
+            [variant]="activeSubNav() === '' ? 'default' : 'outline'"
+            size="sm"
             type="button"
             (click)="resetFilter()"
-            class="h-8 px-3.5 text-xs font-bold rounded-xl transition-all whitespace-nowrap shrink-0 border"
-            [class.bg-primary]="activeSubNav() === ''"
+            class="h-8 rounded-xl whitespace-nowrap shrink-0 text-xs font-bold"
             [class.text-white]="activeSubNav() === ''"
-            [class.border-primary]="activeSubNav() === ''"
-            [class.shadow-xs]="activeSubNav() === ''"
-            [class.bg-surface]="activeSubNav() !== ''"
-            [class.dark:bg-surface-dark]="activeSubNav() !== ''"
-            [class.text-muted]="activeSubNav() !== ''"
-            [class.dark:text-muted-dark]="activeSubNav() !== ''"
-            [class.border-border/80]="activeSubNav() !== ''"
-            [class.dark:border-border-dark/80]="activeSubNav() !== ''"
-            [class.hover:border-primary]="activeSubNav() !== ''"
-            [class.hover:text-primary]="activeSubNav() !== ''"
           >
             Tất cả
           </button>
 
           @for (nav of section().subNav; track nav.slug) {
             <button
+              hlmBtn
+              [variant]="activeSubNav() === nav.slug ? 'default' : 'outline'"
+              size="sm"
               type="button"
               (click)="filterBy(nav.slug)"
-              class="h-8 px-3.5 text-xs font-semibold rounded-xl transition-all whitespace-nowrap shrink-0 border"
-              [class.bg-primary]="activeSubNav() === nav.slug"
+              class="h-8 rounded-xl whitespace-nowrap shrink-0 text-xs font-semibold"
               [class.text-white]="activeSubNav() === nav.slug"
-              [class.border-primary]="activeSubNav() === nav.slug"
-              [class.shadow-xs]="activeSubNav() === nav.slug"
-              [class.bg-surface]="activeSubNav() !== nav.slug"
-              [class.dark:bg-surface-dark]="activeSubNav() !== nav.slug"
-              [class.text-muted]="activeSubNav() !== nav.slug"
-              [class.dark:text-muted-dark]="activeSubNav() !== nav.slug"
-              [class.border-border/80]="activeSubNav() !== nav.slug"
-              [class.dark:border-border-dark/80]="activeSubNav() !== nav.slug"
-              [class.hover:border-primary]="activeSubNav() !== nav.slug"
-              [class.hover:text-primary]="activeSubNav() !== nav.slug"
             >
               {{ nav.label }}
             </button>

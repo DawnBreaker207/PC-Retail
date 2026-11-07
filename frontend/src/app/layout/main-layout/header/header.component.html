@@ -29,10 +29,13 @@
     <div class="max-w-screen-2xl mx-auto flex items-center h-14 lg:h-16 px-4 gap-3 sm:gap-6">
       <!-- Mobile hamburger button -->
       <button
+        hlmBtn
+        variant="ghost"
+        size="icon"
         type="button"
         aria-label="Mở menu danh mục"
         [attr.aria-expanded]="showMobileMenu()"
-        class="lg:hidden inline-flex items-center justify-center w-10 h-10 rounded-xl border border-border/70 dark:border-border-dark/70 text-ink dark:text-ink-dark hover:bg-bg dark:hover:bg-bg-dark transition-colors focus:outline-none"
+        class="lg:hidden border border-border/70 dark:border-border-dark/70 text-ink dark:text-ink-dark"
         (click)="showMobileMenu.set(!showMobileMenu())"
       >
         <lucide-angular [img]="Menu" class="w-5 h-5" />
@@ -51,20 +54,24 @@
         <div class="relative group">
           <input
             #searchInput
+            hlmInput
             type="text"
             [value]="searchQuery()"
             placeholder="Tìm kiếm CPU, RTX 4070, Laptop Gaming, Màn hình OLED..."
             aria-label="Tìm kiếm sản phẩm"
-            class="w-full rounded-xl pl-11 pr-16 py-2.5 bg-bg/90 dark:bg-bg-dark/80 border border-border dark:border-border-dark/80 text-sm text-ink dark:text-ink-dark placeholder:text-muted/60 dark:placeholder:text-muted-dark/60 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all shadow-2xs"
+            class="w-full rounded-xl pl-11 pr-16 py-2.5 bg-bg/90 dark:bg-bg-dark/80 border border-border dark:border-border-dark/80 text-sm text-ink dark:text-ink-dark placeholder:text-muted/60 dark:placeholder:text-muted-dark/60 focus:border-primary transition-all shadow-2xs"
             (input)="onSearchInput(searchInput.value)"
             (focus)="onSearchFocus()"
             (keyup.enter)="search(searchInput.value)"
             (keyup.escape)="closeSearch()"
           />
           <button
+            hlmBtn
+            variant="ghost"
+            size="icon"
             type="button"
             aria-label="Tìm kiếm"
-            class="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted dark:text-muted-dark group-focus-within:text-primary transition-colors"
+            class="absolute left-1 top-1/2 -translate-y-1/2 h-8 w-8 text-muted dark:text-muted-dark group-focus-within:text-primary transition-colors hover:bg-transparent"
             (click)="search(searchInput.value)"
           >
             <lucide-angular [img]="Search" class="w-4 h-4" />
@@ -87,9 +94,12 @@
                 <div class="flex flex-wrap gap-2">
                   @for (term of popularSearches; track term) {
                     <button
+                      hlmBtn
+                      variant="outline"
+                      size="sm"
                       type="button"
                       (click)="applyPopularSearch(term)"
-                      class="px-3 py-1.5 text-xs rounded-lg bg-bg dark:bg-bg-dark border border-border/70 dark:border-border-dark/70 hover:border-primary hover:text-primary transition-colors text-ink dark:text-ink-dark"
+                      class="text-xs rounded-lg text-ink dark:text-ink-dark"
                     >
                       {{ term }}
                     </button>
@@ -129,9 +139,11 @@
 
                   <!-- Footer: View all button -->
                   <button
+                    hlmBtn
+                    variant="ghost"
                     type="button"
                     (click)="search(searchInput.value)"
-                    class="w-full py-2.5 px-4 text-center text-xs font-bold text-primary hover:bg-primary/5 transition-colors border-t border-border/60 dark:border-border-dark/60 block"
+                    class="w-full py-2.5 px-4 text-center text-xs font-bold text-primary hover:bg-primary/5 transition-colors border-t border-border/60 dark:border-border-dark/60 block rounded-none h-auto"
                   >
                     Xem tất cả kết quả cho "{{ searchQuery() }}" →
                   </button>
@@ -151,9 +163,12 @@
       <div class="flex items-center gap-1.5 sm:gap-2.5 ml-auto">
         <!-- Mobile search button -->
         <button
+          hlmBtn
+          variant="ghost"
+          size="icon"
           type="button"
           aria-label="Mở tìm kiếm"
-          class="sm:hidden inline-flex items-center justify-center w-9 h-9 rounded-xl border border-border/70 dark:border-border-dark/70 text-ink dark:text-ink-dark hover:bg-bg dark:hover:bg-bg-dark transition-colors focus:outline-none"
+          class="sm:hidden border border-border/70 dark:border-border-dark/70 text-ink dark:text-ink-dark"
           (click)="showMobileSearch.set(!showMobileSearch())"
         >
           <lucide-angular [img]="Search" class="w-4 h-4" />
@@ -162,6 +177,7 @@
         <!-- Wishlist -->
         <a
           routerLink="/yeu-thich"
+          [hlmTooltip]="'Sản phẩm yêu thích'"
           aria-label="Sản phẩm yêu thích"
           class="hidden sm:inline-flex items-center justify-center w-10 h-10 rounded-xl border border-border/60 dark:border-border-dark/60 text-muted dark:text-muted-dark hover:text-ink dark:hover:text-ink-dark hover:bg-bg dark:hover:bg-bg-dark hover:border-border dark:hover:border-border-dark transition-all relative"
         >
@@ -176,6 +192,7 @@
         <!-- Cart -->
         <a
           routerLink="/cart"
+          [hlmTooltip]="'Giỏ hàng của bạn'"
           aria-label="Giỏ hàng"
           class="inline-flex items-center justify-center w-10 h-10 rounded-xl border border-border/60 dark:border-border-dark/60 text-muted dark:text-muted-dark hover:text-ink dark:hover:text-ink-dark hover:bg-bg dark:hover:bg-bg-dark hover:border-border dark:hover:border-border-dark transition-all relative"
         >
@@ -194,10 +211,14 @@
 
         <!-- Theme Toggle (Light/Dark) -->
         <button
+          hlmBtn
+          variant="ghost"
+          size="icon"
           type="button"
           (click)="toggleTheme()"
+          [hlmTooltip]="isDark() ? 'Chuyển sang chế độ Sáng' : 'Chuyển sang chế độ Tối'"
           aria-label="Chuyển chế độ sáng/tối"
-          class="hidden lg:inline-flex items-center justify-center w-10 h-10 rounded-xl border border-border/60 dark:border-border-dark/60 text-muted dark:text-muted-dark hover:text-ink dark:hover:text-ink-dark hover:bg-bg dark:hover:bg-bg-dark transition-colors focus:outline-none"
+          class="hidden lg:inline-flex border border-border/60 dark:border-border-dark/60 text-muted dark:text-muted-dark hover:text-ink dark:hover:text-ink-dark cursor-pointer"
         >
           <lucide-angular [img]="isDark() ? Sun : Moon" class="w-4 h-4" />
         </button>
@@ -240,6 +261,16 @@
                       Trang quản trị hệ thống
                     </a>
                   }
+                  @if (isShipper() || isAdminOrStaff()) {
+                    <a
+                      routerLink="/shipper"
+                      (click)="userMenuOpen.set(false)"
+                      class="flex items-center gap-2.5 px-3 py-2 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 rounded-lg transition-colors font-semibold"
+                    >
+                      <lucide-angular [img]="Truck" class="w-4 h-4" />
+                      Cổng giao hàng (Shipper Portal)
+                    </a>
+                  }
                   <a
                     routerLink="/account"
                     (click)="userMenuOpen.set(false)"
@@ -267,9 +298,11 @@
 
                   <div class="pt-1.5 border-t border-border/60 dark:border-border-dark/60 mt-1">
                     <button
+                      hlmBtn
+                      variant="ghost"
                       type="button"
                       (click)="logout()"
-                      class="flex items-center gap-2.5 px-3 py-2 text-destructive hover:bg-destructive/10 rounded-lg transition-colors w-full text-left"
+                      class="flex items-center justify-start gap-2.5 px-3 py-2 text-destructive hover:bg-destructive/10 rounded-lg transition-colors w-full text-left font-normal"
                     >
                       <lucide-angular [img]="LogOut" class="w-4 h-4" />
                       Đăng xuất
@@ -282,7 +315,8 @@
         } @else {
           <a
             routerLink="/auth/login"
-            class="inline-flex items-center justify-center rounded-xl px-4 py-2 text-xs font-semibold transition-all bg-primary text-white hover:bg-primary-dark shadow-sm shadow-primary/20 hover:shadow-md"
+            hlmBtn
+            class="text-white shadow-sm shadow-primary/20"
           >
             Đăng nhập
           </a>
@@ -297,16 +331,20 @@
       <div class="relative">
         <input
           #mobileSearchInput
+          hlmInput
           type="text"
           placeholder="Bạn cần tìm sản phẩm gì?"
           aria-label="Tìm kiếm sản phẩm"
-          class="w-full rounded-xl pl-10 pr-4 py-2 bg-bg dark:bg-bg-dark border border-border dark:border-border-dark text-sm text-ink dark:text-ink-dark placeholder:text-muted/60 focus:outline-none focus:border-primary"
+          class="w-full rounded-xl pl-10 pr-4 py-2 bg-bg dark:bg-bg-dark border border-border dark:border-border-dark text-sm text-ink dark:text-ink-dark placeholder:text-muted/60 focus:border-primary"
           (keyup.enter)="search(mobileSearchInput.value); showMobileSearch.set(false)"
         />
         <button
+          hlmBtn
+          variant="ghost"
+          size="icon"
           type="button"
           aria-label="Tìm kiếm"
-          class="absolute left-3 top-1/2 -translate-y-1/2 text-muted"
+          class="absolute left-1 top-1/2 -translate-y-1/2 h-8 w-8 text-muted hover:bg-transparent"
           (click)="search(mobileSearchInput.value); showMobileSearch.set(false)"
         >
           <lucide-angular [img]="Search" class="w-4 h-4" />
@@ -327,10 +365,13 @@
               <span class="text-ink dark:text-ink-dark font-black text-xl tracking-tight">DAWN<span class="text-primary font-bold">.</span></span>
             </div>
             <button
+              hlmBtn
+              variant="ghost"
+              size="icon"
               type="button"
               aria-label="Đóng menu"
               (click)="showMobileMenu.set(false)"
-              class="p-1.5 rounded-lg text-muted hover:text-ink dark:hover:text-ink-dark hover:bg-bg dark:hover:bg-bg-dark transition-colors"
+              class="text-muted hover:text-ink dark:hover:text-ink-dark"
             >
               <lucide-angular [img]="X" class="w-5 h-5" />
             </button>

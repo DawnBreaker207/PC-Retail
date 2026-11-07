@@ -36,7 +36,8 @@
             [ngClass]="isActive(item.route)
               ? 'bg-primary text-white shadow-2xs'
               : 'text-ink/80 dark:text-ink-dark/80 hover:bg-bg dark:hover:bg-white/5 hover:text-primary'"
-            [title]="isCollapsed() ? item.label : ''"
+            [hlmTooltip]="isCollapsed() ? item.label : ''"
+            tooltipPosition="right"
           >
             <lucide-angular [img]="item.icon" class="w-4.5 h-4.5 shrink-0" />
             @if (!isCollapsed()) {
@@ -46,6 +47,7 @@
                   hlmBadge
                   [variant]="isActive(item.route) ? 'secondary' : 'destructive'"
                   class="ml-auto text-[10px] font-bold px-1.5 py-0 h-4.5 min-w-[18px] flex items-center justify-center rounded-full"
+                  [class.text-white]="!isActive(item.route)"
                 >
                   {{ badgeCount(item) }}
                 </span>
@@ -60,10 +62,14 @@
   <!-- Bottom Collapse Toggle Bar -->
   <div class="p-3 border-t border-border/80 dark:border-border-dark flex items-center justify-center shrink-0">
     <button
+      hlmBtn
+      variant="outline"
+      size="sm"
       type="button"
       (click)="toggleCollapse()"
-      class="w-full flex items-center justify-center gap-2 p-2 rounded-xl border border-border/60 dark:border-border-dark/60 hover:bg-bg dark:hover:bg-bg-dark text-muted dark:text-muted-dark hover:text-ink transition-colors cursor-pointer text-xs font-semibold"
-      [title]="isCollapsed() ? 'Mở rộng sidebar' : 'Thu gọn sidebar'"
+      class="w-full flex items-center justify-center gap-2 text-xs font-semibold cursor-pointer"
+      [hlmTooltip]="isCollapsed() ? 'Mở rộng sidebar' : 'Thu gọn sidebar'"
+      [tooltipPosition]="isCollapsed() ? 'right' : 'top'"
     >
       <lucide-angular [img]="isCollapsed() ? ChevronRight : ChevronLeft" class="w-4 h-4" />
       @if (!isCollapsed()) {

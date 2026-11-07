@@ -7,25 +7,34 @@ import {
   ChangeDetectionStrategy,
 } from '@angular/core';
 import { LucideAngularModule, Bell, CheckCheck, Inbox } from 'lucide-angular';
+import { HlmButtonDirective } from '@shared/ui/button';
+import { HlmBadgeDirective } from '@shared/ui/badge';
+import { HlmTooltipDirective } from '@shared/ui/tooltip';
 import { NotificationService } from '@core/services/notification.service';
 import { AuthService } from '@core/auth/auth.service';
 
 @Component({
   selector: 'app-notification-bell',
-  imports: [LucideAngularModule],
+  imports: [LucideAngularModule, HlmButtonDirective, HlmBadgeDirective, HlmTooltipDirective],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <div class="relative inline-block">
       <button
+        hlmBtn
+        variant="ghost"
+        size="icon"
         type="button"
+        [hlmTooltip]="'Thông báo hệ thống'"
         aria-label="Thông báo"
-        class="relative inline-flex items-center justify-center w-10 h-10 rounded-full hover:bg-white/10 text-white transition-colors focus:outline-none"
+        class="relative w-10 h-10 rounded-full text-muted dark:text-muted-dark hover:text-ink dark:hover:text-ink-dark cursor-pointer"
         (click)="toggleOpen()"
       >
         <lucide-angular [img]="Bell" class="w-5 h-5" />
         @if (notif.unreadCount() > 0) {
           <span
-            class="absolute top-1 right-1 min-w-[18px] h-[18px] px-1 bg-destructive text-white text-[10px] font-bold rounded-full flex items-center justify-center ring-2 ring-primary"
+            hlmBadge
+            variant="destructive"
+            class="absolute top-1 right-1 min-w-[18px] h-[18px] px-1 text-white text-[10px] font-bold rounded-full flex items-center justify-center p-0"
           >
             {{ notif.unreadCount() > 99 ? '99+' : notif.unreadCount() }}
           </span>
@@ -42,9 +51,13 @@ import { AuthService } from '@core/auth/auth.service';
             <span class="font-bold text-sm text-ink dark:text-ink-dark">Thông báo</span>
             @if (notif.items().length > 0) {
               <button
+                hlmBtn
+                variant="ghost"
+                size="sm"
                 type="button"
+                [hlmTooltip]="'Đánh dấu tất cả là đã đọc'"
                 (click)="notif.markAllRead()"
-                class="text-xs text-primary hover:underline font-medium inline-flex items-center gap-1"
+                class="text-xs text-primary h-7 px-2 font-medium inline-flex items-center gap-1 cursor-pointer"
               >
                 <lucide-angular [img]="CheckCheck" class="w-3.5 h-3.5" />
                 Đọc tất cả

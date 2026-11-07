@@ -9,11 +9,13 @@ import {
 import { isPlatformBrowser } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { LucideAngularModule, Phone, MessageCircle, Wrench, ChevronUp } from 'lucide-angular';
+import { HlmButtonDirective } from '@shared/ui/button';
+import { HlmTooltipDirective } from '@shared/ui/tooltip';
 
 @Component({
   selector: 'app-floating-support',
   standalone: true,
-  imports: [RouterLink, LucideAngularModule],
+  imports: [RouterLink, LucideAngularModule, HlmButtonDirective, HlmTooltipDirective],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <aside
@@ -59,7 +61,7 @@ import { LucideAngularModule, Phone, MessageCircle, Wrench, ChevronUp } from 'lu
         class="group relative flex items-center justify-center w-12 h-12 rounded-full bg-primary text-white shadow-lg shadow-primary/30 hover:shadow-xl hover:bg-primary-dark hover:scale-105 active:scale-95 transition-all"
         title="Hotline tư vấn: 1900 5301"
       >
-        <lucide-angular [img]="PhoneIcon" class="w-5 h-5 group-hover:animate-bounce" />
+        <lucide-angular [img]="PhoneIcon" class="w-5 h-5 group-hover:animate-bounce text-white" />
         <span class="absolute -top-1 -right-1 flex h-3.5 w-3.5">
           <span
             class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"
@@ -78,11 +80,15 @@ import { LucideAngularModule, Phone, MessageCircle, Wrench, ChevronUp } from 'lu
       <!-- Nút Cuộn lên đầu trang (Back to top) -->
       @if (showBackToTop()) {
         <button
+          hlmBtn
+          variant="outline"
+          size="icon"
           type="button"
           (click)="scrollToTop()"
           aria-label="Cuộn lên đầu trang"
-          class="flex items-center justify-center w-10 h-10 rounded-full bg-surface/90 dark:bg-surface-dark/90 backdrop-blur-md border border-border/80 dark:border-border-dark/80 text-foreground hover:bg-primary hover:text-white hover:border-primary transition-all duration-300 shadow-md hover:scale-105 active:scale-90 animate-in fade-in zoom-in duration-200"
-          title="Lên đầu trang"
+          [hlmTooltip]="'Cuộn lên đầu trang'"
+          tooltipPosition="left"
+          class="w-10 h-10 rounded-full bg-surface/90 dark:bg-surface-dark/90 backdrop-blur-md border border-border/80 dark:border-border-dark/80 text-foreground hover:bg-primary hover:text-white hover:border-primary shadow-md cursor-pointer"
         >
           <lucide-angular [img]="ChevronUpIcon" class="w-5 h-5" />
         </button>

@@ -7,12 +7,13 @@ import {
   Info,
   X,
 } from 'lucide-angular';
+import { HlmButtonDirective } from '@shared/ui/button';
 import { ToastService } from '@core/services/toast.service';
 
 @Component({
   selector: 'app-toast-container',
   standalone: true,
-  imports: [LucideAngularModule],
+  imports: [LucideAngularModule, HlmButtonDirective],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <div
@@ -61,9 +62,12 @@ import { ToastService } from '@core/services/toast.service';
             {{ t.message }}
           </div>
           <button
+            hlmBtn
+            variant="ghost"
+            size="icon"
             type="button"
             (click)="toastService.dismiss(t.id)"
-            class="text-muted hover:text-foreground p-0.5 rounded-md transition-colors"
+            class="size-6 text-muted hover:text-foreground p-0 rounded-md"
             aria-label="Đóng"
           >
             <lucide-icon [img]="XIcon" class="size-3.5" />

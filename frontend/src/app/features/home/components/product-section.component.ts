@@ -11,13 +11,14 @@ import { RouterLink } from '@angular/router';
 import { LucideAngularModule, ChevronRight, Sparkles, Flame, ArrowRight } from 'lucide-angular';
 import { MockDataService } from '@core/services/mock-data.service';
 import { ProductCardComponent } from '@shared/components/product-card.component';
+import { HlmButtonDirective } from '@shared/ui/button';
 import { CartStore } from '@features/cart/store/cart.store';
 import { HomeSection, Sku } from '@core/models/common.model';
 import { splitLinkQuery } from '@shared/utils/link-query.util';
 
 @Component({
   selector: 'app-product-section',
-  imports: [RouterLink, ProductCardComponent, LucideAngularModule],
+  imports: [RouterLink, ProductCardComponent, LucideAngularModule, HlmButtonDirective],
   templateUrl: './product-section.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './product-section.component.css',

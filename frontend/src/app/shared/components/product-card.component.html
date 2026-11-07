@@ -49,7 +49,11 @@
 
     <!-- Wishlist Floating Button -->
     <button
+      hlmBtn
+      variant="ghost"
+      size="icon"
       type="button"
+      [hlmTooltip]="wishlist.has(product().id) ? 'Bỏ yêu thích' : 'Thêm vào yêu thích'"
       [attr.aria-label]="wishlist.has(product().id) ? 'Bỏ yêu thích' : 'Thêm vào yêu thích'"
       class="absolute right-2.5 top-2.5 w-8 h-8 rounded-full bg-surface/80 dark:bg-surface-dark/80 backdrop-blur-md border border-border/60 dark:border-border-dark/60 flex items-center justify-center transition-all active:scale-90 shadow-2xs z-10"
       [class.opacity-0]="!wishlist.has(product().id)"
@@ -131,8 +135,12 @@
 
       <!-- Quick Add to Cart Button -->
       <button
+        hlmBtn
+        variant="outline"
+        size="icon"
         type="button"
         [disabled]="isAdding()"
+        [hlmTooltip]="'Thêm vào giỏ hàng'"
         [attr.aria-label]="'Thêm ' + product().name + ' vào giỏ'"
         (click)="$event.stopPropagation(); addToCart.emit()"
         class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-primary/10 hover:bg-primary text-primary hover:text-white border border-primary/25 flex items-center justify-center transition-all duration-200 shadow-2xs hover:shadow-md hover:shadow-primary/25 shrink-0 disabled:opacity-50"
