@@ -19,30 +19,24 @@
     <aside class="w-full md:w-64 border-b md:border-b-0 md:border-r border-border/70 dark:border-border-dark/70 p-3 sm:p-4 bg-bg/40 dark:bg-bg-dark/40 shrink-0">
       <div class="flex md:flex-col gap-1.5 overflow-x-auto md:overflow-visible">
         <button
+          hlmBtn
+          [variant]="activeTab() === 'profile' ? 'default' : 'ghost'"
           type="button"
           (click)="activeTab.set('profile')"
-          class="flex items-center gap-2.5 px-3.5 py-2.5 rounded-lg text-sm font-medium transition-colors text-left whitespace-nowrap w-full"
-          [class.bg-primary]="activeTab() === 'profile'"
+          class="flex items-center justify-start gap-2.5 px-3.5 py-2.5 rounded-lg text-sm font-medium transition-colors text-left whitespace-nowrap w-full"
           [class.text-white]="activeTab() === 'profile'"
-          [class.text-muted]="activeTab() !== 'profile'"
-          [class.dark:text-muted-dark]="activeTab() !== 'profile'"
-          [class.hover:bg-bg]="activeTab() !== 'profile'"
-          [class.dark:hover:bg-bg-dark]="activeTab() !== 'profile'"
         >
           <lucide-angular [img]="User" class="w-4 h-4 shrink-0" />
           <span>Thông tin cá nhân</span>
         </button>
 
         <button
+          hlmBtn
+          [variant]="activeTab() === 'password' ? 'default' : 'ghost'"
           type="button"
           (click)="activeTab.set('password')"
-          class="flex items-center gap-2.5 px-3.5 py-2.5 rounded-lg text-sm font-medium transition-colors text-left whitespace-nowrap w-full"
-          [class.bg-primary]="activeTab() === 'password'"
+          class="flex items-center justify-start gap-2.5 px-3.5 py-2.5 rounded-lg text-sm font-medium transition-colors text-left whitespace-nowrap w-full"
           [class.text-white]="activeTab() === 'password'"
-          [class.text-muted]="activeTab() !== 'password'"
-          [class.dark:text-muted-dark]="activeTab() !== 'password'"
-          [class.hover:bg-bg]="activeTab() !== 'password'"
-          [class.dark:hover:bg-bg-dark]="activeTab() !== 'password'"
         >
           <lucide-angular [img]="KeyRound" class="w-4 h-4 shrink-0" />
           <span>Đổi mật khẩu</span>
@@ -50,42 +44,50 @@
 
         @if (!isStaffOrAdmin()) {
           <button
+            hlmBtn
+            [variant]="activeTab() === 'address' ? 'default' : 'ghost'"
             type="button"
             (click)="activeTab.set('address')"
-            class="flex items-center gap-2.5 px-3.5 py-2.5 rounded-lg text-sm font-medium transition-colors text-left whitespace-nowrap w-full"
-            [class.bg-primary]="activeTab() === 'address'"
+            class="flex items-center justify-start gap-2.5 px-3.5 py-2.5 rounded-lg text-sm font-medium transition-colors text-left whitespace-nowrap w-full"
             [class.text-white]="activeTab() === 'address'"
-            [class.text-muted]="activeTab() !== 'address'"
-            [class.dark:text-muted-dark]="activeTab() !== 'address'"
-            [class.hover:bg-bg]="activeTab() !== 'address'"
-            [class.dark:hover:bg-bg-dark]="activeTab() !== 'address'"
           >
             <lucide-angular [img]="MapPin" class="w-4 h-4 shrink-0" />
             <span>Sổ địa chỉ</span>
           </button>
 
           <button
+            hlmBtn
+            [variant]="activeTab() === 'vouchers' ? 'default' : 'ghost'"
             type="button"
             (click)="activeTab.set('vouchers')"
-            class="flex items-center gap-2.5 px-3.5 py-2.5 rounded-lg text-sm font-medium transition-colors text-left whitespace-nowrap w-full"
-            [class.bg-primary]="activeTab() === 'vouchers'"
+            class="flex items-center justify-start gap-2.5 px-3.5 py-2.5 rounded-lg text-sm font-medium transition-colors text-left whitespace-nowrap w-full"
             [class.text-white]="activeTab() === 'vouchers'"
-            [class.text-muted]="activeTab() !== 'vouchers'"
-            [class.dark:text-muted-dark]="activeTab() !== 'vouchers'"
-            [class.hover:bg-bg]="activeTab() !== 'vouchers'"
-            [class.dark:hover:bg-bg-dark]="activeTab() !== 'vouchers'"
           >
             <lucide-angular [img]="Ticket" class="w-4 h-4 shrink-0" />
             <span>Mã ưu đãi của tôi</span>
+          </button>
+
+          <button
+            hlmBtn
+            [variant]="activeTab() === 'invoices' ? 'default' : 'ghost'"
+            type="button"
+            (click)="activeTab.set('invoices')"
+            class="flex items-center justify-start gap-2.5 px-3.5 py-2.5 rounded-lg text-sm font-medium transition-colors text-left whitespace-nowrap w-full cursor-pointer"
+            [class.text-white]="activeTab() === 'invoices'"
+          >
+            <lucide-angular [img]="ReceiptTextIcon" class="w-4 h-4 shrink-0" />
+            <span>Hóa đơn VAT</span>
           </button>
         }
       </div>
 
       <div class="pt-4 mt-4 border-t border-border/70 dark:border-border-dark/70 hidden md:block">
         <button
+          hlmBtn
+          variant="ghost"
           type="button"
           (click)="logout()"
-          class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-destructive hover:bg-destructive/10 transition-colors w-full"
+          class="flex items-center justify-start gap-2 px-3 py-2 rounded-lg text-sm font-medium text-destructive hover:bg-destructive/10 transition-colors w-full"
         >
           <lucide-angular [img]="LogOut" class="w-4 h-4 shrink-0" />
           <span>Đăng xuất</span>
@@ -145,9 +147,9 @@
               </div>
 
               <div class="md:col-span-2 flex justify-end pt-4 border-t border-border/60 dark:border-border-dark/60 mt-2">
-                <button hlmBtn type="submit" [disabled]="profileForm.invalid || isSavingProfile()" class="px-6">
+                <button hlmBtn type="submit" [disabled]="profileForm.invalid || isSavingProfile()" class="px-6 text-white">
                   @if (isSavingProfile()) {
-                    <lucide-angular [img]="Loader2" class="w-4 h-4 mr-2 animate-spin" />
+                    <lucide-angular [img]="Loader2" class="w-4 h-4 mr-2 animate-spin text-white" />
                   }
                   Lưu thay đổi
                 </button>
@@ -171,9 +173,9 @@
               </div>
 
               <div class="pt-4 border-t border-border/60 dark:border-border-dark/60">
-                <button hlmBtn type="submit" [disabled]="passwordForm.invalid || isSavingPassword()" class="px-6">
+                <button hlmBtn type="submit" [disabled]="passwordForm.invalid || isSavingPassword()" class="px-6 text-white">
                   @if (isSavingPassword()) {
-                    <lucide-angular [img]="Loader2" class="w-4 h-4 mr-2 animate-spin" />
+                    <lucide-angular [img]="Loader2" class="w-4 h-4 mr-2 animate-spin text-white" />
                   }
                   Đổi mật khẩu
                 </button>
@@ -191,6 +193,12 @@
         @case ('vouchers') {
           <div class="animate-fade-in">
             <app-my-vouchers />
+          </div>
+        }
+
+        @case ('invoices') {
+          <div class="animate-fade-in">
+            <app-my-invoices />
           </div>
         }
       }

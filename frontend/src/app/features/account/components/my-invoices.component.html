@@ -1,0 +1,130 @@
+<div class="space-y-6">
+  <!-- Header -->
+  <div class="flex items-center justify-between">
+    <div>
+      <h2 class="text-lg font-bold text-foreground flex items-center gap-2">
+        <lucide-icon [img]="ReceiptTextIcon" class="size-5 text-primary"></lucide-icon>
+        Hóa đơn điện tử VAT
+      </h2>
+      <p class="text-xs text-muted-foreground mt-0.5">
+        Quản lý và tra cứu các hóa đơn giá trị gia tăng được phát hành theo đơn hàng của bạn.
+      </p>
+    </div>
+
+    <button
+      hlmBtn
+      variant="outline"
+      size="sm"
+      (click)="loadInvoices()"
+      [disabled]="loading()"
+      hlmTooltip="Tải lại danh sách hóa đơn"
+      class="gap-1.5 h-8 text-xs cursor-pointer"
+    >
+      <lucide-icon [img]="RefreshCwIcon" class="size-3.5" [class.animate-spin]="loading()"></lucide-icon>
+      Làm mới
+    </button>
+  </div>
+
+  <!-- Info notice -->
+  <div class="p-3.5 rounded-xl bg-blue-500/10 border border-blue-500/20 text-xs text-blue-700 dark:text-blue-300 flex items-start gap-2.5">
+    <lucide-icon [img]="FileCheck2Icon" class="size-4 shrink-0 mt-0.5"></lucide-icon>
+    <p>
+      Hóa đơn điện tử có giá trị pháp lý tương đương hóa đơn giấy, được ký số bởi cơ quan thuế theo Nghị định 123/2020/NĐ-CP và Thông tư 78/2021/TT-BTC.
+    </p>
+  </div>
+
+  @if (loading() && invoices().length === 0) {
+    <div class="py-16 text-center text-muted-foreground">
+      <lucide-icon [img]="LoaderIcon" class="size-8 mx-auto animate-spin mb-3 text-primary"></lucide-icon>
+      <p class="text-xs">Đang tải dữ liệu hóa đơn điện tử...</p>
+    </div>
+  } @else if (invoices().length === 0) {
+    <div class="py-14 text-center rounded-xl border border-dashed border-border bg-card">
+      <div class="size-12 rounded-full bg-muted/40 mx-auto flex items-center justify-center text-muted-foreground mb-3">
+        <lucide-icon [img]="ReceiptTextIcon" class="size-6"></lucide-icon>
+      </div>
+      <h3 class="text-sm font-semibold text-foreground">Bạn chưa có hóa đơn VAT nào</h3>
+      <p class="text-xs text-muted-foreground mt-1 max-w-sm mx-auto">
+        Khi bạn đặt đơn hàng và chọn yêu cầu xuất hóa đơn điện tử, thông tin hóa đơn sẽ hiển thị tại đây sau khi đơn hoàn tất.
+      </p>
+    </div>
+  } @else {
+    <!-- Invoices Table -->
+    <div class="rounded-xl border border-border bg-card overflow-hidden shadow-xs">
+      <div class="overflow-x-auto">
+        <table hlmTable class="w-full text-xs sm:text-sm">
+          <thead hlmTableHeader>
+            <tr hlmTableRow>
+              <th hlmTableHead>Số hóa đơn</th>
+              <th hlmTableHead>Mã đơn hàng</th>
+              <th hlmTableHead>Đối tượng</th>
+              <th hlmTableHead>Ngày phát hành</th>
+              <th hlmTableHead class="text-right">Tiền hàng</th>
+              <th hlmTableHead class="text-right">Thuế VAT</th>
+              <th hlmTableHead class="text-right">Tổng thanh toán</th>
+              <th hlmTableHead class="text-center">Trạng thái</th>
+            </tr>
+          </thead>
+          <tbody hlmTableBody>
+            @for (inv of invoices(); track inv.id) {
+              <tr hlmTableRow class="hover:bg-muted/40 transition-colors">
+                <td hlmTableCell class="font-mono font-bold text-foreground">
+                  {{ inv.invoiceNumber || 'Chờ cấp số' }}
+                </td>
+                <td hlmTableCell class="font-semibold text-primary">
+                  #{{ inv.orderId }}
+                </td>
+                <td hlmTableCell>
+                  <div class="flex items-center gap-1.5 text-xs">
+                    @if (inv.buyerType === 'BUSINESS') {
+                      <lucide-icon [img]="Building2Icon" class="size-3.5 text-muted-foreground"></lucide-icon>
+                      <div>
+                        <span class="font-medium text-foreground">Doanh nghiệp</span>
+                        @if (inv.businessTaxCode) {
+                          <div class="text-[11px] font-mono text-muted-foreground">MST: {{ inv.businessTaxCode }}</div>
+                        }
+                      </div>
+                    } @else {
+                      <lucide-icon [img]="UserIcon" class="size-3.5 text-muted-foreground"></lucide-icon>
+                      <span class="font-medium text-foreground">Cá nhân</span>
+                    }
+                  </div>
+                </td>
+                <td hlmTableCell class="text-xs text-muted-foreground">
+                  {{ (inv.issuedAt || inv.createdAt) | date:'dd/MM/yyyy HH:mm' }}
+                </td>
+                <td hlmTableCell class="text-right font-mono text-xs">
+                  {{ inv.subtotal | currencyFormat }}
+                </td>
+                <td hlmTableCell class="text-right font-mono text-xs text-muted-foreground">
+                  {{ inv.taxAmount | currencyFormat }} ({{ inv.taxRate * 100 }}%)
+                </td>
+                <td hlmTableCell class="text-right font-mono font-bold text-foreground text-xs sm:text-sm">
+                  {{ inv.total | currencyFormat }}
+                </td>
+                <td hlmTableCell class="text-center">
+                  <span
+                    hlmBadge
+                    [ngClass]="{
+                      'bg-amber-500 text-white': inv.invoiceStatus === 'PENDING',
+                      'bg-emerald-600 text-white': inv.invoiceStatus === 'ISSUED',
+                      'bg-rose-600 text-white': inv.invoiceStatus === 'CANCELLED'
+                    }"
+                    class="text-[11px] font-semibold px-2 py-0.5"
+                  >
+                    @switch (inv.invoiceStatus) {
+                      @case ('PENDING') { Đang xử lý }
+                      @case ('ISSUED') { Đã phát hành }
+                      @case ('CANCELLED') { Đã hủy }
+                      @default { {{ inv.invoiceStatus }} }
+                    }
+                  </span>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+</div>

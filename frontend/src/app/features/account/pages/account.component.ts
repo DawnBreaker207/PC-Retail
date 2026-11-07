@@ -1,4 +1,4 @@
-﻿import { Component, computed, inject, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, computed, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import {
@@ -11,6 +11,7 @@ import {
   ChevronRight,
   Lock,
   Loader2,
+  ReceiptText,
 } from 'lucide-angular';
 import { HlmButtonDirective } from '@shared/ui/button';
 import { HlmInputDirective } from '@shared/ui/input';
@@ -22,6 +23,7 @@ import { UserService } from '@core/services/user.service';
 import { AuthService } from '@core/auth/auth.service';
 import { AddressBookComponent } from '../components/address-book.component';
 import { MyVouchersComponent } from '../components/my-vouchers.component';
+import { MyInvoicesComponent } from '../components/my-invoices.component';
 
 const ROLE_LABEL: Record<string, string> = {
   ADMIN: 'Quản trị viên',
@@ -30,7 +32,7 @@ const ROLE_LABEL: Record<string, string> = {
   SUPER_ADMIN: 'Quản trị viên',
 };
 
-type AccountTab = 'profile' | 'password' | 'address' | 'vouchers';
+type AccountTab = 'profile' | 'password' | 'address' | 'vouchers' | 'invoices';
 
 @Component({
   selector: 'app-account',
@@ -44,6 +46,7 @@ type AccountTab = 'profile' | 'password' | 'address' | 'vouchers';
     HlmLabelDirective,
     AddressBookComponent,
     MyVouchersComponent,
+    MyInvoicesComponent,
   ],
   templateUrl: './account.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
@@ -58,6 +61,7 @@ export class AccountComponent {
   readonly ChevronRight = ChevronRight;
   readonly Lock = Lock;
   readonly Loader2 = Loader2;
+  readonly ReceiptTextIcon = ReceiptText;
 
   private fb = inject(FormBuilder);
   private userService = inject(UserService);
