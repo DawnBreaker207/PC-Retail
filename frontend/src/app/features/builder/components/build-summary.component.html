@@ -126,28 +126,36 @@
   <button
     type="button"
     hlmBtn
-    class="w-full font-bold shadow-md shadow-primary/20 hover:shadow-lg transition-all py-3.5 rounded-xl mb-3 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+    class="w-full font-bold shadow-md shadow-primary/20 hover:shadow-lg transition-all py-3.5 rounded-xl mb-3 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed text-white"
     [disabled]="hasBlock || selectedItems.length === 0"
     (click)="onAddToCart()"
   >
-    <lucide-angular [img]="CartIcon" class="w-4 h-4" />
-    <span>{{ hasBlock ? 'Xung đột phần cứng — Không thể thêm' : 'Thêm vào giỏ hàng (' + selectedItems.length + ' linh kiện)' }}</span>
+    <lucide-angular [img]="CartIcon" class="w-4 h-4 text-white" />
+    <span class="text-white">{{ hasBlock ? 'Xung đột phần cứng — Không thể thêm' : 'Thêm vào giỏ hàng (' + selectedItems.length + ' linh kiện)' }}</span>
   </button>
 
   @if (selectedItems.length > 0) {
     <div class="grid grid-cols-2 gap-2">
       <button
+        hlmBtn
+        variant="outline"
+        size="sm"
         type="button"
         (click)="printBuild()"
-        class="flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl border border-border/80 dark:border-border-dark text-xs font-medium text-ink dark:text-ink-dark hover:bg-bg dark:hover:bg-bg-dark transition-all cursor-pointer"
+        [hlmTooltip]="'In danh sách linh kiện cấu hình PC'"
+        class="flex items-center justify-center gap-1.5 text-xs font-medium text-ink dark:text-ink-dark cursor-pointer"
       >
         <lucide-angular [img]="PrinterIcon" class="w-3.5 h-3.5 text-muted" />
         In cấu hình
       </button>
       <button
+        hlmBtn
+        variant="outline"
+        size="sm"
         type="button"
         (click)="copyBuildText()"
-        class="flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl border border-border/80 dark:border-border-dark text-xs font-medium text-ink dark:text-ink-dark hover:bg-bg dark:hover:bg-bg-dark transition-all cursor-pointer"
+        [hlmTooltip]="'Sao chép cấu hình vào bộ nhớ tạm'"
+        class="flex items-center justify-center gap-1.5 text-xs font-medium text-ink dark:text-ink-dark cursor-pointer"
       >
         <lucide-angular [img]="CopyIcon" class="w-3.5 h-3.5 text-muted" />
         Sao chép

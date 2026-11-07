@@ -1,22 +1,25 @@
 <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
   <!-- Backdrop -->
-  <div class="fixed inset-0 bg-black/50 backdrop-blur-xs transition-opacity" (click)="onClose()"></div>
+  <div class="fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity" (click)="onClose()"></div>
 
-  <!-- Modal Dialog -->
-  <div class="relative w-full max-w-2xl bg-surface dark:bg-surface-dark rounded-2xl border border-border/80 shadow-2xl p-6 overflow-hidden flex flex-col max-h-[85vh] animate-in fade-in zoom-in-95 duration-200">
+  <!-- Modal Dialog (Spartan Dialog) -->
+  <div hlmDialogContent class="relative w-full max-w-2xl bg-card text-card-foreground rounded-2xl border border-border shadow-2xl p-6 overflow-hidden flex flex-col max-h-[85vh] animate-in fade-in zoom-in-95 duration-200">
     <!-- Header -->
-    <div class="flex items-center justify-between pb-4 border-b border-border/80 mb-4">
+    <div hlmDialogHeader class="flex items-center justify-between pb-4 border-b border-border/80 mb-4">
       <div>
-        <h2 class="text-base font-bold text-foreground">Chọn linh kiện</h2>
-        <p class="text-xs text-muted dark:text-muted-dark">Danh sách linh kiện tương thích với slot này</p>
+        <h2 hlmDialogTitle class="text-base font-bold text-foreground">Chọn linh kiện</h2>
+        <p hlmDialogDescription class="text-xs text-muted-foreground mt-0.5">Danh sách linh kiện tương thích với slot này</p>
       </div>
       <button
         type="button"
+        hlmBtn
+        variant="ghost"
+        size="sm"
         (click)="onClose()"
-        class="text-muted hover:text-foreground p-1.5 rounded-lg hover:bg-muted/20 transition-colors"
+        class="text-muted-foreground hover:text-foreground h-8 w-8 p-0 rounded-lg cursor-pointer"
         aria-label="Đóng"
       >
-        <lucide-icon [img]="XIcon" class="size-4.5" />
+        <lucide-icon [img]="XIcon" class="size-4" />
       </button>
     </div>
 

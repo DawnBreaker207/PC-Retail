@@ -1,0 +1,230 @@
+<div hlmDialogOverlay (click)="closed.emit()"></div>
+<div
+  hlmDialogContent
+  class="w-full max-w-3xl max-h-[92vh] overflow-y-auto p-6 bg-surface dark:bg-surface-dark border border-border/80 shadow-2xl rounded-2xl animate-in fade-in-0 zoom-in-95"
+>
+  <!-- Modal Header -->
+  <div hlmDialogHeader class="mb-5 flex items-start justify-between">
+    <div class="flex items-center gap-3">
+      <div class="p-2.5 rounded-xl bg-gradient-to-tr from-primary to-orange-500 text-white shadow-md">
+        <lucide-icon [img]="SparklesIcon" class="size-6"></lucide-icon>
+      </div>
+      <div>
+        <h2 hlmDialogTitle class="text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
+          AI PC Builder Optimizer
+          <span hlmBadge class="text-xs bg-primary text-white">Trí tuệ nhân tạo</span>
+        </h2>
+        <p hlmDialogDescription class="text-xs text-muted-foreground mt-0.5">
+          Tự động phân bổ ngân sách, tính toán điểm hiệu năng (P/P) và kiểm tra tương thích phần cứng thông minh.
+        </p>
+      </div>
+    </div>
+    <button
+      hlmBtn
+      variant="ghost"
+      size="icon"
+      class="text-muted-foreground hover:text-foreground"
+      (click)="closed.emit()"
+    >
+      <lucide-icon [img]="XIcon" class="size-5"></lucide-icon>
+    </button>
+  </div>
+
+  <!-- Configuration Form -->
+  <div class="space-y-5">
+    <!-- Budget Selector -->
+    <div class="p-4 rounded-xl bg-muted/20 border border-border/60 space-y-3">
+      <div class="flex items-center justify-between">
+        <label class="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+          <lucide-icon [img]="SlidersIcon" class="size-4 text-primary"></lucide-icon>
+          Ngân sách dự kiến của bạn (VND)
+        </label>
+        <span class="text-base font-bold text-primary font-mono">
+          {{ budget() | currencyFormat }}
+        </span>
+      </div>
+
+      <div class="flex flex-col sm:flex-row items-center gap-3">
+        <input
+          hlmInput
+          type="number"
+          step="500000"
+          min="5000000"
+          max="200000000"
+          [ngModel]="budget()"
+          (ngModelChange)="budget.set($event)"
+          class="w-full sm:w-1/2 font-mono text-sm"
+          placeholder="Nhập số tiền..."
+        />
+        <div class="flex flex-wrap gap-1.5 w-full sm:w-1/2">
+          @for (preset of budgetPresets; track preset.value) {
+            <button
+              type="button"
+              (click)="budget.set(preset.value)"
+              class="px-2.5 py-1 text-xs rounded-lg border transition-all cursor-pointer font-medium"
+              [class.bg-primary]="budget() === preset.value"
+              [class.text-white]="budget() === preset.value"
+              [class.border-primary]="budget() === preset.value"
+              [class.bg-card]="budget() !== preset.value"
+              [class.text-foreground]="budget() !== preset.value"
+              [class.border-border]="budget() !== preset.value"
+            >
+              {{ preset.label }}
+            </button>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Use Case Selector -->
+    <div class="space-y-2">
+      <label class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+        Nhu cầu sử dụng chính
+      </label>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+        @for (item of useCases; track item.value) {
+          <div
+            (click)="useCase.set(item.value)"
+            class="p-3 rounded-xl border transition-all cursor-pointer flex flex-col justify-between"
+            [class.border-primary]="useCase() === item.value"
+            [class.bg-primary/5]="useCase() === item.value"
+            [class.ring-1]="useCase() === item.value"
+            [class.ring-primary]="useCase() === item.value"
+            [class.border-border]="useCase() !== item.value"
+            [class.bg-card]="useCase() !== item.value"
+          >
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-sm text-foreground">{{ item.title }}</span>
+              @if (useCase() === item.value) {
+                <span class="size-2 rounded-full bg-primary"></span>
+              }
+            </div>
+            <p class="text-xs text-muted-foreground mt-1">{{ item.desc }}</p>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Preferred Brand & Generate Action -->
+    <div class="flex flex-col sm:flex-row items-center gap-3 pt-1">
+      <div class="w-full sm:flex-1">
+        <label class="text-xs font-semibold uppercase tracking-wider text-muted-foreground block mb-1.5">
+          Thương hiệu ưu tiên
+        </label>
+        <select
+          class="w-full h-10 px-3 rounded-lg border border-input bg-background text-foreground text-xs focus:outline-none focus:ring-2 focus:ring-ring"
+          [ngModel]="preferBrand()"
+          (ngModelChange)="preferBrand.set($event)"
+        >
+          @for (brand of brands; track brand.value) {
+            <option [value]="brand.value">{{ brand.label }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="w-full sm:w-auto self-end pt-2 sm:pt-0">
+        <button
+          hlmBtn
+          variant="default"
+          class="w-full sm:w-auto h-10 text-white font-bold flex items-center justify-center gap-2 px-6 shadow-md"
+          [disabled]="loading()"
+          (click)="generateBuild()"
+          hlmTooltip="Yêu cầu AI phân tích và tạo cấu hình máy tính tối ưu"
+        >
+          @if (loading()) {
+            <lucide-icon [img]="LoaderIcon" class="size-4 animate-spin"></lucide-icon>
+            AI đang phân tích...
+          } @else {
+            <lucide-icon [img]="SparklesIcon" class="size-4"></lucide-icon>
+            Tạo cấu hình với AI
+          }
+        </button>
+      </div>
+    </div>
+
+    <!-- Results Display -->
+    @if (results().length > 0) {
+      <div class="mt-6 pt-5 border-t border-border/80 space-y-4">
+        <!-- Strategy Tabs -->
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            @for (build of results(); track $index) {
+              <button
+                type="button"
+                (click)="selectedIndex.set($index)"
+                class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5"
+                [class.bg-primary]="selectedIndex() === $index"
+                [class.text-white]="selectedIndex() === $index"
+                [class.bg-muted]="selectedIndex() !== $index"
+                [class.text-foreground]="selectedIndex() !== $index"
+              >
+                Phương án {{ $index + 1 }}
+                <span class="text-[10px] opacity-80">({{ build.totalPrice | currencyFormat }})</span>
+              </button>
+            }
+          </div>
+          <span hlmBadge variant="outline" class="text-xs font-semibold">
+            P/P Score: {{ results()[selectedIndex()].valueScore | number:'1.2-2' }}
+          </span>
+        </div>
+
+        <!-- Strategy Details Card -->
+        @if (results()[selectedIndex()]; as curBuild) {
+          <div class="p-4 rounded-xl border border-border bg-card space-y-3 shadow-xs">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-border/50">
+              <p class="text-xs font-medium text-muted-foreground">{{ curBuild.description }}</p>
+              <div class="text-right">
+                <span class="text-xs text-muted-foreground mr-1">Tổng cộng:</span>
+                <span class="text-base font-extrabold text-primary font-mono">
+                  {{ curBuild.totalPrice | currencyFormat }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Components List -->
+            <div class="space-y-1.5 max-h-56 overflow-y-auto pr-1">
+              @for (comp of curBuild.components; track comp.skuId) {
+                <div class="flex items-center justify-between py-1 px-2 rounded-lg hover:bg-muted/40 transition-colors text-xs">
+                  <div class="flex items-center gap-2 min-w-0">
+                    <span hlmBadge variant="secondary" class="font-bold text-[10px] uppercase w-20 shrink-0 text-center">
+                      {{ comp.slotType }}
+                    </span>
+                    <span class="font-medium text-foreground truncate" [title]="comp.name">
+                      {{ comp.name }}
+                    </span>
+                  </div>
+                  <span class="font-mono font-semibold text-foreground shrink-0 ml-3">
+                    {{ comp.price | currencyFormat }}
+                  </span>
+                </div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+  <!-- Modal Footer -->
+  <div hlmDialogFooter class="mt-6 pt-4 border-t border-border/60 flex items-center justify-between gap-3">
+    <button
+      hlmBtn
+      variant="outline"
+      (click)="closed.emit()"
+    >
+      Đóng
+    </button>
+
+    @if (results().length > 0) {
+      <button
+        hlmBtn
+        variant="default"
+        class="text-white font-bold flex items-center gap-2 shadow-sm"
+        (click)="applyCurrentBuild()"
+      >
+        <lucide-icon [img]="CheckIcon" class="size-4"></lucide-icon>
+        Áp dụng cấu hình này vào dàn máy
+      </button>
+    }
+  </div>
+</div>

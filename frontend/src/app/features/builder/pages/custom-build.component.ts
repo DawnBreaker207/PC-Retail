@@ -9,20 +9,35 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { BuilderService } from '../services/builder.service';
-import { BuilderSlot, BuilderSelection, BuilderValidation } from '@core/models/common.model';
+import { BuilderSlot, BuilderSelection, BuilderValidation, AiComponentSlot, BuilderSlotType } from '@core/models/common.model';
 import { SlotListComponent } from '../components/slot-list.component';
 import { BuildSummaryComponent } from '../components/build-summary.component';
+import { AiBuilderModalComponent } from '../components/ai-builder-modal.component';
 import { HlmSkeletonComponent } from '@shared/ui/skeleton';
 import { HlmBadgeDirective } from '@shared/ui/badge';
+import { HlmButtonDirective } from '@shared/ui/button';
+import { HlmTooltipDirective } from '@shared/ui/tooltip';
+import { LucideAngularModule, Sparkles } from 'lucide-angular';
 
 @Component({
   selector: 'app-custom-build',
-  imports: [SlotListComponent, BuildSummaryComponent, HlmSkeletonComponent, HlmBadgeDirective],
+  imports: [
+    SlotListComponent,
+    BuildSummaryComponent,
+    AiBuilderModalComponent,
+    HlmSkeletonComponent,
+    HlmBadgeDirective,
+    HlmButtonDirective,
+    HlmTooltipDirective,
+    LucideAngularModule,
+  ],
   templateUrl: './custom-build.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './custom-build.component.css',
 })
 export class CustomBuildComponent {
+  readonly SparklesIcon = Sparkles;
+
   private builderService = inject(BuilderService);
   private destroyRef = inject(DestroyRef);
 
@@ -30,6 +45,7 @@ export class CustomBuildComponent {
   selections = signal<Map<string, BuilderSelection>>(new Map());
   validation = signal<BuilderValidation | null>(null);
   loading = signal(true);
+  aiModalOpen = signal(false);
 
   constructor() {
     this.loadSlots();
@@ -66,6 +82,35 @@ export class CustomBuildComponent {
 
   onClearBuild() {
     this.selections.set(new Map());
+    this.revalidate();
+  }
+
+  onAiBuildApplied(components: AiComponentSlot[]) {
+    const newMap = new Map<string, BuilderSelection>();
+    for (const c of components) {
+      const matchingSlot = this.slots().find((s) => s.slotType === c.slotType) || {
+        slotType: c.slotType as BuilderSlotType,
+        slotName: c.slotType,
+        isRequired: true,
+        isRemovable: true,
+      };
+      newMap.set(c.slotType, {
+        slotType: c.slotType as BuilderSlotType,
+        slotName: matchingSlot.slotName,
+        sku: {
+          id: c.skuId,
+          name: c.name,
+          slug: '',
+          price: c.price,
+          imageUrls: [],
+          brandName: '',
+          status: 'ACTIVE',
+          soldCount: 0,
+          specs: c.specs ? { detail: c.specs } : undefined,
+        },
+      });
+    }
+    this.selections.set(newMap);
     this.revalidate();
   }
 

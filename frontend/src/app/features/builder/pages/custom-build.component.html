@@ -10,6 +10,19 @@
         Hệ thống tự động kiểm tra tương thích giữa CPU, Mainboard, RAM, GPU và tính toán công suất nguồn tối ưu theo chuẩn 3 cấp độ SAFE / WARNING / BLOCK.
       </p>
     </div>
+
+    <div class="flex items-center gap-2 shrink-0">
+      <button
+        hlmBtn
+        variant="default"
+        class="text-white bg-gradient-to-r from-primary to-orange-500 hover:opacity-95 shadow-md flex items-center gap-2 font-bold px-4 h-10 cursor-pointer"
+        (click)="aiModalOpen.set(true)"
+        hlmTooltip="Yêu cầu AI tư vấn dàn máy chuẩn hiệu năng và ngân sách"
+      >
+        <lucide-icon [img]="SparklesIcon" class="size-4"></lucide-icon>
+        AI Tư vấn cấu hình
+      </button>
+    </div>
   </div>
 
   @if (loading()) {
@@ -51,5 +64,12 @@
         />
       </div>
     </div>
+  }
+
+  @if (aiModalOpen()) {
+    <app-ai-builder-modal
+      (closed)="aiModalOpen.set(false)"
+      (buildApplied)="onAiBuildApplied($event)"
+    />
   }
 </div>

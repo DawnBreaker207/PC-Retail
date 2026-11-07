@@ -15,6 +15,12 @@ import { HlmButtonDirective } from '@shared/ui/button';
 import { HlmInputDirective } from '@shared/ui/input';
 import { HlmBadgeDirective } from '@shared/ui/badge';
 import { HlmSkeletonComponent } from '@shared/ui/skeleton';
+import {
+  HlmDialogContentDirective,
+  HlmDialogHeaderDirective,
+  HlmDialogTitleDirective,
+  HlmDialogDescriptionDirective,
+} from '@shared/ui/dialog';
 import { CurrencyFormatPipe } from '@shared/pipes/currency-format.pipe';
 import { FallbackImageDirective } from '@shared/directives/fallback-image.directive';
 import { Sku, ResponsePage } from '@core/models/common.model';
@@ -33,6 +39,10 @@ import { MockDataService } from '@core/services/mock-data.service';
     HlmInputDirective,
     HlmBadgeDirective,
     HlmSkeletonComponent,
+    HlmDialogContentDirective,
+    HlmDialogHeaderDirective,
+    HlmDialogTitleDirective,
+    HlmDialogDescriptionDirective,
     CurrencyFormatPipe,
   ],
   templateUrl: './product-picker-modal.component.html',

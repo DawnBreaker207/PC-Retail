@@ -20,6 +20,7 @@ import {
 } from 'lucide-angular';
 import { HlmButtonDirective } from '@shared/ui/button';
 import { HlmBadgeDirective } from '@shared/ui/badge';
+import { HlmTooltipDirective } from '@shared/ui/tooltip';
 import {
   BuilderSlot,
   BuilderSelection,
@@ -28,7 +29,6 @@ import {
   BuilderSlotType,
 } from '@core/models/common.model';
 import { CurrencyFormatPipe } from '@shared/pipes/currency-format.pipe';
-import { FallbackImageDirective } from '@shared/directives/fallback-image.directive';
 import { ProductPickerModalComponent } from './product-picker-modal.component';
 
 @Component({
@@ -36,10 +36,10 @@ import { ProductPickerModalComponent } from './product-picker-modal.component';
   standalone: true,
   imports: [
     CommonModule,
-    FallbackImageDirective,
     LucideAngularModule,
     HlmButtonDirective,
     HlmBadgeDirective,
+    HlmTooltipDirective,
     CurrencyFormatPipe,
     ProductPickerModalComponent,
   ],
